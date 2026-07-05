@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "profas-leadership-lms.vercel.app";
+  const rawHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "profas-leadership-lms.vercel.app";
+  const host = rawHost.replace(/\/+$/, "");
   const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
-  const dynamicBaseUrl = `${protocol}://${host}`;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || dynamicBaseUrl;
+  const baseUrl = `${protocol}://${host}`;
   const redirectUri = `${baseUrl}/api/auth/callback/google`;
   console.log("=== GOOGLE AUTH START ===", { baseUrl, redirectUri });
 

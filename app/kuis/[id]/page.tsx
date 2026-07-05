@@ -28,6 +28,38 @@ export default async function KuisPage({ params }: { params: Promise<{ id: strin
     }
   });
 
+  // MASTER SKILL: Smart Resolve & Self-Healing Assessment
+  // Jika assessment tidak ada ATAU soalnya sedikit/default, cari berdasarkan CourseNode (assessmentId maupun node.id)
+  const node = await prisma.courseNode.findFirst({ where: { OR: [{ id }, { assessmentId: id }] } });
+  if (node && (!assessment || assessment.questions.length <= 1)) {
+    const possibleIds = [node.assessmentId, node.id].filter(Boolean) as string[];
+    for (const pid of possibleIds) {
+      if (pid === id && assessment && assessment.questions.length > 1) continue;
+      const altAssessment = await prisma.assessment.findUnique({
+        where: { id: pid },
+        include: {
+          course: {
+            select: {
+              id: true,
+              slug: true,
+              title: true,
+              published: true,
+              enrollments: { where: { userId: user.id }, select: { id: true } }
+            }
+          },
+          questions: {
+            orderBy: { order: "asc" },
+            select: { id: true, prompt: true, options: true, order: true, type: true, points: true }
+          }
+        }
+      });
+      if (altAssessment && altAssessment.questions.length > 0) {
+        assessment = altAssessment;
+        break;
+      }
+    }
+  }
+
   // MASTER SKILL: Self-Healing Assessment jika belum ada di database atau ter-reset
   if (!assessment) {
     const node = await prisma.courseNode.findFirst({ where: { OR: [{ id }, { assessmentId: id }] } });

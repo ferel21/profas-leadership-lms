@@ -16,6 +16,7 @@
     "autopilot:once": "bash scripts/autopilot-control.sh once",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
+    "db:supabase": "node scripts/setup-supabase.js",
     "setup": "prisma generate && tsx prisma/init.ts && prisma db seed"
   },
   "dependencies": {

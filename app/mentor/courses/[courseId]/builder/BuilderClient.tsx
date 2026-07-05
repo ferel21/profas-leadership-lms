@@ -304,9 +304,28 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             {(node.type === "QUIZ" || node.type === "ASSIGNMENT") && (
-              <a href={`/mentor/courses/${course.id}/assessments/${node.assessmentId || node.id}/edit`} className="btn btn-ghost btn-small" style={{ color: '#0369a1', background: '#e0f2fe', borderRadius: '8px', fontWeight: 700 }}>
+              <button 
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    const flat = flattenNodes(nodes);
+                    await fetch(`/api/courses/${course.id}/nodes`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ nodes: flat, deletedIds })
+                    });
+                  } catch (e) {
+                    console.error("Auto-save before edit error:", e);
+                  } finally {
+                    setSaving(false);
+                    window.location.href = `/mentor/courses/${course.id}/assessments/${node.assessmentId || node.id}/edit`;
+                  }
+                }} 
+                className="btn btn-ghost btn-small hover-lift" 
+                style={{ color: '#0369a1', background: '#e0f2fe', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
                 <Edit2 size={14}/> Edit Soal / Tugas
-              </a>
+              </button>
             )}
             <button onClick={() => handleDelete(node.id)} className="btn btn-ghost btn-small hover-lift" style={{ color: 'var(--error)', padding: '6px' }}><Trash2 size={16}/></button>
           </div>

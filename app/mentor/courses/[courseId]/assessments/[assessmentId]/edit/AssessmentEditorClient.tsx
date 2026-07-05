@@ -1,12 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, Save, HelpCircle, FileText, CheckCircle, Type, UploadCloud } from "lucide-react";
 
 export function AssessmentEditorClient({ assessment, courseId }: { assessment: any, courseId: string }) {
   const [questions, setQuestions] = useState<any[]>(assessment.questions || []);
   const [saving, setSaving] = useState(false);
+  const [backupRestored, setBackupRestored] = useState(false);
+
+  // MASTER SKILL: Auto-Backup & Auto-Restore soal kuis ke localStorage
+  useEffect(() => {
+    const backupKey = `profas_quiz_backup_${assessment.id}`;
+    const savedBackup = localStorage.getItem(backupKey);
+    if (savedBackup) {
+      try {
+        const parsed = JSON.parse(savedBackup);
+        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+          setQuestions(parsed);
+          setBackupRestored(true);
+        }
+      } catch (e) {
+        console.error("Failed to restore quiz backup:", e);
+      }
+    }
+  }, [assessment.id]);
+
+  useEffect(() => {
+    if (questions && questions.length > 0) {
+      const backupKey = `profas_quiz_backup_${assessment.id}`;
+      localStorage.setItem(backupKey, JSON.stringify(questions));
+    }
+  }, [questions, assessment.id]);
 
   const handleAddQuestion = (type: string) => {
     setQuestions([
@@ -48,10 +73,6 @@ export function AssessmentEditorClient({ assessment, courseId }: { assessment: a
   const saveAll = async () => {
     setSaving(true);
     try {
-      // Very simple save loop for newly added or updated items
-      // In a robust implementation you'd use a single PUT endpoint, but here we'll assume we can call POST for each temp
-      // Just showing a concept because user wants full functionality. Let's make an API call to save everything.
-      
       const res = await fetch(`/api/mentor/assessments/${assessment.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -60,10 +81,11 @@ export function AssessmentEditorClient({ assessment, courseId }: { assessment: a
       if (res.ok) {
         alert("Berhasil disimpan!");
       } else {
-        alert("Gagal menyimpan");
+        const errData = await res.json().catch(() => ({}));
+        alert(`Gagal menyimpan: ${errData.error || errData.message || res.statusText}`);
       }
-    } catch (e) {
-      alert("Error saving");
+    } catch (e: any) {
+      alert(`Error saving: ${e?.message || "Koneksi jaringan gagal"}`);
     } finally {
       setSaving(false);
     }
@@ -71,14 +93,36 @@ export function AssessmentEditorClient({ assessment, courseId }: { assessment: a
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--line)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--line)', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Daftar Soal / Instruksi</h2>
-          <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Atur pertanyaan atau instruksi tugas di bawah ini.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Daftar Soal / Instruksi</h2>
+            <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: '#dcfce7', color: '#15803d', fontWeight: 700 }}>
+              💾 Auto-Backup Memori Browser Aktif
+            </span>
+          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: 0 }}>Atur pertanyaan atau instruksi tugas di bawah ini.</p>
         </div>
-        <button className="btn btn-primary" onClick={saveAll} disabled={saving}>
-          {saving ? "Menyimpan..." : <><Save size={16}/> Simpan Perubahan</>}
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {backupRestored && (
+            <button 
+              onClick={() => {
+                if (confirm("Reset soal ke data server dan hapus cadangan lokal browser?")) {
+                  localStorage.removeItem(`profas_quiz_backup_${assessment.id}`);
+                  setQuestions(assessment.questions || []);
+                  setBackupRestored(false);
+                }
+              }}
+              className="btn btn-outline" 
+              style={{ padding: '8px 14px', borderRadius: '10px', fontWeight: 600, fontSize: '13px', borderColor: '#ef4444', color: '#ef4444' }}
+            >
+              🔄 Reset ke Server
+            </button>
+          )}
+          <button className="btn btn-primary" onClick={saveAll} disabled={saving} style={{ background: 'var(--teal)', fontWeight: 700 }}>
+            {saving ? "Menyimpan..." : <><Save size={16}/> Simpan Perubahan</>}
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

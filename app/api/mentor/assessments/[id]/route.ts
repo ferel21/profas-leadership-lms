@@ -14,13 +14,45 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const body = await req.json();
     const { questions } = body;
 
-    const assessment = await prisma.assessment.findUnique({
+    let assessment = await prisma.assessment.findUnique({
       where: { id: assessmentId },
       include: { course: true }
     });
 
-    if (!assessment || assessment.course.mentorId !== user.id) {
-      return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
+    if (!assessment) {
+      // MASTER SKILL: Self-Healing Auto-Create Assessment in PUT route to survive ephemeral Vercel container resets!
+      const node = await prisma.courseNode.findFirst({ where: { OR: [{ id: assessmentId }, { assessmentId: assessmentId }] } });
+      const courseIdToUse = node ? node.courseId : (await prisma.course.findFirst({ where: { mentorId: user.id } }))?.id;
+
+      if (!courseIdToUse) {
+        return NextResponse.json({ error: 'Course not found for mentor' }, { status: 404 });
+      }
+
+      const course = await prisma.course.findUnique({ where: { id: courseIdToUse } });
+      if (!course || course.mentorId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized course' }, { status: 401 });
+      }
+
+      assessment = await prisma.assessment.create({
+        data: {
+          id: assessmentId,
+          courseId: courseIdToUse,
+          title: node ? node.title : "Evaluasi / Kuis",
+          type: (node && node.type === "ASSIGNMENT") ? "FINAL" : "MODULE",
+          isAssignment: node ? node.type === "ASSIGNMENT" : false,
+          passingScore: 70,
+          timeLimitMin: 30
+        },
+        include: { course: true }
+      });
+
+      if (node && !node.assessmentId) {
+        await prisma.courseNode.update({ where: { id: node.id }, data: { assessmentId: assessment.id } }).catch(() => {});
+      }
+    }
+
+    if (assessment.course.mentorId !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized assessment' }, { status: 401 });
     }
 
     // Delete existing questions

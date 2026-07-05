@@ -1,0 +1,19 @@
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Award, BookOpen, Check, ChevronRight, Clock3, Globe2, PlayCircle, ShieldCheck, Star, Users } from "lucide-react";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { EnrollButton } from "@/components/EnrollButton";
+import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { formatRupiah, initials } from "@/lib/utils";
+
+export default async function CourseDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const [course,user] = await Promise.all([prisma.course.findFirst({ where: { slug, published: true }, include: { mentor: true, nodes: { orderBy: [{ parentId: "asc" }, { order: "asc" }], include: { assessment: true } }, assessments: { where: { type: "PRETEST" } } } }), getCurrentUser()]);
+  if (!course) notFound(); const outcomes = JSON.parse(course.outcomes) as string[]; const lessonCount = course.nodes.filter(n=>n.type !== "FOLDER").length;
+  const enrolled = user ? !!await prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId: course.id } }, select: { id: true } }) : false;
+  const folders = course.nodes.filter(n => n.type === "FOLDER");
+  return <><Header/><main className="detail-page"><section className="detail-hero"><div className="container detail-grid"><div><div className="breadcrumbs"><Link href="/program">Program</Link><ChevronRight/><span>{course.category}</span></div><span className="level-badge static-badge">{course.level === "BASIC"?"Dasar":course.level === "INTERMEDIATE"?"Menengah":"Lanjutan"}</span><h1>{course.title}</h1><p>{course.description}</p><div className="detail-rating"><span><Star fill="currentColor"/> {course.rating}</span><small>(128 ulasan)</small><i/><span><Users/> {course.studentsCount.toLocaleString("id-ID")} peserta</span></div><div className="mentor-inline"><span>{initials(course.mentor.name)}</span><div><small>Dibimbing oleh</small><b>{course.mentor.name}</b></div></div></div><aside className="enroll-card"><div className="enroll-cover"><Image src={course.image} alt={course.title} fill/><PlayCircle/></div><div className="enroll-body"><small>Investasi belajar</small><h3>{formatRupiah(course.price)}</h3><EnrollButton courseId={course.id} slug={course.slug} signedIn={!!user} enrolled={enrolled}/><p className="secure-text"><ShieldCheck/> Akses aman & sertifikat terverifikasi</p><hr/><b>Program ini mencakup:</b><ul><li><Clock3/>{course.durationHours} jam pembelajaran</li><li><BookOpen/>{folders.length} modul • {lessonCount} materi</li><li><Globe2/>Akses fleksibel 12 bulan</li><li><Award/>Sertifikat PROFAS</li></ul></div></aside></div></section><section className="section detail-content"><div className="container detail-main"><article><h2>Apa yang akan Anda kuasai</h2><div className="outcome-list">{outcomes.map(item=><p key={item}><Check/>{item}</p>)}</div><h2>Kurikulum program</h2><p className="curriculum-intro">Disusun bertahap agar konsep berubah menjadi praktik kepemimpinan nyata.</p><div className="curriculum">{folders.map((folder, i) => <details key={folder.id}><summary><div><h3>{i + 1}. {folder.title}</h3><p>{folder.description}</p></div><ChevronRight/></summary><div>{course.nodes.filter(n => n.parentId === folder.id).map(lesson=><p key={lesson.id}>{lesson.type==="VIDEO"?<PlayCircle/>:<BookOpen/>}{lesson.title}<small>{lesson.durationMin} menit</small></p>)}</div></details>)}</div></article><aside className="mentor-detail"><span>{initials(course.mentor.name)}</span><p>Mentor program</p><h3>{course.mentor.name}</h3><small>{course.mentor.headline}</small><p>Praktisi pengembangan organisasi yang membantu pemimpin dan tim mengubah strategi menjadi perilaku kerja yang berdampak.</p></aside></div></section></main><Footer/></>;
+}

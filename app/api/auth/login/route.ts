@@ -1,0 +1,21 @@
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { createToken } from "@/lib/auth";
+
+const schema = z.object({ email: z.string().email(), password: z.string().min(6), remember: z.boolean().optional() });
+
+export async function POST(request: Request) {
+  try {
+    const input = schema.parse(await request.json());
+    const user = await prisma.user.findUnique({ where: { email: input.email.toLowerCase() } });
+    if (!user || !(await bcrypt.compare(input.password, user.passwordHash))) return NextResponse.json({ message: "Email atau kata sandi tidak sesuai." }, { status: 401 });
+    const token = await createToken({ userId: user.id, role: user.role });
+    const response = NextResponse.json({ user: { id: user.id, name: user.name, role: user.role } });
+    response.cookies.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: input.remember ? 60 * 60 * 24 * 7 : undefined, path: "/" });
+    return response;
+  } catch {
+    return NextResponse.json({ message: "Data masuk tidak valid." }, { status: 400 });
+  }
+}

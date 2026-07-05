@@ -1,0 +1,1 @@
+export function ProgressRing({ value, size = 76 }: { value: number; size?: number }) { const r=28,c=2*Math.PI*r,o=c-(value/100)*c; return <div className="progress-ring" style={{width:size,height:size}}><svg viewBox="0 0 68 68"><circle cx="34" cy="34" r={r}/><circle className="value" cx="34" cy="34" r={r} strokeDasharray={c} strokeDashoffset={o}/></svg><b>{value}%</b></div> }

@@ -1,0 +1,288 @@
+/* 
+  ========================================
+  PROFAS PREMIUM GLOBAL POLISH
+  ========================================
+*/
+
+/* 1. ANIMATIONS & TRANSITIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(13, 148, 136, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+}
+
+body {
+  animation: fadeUp 0.4s ease-out;
+}
+
+/* Base interactive elements */
+.btn, button, a, .course-card, .feature-card, .enroll-card {
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* 2. FORM ELEMENTS POLISH */
+input, select, textarea {
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+  border-radius: 12px !important;
+  background-color: #f8fafc !important;
+}
+
+input:focus, select:focus, textarea:focus, input:focus-visible {
+  border-color: var(--teal) !important;
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15) !important;
+  outline: none !important;
+  background-color: #fff !important;
+}
+
+/* 3. BUTTONS */
+.btn-primary {
+  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%) !important;
+  box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3) !important;
+  border: none !important;
+  font-weight: 700 !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4) !important;
+}
+
+.btn-outline {
+  border: 2px solid #e2e8f0 !important;
+  font-weight: 700 !important;
+}
+
+.btn-outline:hover {
+  border-color: var(--teal) !important;
+  color: var(--teal-dark) !important;
+  background-color: #f0fdfa !important;
+}
+
+/* 4. DASHBOARD CARDS & WIDGETS */
+.continue-card, .weekly-card, .rank-card, .certificate-mini, .data-card, .metric-grid article, .my-programs > article {
+  border: 1px solid #f1f5f9 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+}
+
+.continue-card:hover, .metric-grid article:hover, .my-programs > article:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* 5. SIDEBAR NAVIGATION */
+.dashboard-sidebar {
+  border-right: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.02) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.dashboard-sidebar nav a {
+  border-radius: 10px !important;
+  margin-bottom: 4px !important;
+  transition: all 0.2s ease !important;
+  font-size: var(--text-base) !important;
+}
+
+.dashboard-sidebar nav a:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  transform: translateX(4px) !important;
+}
+
+.dashboard-sidebar nav a.active {
+  background: linear-gradient(90deg, #f0fdfa 0%, #ccfbf1 100%) !important;
+  color: var(--teal-dark) !important;
+  font-weight: 800 !important;
+  border-left: 4px solid var(--teal) !important;
+}
+
+/* 6. TABLES AND LISTS */
+.table-row, .leaderboard-row, .agenda-list > div, .mentor-courses > div {
+  transition: background 0.2s ease !important;
+  border-radius: 8px !important;
+}
+
+.table-row:hover, .leaderboard-row:not(.me):hover, .agenda-list > div:hover, .mentor-courses > div:hover {
+  background-color: #f8fafc !important;
+  cursor: pointer;
+}
+
+/* 7. GLASSMORPHISM TOP HEADER */
+.dashboard-header {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+/* 7.5 COURSE ROWS */
+.course-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+.course-row:hover {
+  background: #f8fafc;
+}
+.course-row-img {
+  position: relative;
+  width: 100px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.course-row-img img {
+  object-fit: cover;
+}
+.course-row-info {
+  flex: 1;
+}
+.course-row-info h3 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+.course-row-info p {
+  font-size: var(--text-base);
+  color: #64748b;
+  margin: 0;
+}
+.course-row-arrow {
+  color: #94a3b8;
+  width: 20px;
+}
+
+/* 8. EMPTY STATES COMPONENT */
+.empty-state-premium {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: #f8fafc;
+  border: 2px dashed #e2e8f0;
+  border-radius: 24px;
+  margin: 20px 0;
+  animation: fadeUp 0.5s ease;
+}
+
+.empty-state-premium .icon-wrap {
+  width: 80px;
+  height: 80px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+  color: var(--teal);
+}
+
+.empty-state-premium h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.empty-state-premium p {
+  color: #64748b;
+  font-size: 0.95rem;
+  max-width: 400px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* 9. SCROLLBARS */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 10. BADGES */
+.static-badge, .level-badge {
+  border-radius: 99px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+}
+
+/* 11. PROGRESS BARS */
+.progress-line i {
+  background-color: #f1f5f9 !important;
+  overflow: hidden;
+}
+
+.progress-line em {
+  background: linear-gradient(90deg, var(--teal-light), var(--teal)) !important;
+  border-radius: 99px !important;
+  position: relative;
+}
+
+.progress-line em::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 12. TYPOGRAPHY ENHANCEMENTS (ZENIUS-STYLE) */
+
+/* Header & Footer */
+.desktop-nav { font-size: var(--text-lg) !important; }
+.nav-login { font-size: var(--text-lg) !important; }
+.footer h4 { font-size: var(--text-lg) !important; margin-bottom: 16px !important; }
+.footer a, .footer p { font-size: var(--text-lg) !important; }
+.footer-bottom { font-size: var(--text-lg) !important; }
+
+/* Dashboard LMS Sidebar */
+.dashboard-sidebar nav a, 
+.sidebar-bottom a, 
+.sidebar-bottom button {
+  font-size: var(--text-lg) !important;
+  height: 48px !important;
+}
+.sidebar-user b { font-size: var(--text-lg) !important; }
+.sidebar-user small { font-size: var(--text-md) !important; }
+.dash-welcome { font-size: var(--text-lg) !important; }
+.logo b { font-size: var(--text-2xl) !important; }
+.logo small { font-size: var(--text-base) !important; }
+
+/* Global adjustments for readability */
+h1, h2, h3, h4, h5, h6 { font-family: inherit !important; }

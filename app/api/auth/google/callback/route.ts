@@ -7,8 +7,7 @@ export async function GET(request: Request) {
   const code = urlObj.searchParams.get("code");
   const error = urlObj.searchParams.get("error");
 
-  const envUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://profas-leadership-lms.vercel.app";
-  const baseUrl = envUrl.replace(/\/+$/, "");
+  const baseUrl = "https://profas-leadership-lms.vercel.app";
   const redirectUri = `${baseUrl}/api/auth/callback/google`;
   console.log("=== GOOGLE AUTH CALLBACK ===", { baseUrl, redirectUri, code: !!code, error });
 

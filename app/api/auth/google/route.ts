@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-  const envUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://profas-leadership-lms.vercel.app";
-  const baseUrl = envUrl.replace(/\/+$/, "");
-  const redirectUri = `${baseUrl}/api/auth/callback/google`;
-  console.log("=== GOOGLE AUTH START ===", { baseUrl, redirectUri });
+  const redirectUri = "https://profas-leadership-lms.vercel.app/api/auth/callback/google";
+  console.log("=== GOOGLE AUTH START ===", { redirectUri });
 
   if (!GOOGLE_CLIENT_ID) {
     return NextResponse.json({ message: "Google Client ID is missing from environment variables." }, { status: 500 });

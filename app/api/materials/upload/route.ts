@@ -66,19 +66,25 @@ export async function POST(request: Request) {
   const fileType = ALLOWED_TYPES.get(file.type);
   if (!fileType) return NextResponse.json({ message: `Tipe file ${file.type} tidak didukung.` }, { status: 400 });
 
-  // Save file
+  // Save file dengan Fallback ke /tmp untuk Vercel Serverless
   const courseId = lesson.course.id;
-  const uploadDir = join(process.cwd(), "public", "uploads", courseId);
-  if (!existsSync(uploadDir)) await mkdir(uploadDir, { recursive: true });
-
   const timestamp = Date.now();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const fileName = `${timestamp}-${safeName}`;
-  const filePath = join(uploadDir, fileName);
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filePath, buffer);
 
-  const fileUrl = `/uploads/${courseId}/${fileName}`;
+  try {
+    const uploadDir = join(process.cwd(), "public", "uploads", courseId);
+    if (!existsSync(uploadDir)) await mkdir(uploadDir, { recursive: true });
+    await writeFile(join(uploadDir, fileName), buffer);
+  } catch {
+    // MASTER SKILL: Fallback ke /tmp jika public/uploads bersifad read-only (Vercel Serverless)
+    const tmpDir = join("/tmp", "uploads", courseId);
+    if (!existsSync(tmpDir)) await mkdir(tmpDir, { recursive: true });
+    await writeFile(join(tmpDir, fileName), buffer);
+  }
+
+  const fileUrl = `/api/uploads/${courseId}/${fileName}`;
   const material = await prisma.courseNode.create({
     data: { parentId: lessonId, courseId, title: file.name, type: fileType as import("@prisma/client").NodeType, fileName: file.name, fileUrl, fileSize: file.size, description, order: 999 }
   });

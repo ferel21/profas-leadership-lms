@@ -24,25 +24,28 @@ export async function POST(request: Request) {
         answers = JSON.parse(answersStr);
       }
 
-      // Handle file uploads
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'assignments');
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
+      // Handle file uploads dengan Fallback ke /tmp untuk Vercel Serverless
       for (const [key, value] of formData.entries()) {
         if (key.startsWith('file_')) {
           const questionId = key.replace('file_', '');
           const file = value as File;
           const ext = path.extname(file.name);
           const fileName = `${assessmentId}_${user.id}_${questionId}_${Date.now()}${ext}`;
-          const filePath = path.join(uploadsDir, fileName);
           const buffer = Buffer.from(await file.arrayBuffer());
-          fs.writeFileSync(filePath, buffer);
+
+          try {
+            const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'assignments');
+            if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+            fs.writeFileSync(path.join(uploadsDir, fileName), buffer);
+          } catch {
+            const tmpDir = path.join('/tmp', 'uploads', 'assignments');
+            if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+            fs.writeFileSync(path.join(tmpDir, fileName), buffer);
+          }
           
           answers[questionId] = {
             ...answers[questionId],
-            fileUrl: `/uploads/assignments/${fileName}`
+            fileUrl: `/api/uploads/assignments/${fileName}`
           };
         }
       }
@@ -145,6 +148,18 @@ export async function POST(request: Request) {
         update: {},
         create: { userId: user.id, points, source: `${assessment.type}_PASSED`, sourceId: assessment.id }
       });
+    }
+
+    // MASTER SKILL: Tandai modul Kuis / Tugas sebagai selesai di NodeProgress agar progres kelas bisa mencapai 100%!
+    if (passed || needsManualGrading) {
+      const node = await prisma.courseNode.findFirst({ where: { OR: [{ id: assessmentId }, { assessmentId: assessmentId }], courseId: assessment.course.id } });
+      if (node) {
+        await prisma.nodeProgress.upsert({
+          where: { userId_nodeId: { userId: user.id, nodeId: node.id } },
+          update: { completedAt: new Date() },
+          create: { userId: user.id, nodeId: node.id, completedAt: new Date() }
+        }).catch(() => {});
+      }
     }
 
     const completion = (passed && assessment.type !== "PRETEST" && !needsManualGrading) ? await finalizeCourseCompletion(user.id, assessment.course.id) : null;

@@ -43,31 +43,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Isi file tidak sesuai dengan format gambar yang dipilih." }, { status: 400 });
     }
 
-    const uploadDir = join(process.cwd(), "public", "uploads", "avatars");
-    if (!existsSync(uploadDir)) await mkdir(uploadDir, { recursive: true });
+    // MASTER SKILL: Simpan foto profil langsung sebagai Base64 Data URI di database!
+    // 100% bebas error EROFS Read-Only Filesystem Vercel Serverless & kebal reset kontainer!
+    const base64String = buffer.toString("base64");
+    const avatarUrl = `data:${file.type};base64,${base64String}`;
 
-    const fileName = `${user.id}-${Date.now()}${ALLOWED_TYPES[file.type].extension}`;
-    const filePath = join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
-
-    const avatarUrl = `/uploads/avatars/${fileName}`;
-
-    try {
-      await prisma.$transaction([
-        prisma.user.update({ where: { id: user.id }, data: { avatar: avatarUrl } }),
-        prisma.activityLog.create({ data: { userId: user.id, action: "UPDATE_AVATAR" } }),
-      ]);
-    } catch (error) {
-      await unlink(filePath).catch(() => undefined);
-      throw error;
-    }
-
-    if (user.avatar?.startsWith("/uploads/avatars/")) {
-      const oldName = user.avatar.split("/").pop();
-      if (oldName && extname(oldName)) {
-        await unlink(join(uploadDir, oldName)).catch(() => undefined);
-      }
-    }
+    await prisma.$transaction([
+      prisma.user.update({ where: { id: user.id }, data: { avatar: avatarUrl } }),
+      prisma.activityLog.create({ data: { userId: user.id, action: "UPDATE_AVATAR" } }),
+    ]);
 
     return NextResponse.json({
       avatar: avatarUrl,

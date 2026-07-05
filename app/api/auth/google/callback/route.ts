@@ -112,6 +112,21 @@ export async function GET(request: Request) {
       });
     }
 
+    // Auto-enrollment: Pastikan peserta baru yang login via Google langsung terdaftar di kelas-kelas aktif
+    if (user.role === "STUDENT") {
+      const enrCount = await prisma.enrollment.count({ where: { userId: user.id } });
+      if (enrCount === 0) {
+        const publishedCourses = await prisma.course.findMany({ where: { published: true } });
+        for (const course of publishedCourses) {
+          await prisma.enrollment.upsert({
+            where: { userId_courseId: { userId: user.id, courseId: course.id } },
+            update: {},
+            create: { userId: user.id, courseId: course.id, status: "ACTIVE", progressPercent: 0 }
+          });
+        }
+      }
+    }
+
     // Generate JWT token with full info for self-healing in serverless Vercel
     const token = await createToken({ 
       userId: user.id, 

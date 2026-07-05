@@ -111,7 +111,7 @@ export default async function DashboardPage() {
   // STUDENT DASHBOARD
   // ═══════════════════════════════════════════════════════════
   if (user.role === "STUDENT") {
-    const [enrollments, certificates] = await Promise.all([
+    let [enrollments, certificates] = await Promise.all([
       prisma.enrollment.findMany({
         where: { userId: user.id },
         include: {
@@ -125,6 +125,27 @@ export default async function DashboardPage() {
         orderBy: { issuedAt: "desc" }
       })
     ]);
+
+    // Auto-enrollment / Self-Healing: Jika peserta (termasuk yang login via Google) belum memiliki kelas, otomatis daftarkan ke seluruh program kepemimpinan aktif!
+    if (enrollments.length === 0) {
+      const publishedCourses = await prisma.course.findMany({ where: { published: true } });
+      if (publishedCourses.length > 0) {
+        for (const course of publishedCourses) {
+          await prisma.enrollment.upsert({
+            where: { userId_courseId: { userId: user.id, courseId: course.id } },
+            update: {},
+            create: { userId: user.id, courseId: course.id, status: "ACTIVE", progressPercent: 0 }
+          });
+        }
+        enrollments = await prisma.enrollment.findMany({
+          where: { userId: user.id },
+          include: {
+            course: { include: { nodes: { where: { type: { not: "FOLDER" } } } } }
+          },
+          orderBy: { enrolledAt: "desc" }
+        });
+      }
+    }
 
     const completedEnrollments = enrollments.filter(e => e.status === "COMPLETED" || e.progressPercent === 100);
     const existingCourseIds = new Set(certificates.map(c => c.courseId));

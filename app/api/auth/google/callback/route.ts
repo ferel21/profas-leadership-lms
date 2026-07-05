@@ -3,14 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { createToken } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const code = searchParams.get("code");
-  const error = searchParams.get("error");
+  const urlObj = new URL(request.url);
+  const code = urlObj.searchParams.get("code");
+  const error = urlObj.searchParams.get("error");
 
   const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "localhost:3000";
   const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const baseUrl = `${protocol}://${host}`;
-  const redirectUri = `${baseUrl}/api/auth/google/callback`;
+  const redirectUri = `${baseUrl}${urlObj.pathname}`;
 
   if (error) {
     return NextResponse.redirect(`${baseUrl}/masuk?error=google_auth_failed`);

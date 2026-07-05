@@ -286,3 +286,47 @@ input:focus, select:focus, textarea:focus, input:focus-visible {
 
 /* Global adjustments for readability */
 h1, h2, h3, h4, h5, h6 { font-family: inherit !important; }
+
+/* 
+  ========================================
+  13. MODERN GLASSMORPHISM & VIBRANT UI
+  ======================================== 
+*/
+.glass, .glass-card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
+  border-radius: 20px !important;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 40px 0 rgba(13, 148, 136, 0.15) !important;
+  border-color: rgba(13, 148, 136, 0.4) !important;
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.glass-floating {
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Glow effects */
+.glow-teal {
+  box-shadow: 0 0 25px rgba(13, 148, 136, 0.3) !important;
+}
+.glow-gold {
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.3) !important;
+}
+

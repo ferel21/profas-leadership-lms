@@ -9,3 +9,5 @@ prisma/dev.db-journal
 .DS_Store
 .autopilot/
 .env*
+.vercel
+.env*.local

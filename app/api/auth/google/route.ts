@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET() {
   const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const redirectUri = `${baseUrl}/api/auth/google/callback`;

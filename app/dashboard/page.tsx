@@ -12,8 +12,8 @@ function MetricGrid({ items }: { items: [string, number | string, React.ElementT
   return (
     <div className="metric-grid">
       {items.map(([label, value, Icon, desc], i) => (
-        <div className="metric-card" key={i}>
-          <div className="metric-icon"><Icon size={20} /></div>
+        <div className="metric-card glass-card hover-lift" key={i}>
+          <div className="metric-icon glow-teal"><Icon size={20} /></div>
           <div>
             <span>{label}</span>
             <b>{value}</b>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
           ["Skor Rata-rata", "0", TrendingUp, "Dari kuis & tugas"]
         ]} />
         <section className="role-grid">
-          <article className="data-card" id="program">
+          <article className="data-card glass-card" id="program">
             <div className="data-title">
               <div><h2>Melanjutkan Belajar</h2><p>Program yang sedang Anda ikuti</p></div>
             </div>
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
             </div>
           </article>
 
-          <article className="data-card" id="sertifikat">
+          <article className="data-card glass-card" id="sertifikat">
             <div className="data-title">
               <div><h2>Sertifikat Saya</h2><p>Pencapaian dari program yang telah selesai</p></div>
             </div>
@@ -142,7 +142,7 @@ export default async function DashboardPage() {
           ["Rating", "4.8", Award, "Rata-rata ulasan"]
         ]} />
         <section className="role-grid">
-          <article className="data-card" id="program">
+          <article className="data-card glass-card" id="program">
             <div className="data-title">
               <div><h2>Manajemen Kurikulum & Program</h2><p>Kelola struktur materi Anda</p></div>
             </div>
@@ -163,7 +163,7 @@ export default async function DashboardPage() {
             </div>
           </article>
 
-          <aside className="data-card">
+          <aside className="data-card glass-card">
             <div className="data-title">
               <div><h2>Aksi Cepat Mentor</h2><p>Pintu akses fitur pengajaran</p></div>
             </div>
@@ -263,7 +263,7 @@ export default async function DashboardPage() {
           </div>
         </article>
         
-        <aside className="data-card">
+        <aside className="data-card glass-card">
           <div className="data-title">
             <div>
               <h2>Performa Pembelajaran</h2>

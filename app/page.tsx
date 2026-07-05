@@ -51,17 +51,17 @@ export default async function Home() {
             <h2>Ekosistem LMS modern yang<br/><em>dirancang untuk hasil.</em></h2>
           </div>
           <div className="benefit-grid">
-            <div className="benefit-card">
+            <div className="benefit-card glass-card hover-lift">
               <div className="icon-box"><Target size={28}/></div>
               <h3>Terstruktur & Terukur</h3>
               <p>Sistem kami memetakan kemampuan awal (Pre-test) dan mengukur kemajuan kompetensi Anda setelah pembelajaran selesai secara akurat.</p>
             </div>
-            <div className="benefit-card">
+            <div className="benefit-card glass-card hover-lift">
               <div className="icon-box"><Users2 size={28}/></div>
               <h3>Belajar dari Praktisi</h3>
               <p>Materi tidak dibuat oleh akademisi teoritis, melainkan oleh profesional dan eksekutif yang menghadapi masalah nyata di industri.</p>
             </div>
-            <div className="benefit-card">
+            <div className="benefit-card glass-card hover-lift">
               <div className="icon-box"><TrendingUp size={28}/></div>
               <h3>Fokus pada Dampak</h3>
               <p>Setiap program dilengkapi dengan studi kasus interaktif, tugas akhir, dan rencana aksi untuk diimplementasikan langsung ke karir Anda.</p>
@@ -95,22 +95,22 @@ export default async function Home() {
             <p style={{ maxWidth: "600px", margin: "1rem auto 0" }}>Pengalaman belajar di PROFAS dirancang sekuensial agar pemahaman Anda terbangun secara solid, selangkah demi selangkah.</p>
           </div>
           <div className="flow-grid">
-            <div className="flow-step">
+            <div className="flow-step glass-card hover-lift">
               <div className="flow-step-num">1</div>
               <h3>Asesmen Awal</h3>
               <p>Kerjakan Pre-test singkat untuk mengetahui titik mula dan kelemahan yang perlu ditingkatkan.</p>
             </div>
-            <div className="flow-step">
+            <div className="flow-step glass-card hover-lift">
               <div className="flow-step-num">2</div>
               <h3>Eksplorasi Materi</h3>
               <p>Akses ratusan jam video, modul interaktif, dan materi bacaan komprehensif kapan saja.</p>
             </div>
-            <div className="flow-step">
+            <div className="flow-step glass-card hover-lift">
               <div className="flow-step-num">3</div>
               <h3>Uji Praktis</h3>
               <p>Kerjakan kuis, evaluasi bertahap, serta studi kasus yang dinilai langsung oleh mentor.</p>
             </div>
-            <div className="flow-step">
+            <div className="flow-step glass-card hover-lift">
               <div className="flow-step-num">4</div>
               <h3>Sertifikasi Digital</h3>
               <p>Raih sertifikat berlisensi dan bagikan kredensial kepemimpinan Anda ke LinkedIn.</p>
@@ -172,7 +172,7 @@ export default async function Home() {
             <h2>Apa kata alumni kami?</h2>
           </div>
           <div className="testimonial-grid">
-            <div className="testi-card">
+            <div className="testi-card glass-card hover-lift">
               <div className="stars"><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/></div>
               <p>&quot;Modul Strategic Leadership di sini sangat praktis. Tidak bertele-tele dengan teori, langsung membedah studi kasus nyata di BUMN yang relevan dengan tim saya saat ini.&quot;</p>
               <div className="testi-author">
@@ -180,7 +180,7 @@ export default async function Home() {
                 <div><h4>Reza Dwi</h4><span>Manager, BUMN</span></div>
               </div>
             </div>
-            <div className="testi-card">
+            <div className="testi-card glass-card hover-lift">
               <div className="stars"><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/></div>
               <p>&quot;PROFAS membantu saya menyadari bahwa memimpin UMKM bukan berarti harus memikirkan segalanya sendiri. Saya belajar Mendelegasi secara sistematis.&quot;</p>
               <div className="testi-author">
@@ -188,7 +188,7 @@ export default async function Home() {
                 <div><h4>Nadia Pratama</h4><span>Founder UMKM Retail</span></div>
               </div>
             </div>
-            <div className="testi-card">
+            <div className="testi-card glass-card hover-lift">
               <div className="stars"><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/><Star fill="currentColor"/></div>
               <p>&quot;Sistemnya sangat modern. Enak diakses dari HP saat saya sedang *commuting*. UI-nya bersih dan fitur resume otomatisnya amat sangat membantu!&quot;</p>
               <div className="testi-author">

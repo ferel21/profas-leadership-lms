@@ -7,6 +7,8 @@ import Link from "next/link";
 import { BookOpen, UsersRound, Award, ChevronRight, Activity, TrendingUp, Layers3 } from "lucide-react";
 import Image from "next/image";
 import { AdminReportTable, ReportRow } from "@/components/AdminReportTable";
+import { MentorCourseActions } from "@/components/MentorCourseActions";
+import { AdminUserManagement } from "@/components/AdminUserManagement";
 
 // Simple UI components
 function MetricGrid({ items }: { items: [string, number | string, React.ElementType, string][] }) {
@@ -33,19 +35,6 @@ function RoleHeading({ title, subtitle }: { title: string, subtitle: string }) {
         <h1>{title}</h1>
         <p>{subtitle}</p>
       </div>
-    </div>
-  );
-}
-
-function ProgressRing({ value }: { value: number }) {
-  const dasharray = `${value}, 100`;
-  return (
-    <div className="progress-ring-box">
-      <svg viewBox="0 0 36 36" className="progress-ring">
-        <path className="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-        <path className="ring-fill" strokeDasharray={dasharray} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-      </svg>
-      <span>{Math.round(value)}%</span>
     </div>
   );
 }
@@ -98,47 +87,53 @@ export default async function DashboardPage() {
       <DashboardChrome user={user}>
         <RoleHeading title="Ruang Belajar" subtitle="Lanjutkan pembelajaran dan capai target harian Anda." />
         <MetricGrid items={[
-          ["Program Aktif", stats.courses - stats.completed, BookOpen, "Sedang dipelajari"],
-          ["Selesai", stats.completed, Award, "Sertifikat diraih"],
-          ["Jam Belajar", stats.hours, Activity, "Total durasi"],
-          ["Skor Rata-rata", "0", TrendingUp, "Dari kuis & tugas"]
+          ["Program Diikuti", stats.courses, BookOpen, "Kelas kepemimpinan aktif"],
+          ["Sertifikat Diperoleh", certificates.length, Award, "Bukti kelulusan Anda"],
+          ["Jam Belajar", `${stats.hours} Jam`, Activity, "Etimasi total waktu"],
+          ["Rata-rata Progres", `${average(enrollments.map(e => e.progressPercent))}%`, TrendingUp, "Penyelesaian materi"]
         ]} />
         <section className="role-grid">
           <article className="data-card glass-card" id="program">
             <div className="data-title">
-              <div><h2>Melanjutkan Belajar</h2><p>Program yang sedang Anda ikuti</p></div>
+              <div><h2>Program Aktif Anda</h2><p>Lanjutkan materi dari modul terakhir</p></div>
             </div>
-            <div className="course-list">
-              {enrollments.map(e => (
-                <Link href={`/belajar/${e.course.slug}`} className="course-row hover-lift" key={e.id}>
-                  <div className="course-row-img"><Image src={e.course.image} fill alt={e.course.title} /></div>
-                  <div className="course-row-info"><h3>{e.course.title}</h3><p>{e.course.nodes.length} materi</p></div>
-                  <ProgressRing value={e.progressPercent} />
-                  <ChevronRight className="course-row-arrow" />
-                </Link>
-              ))}
-              {!enrollments.length && <EmptyState text="Anda belum mengikuti program apapun." />}
-            </div>
+            {enrollments.length === 0 ? <EmptyState text="Belum ada program yang diikuti. Eksplorasi katalog program sekarang." /> : (
+              <div className="enrollment-list">
+                {enrollments.map(item => (
+                  <Link href={`/belajar/${item.courseId}`} className="enroll-item hover-lift" key={item.id}>
+                    <div className="thumb-wrap"><Image src={item.course.image} fill alt={item.course.title} /></div>
+                    <section>
+                      <span>{item.course.category}</span>
+                      <h3>{item.course.title}</h3>
+                      <p>{item.course.nodes.length} modul • {item.course.durationHours} jam</p>
+                      <div className="progress-bar"><i style={{ width: `${item.progressPercent}%` }} /></div>
+                      <small>Progres: {item.progressPercent}%</small>
+                    </section>
+                    <ChevronRight />
+                  </Link>
+                ))}
+              </div>
+            )}
           </article>
-
-          <article className="data-card glass-card" id="sertifikat">
-            <div className="data-title">
-              <div><h2>Sertifikat Saya</h2><p>Pencapaian dari program yang telah selesai</p></div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {certificates.map(cert => (
-                <div key={cert.id} className="certificate-mini hover-lift" style={{ borderRadius: "12px", padding: "16px" }}>
-                  <span><Award size={20} /></span>
-                  <div>
-                    <small>NO. {cert.uniqueNumber}</small>
-                    <b style={{ fontSize: "14px" }}>{cert.course.title}</b>
-                    <Link href={`/sertifikat/${cert.uniqueNumber}`}>Lihat Sertifikat <ChevronRight size={14} /></Link>
+          <aside className="data-card glass-card">
+            <div className="data-title"><div><h2>Sertifikat & Pencapaian</h2><p>Lulusan terverifikasi</p></div></div>
+            {certificates.length === 0 ? <EmptyState text="Sertifikat akan muncul di sini setelah Anda menyelesaikan program." /> : (
+              <div className="cert-list">
+                {certificates.map(cert => (
+                  <div className="cert-card hover-lift" key={cert.id}>
+                    <div>
+                      <Award size={20} />
+                      <section>
+                        <h4>{cert.course.title}</h4>
+                        <small>No: {cert.uniqueNumber}</small>
+                      </section>
+                    </div>
+                    <Link href={`/sertifikat/${cert.uniqueNumber}`} className="btn btn-outline btn-small">Lihat & Unduh</Link>
                   </div>
-                </div>
-              ))}
-              {!certificates.length && <EmptyState text="Anda belum memiliki sertifikat." />}
-            </div>
-          </article>
+                ))}
+              </div>
+            )}
+          </aside>
         </section>
       </DashboardChrome>
     );
@@ -148,8 +143,15 @@ export default async function DashboardPage() {
     // ... logic for mentor
     const courses = await prisma.course.findMany({
       where: { mentorId: user.id },
-      include: { enrollments: true, nodes: true }
+      include: { enrollments: true, nodes: { select: { id: true, type: true, title: true } } }
     });
+
+    const courseOptions = courses.map(c => ({
+      id: c.id,
+      title: c.title,
+      nodes: c.nodes.map(n => ({ id: n.id, title: n.title, type: n.type }))
+    }));
+
     return (
       <DashboardChrome user={user}>
         <RoleHeading title="Dashboard Mentor" subtitle="Kelola materi, evaluasi tugas, dan pantau progres peserta Anda." />
@@ -159,7 +161,12 @@ export default async function DashboardPage() {
           ["Tugas Menunggu", 0, Activity, "Perlu dinilai"],
           ["Rating", "4.8", Award, "Rata-rata ulasan"]
         ]} />
-        <section className="role-grid">
+
+        <div style={{ marginTop: "1.5rem" }}>
+          <MentorCourseActions courses={courseOptions} />
+        </div>
+
+        <section className="role-grid" style={{ marginTop: "1rem" }}>
           <article className="data-card glass-card" id="program">
             <div className="data-title">
               <div><h2>Manajemen Kurikulum & Program</h2><p>Kelola struktur materi Anda</p></div>
@@ -212,7 +219,7 @@ export default async function DashboardPage() {
   }
 
   // SUPER ADMIN
-  const [users, courses, certificates, enrollments, roleCounts, allEnrollments] = await Promise.all([
+  const [users, courses, certificates, enrollments, roleCounts, allEnrollments, allUsersList, allCoursesList] = await Promise.all([
     prisma.user.count(),
     prisma.course.count({ where: { published: true } }),
     prisma.certificate.count(),
@@ -223,6 +230,16 @@ export default async function DashboardPage() {
         user: { select: { id: true, name: true, email: true } },
         course: { select: { id: true, title: true } }
       }
+    }),
+    prisma.user.findMany({
+      select: {
+        id: true, name: true, email: true, role: true, authProvider: true, createdAt: true,
+        _count: { select: { enrollments: true, certificates: true, mentoredCourses: true } }
+      },
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.course.findMany({
+      include: { nodes: { select: { id: true, type: true, title: true } } }
     })
   ]);
 
@@ -254,7 +271,11 @@ export default async function DashboardPage() {
         ["Sertifikat Terbit", certificates, Award, "Terverifikasi publik"]
       ]} />
       
-      <section className="role-grid">
+      <div style={{ marginTop: "1.5rem" }}>
+        <MentorCourseActions courses={allCoursesList.map(c => ({ id: c.id, title: c.title, nodes: c.nodes }))} />
+      </div>
+
+      <section className="role-grid" style={{ marginTop: "1rem" }}>
         <article className="data-card analytics-card">
           <div className="data-title">
             <div>
@@ -305,6 +326,9 @@ export default async function DashboardPage() {
           </div>
         </aside>
       </section>
+
+      {/* Admin User & Role Management */}
+      <AdminUserManagement initialUsers={allUsersList.map(u => ({ ...u, createdAt: u.createdAt.toISOString() }))} />
 
       {/* Advanced Admin Report Table */}
       <AdminReportTable data={reportData} />

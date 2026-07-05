@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, UsersRound, TrendingUp, ChevronRight, Settings } from "lucide-react";
 import { ProgressRing } from "@/components/ProgressRing";
+import { MentorCourseActions } from "@/components/MentorCourseActions";
 
 function average(values: number[]) {
   return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
@@ -18,7 +19,7 @@ export default async function MentorDashboardPage() {
   const courses = await prisma.course.findMany({
     where: { mentorId: user.id },
     include: {
-      nodes: { select: { id: true, type: true } },
+      nodes: { select: { id: true, type: true, title: true } },
       enrollments: { select: { userId: true, progressPercent: true } }
     }
   });
@@ -26,6 +27,12 @@ export default async function MentorDashboardPage() {
   const enrollments = courses.flatMap(course => course.enrollments);
   const students = new Set(enrollments.map(enrollment => enrollment.userId)).size;
   const averageProgress = average(enrollments.map(enrollment => enrollment.progressPercent));
+
+  const courseOptions = courses.map(c => ({
+    id: c.id,
+    title: c.title,
+    nodes: c.nodes.map(n => ({ id: n.id, title: n.title, type: n.type }))
+  }));
 
   return (
     <DashboardChrome user={user}>
@@ -52,7 +59,11 @@ export default async function MentorDashboardPage() {
         </article>
       </div>
 
-      <section className="role-grid" style={{ marginTop: "2rem" }}>
+      <div style={{ marginTop: "2rem" }}>
+        <MentorCourseActions courses={courseOptions} />
+      </div>
+
+      <section className="role-grid" style={{ marginTop: "1rem" }}>
         <article className="data-card glass hover-lift" id="program" style={{ width: '100%', gridColumn: '1 / -1' }}>
           <div className="data-title">
             <div>

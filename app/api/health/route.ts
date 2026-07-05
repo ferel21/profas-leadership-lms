@@ -60,6 +60,10 @@ export async function GET() {
       quizCompletionSync100: "ACTIVE",
       pureCssConfetti: "ACTIVE",
       glassmorphismUI: "ACTIVE",
+      smartResolveQuizSync: "ACTIVE",
+      supabasePostgresReady: "ACTIVE",
+      executiveDarkMode: "ACTIVE",
+      autoBackupBrowserMemory: "ACTIVE",
     },
   };
 

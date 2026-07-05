@@ -248,42 +248,42 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               </div>
             </div>
           ) : (current.type === "QUIZ" || current.type === "ASSIGNMENT") ? (
-            <article className="reading-content glass hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px', border: '1px solid var(--teal)', background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,253,250,0.9) 100%)', boxShadow: '0 10px 30px rgba(13, 148, 136, 0.1)', textAlign: 'center' }}>
-              <div style={{ width: '80px', height: '80px', background: 'var(--teal)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'white', boxShadow: '0 8px 20px rgba(13, 148, 136, 0.3)' }}>
-                {current.type === "QUIZ" ? <Award size={40} /> : <FileCheck size={40} />}
+            <article className="pro-quiz-launch-card pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', textAlign: 'center' }}>
+              <div className="pro-pulse-badge" style={{ width: '88px', height: '88px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'white', boxShadow: '0 8px 25px rgba(13, 148, 136, 0.4)' }}>
+                {current.type === "QUIZ" ? <Award size={44} /> : <FileCheck size={44} />}
               </div>
-              <span className="eyebrow" style={{ color: 'var(--teal)', fontWeight: 'bold', fontSize: '14px', letterSpacing: '1px' }}>
-                {current.type === "QUIZ" ? "EVALUASI & KUIS PEMAHAMAN" : "TUGAS & STUDI KASUS"}
+              <span className="eyebrow" style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '14px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                {current.type === "QUIZ" ? "⚡ EVALUASI & KUIS PEMAHAMAN PRO" : "💼 TUGAS EKSEKUTIF & STUDI KASUS"}
               </span>
-              <h1 style={{ marginTop: '0.5rem', marginBottom: '1rem', fontSize: '36px', color: 'var(--ink)', fontWeight: 800 }}>
+              <h1 style={{ marginTop: '0.75rem', marginBottom: '1.25rem', fontSize: '38px', color: 'var(--ink)', fontWeight: 800, letterSpacing: '-0.5px' }}>
                 {current.title}
               </h1>
-              <p style={{ maxWidth: '600px', margin: '0 auto 2.5rem', fontSize: '1.15rem', color: '#475569', lineHeight: 1.7 }}>
+              <p style={{ maxWidth: '640px', margin: '0 auto 2.5rem', fontSize: '1.2rem', color: '#475569', lineHeight: 1.7 }}>
                 {current.content || (current.type === "QUIZ" 
-                  ? "Uji tingkat pemahaman strategi dan konsep kepemimpinan Anda pada modul ini. Klik tombol di bawah untuk memulai kuis." 
-                  : "Selesaikan instruksi tugas eksekutif ini untuk memvalidasi penerapan kepemimpinan Anda di lapangan.")}
+                  ? "Uji tingkat pemahaman strategi dan konsep kepemimpinan Anda pada modul ini. Klik tombol di bawah untuk memulai kuis interaktif." 
+                  : "Selesaikan instruksi tugas eksekutif ini untuk memvalidasi penerapan kepemimpinan Anda di lapangan nyata.")}
               </p>
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Link 
                   href={`/evaluasi/${current.assessmentId || current.id}`} 
-                  className="btn btn-primary hover-lift" 
-                  style={{ background: 'var(--teal)', padding: '16px 36px', fontSize: '18px', borderRadius: '14px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '10px', boxShadow: '0 8px 20px rgba(13, 148, 136, 0.25)' }}
+                  className="pro-btn-glow hover-lift" 
+                  style={{ padding: '18px 42px', fontSize: '18px', borderRadius: '16px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
                 >
-                  <Play fill="currentColor" size={20} /> Mulai {current.type === "QUIZ" ? "Mengerjakan Kuis" : "Mengerjakan Tugas"} Sekarang
+                  <Play fill="currentColor" size={22} /> Mulai {current.type === "QUIZ" ? "Mengerjakan Kuis" : "Mengerjakan Tugas"} Sekarang 🚀
                 </Link>
               </div>
-              <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '2rem', color: '#64748b', fontSize: '14px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock3 size={16} /> Durasi: {current.durationMin || 30} Menit</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle2 size={16} /> Bobot Nilai: 100 Poin</span>
+              <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center', gap: '2.5rem', color: '#64748b', fontSize: '15px', fontWeight: 600 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0fdfa', padding: '6px 14px', borderRadius: '20px', color: 'var(--color-primary-dark)' }}><Clock3 size={18} /> Durasi: {current.durationMin || 30} Menit</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fef3c7', padding: '6px 14px', borderRadius: '20px', color: '#b45309' }}><CheckCircle2 size={18} /> Bobot Nilai: 100 Poin</span>
               </div>
             </article>
           ) : (
-            <article className="reading-content glass hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px', border: '1px solid var(--line)', background: 'rgba(255,255,255,0.7)' }}>
-              <span className="eyebrow" style={{ color: 'var(--teal)', fontWeight: 'bold' }}>MATERI BACAAN</span>
-              <h1 style={{ marginTop: '0.5rem', marginBottom: '1.5rem', fontSize: '38px', color: 'var(--ink)' }}>{current.title}</h1>
-              <div style={{ lineHeight: 1.85, fontSize: '1.15rem', color: '#475569' }}>{current.content}</div>
+            <article className="pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px' }}>
+              <span className="eyebrow" style={{ color: 'var(--color-primary)', fontWeight: 'bold', letterSpacing: '1px' }}>📖 MATERI BACAAN EKSKLUSIF</span>
+              <h1 style={{ marginTop: '0.75rem', marginBottom: '1.75rem', fontSize: '40px', color: 'var(--ink)', fontWeight: 800, letterSpacing: '-0.5px' }}>{current.title}</h1>
+              <div style={{ lineHeight: 1.9, fontSize: '1.18rem', color: '#334155' }}>{current.content}</div>
               {current.fileUrl && (
-                <a className="btn btn-primary" href={current.fileUrl} target="_blank" rel="noreferrer" style={{ marginTop: '1rem', display: 'inline-flex' }}><Download size={16} style={{ marginRight: '8px' }} /> Unduh Lampiran</a>
+                <a className="pro-btn-glow hover-lift" href={current.fileUrl} target="_blank" rel="noreferrer" style={{ marginTop: '2rem', display: 'inline-flex', alignItems: 'center', padding: '14px 28px', borderRadius: '12px', textDecoration: 'none', fontSize: '16px' }}><Download size={18} style={{ marginRight: '10px' }} /> Unduh Berkas Materi</a>
               )}
             </article>
           )}

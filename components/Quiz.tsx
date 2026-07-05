@@ -66,7 +66,36 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
     }
   };
 
-  if (result && !showReview) return <div className="quiz-result glass" style={{ maxWidth: '600px', margin: '4rem auto', padding: '3rem', borderRadius: '24px', textAlign: 'center' }}><span className={result.passed ? "passed" : "failed"} style={{ display: 'inline-flex', padding: '20px', borderRadius: '50%', background: result.passed || result.needsManualGrading ? 'var(--teal-light)' : '#fee2e2', color: result.passed || result.needsManualGrading ? 'var(--teal)' : '#dc2626', marginBottom: '1rem' }}>{result.passed || result.needsManualGrading ? <Trophy size={48} /> : <XCircle size={48} />}</span><small style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', color: 'var(--muted)', marginBottom: '1rem' }}>{result.needsManualGrading ? "TERKIRIM & MENUNGGU PENILAIAN" : (result.passed ? "EVALUASI SELESAI" : "BELUM LULUS")}</small><h1 style={{ fontSize: '72px', margin: '0', color: 'var(--ink)' }}>{result.score}</h1><p style={{ color: 'var(--muted)', marginTop: '0' }}>Skor Anda</p>{!result.needsManualGrading && <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', margin: '2rem 0', padding: '1.5rem', background: 'rgba(255,255,255,0.5)', borderRadius: '16px' }}><span><b style={{ display: 'block', fontSize: '24px' }}>{result.correct}/{result.total}</b><small style={{ color: 'var(--muted)' }}>Jawaban benar</small></span><span><b style={{ display: 'block', fontSize: '24px' }}>{assessment.passingScore}</b><small style={{ color: 'var(--muted)' }}>Nilai minimum</small></span></div>}<h2 style={{ fontSize: '18px', color: 'var(--ink)' }}>{result.feedback}</h2><div className="result-actions" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>{result.questions && !result.needsManualGrading && <button onClick={() => setShowReview(true)} className="btn btn-primary hover-lift">Lihat Pembahasan</button>}{!result.passed && !result.needsManualGrading && <button onClick={retry} className="btn btn-outline hover-lift"><RotateCcw /> Coba Lagi</button>}<Link href={`/belajar/${assessment.course.slug}`} className="btn btn-outline hover-lift">Kembali ke Kelas</Link></div></div>;
+  if (result && !showReview) return <div className="quiz-result pro-glass-card pro-celebrate-check hover-lift" style={{ maxWidth: '640px', margin: '4rem auto', padding: '3.5rem', borderRadius: '28px', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 50px rgba(13, 148, 136, 0.2)' }}>
+    {result.passed && (
+      <div className="confetti-wrapper" aria-hidden="true">
+        {['#0d9488', '#06b6d4', '#fbbf24', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#3b82f6'].map((color, i) => (
+          <span
+            key={i}
+            className="pro-confetti-particle"
+            style={{
+              left: `${8 + (i * 12)}%`,
+              backgroundColor: color,
+              animationDelay: `${i * 0.15}s`,
+              animationDuration: `${2.5 + (i % 3) * 0.4}s`,
+              transform: `rotate(${i * 45}deg)`
+            }}
+          />
+        ))}
+      </div>
+    )}
+    <span className={result.passed ? "passed pro-pulse-badge" : "failed"} style={{ display: 'inline-flex', padding: '24px', borderRadius: '50%', background: result.passed || result.needsManualGrading ? 'linear-gradient(135deg, var(--color-primary), var(--color-accent))' : '#fee2e2', color: result.passed || result.needsManualGrading ? 'white' : '#dc2626', marginBottom: '1.5rem', boxShadow: '0 10px 25px rgba(13, 148, 136, 0.35)' }}>{result.passed || result.needsManualGrading ? <Trophy size={54} /> : <XCircle size={54} />}</span>
+    <small style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', letterSpacing: '2.5px', color: 'var(--color-primary)', marginBottom: '1rem', textTransform: 'uppercase' }}>{result.needsManualGrading ? "⏳ TERKIRIM & MENUNGGU PENILAIAN" : (result.passed ? "🎉 EVALUASI SELESAI & LULUS PRO" : "❌ BELUM LULUS EVALUASI")}</small>
+    <h1 style={{ fontSize: '78px', margin: '0', color: 'var(--ink)', fontWeight: 900, letterSpacing: '-2px', background: 'linear-gradient(135deg, var(--ink), var(--color-primary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{result.score}</h1>
+    <p style={{ color: 'var(--muted)', marginTop: '0', fontSize: '16px', fontWeight: 600 }}>Skor Kompetensi Akhir</p>
+    {!result.needsManualGrading && <div style={{ display: 'flex', justifyContent: 'center', gap: '3.5rem', margin: '2.5rem 0', padding: '1.75rem', background: 'rgba(240, 253, 250, 0.8)', borderRadius: '20px', border: '1px solid rgba(13, 148, 136, 0.2)' }}><span><b style={{ display: 'block', fontSize: '28px', color: 'var(--color-primary-dark)' }}>{result.correct}/{result.total}</b><small style={{ color: '#475569', fontWeight: 600 }}>Jawaban Tepat</small></span><span><b style={{ display: 'block', fontSize: '28px', color: '#b45309' }}>{assessment.passingScore}</b><small style={{ color: '#475569', fontWeight: 600 }}>Batas Lulus (KKM)</small></span></div>}
+    <h2 style={{ fontSize: '20px', color: 'var(--ink)', lineHeight: 1.6, fontWeight: 700 }}>{result.feedback}</h2>
+    <div className="result-actions" style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', marginTop: '2.5rem', flexWrap: 'wrap' }}>
+      {result.questions && !result.needsManualGrading && <button onClick={() => setShowReview(true)} className="pro-btn-glow hover-lift" style={{ padding: '14px 28px', borderRadius: '14px', fontSize: '16px' }}>Lihat Pembahasan Lengkap</button>}
+      {!result.passed && !result.needsManualGrading && <button onClick={retry} className="btn btn-outline hover-lift" style={{ padding: '14px 28px', borderRadius: '14px', fontSize: '16px', fontWeight: 700 }}><RotateCcw /> Coba Sekali Lagi</button>}
+      <Link href={`/belajar/${assessment.course.slug}`} className="btn btn-outline hover-lift" style={{ padding: '14px 28px', borderRadius: '14px', fontSize: '16px', fontWeight: 700, textDecoration: 'none' }}>Kembali ke Kelas</Link>
+    </div>
+  </div>;
 
   if (showReview && result?.questions) return <div className="quiz-review-page">
     <header className="review-header"><button onClick={() => setShowReview(false)} className="btn btn-small btn-outline"><ArrowLeft /> Kembali ke Skor</button><h2>Pembahasan Evaluasi: {assessment.title}</h2></header>

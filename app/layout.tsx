@@ -4,6 +4,7 @@ import "./typography.css";
 import "./master.css";
 import "./landing.css";
 import "./premium.css";
+import "./pro-lms.css";
 
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito" });
 

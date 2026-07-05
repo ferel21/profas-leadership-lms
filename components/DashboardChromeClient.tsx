@@ -63,7 +63,13 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
         <button onClick={()=>setOpen(false)} aria-label="Tutup menu" className="mobile-close-btn"><X/></button>
       </div>
       <div className="sidebar-user">
-        <span className={user.avatar ? "has-avatar" : ""}>{user.avatar ? <Image src={user.avatar} alt="" width={38} height={38} /> : initials(user.name)}</span>
+        <span className={user.avatar ? "has-avatar" : ""} style={!user.avatar ? {
+          background: "linear-gradient(135deg, #0d9488, #14b8a6)",
+          color: "#fff",
+          fontWeight: 800,
+          fontSize: "1rem",
+          boxShadow: "0 4px 14px rgba(13,148,136,0.35)"
+        } : {}}>{user.avatar ? <Image src={user.avatar} alt="" width={38} height={38} /> : initials(user.name)}</span>
         {!collapsed && <div><b>{user.username ? `@${user.username}` : user.name}</b><small>{user.name} · {user.role==="STUDENT"?"Peserta":user.role==="MENTOR"?"Mentor":"Super Admin"}</small></div>}
       </div>
       <nav>

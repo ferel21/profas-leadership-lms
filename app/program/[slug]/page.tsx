@@ -11,7 +11,7 @@ import { formatRupiah, initials } from "@/lib/utils";
 
 export default async function CourseDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [course,user] = await Promise.all([prisma.course.findFirst({ where: { slug, published: true }, include: { mentor: true, nodes: { orderBy: [{ parentId: "asc" }, { order: "asc" }], include: { assessment: true } }, assessments: { where: { type: "PRETEST" } } } }), getCurrentUser()]);
+  const [course,user] = await Promise.all([prisma.course.findFirst({ where: { OR: [{ slug }, { id: slug }], published: true }, include: { mentor: true, nodes: { orderBy: [{ parentId: "asc" }, { order: "asc" }], include: { assessment: true } }, assessments: { where: { type: "PRETEST" } } } }), getCurrentUser()]);
   if (!course) notFound(); const outcomes = JSON.parse(course.outcomes) as string[]; const lessonCount = course.nodes.filter(n=>n.type !== "FOLDER").length;
   const enrolled = user ? !!await prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId: course.id } }, select: { id: true } }) : false;
   const folders = course.nodes.filter(n => n.type === "FOLDER");

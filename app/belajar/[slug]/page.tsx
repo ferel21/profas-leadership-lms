@@ -9,7 +9,10 @@ export default async function LearnPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
 
   const course = await prisma.course.findFirst({
-    where: { slug, published: true },
+    where: {
+      OR: [{ slug }, { id: slug }],
+      published: true
+    },
     select: {
       id: true,
       slug: true,

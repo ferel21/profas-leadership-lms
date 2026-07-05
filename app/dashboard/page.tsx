@@ -199,7 +199,7 @@ export default async function DashboardPage() {
                 {sortedEnrollments.map(item => {
                   const isCompleted = item.status === "COMPLETED" || item.progressPercent === 100;
                   return (
-                    <Link href={`/belajar/${item.courseId}`} key={item.id} style={{ textDecoration: "none" }}>
+                    <Link href={`/belajar/${item.course.slug}`} key={item.id} style={{ textDecoration: "none" }}>
                       <div className="hover-lift" style={{
                         display: "flex", gap: "1rem", alignItems: "center",
                         padding: "1rem", borderRadius: "16px",

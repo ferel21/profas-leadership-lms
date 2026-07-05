@@ -10,7 +10,9 @@ export async function POST(request: Request) {
   try {
     const input = schema.parse(await request.json());
     const user = await prisma.user.findUnique({ where: { email: input.email.toLowerCase() } });
-    if (!user || !(await bcrypt.compare(input.password, user.passwordHash))) return NextResponse.json({ message: "Email atau kata sandi tidak sesuai." }, { status: 401 });
+    if (!user) return NextResponse.json({ message: "Email atau kata sandi tidak sesuai." }, { status: 401 });
+    if (!user.passwordHash) return NextResponse.json({ message: "Akun ini menggunakan Google. Silakan klik 'Masuk dengan Google'." }, { status: 401 });
+    if (!(await bcrypt.compare(input.password, user.passwordHash))) return NextResponse.json({ message: "Email atau kata sandi tidak sesuai." }, { status: 401 });
     const token = await createToken({ userId: user.id, role: user.role });
     const response = NextResponse.json({ user: { id: user.id, name: user.name, role: user.role } });
     response.cookies.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: input.remember ? 60 * 60 * 24 * 7 : undefined, path: "/" });

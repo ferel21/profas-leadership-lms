@@ -24,7 +24,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
       });
     }
 
-    // 2. Update/Create nodes
+    // 2. Bypass SQLite Unique Constraint (courseId, parentId, order)
+    // Temporarily shift the order of all updating nodes to safe negative numbers 
+    // so they don't collide when applying the new target orders
+    const updatingNodes = nodes.filter((n: any) => !n.isNew);
+    for (let i = 0; i < updatingNodes.length; i++) {
+      await prisma.courseNode.update({
+        where: { id: updatingNodes[i].id },
+        data: { order: -(10000 + i) }
+      });
+    }
+
+    // 3. Update/Create nodes
     for (const node of nodes) {
       if (node.isNew) {
         // Create new node

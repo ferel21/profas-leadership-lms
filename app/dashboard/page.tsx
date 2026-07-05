@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DashboardChrome } from "@/components/DashboardChrome";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -75,6 +76,23 @@ export default async function DashboardPage() {
         orderBy: { issuedAt: "desc" }
       })
     ]);
+
+    // Fallback dinamis untuk isolasi multi-instance /tmp SQLite di lingkungan serverless Vercel:
+    const completedEnrollments = enrollments.filter(e => e.status === "COMPLETED" || e.progressPercent === 100);
+    const existingCourseIds = new Set(certificates.map(c => c.courseId));
+    for (const enr of completedEnrollments) {
+      if (!existingCourseIds.has(enr.courseId)) {
+        const virtualCertNumber = `PROFAS-LDR-${new Date().getFullYear()}-${enr.courseId.slice(-4).toUpperCase()}-${user.id.slice(-4).toUpperCase()}`;
+        certificates.push({
+          id: `virt-${enr.courseId}`,
+          uniqueNumber: virtualCertNumber,
+          issuedAt: enr.completedAt || new Date(),
+          userId: user.id,
+          courseId: enr.courseId,
+          course: enr.course
+        } as any);
+      }
+    }
     const stats = { courses: enrollments.length, completed: enrollments.filter(e => e.status === "COMPLETED").length, hours: 0 };
     return (
       <DashboardChrome user={user}>

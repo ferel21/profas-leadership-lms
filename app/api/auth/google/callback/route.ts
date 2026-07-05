@@ -19,11 +19,19 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${baseUrl}/masuk?error=missing_code`);
   }
 
-  const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+  const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET;
 
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    return NextResponse.json({ message: "Google OAuth credentials missing" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Google OAuth credentials missing",
+      message: "Google OAuth credentials missing from environment variables.",
+      missing: {
+        clientId: !GOOGLE_CLIENT_ID,
+        clientSecret: !GOOGLE_CLIENT_SECRET
+      },
+      hint: "Pastikan GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET sudah dicentang untuk lingkungan Production di Vercel, lalu Redeploy."
+    }, { status: 500 });
   }
 
   try {

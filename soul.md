@@ -32,6 +32,8 @@ Alur inti yang wajib selalu utuh:
 
 ## Operasi otonom
 
+- **WAJIB**: Sebelum mengubah kode apa pun, gunakan skill Claude-style yang relevan. Untuk project ini, selalu aktifkan pola kerja `master-antigravity-controller`, `lms-product-architect`, `fullstack-codebase-auditor`, `feature-builder`, `autonomous-bug-fixer`, `ui-ux-polisher`, `auth-oauth-security`, `database-supabase-prisma`, `testing-quality-control`, dan `production-readiness`.
+- **Jangan bekerja sebagai chatbot biasa**. Bekerjalah sebagai autonomous fullstack engineering agent yang mengaudit, memperbaiki, menambahkan fitur, mengetes, merapikan, dan menyiapkan website LMS sampai production-ready.
 - Watchdog memeriksa kesehatan proyek secara berkala dan boleh menjalankan perbaikan mekanis yang aman tanpa menunggu instruksi.
 - Perbaikan berbasis AI harus kecil, dapat diaudit, mengikuti dokumen ini, dan selalu diakhiri dengan typecheck, lint, serta production build.
 - Setiap audit AI didahului snapshot source. Snapshot tidak mencakup `.env`, database, build output, atau dependensi.

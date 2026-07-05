@@ -7,6 +7,7 @@ import Link from "next/link";
 import { BookOpen, UsersRound, TrendingUp, ChevronRight, Settings } from "lucide-react";
 import { ProgressRing } from "@/components/ProgressRing";
 import { MentorCourseActions } from "@/components/MentorCourseActions";
+import { BroadcastManager } from "@/components/BroadcastManager";
 
 function average(values: number[]) {
   return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
@@ -61,6 +62,7 @@ export default async function MentorDashboardPage() {
 
       <div style={{ marginTop: "2rem" }}>
         <MentorCourseActions courses={courseOptions} />
+        <BroadcastManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
       </div>
 
       <section className="role-grid" style={{ marginTop: "1rem" }}>

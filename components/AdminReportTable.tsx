@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Search, Filter } from "lucide-react";
+import { Search, Filter, FileSpreadsheet } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import * as XLSX from "xlsx";
 
 export type ReportRow = {
   id: string;
@@ -28,18 +29,48 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
   const courses = Array.from(new Set(data.map(d => d.course)));
 
   const handleExport = () => {
-    const headers = ["Nama,Email,Program,Progres (%),Nilai Rata-rata,Status,Tanggal Daftar"];
-    const csv = filtered.map(r => 
-      `"${r.name}","${r.email}","${r.course}",${r.progress},${r.score || ""},"${r.status}","${formatDate(new Date(r.enrolledAt))}"`
-    );
-    const blob = new Blob([[headers, ...csv].join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `Laporan_Peserta_${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // 1. Persiapkan data untuk Sheet 1 (Data Detail Peserta)
+    const detailData = filtered.map((r, idx) => ({
+      "No": idx + 1,
+      "Nama Lengkap": r.name,
+      "Email": r.email,
+      "Program Kepemimpinan": r.course,
+      "Progres (%)": r.progress,
+      "Nilai Rata-rata": r.score ? r.score : "-",
+      "Status Kelulusan": r.status,
+      "Tanggal Daftar": formatDate(new Date(r.enrolledAt))
+    }));
+
+    // 2. Persiapkan data untuk Sheet 2 (Ringkasan Eksekutif & KPI)
+    const totalPeserta = filtered.length;
+    const totalLulus = filtered.filter(r => r.status === "LULUS").length;
+    const rasioLulus = totalPeserta > 0 ? ((totalLulus / totalPeserta) * 100).toFixed(1) + "%" : "0%";
+    const rataProgres = totalPeserta > 0 ? (filtered.reduce((a, b) => a + b.progress, 0) / totalPeserta).toFixed(1) + "%" : "0%";
+    
+    const kpiData = [
+      { "Indikator Kinerja Utama (KPI)": "Total Peserta Terdaftar", "Nilai": totalPeserta },
+      { "Indikator Kinerja Utama (KPI)": "Peserta Lulus / Bersertifikat", "Nilai": totalLulus },
+      { "Indikator Kinerja Utama (KPI)": "Rasio Kelulusan (%)", "Nilai": rasioLulus },
+      { "Indikator Kinerja Utama (KPI)": "Rata-rata Progres Belajar (%)", "Nilai": rataProgres },
+      { "Indikator Kinerja Utama (KPI)": "Tanggal Ekspor Laporan", "Nilai": new Date().toLocaleDateString("id-ID") }
+    ];
+
+    // 3. Buat Workbook dan Worksheets
+    const wb = XLSX.utils.book_new();
+    const wsDetail = XLSX.utils.json_to_sheet(detailData);
+    const wsKpi = XLSX.utils.json_to_sheet(kpiData);
+
+    // Set lebar kolom profesional
+    wsDetail["!cols"] = [
+      { wch: 6 }, { wch: 28 }, { wch: 28 }, { wch: 32 }, { wch: 14 }, { wch: 16 }, { wch: 18 }, { wch: 20 }
+    ];
+    wsKpi["!cols"] = [{ wch: 35 }, { wch: 25 }];
+
+    XLSX.utils.book_append_sheet(wb, wsDetail, "Data Detail Peserta");
+    XLSX.utils.book_append_sheet(wb, wsKpi, "Ringkasan KPI");
+
+    // 4. Unduh file Excel .xlsx
+    XLSX.writeFile(wb, `Laporan_LMS_PROFAS_${new Date().toISOString().split("T")[0]}.xlsx`);
   };
 
   return (
@@ -47,10 +78,10 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
       <div className="data-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
           <h2>Laporan Detail Peserta</h2>
-          <p>Filter, urutkan, dan ekspor data analitik peserta.</p>
+          <p>Filter, urutkan, dan ekspor data analitik peserta ke format spreadsheet Excel profesional.</p>
         </div>
-        <button onClick={handleExport} className="btn btn-outline hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Download size={16} /> Ekspor CSV
+        <button onClick={handleExport} className="btn btn-outline hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: 'var(--teal)', color: 'var(--teal)', fontWeight: 600 }}>
+          <FileSpreadsheet size={18} /> Ekspor Excel (.xlsx)
         </button>
       </div>
 

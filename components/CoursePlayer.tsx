@@ -2,9 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, Clock3, Download, FileText, Film, Image as ImageIcon, Link2, LoaderCircle, Menu, MessageSquare, Play, Send, X, Folder } from "lucide-react";
+import { Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, Clock3, Download, FileText, Film, Image as ImageIcon, Link2, LoaderCircle, Menu, MessageSquare, Play, Send, X, Folder, FileCheck, FileCode } from "lucide-react";
 import { initials } from "@/lib/utils";
 import { CompletionCelebration } from "./CompletionCelebration";
+import { AILeadershipTutor } from "./AILeadershipTutor";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import { jsPDF } from "jspdf";
 
 export type NodeType = "FOLDER" | "VIDEO" | "PDF" | "DOCUMENT" | "IMAGE" | "LINK" | "QUIZ" | "ASSIGNMENT" | "TEXT";
 
@@ -100,6 +103,47 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
     a.download = `Catatan-PROFAS-${current.title.replace(/[^a-zA-Z0-9]/g, "-")}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function downloadNoteDocx() {
+    if (!noteText.trim() || !current) return;
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({ text: "Jurnal & Catatan Pembelajaran PROFAS Leadership", heading: HeadingLevel.TITLE }),
+          new Paragraph({ text: `Modul: ${current.title}`, heading: HeadingLevel.HEADING_2 }),
+          new Paragraph({ text: `Peserta: ${currentUser.name} | Tanggal: ${new Date().toLocaleDateString("id-ID")}` }),
+          new Paragraph({ text: "" }),
+          ...noteText.split("\n").map(line => new Paragraph({ children: [new TextRun(line)] }))
+        ]
+      }]
+    });
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Catatan-PROFAS-${current.title.replace(/[^a-zA-Z0-9]/g, "-")}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadNotePdf() {
+    if (!noteText.trim() || !current) return;
+    const pdf = new jsPDF();
+    pdf.setFontSize(18);
+    pdf.setTextColor(13, 148, 136); // Teal #0d9488
+    pdf.text("Catatan Pembelajaran PROFAS Leadership", 15, 20);
+    pdf.setFontSize(12);
+    pdf.setTextColor(50, 50, 50);
+    pdf.text(`Modul: ${current.title}`, 15, 30);
+    pdf.text(`Peserta: ${currentUser.name} | Tanggal: ${new Date().toLocaleDateString("id-ID")}`, 15, 38);
+    pdf.setLineWidth(0.5);
+    pdf.line(15, 42, 195, 42);
+    pdf.setFontSize(11);
+    const lines = pdf.splitTextToSize(noteText, 180);
+    pdf.text(lines, 15, 50);
+    pdf.save(`Catatan-PROFAS-${current.title.replace(/[^a-zA-Z0-9]/g, "-")}.pdf`);
   }
 
   const current = flatLessons.find(n => n.id === currentId) ?? flatLessons[0];
@@ -256,15 +300,21 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
             <div className="notes-container">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
                 <div>
-                  <h2 style={{ fontSize: "1.5rem", margin: 0, color: "var(--ink)" }}>Catatan Pribadi Eksekutif</h2>
-                  <small style={{ color: "#64748b" }}>Catatan ini tersimpan secara lokal dan privat untuk refleksi kepemimpinan Anda.</small>
+                  <h2 style={{ fontSize: "1.5rem", margin: 0, color: "var(--ink)" }}>Catatan & Jurnal Refleksi Eksekutif</h2>
+                  <small style={{ color: "#64748b" }}>Catatan ini tersimpan secara lokal dan dapat diunduh ke berbagai format dokumen resmi.</small>
                 </div>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                   <button type="button" onClick={downloadNote} disabled={!noteText.trim()} className="btn btn-outline btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <Download size={14} /> Unduh (.txt)
+                    <Download size={14} /> Txt
+                  </button>
+                  <button type="button" onClick={downloadNoteDocx} disabled={!noteText.trim()} className="btn btn-outline btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px", borderColor: "#2563eb", color: "#2563eb", fontWeight: 600 }}>
+                    <FileCheck size={14} /> Word (.docx)
+                  </button>
+                  <button type="button" onClick={downloadNotePdf} disabled={!noteText.trim()} className="btn btn-outline btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px", borderColor: "#dc2626", color: "#dc2626", fontWeight: 600 }}>
+                    <FileCode size={14} /> PDF (.pdf)
                   </button>
                   <button type="button" onClick={saveNote} className="btn btn-primary btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <CheckCircle2 size={14} /> {noteSaved ? "Tersimpan!" : "Simpan Catatan"}
+                    <CheckCircle2 size={14} /> {noteSaved ? "Tersimpan!" : "Simpan"}
                   </button>
                 </div>
               </div>
@@ -278,6 +328,9 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
             </div>
           )}
           {message && <p className="player-message" role="alert">{message}</p>}
+
+          {/* AI Leadership Tutor Widget */}
+          <AILeadershipTutor lessonTitle={current.title} />
         </section>
         <footer className="player-footer">
           <button disabled={index === 0} onClick={() => selectLesson(flatLessons[index - 1].id)}><ChevronLeft /> Sebelumnya</button>

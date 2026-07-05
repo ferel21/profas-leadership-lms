@@ -9,6 +9,7 @@ import Image from "next/image";
 import { AdminReportTable, ReportRow } from "@/components/AdminReportTable";
 import { MentorCourseActions } from "@/components/MentorCourseActions";
 import { AdminUserManagement } from "@/components/AdminUserManagement";
+import { BroadcastManager } from "@/components/BroadcastManager";
 
 // Simple UI components
 function MetricGrid({ items }: { items: [string, number | string, React.ElementType, string][] }) {
@@ -326,6 +327,9 @@ export default async function DashboardPage() {
           </div>
         </aside>
       </section>
+
+      {/* Admin Broadcast Manager */}
+      <BroadcastManager courses={allCoursesList.map(c => ({ id: c.id, title: c.title }))} />
 
       {/* Admin User & Role Management */}
       <AdminUserManagement initialUsers={allUsersList.map(u => ({ ...u, createdAt: u.createdAt.toISOString() }))} />

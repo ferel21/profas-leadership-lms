@@ -7,8 +7,11 @@ export async function GET(request: Request) {
   const code = urlObj.searchParams.get("code");
   const error = urlObj.searchParams.get("error");
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const redirectUri = `${baseUrl}${urlObj.pathname}`;
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "profas-leadership-lms.vercel.app";
+  const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+  const dynamicBaseUrl = `${protocol}://${host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || dynamicBaseUrl;
+  const redirectUri = `${baseUrl}/api/auth/callback/google`;
   console.log("=== GOOGLE AUTH CALLBACK ===", { baseUrl, redirectUri, code: !!code, error });
 
   if (error) {

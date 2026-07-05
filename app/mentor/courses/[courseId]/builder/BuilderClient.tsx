@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, GripVertical, FileText, PlayCircle, Folder, ChevronRight, ChevronDown, Save, Upload, Link2, HelpCircle, Loader2, Sparkles, Megaphone, CheckCircle2, FileUp, X } from "lucide-react";
 
 export type NodeType = "FOLDER" | "VIDEO" | "PDF" | "DOCUMENT" | "IMAGE" | "LINK" | "QUIZ" | "ASSIGNMENT" | "TEXT";
@@ -49,6 +49,31 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [backupRestored, setBackupRestored] = useState(false);
+
+  // MASTER SKILL: Auto-Backup & Auto-Restore ke localStorage (Menanggulangi reset database ephemeral Vercel)
+  useEffect(() => {
+    const backupKey = `profas_lms_backup_${course.id}`;
+    const savedBackup = localStorage.getItem(backupKey);
+    if (savedBackup) {
+      try {
+        const parsed = JSON.parse(savedBackup);
+        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+          setNodes(parsed);
+          setBackupRestored(true);
+        }
+      } catch (e) {
+        console.error("Failed to restore curriculum backup:", e);
+      }
+    }
+  }, [course.id]);
+
+  useEffect(() => {
+    if (nodes && nodes.length > 0) {
+      const backupKey = `profas_lms_backup_${course.id}`;
+      localStorage.setItem(backupKey, JSON.stringify(nodes));
+    }
+  }, [nodes, course.id]);
 
   // Modals state
   const [showFolderModal, setShowFolderModal] = useState(false);
@@ -329,12 +354,34 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--line)', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)' }}>Struktur Kurikulum & Materi</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)', margin: 0 }}>Struktur Kurikulum & Materi</h2>
+            <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: '#dcfce7', color: '#15803d', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              💾 Auto-Backup Memori Browser Aktif
+            </span>
+          </div>
           <p style={{ color: 'var(--muted)', margin: 0 }}>Tarik dan lepas (drag & drop) untuk menyusun urutan materi dengan bebas.</p>
         </div>
-        <button onClick={saveStructure} disabled={saving} className="btn btn-primary hover-lift" style={{ padding: '12px 24px', borderRadius: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--teal)' }}>
-          {saving ? <Loader2 className="spin" size={18}/> : <Save size={18} />} Simpan Kurikulum Sekarang
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {backupRestored && (
+            <button 
+              onClick={() => {
+                if (confirm("Reset kurikulum ke data asli dari server Vercel dan hapus cadangan lokal browser?")) {
+                  localStorage.removeItem(`profas_lms_backup_${course.id}`);
+                  setNodes(course.nodes);
+                  setBackupRestored(false);
+                }
+              }}
+              className="btn btn-outline hover-lift" 
+              style={{ padding: '10px 16px', borderRadius: '12px', fontWeight: 600, fontSize: '13px', borderColor: '#ef4444', color: '#ef4444' }}
+            >
+              🔄 Reset ke Data Server
+            </button>
+          )}
+          <button onClick={saveStructure} disabled={saving} className="btn btn-primary hover-lift" style={{ padding: '12px 24px', borderRadius: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--teal)' }}>
+            {saving ? <Loader2 className="spin" size={18}/> : <Save size={18} />} Simpan Kurikulum Sekarang
+          </button>
+        </div>
       </div>
 
       <div 

@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const GOOGLE_CLIENT_ID = 
+    process.env.GOOGLE_CLIENT_ID || 
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 
+    process.env.GOOGLE_ID || 
+    process.env.GOOGLE_CLIENTID || 
+    process.env.GOOGLE_OAUTH_CLIENT_ID || 
+    process.env.CLIENT_ID;
+
   const redirectUri = "https://profas-leadership-lms.vercel.app/api/auth/callback/google";
   console.log("=== GOOGLE AUTH START ===", { redirectUri });
 
   if (!GOOGLE_CLIENT_ID) {
+    const foundRelatedKeys = Object.keys(process.env).filter(k => /google|client|oauth|auth|id/i.test(k));
     return NextResponse.json({ 
-      error: "Google Client ID is missing",
-      message: "Google Client ID is missing from environment variables.",
-      hint: "Pastikan GOOGLE_CLIENT_ID atau NEXT_PUBLIC_GOOGLE_CLIENT_ID sudah ditambahkan di Vercel Settings -> Environment Variables dan centang Production, lalu Redeploy."
+      error: "Google Client ID is missing in Vercel Server Memory",
+      message: "Server Vercel mendeteksi bahwa variabel lingkungan untuk Google Client ID masih kosong/tidak ada.",
+      foundRelatedKeysInVercel: foundRelatedKeys,
+      hint: "PENTING: Membuat Client ID di Google Cloud Console TIDAK otomatis mengirimkannya ke Vercel. Anda WAJIB menyalin Client ID tersebut dan menambahkannya di Dasbor Vercel -> Project profas-leadership-lms -> Settings -> Environment Variables -> Nama: GOOGLE_CLIENT_ID, lalu klik Save dan Redeploy."
     }, { status: 500 });
   }
 

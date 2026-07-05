@@ -19,18 +19,33 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${baseUrl}/masuk?error=missing_code`);
   }
 
-  const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET;
+  const GOOGLE_CLIENT_ID = 
+    process.env.GOOGLE_CLIENT_ID || 
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 
+    process.env.GOOGLE_ID || 
+    process.env.GOOGLE_CLIENTID || 
+    process.env.GOOGLE_OAUTH_CLIENT_ID || 
+    process.env.CLIENT_ID;
+
+  const GOOGLE_CLIENT_SECRET = 
+    process.env.GOOGLE_CLIENT_SECRET || 
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET || 
+    process.env.GOOGLE_SECRET || 
+    process.env.GOOGLE_CLIENTSECRET || 
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET || 
+    process.env.CLIENT_SECRET;
 
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    const foundRelatedKeys = Object.keys(process.env).filter(k => /google|client|oauth|auth|secret|id/i.test(k));
     return NextResponse.json({ 
-      error: "Google OAuth credentials missing",
-      message: "Google OAuth credentials missing from environment variables.",
+      error: "Google OAuth credentials missing in Vercel Server Memory",
+      message: "Server Vercel mendeteksi bahwa variabel lingkungan untuk Google OAuth masih kosong/tidak lengkap.",
       missing: {
         clientId: !GOOGLE_CLIENT_ID,
         clientSecret: !GOOGLE_CLIENT_SECRET
       },
-      hint: "Pastikan GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET sudah dicentang untuk lingkungan Production di Vercel, lalu Redeploy."
+      foundRelatedKeysInVercel: foundRelatedKeys,
+      hint: "PENTING: Membuat Client ID di Google Cloud Console TIDAK otomatis mengirimkannya ke Vercel. Anda WAJIB menyalin Client ID & Secret dan menambahkannya di Dasbor Vercel -> Project profas-leadership-lms -> Settings -> Environment Variables -> Nama: GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET, lalu klik Save dan Redeploy."
     }, { status: 500 });
   }
 

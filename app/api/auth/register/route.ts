@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { Persona, Prisma } from "@prisma/client";
@@ -19,7 +20,11 @@ export async function POST(request: Request) {
     const duplicate = await prisma.user.findFirst({ where: { OR: [{ email: input.email }, { username: input.username }] }, select: { email: true, username: true } });
     if (duplicate) return NextResponse.json({ message: duplicate.email === input.email ? "Email sudah terdaftar." : "Nama akun sudah digunakan." }, { status: 409 });
     const user = await prisma.user.create({ data: { name: input.name, username: input.username, email: input.email, passwordHash: await bcrypt.hash(input.password, 10), persona: input.persona, role: "STUDENT" } });
-    const token = await createToken({ userId: user.id, role: user.role });
+    const token = await createToken({ userId: user.id, role: user.role, email: user.email, name: user.name, avatar: user.avatar || undefined, authProvider: "LOCAL" });
+    
+    const cookieStore = await cookies();
+    cookieStore.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 604800, path: "/" });
+
     const response = NextResponse.json({ user: { id: user.id, name: user.name, role: user.role } }, { status: 201 });
     response.cookies.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 604800, path: "/" });
     return response;

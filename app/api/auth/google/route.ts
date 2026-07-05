@@ -1,16 +1,22 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  const GOOGLE_CLIENT_ID = 
+export async function GET(request: Request) {
+  const GOOGLE_CLIENT_ID = (
     process.env.GOOGLE_CLIENT_ID || 
     process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 
     process.env.GOOGLE_ID || 
     process.env.GOOGLE_CLIENTID || 
     process.env.GOOGLE_OAUTH_CLIENT_ID || 
-    process.env.CLIENT_ID;
+    process.env.CLIENT_ID || ""
+  ).trim().replace(/^["']|["']$/g, "");
 
-  const redirectUri = "https://profas-leadership-lms.vercel.app/api/auth/callback/google";
-  console.log("=== GOOGLE AUTH START ===", { redirectUri });
+  const urlObj = new URL(request.url);
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || urlObj.host;
+  const protocol = host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https";
+  const origin = process.env.NEXT_PUBLIC_APP_URL ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "") : `${protocol}://${host}`;
+    
+  const redirectUri = `${origin}/api/auth/callback/google`;
+  console.log("=== GOOGLE AUTH START ===", { origin, redirectUri });
 
   if (!GOOGLE_CLIENT_ID) {
     const foundRelatedKeys = Object.keys(process.env).filter(k => /google|client|oauth|auth|id/i.test(k));

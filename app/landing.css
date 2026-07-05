@@ -551,7 +551,7 @@
 
 .testi-grid-clean {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 2rem;
   margin-top: 4rem;
 }
@@ -653,22 +653,74 @@
   color: white;
 }
 
-/* RESPONSIVE DESIGN */
+/* RESPONSIVE DESIGN FOR LANDING PAGE */
 @media (max-width: 1024px) {
   .hero-grid-clean { grid-template-columns: 1fr; text-align: center; }
   .hero-btns-clean { justify-content: center; }
-  .hero-desc-clean { margin: 0 auto 2.5rem; }
+  .hero-desc-clean { margin: 0 auto 2.5rem; max-width: 100%; }
   .stats-grid-clean { grid-template-columns: repeat(2, 1fr); gap: 2.5rem; }
   .bento-grid-clean { grid-template-columns: 1fr; }
   .bento-card-clean.span-2 { grid-column: span 1; }
   .roadmap-grid-clean { grid-template-columns: 1fr 1fr; gap: 2rem; }
   .roadmap-grid-clean::before { display: none; }
-  .split-row-clean { grid-template-columns: 1fr; gap: 3rem; }
+  .split-row-clean, .split-row-clean.reverse { grid-template-columns: 1fr; gap: 3rem; direction: ltr !important; }
+}
+
+@media (max-width: 768px) {
+  .hero-clean { padding: 60px 0 70px; }
+  .hero-title-clean { font-size: 2.3rem; line-height: 1.2; }
+  .hero-desc-clean { font-size: 1.05rem; }
+  .bento-card-clean { padding: 1.75rem; }
+  .programs-top-row { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .testi-grid-clean { grid-template-columns: 1fr; gap: 1.5rem; }
+  .testi-card-clean { padding: 1.75rem; }
+  .cta-banner-cyan { padding: 3.5rem 2rem; border-radius: 24px; }
+  .heading-clean h2 { font-size: 2.2rem; }
 }
 
 @media (max-width: 640px) {
-  .hero-title-clean { font-size: 2.5rem; }
-  .stats-grid-clean { grid-template-columns: 1fr; }
-  .roadmap-grid-clean { grid-template-columns: 1fr; }
-  .btn-cyan-primary, .btn-cyan-secondary { width: 100%; justify-content: center; }
+  .hero-clean { padding: 40px 0 60px; }
+  .hero-title-clean { font-size: clamp(1.65rem, 7vw, 2.1rem); line-height: 1.2; letter-spacing: -0.02em; }
+  .hero-desc-clean { font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; }
+  .hero-btns-clean { flex-direction: column; width: 100%; gap: 12px; }
+  .btn-cyan-primary, .btn-cyan-secondary { width: 100%; justify-content: center; padding: 14px 20px; font-size: 0.95rem; }
+  .badge-pill-cyan { font-size: 0.72rem; padding: 6px 12px; white-space: normal; text-align: center; width: 100%; justify-content: center; }
+  
+  .hero-mockup-clean { padding: 1.25rem; border-radius: 18px; margin-top: 1rem; }
+  .mockup-top-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .stats-compare-grid { grid-template-columns: 1fr; gap: 10px; }
+  
+  .stats-strip-clean { padding: 2.5rem 0; }
+  .stats-grid-clean { grid-template-columns: repeat(2, 1fr); gap: 1.8rem; }
+  .stat-num-clean { font-size: 2.2rem; }
+  .stat-label-clean { font-size: 0.82rem; }
+  
+  .bento-section-clean, .programs-section-clean, .ecosystem-section-clean, .testimonials-section-clean, .faq-section-clean, .cta-section-clean { padding: 60px 0; }
+  .heading-clean { margin-bottom: 2.5rem; }
+  .heading-clean h2 { font-size: 1.85rem; line-height: 1.25; }
+  
+  .bento-card-clean { padding: 1.5rem; border-radius: 20px; }
+  .bento-card-clean h3 { font-size: 1.25rem; }
+  
+  .roadmap-grid-clean { grid-template-columns: 1fr; gap: 1.5rem; margin-top: 3rem; }
+  .roadmap-step-clean { padding: 1.5rem; border-radius: 18px; }
+  .roadmap-num-clean { width: 56px; height: 56px; font-size: 1.25rem; margin-bottom: 1.25rem; }
+  
+  .split-row-clean { gap: 2rem; margin-bottom: 4rem; }
+  .testi-card-clean { padding: 1.5rem; border-radius: 18px; }
+  
+  .faq-box-clean { margin-top: 2rem; gap: 1rem; }
+  .faq-item-clean details { padding: 1.25rem 1rem; }
+  .faq-item-clean summary { font-size: 0.95rem; line-height: 1.4; }
+  .faq-answer-clean { font-size: 0.9rem; line-height: 1.6; }
+  
+  .cta-banner-cyan { padding: 2.5rem 1.25rem; border-radius: 20px; }
+  .cta-banner-cyan h2 { font-size: 1.65rem; line-height: 1.25; }
+  .cta-banner-cyan p { font-size: 0.95rem; }
+}
+
+@media (max-width: 380px) {
+  .stats-grid-clean { grid-template-columns: 1fr; gap: 1.5rem; }
+  .hero-title-clean { font-size: 1.55rem; }
+  .stat-num-clean { font-size: 2rem; }
 }

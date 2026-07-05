@@ -2,13 +2,16 @@ import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "profas-development-secret"
-);
+const secretString = (process.env.JWT_SECRET ?? "profas-development-secret").trim().replace(/^["']|["']$/g, "");
+const secret = new TextEncoder().encode(secretString);
 
 export type SessionPayload = {
   userId: string;
-  role: "STUDENT" | "MENTOR" | "INSTITUTION_ADMIN" | "SUPER_ADMIN";
+  email?: string;
+  name?: string;
+  avatar?: string;
+  authProvider?: string;
+  role: "STUDENT" | "MENTOR" | "SUPER_ADMIN";
 };
 
 export async function createToken(payload: SessionPayload) {
@@ -34,7 +37,43 @@ export async function getSession() {
 export async function getCurrentUser() {
   const session = await getSession();
   if (!session) return null;
-  return prisma.user.findUnique({
+  
+  let user = await prisma.user.findUnique({
     where: { id: session.userId }
   });
+  
+  if (!user && session.email) {
+    user = await prisma.user.findUnique({
+      where: { email: session.email.toLowerCase() }
+    });
+  }
+  
+  // Auto-sync / self-heal di lingkungan serverless Vercel (/tmp/dev.db sementara)
+  if (!user && session.email) {
+    try {
+      const validRole = session.role === "MENTOR" ? "MENTOR" : session.role === "SUPER_ADMIN" ? "SUPER_ADMIN" : "STUDENT";
+      user = await prisma.user.upsert({
+        where: { email: session.email.toLowerCase() },
+        update: {
+          name: session.name || "Peserta PROFAS",
+          avatar: session.avatar,
+          role: validRole,
+          authProvider: session.authProvider || "GOOGLE",
+        },
+        create: {
+          id: session.userId,
+          email: session.email.toLowerCase(),
+          name: session.name || "Peserta PROFAS",
+          avatar: session.avatar,
+          role: validRole,
+          authProvider: session.authProvider || "GOOGLE",
+          passwordHash: "",
+        }
+      });
+    } catch (e) {
+      console.error("Auto-sync user in serverless failed:", e);
+    }
+  }
+  
+  return user;
 }

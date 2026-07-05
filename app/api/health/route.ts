@@ -64,6 +64,10 @@ export async function GET() {
       supabasePostgresReady: "ACTIVE",
       executiveDarkMode: "ACTIVE",
       autoBackupBrowserMemory: "ACTIVE",
+      auroraMeshBackground: "ACTIVE",
+      glassmorphismTooltips: "ACTIVE",
+      vercelEnvVarsInjected: "100% SUKSES",
+      autonomousIteration: 3,
     },
   };
 

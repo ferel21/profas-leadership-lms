@@ -24,21 +24,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
       });
     }
 
-    // 2. Bypass SQLite Unique Constraint (courseId, parentId, order)
-    // Gunakan updateMany agar tidak melempar error P2025 jika node tidak ditemukan saat ganti kontainer Vercel
-    const updatingNodes = nodes.filter((n: any) => !n.isNew);
-    for (let i = 0; i < updatingNodes.length; i++) {
+    // 2. MASTER SKILL: Total Order Wipeout & Bypass SQLite Unique Constraint (courseId, parentId, order)
+    // Geser seluruh node yang ada di database untuk course ini ke urutan negatif yang aman
+    // Ini menjamin 100% ruang urutan (0, 1, 2...) kosong dan tidak akan pernah tabrakan!
+    const allExistingNodes = await prisma.courseNode.findMany({
+      where: { courseId },
+      select: { id: true }
+    });
+    for (let i = 0; i < allExistingNodes.length; i++) {
       await prisma.courseNode.updateMany({
-        where: { id: updatingNodes[i].id, courseId },
-        data: { order: -(10000 + i) }
+        where: { id: allExistingNodes[i].id, courseId },
+        data: { order: -(100000 + i) }
       });
     }
 
-    // 3. Update/Create nodes menggunakan UPSERT (100% Idempotent & Anti-Crash)
-    for (const node of nodes) {
+    // 3. MASTER SKILL: Update/Create nodes menggunakan 100% Idempotent UPSERT
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
       let assessmentId = null;
       if (node.type === 'QUIZ' || node.type === 'ASSIGNMENT') {
-        const existingNode = await prisma.courseNode.findUnique({
+        const existingNode = await prisma.courseNode.findFirst({
           where: { id: node.id },
           select: { assessmentId: true }
         });
@@ -62,7 +67,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
         update: {
           parentId: node.parentId || null,
           title: node.title,
-          order: node.order,
+          order: node.order, // Dijamin unik dan sekuensial dari frontend & Phase 2!
           description: node.description || "",
           durationMin: node.durationMin || 0,
           ...(assessmentId ? { assessmentId } : {})
@@ -73,7 +78,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
           parentId: node.parentId || null,
           title: node.title,
           type: node.type || "TEXT",
-          order: node.order,
+          order: node.order, // Dijamin unik dan sekuensial!
           description: node.description || "",
           durationMin: node.durationMin || 0,
           assessmentId

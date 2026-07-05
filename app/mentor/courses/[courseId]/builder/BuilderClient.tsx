@@ -206,7 +206,16 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
   };
 
   const addFile = (title: string, type: NodeType) => {
-    const newNode: CourseNode = { id: generateId(), parentId: activeParentId, title, type, order: 999, children: [], isNew: true };
+    const newNode: CourseNode = { 
+      id: generateId(), 
+      parentId: activeParentId, 
+      title, 
+      type, 
+      order: 999, 
+      children: [], 
+      isNew: true,
+      assessmentId: (type === "QUIZ" || type === "ASSIGNMENT") ? `asm_${generateId()}` : undefined
+    };
     insertIntoTree(newNode);
     setShowUploadModal(false);
   };
@@ -221,14 +230,14 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
           id: bab1Id, parentId: null, title: `Bab: Strategi Eksekusi ${aiTopic || "Kepemimpinan"}`, type: "FOLDER", order: nodes.length, isNew: true,
           children: [
             { id: generateId(), parentId: bab1Id, title: "Video: Fondasi & Mindset Eksekutif", type: "VIDEO", order: 0, children: [], isNew: true },
-            { id: generateId(), parentId: bab1Id, title: "Modul Bacaan: Studi Kasus PROFAS", type: "PDF", order: 1, children: [], isNew: true },
+            { id: generateId(), parentId: bab1Id, title: "Modul Bacaan: Studi Kasus PROFAS", type: "PDF", order: 1, children: [], isNew: true }
           ]
         },
         {
           id: bab2Id, parentId: null, title: `Bab: Evaluasi & Pengukuran ${aiTopic || "Kinerja"}`, type: "FOLDER", order: nodes.length + 1, isNew: true,
           children: [
-            { id: generateId(), parentId: bab2Id, title: "Kuis: Pemetaan Pemahaman Strategis", type: "QUIZ", order: 0, children: [], isNew: true },
-            { id: generateId(), parentId: bab2Id, title: "Tugas Action Plan 30 Hari", type: "ASSIGNMENT", order: 1, children: [], isNew: true },
+            { id: generateId(), parentId: bab2Id, title: "Kuis: Pemetaan Pemahaman Strategis", type: "QUIZ", order: 0, children: [], isNew: true, assessmentId: `asm_${generateId()}` },
+            { id: generateId(), parentId: bab2Id, title: "Tugas Action Plan 30 Hari", type: "ASSIGNMENT", order: 1, children: [], isNew: true, assessmentId: `asm_${generateId()}` }
           ]
         }
       ];
@@ -294,9 +303,9 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
             {node.isNew && <span style={{fontSize:'10px', background:'var(--teal)', color:'white', padding:'2px 8px', borderRadius:'10px', fontWeight:700}}>BARU</span>}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            {((node.type === 'QUIZ' || node.type === 'ASSIGNMENT') && node.assessmentId) && (
-              <a href={`/mentor/courses/${course.id}/assessments/${node.assessmentId}/edit`} className="btn btn-ghost btn-small" style={{ color: '#0369a1', background: '#e0f2fe', borderRadius: '8px' }}>
-                <Edit2 size={14}/> Edit Soal
+            {(node.type === "QUIZ" || node.type === "ASSIGNMENT") && (
+              <a href={`/mentor/courses/${course.id}/assessments/${node.assessmentId || node.id}/edit`} className="btn btn-ghost btn-small" style={{ color: '#0369a1', background: '#e0f2fe', borderRadius: '8px', fontWeight: 700 }}>
+                <Edit2 size={14}/> Edit Soal / Tugas
               </a>
             )}
             <button onClick={() => handleDelete(node.id)} className="btn btn-ghost btn-small hover-lift" style={{ color: 'var(--error)', padding: '6px' }}><Trash2 size={16}/></button>

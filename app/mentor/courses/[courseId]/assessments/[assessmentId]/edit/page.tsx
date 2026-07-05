@@ -12,7 +12,7 @@ export default async function AssessmentEditorPage({ params }: { params: Promise
 
   const { courseId, assessmentId } = await params;
 
-  const assessment = await prisma.assessment.findUnique({
+  let assessment = await prisma.assessment.findUnique({
     where: { id: assessmentId },
     include: {
       course: true,
@@ -20,7 +20,38 @@ export default async function AssessmentEditorPage({ params }: { params: Promise
     }
   });
 
-  if (!assessment || assessment.course.mentorId !== user.id) {
+  if (!assessment) {
+    // MASTER SKILL: Self-Healing Auto-Create Assessment jika belum ada di database atau ter-reset oleh Vercel
+    const course = await prisma.course.findFirst({ where: { id: courseId, mentorId: user.id } });
+    if (!course) {
+      redirect(`/mentor/courses/${courseId}/builder`);
+    }
+    const node = await prisma.courseNode.findFirst({ where: { courseId, OR: [{ id: assessmentId }, { assessmentId: assessmentId }] } });
+    const newTitle = node ? node.title : "Evaluasi / Kuis Baru";
+    const isAssignment = node ? node.type === "ASSIGNMENT" : false;
+
+    assessment = await prisma.assessment.create({
+      data: {
+        id: assessmentId,
+        courseId,
+        title: newTitle,
+        type: isAssignment ? "FINAL" : "MODULE",
+        isAssignment,
+        passingScore: 70,
+        timeLimitMin: 30
+      },
+      include: {
+        course: true,
+        questions: { orderBy: { order: "asc" } }
+      }
+    });
+
+    if (node && !node.assessmentId) {
+      await prisma.courseNode.update({ where: { id: node.id }, data: { assessmentId: assessment.id } }).catch(() => {});
+    }
+  }
+
+  if (assessment.course.mentorId !== user.id) {
     redirect(`/mentor/courses/${courseId}/builder`);
   }
 

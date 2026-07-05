@@ -158,14 +158,14 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
     }
   };
 
-  const flattenNodes = (list: CourseNode[], parentId: string | null = null): Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean }> => {
-    let result: Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean }> = [];
+  const flattenNodes = (list: CourseNode[], parentId: string | null = null): Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null }> => {
+    let result: Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null }> = [];
     list.forEach((n, idx) => {
       // MASTER SKILL: Enforce strict sequential order (0, 1, 2...) to prevent SQLite unique constraint collision
       n.order = idx;
       n.parentId = parentId;
       result.push({
-        id: n.id, parentId: parentId, title: n.title, type: n.type, order: idx, isNew: n.isNew
+        id: n.id, parentId: parentId, title: n.title, type: n.type, order: idx, isNew: n.isNew, assessmentId: n.assessmentId || ((n.type === "QUIZ" || n.type === "ASSIGNMENT") ? n.id : null)
       });
       result = result.concat(flattenNodes(n.children, n.id));
     });

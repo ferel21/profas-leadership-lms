@@ -240,14 +240,44 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
       <main className="player-main">
         <header><button onClick={() => setSidebar(true)} aria-label="Buka daftar materi"><Menu /></button><div><span>{current.title}</span><b>{current.title}</b></div><Link href="/dashboard">Keluar Kelas</Link></header>
         <section className="lesson-stage" style={{ marginBottom: "2rem" }}>
-          {current.type === "VIDEO" ?
+          {current.type === "VIDEO" ? (
             <div className="video-shell hover-lift glass" style={{ borderRadius: "24px", padding: "12px", background: "rgba(255,255,255,0.4)" }}>
               <div style={{ position: "relative", width: "100%", paddingTop: "56.25%", borderRadius: "16px", overflow: "hidden", background: "#0b2229", zIndex: 1 }}>
                 <iframe src={current.content || undefined} title={current.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0, zIndex: 2 }} />
                 <div className="video-fallback" style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center" }}><Play fill="currentColor" style={{ width: "60px", color: "white" }} /></div>
               </div>
             </div>
-            :
+          ) : (current.type === "QUIZ" || current.type === "ASSIGNMENT") ? (
+            <article className="reading-content glass hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px', border: '1px solid var(--teal)', background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,253,250,0.9) 100%)', boxShadow: '0 10px 30px rgba(13, 148, 136, 0.1)', textAlign: 'center' }}>
+              <div style={{ width: '80px', height: '80px', background: 'var(--teal)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'white', boxShadow: '0 8px 20px rgba(13, 148, 136, 0.3)' }}>
+                {current.type === "QUIZ" ? <Award size={40} /> : <FileCheck size={40} />}
+              </div>
+              <span className="eyebrow" style={{ color: 'var(--teal)', fontWeight: 'bold', fontSize: '14px', letterSpacing: '1px' }}>
+                {current.type === "QUIZ" ? "EVALUASI & KUIS PEMAHAMAN" : "TUGAS & STUDI KASUS"}
+              </span>
+              <h1 style={{ marginTop: '0.5rem', marginBottom: '1rem', fontSize: '36px', color: 'var(--ink)', fontWeight: 800 }}>
+                {current.title}
+              </h1>
+              <p style={{ maxWidth: '600px', margin: '0 auto 2.5rem', fontSize: '1.15rem', color: '#475569', lineHeight: 1.7 }}>
+                {current.content || (current.type === "QUIZ" 
+                  ? "Uji tingkat pemahaman strategi dan konsep kepemimpinan Anda pada modul ini. Klik tombol di bawah untuk memulai kuis." 
+                  : "Selesaikan instruksi tugas eksekutif ini untuk memvalidasi penerapan kepemimpinan Anda di lapangan.")}
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link 
+                  href={`/evaluasi/${current.assessmentId || current.id}`} 
+                  className="btn btn-primary hover-lift" 
+                  style={{ background: 'var(--teal)', padding: '16px 36px', fontSize: '18px', borderRadius: '14px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '10px', boxShadow: '0 8px 20px rgba(13, 148, 136, 0.25)' }}
+                >
+                  <Play fill="currentColor" size={20} /> Mulai {current.type === "QUIZ" ? "Mengerjakan Kuis" : "Mengerjakan Tugas"} Sekarang
+                </Link>
+              </div>
+              <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '2rem', color: '#64748b', fontSize: '14px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock3 size={16} /> Durasi: {current.durationMin || 30} Menit</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle2 size={16} /> Bobot Nilai: 100 Poin</span>
+              </div>
+            </article>
+          ) : (
             <article className="reading-content glass hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px', border: '1px solid var(--line)', background: 'rgba(255,255,255,0.7)' }}>
               <span className="eyebrow" style={{ color: 'var(--teal)', fontWeight: 'bold' }}>MATERI BACAAN</span>
               <h1 style={{ marginTop: '0.5rem', marginBottom: '1.5rem', fontSize: '38px', color: 'var(--ink)' }}>{current.title}</h1>
@@ -256,7 +286,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                 <a className="btn btn-primary" href={current.fileUrl} target="_blank" rel="noreferrer" style={{ marginTop: '1rem', display: 'inline-flex' }}><Download size={16} style={{ marginRight: '8px' }} /> Unduh Lampiran</a>
               )}
             </article>
-          }
+          )}
         </section>
         <nav className="lesson-tabs" aria-label="Informasi materi">
           <button onClick={() => setTab("materi")} className={tab === "materi" ? "active" : ""}><BookOpen /> Materi</button>

@@ -41,8 +41,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
     // 3. MASTER SKILL: Update/Create nodes menggunakan 100% Idempotent UPSERT
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
-      let assessmentId = null;
-      if (node.type === 'QUIZ' || node.type === 'ASSIGNMENT') {
+      let assessmentId = node.assessmentId || null;
+      if (!assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
         const existingNode = await prisma.courseNode.findFirst({
           where: { id: node.id },
           select: { assessmentId: true }
@@ -52,14 +52,30 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
         } else {
           const assessment = await prisma.assessment.create({
             data: {
+              id: node.id,
               courseId,
               title: node.title,
               type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
               isAssignment: node.type === 'ASSIGNMENT'
             }
+          }).catch(async () => {
+            return await prisma.assessment.findFirst({ where: { courseId, title: node.title } }) || 
+                   await prisma.assessment.create({ data: { courseId, title: node.title, type: 'MODULE', isAssignment: false } });
           });
           assessmentId = assessment.id;
         }
+      } else if (assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
+        await prisma.assessment.upsert({
+          where: { id: assessmentId },
+          update: { title: node.title },
+          create: {
+            id: assessmentId,
+            courseId,
+            title: node.title,
+            type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
+            isAssignment: node.type === 'ASSIGNMENT'
+          }
+        }).catch(() => {});
       }
 
       await prisma.courseNode.upsert({

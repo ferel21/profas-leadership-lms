@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "localhost:3000";
-  const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
-  const baseUrl = `${protocol}://${host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const redirectUri = `${baseUrl}/api/auth/google/callback`;
+  console.log("=== GOOGLE AUTH START ===", { baseUrl, redirectUri });
 
   if (!GOOGLE_CLIENT_ID) {
     return NextResponse.json({ message: "Google Client ID is missing from environment variables." }, { status: 500 });

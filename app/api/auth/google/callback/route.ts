@@ -7,10 +7,9 @@ export async function GET(request: Request) {
   const code = urlObj.searchParams.get("code");
   const error = urlObj.searchParams.get("error");
 
-  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "localhost:3000";
-  const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
-  const baseUrl = `${protocol}://${host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const redirectUri = `${baseUrl}${urlObj.pathname}`;
+  console.log("=== GOOGLE AUTH CALLBACK ===", { baseUrl, redirectUri, code: !!code, error });
 
   if (error) {
     return NextResponse.redirect(`${baseUrl}/masuk?error=google_auth_failed`);

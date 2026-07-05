@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, Clock3, Download, FileText, Film, Image as ImageIcon, Link2, LoaderCircle, Menu, MessageSquare, Play, Send, X, Folder } from "lucide-react";
 import { initials } from "@/lib/utils";
@@ -73,12 +73,40 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
   const [message, setMessage] = useState("");
   const [lessonCelebrated, setLessonCelebrated] = useState<string | null>(null);
   const [courseCelebration, setCourseCelebration] = useState<{ certNum: string } | null>(null);
+  const [noteText, setNoteText] = useState("");
+  const [noteSaved, setNoteSaved] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && currentId) {
+      const saved = localStorage.getItem(`profas_notes_${currentId}_${currentUser.id}`);
+      setNoteText(saved || "");
+    }
+  }, [currentId, currentUser.id]);
+
+  function saveNote() {
+    if (typeof window !== "undefined" && currentId) {
+      localStorage.setItem(`profas_notes_${currentId}_${currentUser.id}`, noteText);
+      setNoteSaved(true);
+      setTimeout(() => setNoteSaved(false), 2500);
+    }
+  }
+
+  function downloadNote() {
+    if (!noteText.trim() || !current) return;
+    const blob = new Blob([`Catatan Pembelajaran PROFAS Leadership\nModul: ${current.title}\nPeserta: ${currentUser.name}\nTanggal: ${new Date().toLocaleDateString("id-ID")}\n\n--- CATATAN ---\n\n${noteText}`], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Catatan-PROFAS-${current.title.replace(/[^a-zA-Z0-9]/g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   const current = flatLessons.find(n => n.id === currentId) ?? flatLessons[0];
   const index = flatLessons.findIndex(n => n.id === current.id);
   const currentPosts = posts[current?.id] ?? [];
 
-  function selectLesson(id: string) { setCurrentId(id); setSidebar(false); setMessage(""); setDiscussion("") }
+  function selectLesson(id: string) { setCurrentId(id); setSidebar(false); setMessage(""); setDiscussion(""); setNoteSaved(false); }
 
   async function complete() {
     if (!current) return;
@@ -189,6 +217,8 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
         <nav className="lesson-tabs" aria-label="Informasi materi">
           <button onClick={() => setTab("materi")} className={tab === "materi" ? "active" : ""}><BookOpen /> Materi</button>
           <button onClick={() => setTab("diskusi")} className={tab === "diskusi" ? "active" : ""}><MessageSquare /> Diskusi <span>{currentPosts.length}</span></button>
+          <button onClick={() => setTab("lampiran")} className={tab === "lampiran" ? "active" : ""}><Download /> Lampiran</button>
+          <button onClick={() => setTab("catatan")} className={tab === "catatan" ? "active" : ""}><FileText /> Catatan Saya</button>
         </nav>
         <section className="lesson-notes glass" style={{ maxWidth: '1080px', margin: '0 auto 4rem', width: '100%', padding: '2.5rem', borderRadius: '0 0 24px 24px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--line)', borderTop: 'none' }}>
           {tab === "materi" && <>
@@ -196,6 +226,57 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
             <p>{current.content}</p>
           </>}
           {tab === "diskusi" && <><h2>Diskusi bersama</h2>{currentPosts.length === 0 ? <p>Belum ada diskusi. Jadilah yang pertama membagikan refleksi.</p> : <div className="discussion-list">{currentPosts.map(post => <div className="discussion" key={post.id}><b>{initials(post.user.name)}</b><p><strong>{post.user.id === currentUser.id ? "Anda" : post.user.name}</strong>{post.content}</p></div>)}</div>}<form className="discussion-form" onSubmit={submitDiscussion}><textarea value={discussion} onChange={event => setDiscussion(event.target.value)} placeholder="Bagikan pemikiran atau pertanyaan Anda..." maxLength={1000} aria-label="Pesan diskusi" /><button type="submit" className="btn btn-primary btn-small" disabled={busy || discussion.trim().length < 3}>{busy ? <LoaderCircle className="spin" /> : <><Send /> Kirim</>}</button></form></>}
+          {tab === "lampiran" && (
+            <div className="materials-container">
+              <h2 style={{ fontSize: "1.5rem", marginBottom: "0.5rem", color: "var(--ink)" }}>Lampiran & Berkas Pendukung</h2>
+              <p style={{ color: "#64748b", marginBottom: "1.5rem" }}>Unduh berkas materi, lembar kerja eksekutif, dan panduan belajar untuk modul ini.</p>
+              {current.fileUrl ? (
+                <div className="materials-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
+                  <a href={current.fileUrl} target="_blank" rel="noreferrer" className="material-download-card glass hover-lift" style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1.25rem", borderRadius: "16px", textDecoration: "none", color: "var(--ink)" }}>
+                    <div style={{ background: "#f0fdfa", color: "var(--color-primary)", padding: "12px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Download size={24} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{current.fileName || "Berkas Materi Pembelajaran"}</h3>
+                      <small style={{ color: "#64748b" }}>{current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi PROFAS"}</small>
+                    </div>
+                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--color-primary)", background: "#e0f2fe", padding: "4px 10px", borderRadius: "20px" }}>Unduh</span>
+                  </a>
+                </div>
+              ) : (
+                <div className="glass" style={{ padding: "2.5rem", textAlign: "center", borderRadius: "16px", color: "#64748b" }}>
+                  <Folder size={40} style={{ margin: "0 auto 1rem", opacity: 0.5 }} />
+                  <p style={{ margin: 0, fontWeight: 500 }}>Tidak ada berkas lampiran khusus untuk sesi ini.</p>
+                  <small>Seluruh intisari pembelajaran telah tertuang pada teks materi dan video di atas.</small>
+                </div>
+              )}
+            </div>
+          )}
+          {tab === "catatan" && (
+            <div className="notes-container">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
+                <div>
+                  <h2 style={{ fontSize: "1.5rem", margin: 0, color: "var(--ink)" }}>Catatan Pribadi Eksekutif</h2>
+                  <small style={{ color: "#64748b" }}>Catatan ini tersimpan secara lokal dan privat untuk refleksi kepemimpinan Anda.</small>
+                </div>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button type="button" onClick={downloadNote} disabled={!noteText.trim()} className="btn btn-outline btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <Download size={14} /> Unduh (.txt)
+                  </button>
+                  <button type="button" onClick={saveNote} className="btn btn-primary btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <CheckCircle2 size={14} /> {noteSaved ? "Tersimpan!" : "Simpan Catatan"}
+                  </button>
+                </div>
+              </div>
+              <textarea
+                value={noteText}
+                onChange={e => { setNoteText(e.target.value); setNoteSaved(false); }}
+                placeholder="Tulis poin-poin penting, kepanjangan akronim, strategi eksekusi, atau ide kepemimpinan yang Anda dapatkan dari modul ini..."
+                style={{ width: "100%", minHeight: "220px", padding: "1.25rem", borderRadius: "16px", border: "1px solid var(--line)", background: "rgba(255,255,255,0.8)", fontSize: "1rem", lineHeight: 1.6, color: "var(--ink)", fontFamily: "inherit", resize: "vertical", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)" }}
+              />
+              {noteSaved && <p style={{ color: "#10b981", fontSize: "0.875rem", marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "4px" }}><CheckCircle2 size={14} /> Catatan berhasil disimpan ke perangkat Anda.</p>}
+            </div>
+          )}
           {message && <p className="player-message" role="alert">{message}</p>}
         </section>
         <footer className="player-footer">

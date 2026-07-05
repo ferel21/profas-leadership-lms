@@ -161,10 +161,11 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
         };
         setNodes(markNotNew(nodes));
       } else {
-        alert("Gagal menyimpan.");
+        const errData = await res.json().catch(() => ({}));
+        alert(`Gagal menyimpan: ${errData.message || errData.error || res.statusText}`);
       }
-    } catch {
-      alert("Terjadi kesalahan.");
+    } catch (e: any) {
+      alert(`Terjadi kesalahan: ${e?.message || "Koneksi jaringan gagal"}`);
     } finally {
       setSaving(false);
     }

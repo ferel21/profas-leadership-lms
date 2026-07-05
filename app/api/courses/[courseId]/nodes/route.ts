@@ -25,22 +25,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
     }
 
     // 2. Bypass SQLite Unique Constraint (courseId, parentId, order)
-    // Temporarily shift the order of all updating nodes to safe negative numbers 
-    // so they don't collide when applying the new target orders
+    // Gunakan updateMany agar tidak melempar error P2025 jika node tidak ditemukan saat ganti kontainer Vercel
     const updatingNodes = nodes.filter((n: any) => !n.isNew);
     for (let i = 0; i < updatingNodes.length; i++) {
-      await prisma.courseNode.update({
-        where: { id: updatingNodes[i].id },
+      await prisma.courseNode.updateMany({
+        where: { id: updatingNodes[i].id, courseId },
         data: { order: -(10000 + i) }
       });
     }
 
-    // 3. Update/Create nodes
+    // 3. Update/Create nodes menggunakan UPSERT (100% Idempotent & Anti-Crash)
     for (const node of nodes) {
-      if (node.isNew) {
-        // Create new node
-        let assessmentId = null;
-        if (node.type === 'QUIZ' || node.type === 'ASSIGNMENT') {
+      let assessmentId = null;
+      if (node.type === 'QUIZ' || node.type === 'ASSIGNMENT') {
+        const existingNode = await prisma.courseNode.findUnique({
+          where: { id: node.id },
+          select: { assessmentId: true }
+        });
+        if (existingNode?.assessmentId) {
+          assessmentId = existingNode.assessmentId;
+        } else {
           const assessment = await prisma.assessment.create({
             data: {
               courseId,
@@ -51,33 +55,30 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
           });
           assessmentId = assessment.id;
         }
-
-        await prisma.courseNode.create({
-          data: {
-            id: node.id, 
-            courseId,
-            parentId: node.parentId,
-            title: node.title,
-            type: node.type,
-            order: node.order,
-            description: node.description || "",
-            durationMin: node.durationMin || 0,
-            assessmentId
-          }
-        });
-      } else {
-        // Update existing node
-        await prisma.courseNode.update({
-          where: { id: node.id },
-          data: {
-            parentId: node.parentId,
-            title: node.title,
-            order: node.order,
-            description: node.description || "",
-            durationMin: node.durationMin || 0
-          }
-        });
       }
+
+      await prisma.courseNode.upsert({
+        where: { id: node.id },
+        update: {
+          parentId: node.parentId || null,
+          title: node.title,
+          order: node.order,
+          description: node.description || "",
+          durationMin: node.durationMin || 0,
+          ...(assessmentId ? { assessmentId } : {})
+        },
+        create: {
+          id: node.id,
+          courseId,
+          parentId: node.parentId || null,
+          title: node.title,
+          type: node.type || "TEXT",
+          order: node.order,
+          description: node.description || "",
+          durationMin: node.durationMin || 0,
+          assessmentId
+        }
+      });
     }
 
     return NextResponse.json({ success: true });

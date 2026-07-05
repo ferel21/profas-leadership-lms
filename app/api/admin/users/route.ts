@@ -37,6 +37,69 @@ export async function GET() {
   }
 }
 
+export async function POST(request: Request) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "SUPER_ADMIN") {
+    return NextResponse.json({ message: "Akses ditolak. Hanya Super Admin yang berhak." }, { status: 403 });
+  }
+
+  try {
+    const body = await request.json();
+    const { name, email, role = "STUDENT", authProvider = "GOOGLE" } = body;
+
+    if (!name || !email) {
+      return NextResponse.json({ message: "Nama dan email wajib diisi." }, { status: 400 });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
+
+    if (existingUser) {
+      return NextResponse.json({ message: "Email pengguna sudah terdaftar di sistem." }, { status: 409 });
+    }
+
+    const newUser = await prisma.user.create({
+      data: {
+        name: name.trim(),
+        email: cleanEmail,
+        role: role as Role,
+        authProvider: authProvider,
+        passwordHash: "",
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0d9488&color=fff`
+      }
+    });
+
+    // Auto-enroll ke semua program kepemimpinan jika role adalah STUDENT
+    if (newUser.role === "STUDENT") {
+      const publishedCourses = await prisma.course.findMany({ where: { published: true } });
+      for (const course of publishedCourses) {
+        await prisma.enrollment.create({
+          data: { userId: newUser.id, courseId: course.id, status: "ACTIVE", progressPercent: 0 }
+        });
+      }
+    }
+
+    const userRow = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      authProvider: newUser.authProvider,
+      createdAt: newUser.createdAt.toISOString(),
+      _count: {
+        enrollments: newUser.role === "STUDENT" ? 3 : 0,
+        certificates: 0,
+        mentoredCourses: 0
+      }
+    };
+
+    return NextResponse.json({ success: true, user: userRow }, { status: 201 });
+  } catch (err: any) {
+    console.error("Create User Error:", err);
+    return NextResponse.json({ message: "Gagal membuat atau menyinkronkan pengguna baru." }, { status: 500 });
+  }
+}
+
 export async function PATCH(request: Request) {
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") {

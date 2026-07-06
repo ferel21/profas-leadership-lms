@@ -434,7 +434,63 @@
   filter: brightness(1.15);
 }
 
-/* --- 11. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+/* --- 11. HOLOGRAPHIC CERTIFICATE SEAL & BOOKMARK CARDS (24/7 HOURLY AUDIT V7) --- */
+@keyframes hologram-shine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.pro-hologram-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0d9488, #06b6d4, #fbbf24, #10b981, #8b5cf6);
+  background-size: 300% 300%;
+  animation: hologram-shine 6s ease infinite;
+  box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  color: white;
+  font-weight: 800;
+  font-size: 0.75rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+
+.pro-hologram-seal::before {
+  content: "";
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.pro-bookmark-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.pro-bookmark-card:hover {
+  transform: translateX(6px);
+  border-left-color: var(--color-accent);
+  box-shadow: 0 12px 28px -8px rgba(13, 148, 136, 0.2);
+}
+
+/* --- 12. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
 @media print {
   body * {
     visibility: hidden !important;

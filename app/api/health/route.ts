@@ -72,8 +72,10 @@ export async function GET() {
       floatingCommandBarUI: "ACTIVE",
       studyStreakFlameUI: "ACTIVE",
       podiumMedalsUI: "ACTIVE",
+      holographicCertificateSealUI: "ACTIVE",
+      glassBookmarkCardsUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "6 (Hourly Schedule V3)",
+      autonomousIteration: "7 (Hourly Schedule V4)",
     },
   };
 

@@ -200,6 +200,48 @@ export default async function DashboardPage() {
           <StatCard label="Program Selesai" value={completedEnrollments.length} desc="Dari total program" icon={GraduationCap} gradient="linear-gradient(135deg, #10b981, #34d399)" />
         </div>
 
+        {/* ── Executive Learning Roadmap & Career Pathway ── */}
+        <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ background: "#fff", borderRadius: "20px", padding: "1.5rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+            <SectionTitle title="🗺️ Alur Kepemimpinan Eksekutif (*Executive Career Roadmap*)" subtitle="Jalur tahapan evolusi kepemimpinan Anda di PROFAS Institute" />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginTop: "1rem" }} className="responsive-stat-grid">
+              <div className="pro-roadmap-node hover-lift" style={{ background: "linear-gradient(135deg, #0f172a, #1e293b)", color: "#fff", border: "1px solid #0d9488" }}>
+                <div>
+                  <span style={{ fontSize: "0.65rem", fontWeight: 800, background: "#0d9488", padding: "2px 8px", borderRadius: "20px", color: "#fff" }}>TAHAP 1 • AKTIF</span>
+                  <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Fondasi & Self-Leadership</h4>
+                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.8 }}>Memimpin diri, integritas, dan kecerdasan emosional.</p>
+                </div>
+              </div>
+              <div className="pro-roadmap-node hover-lift" style={{ background: "rgba(15, 23, 42, 0.8)", color: "#e2e8f0", border: "1px solid rgba(255,255,255,0.15)" }}>
+                <div>
+                  <span style={{ fontSize: "0.65rem", fontWeight: 800, background: "rgba(255,255,255,0.15)", padding: "2px 8px", borderRadius: "20px", color: "#cbd5e1" }}>TAHAP 2 • BERIKUTNYA</span>
+                  <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Manajemen Tim & Kolaborasi</h4>
+                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.7 }}>Resolusi konflik, delegasi efektif, dan budaya agile.</p>
+                </div>
+              </div>
+              <div className="pro-roadmap-node hover-lift" style={{ background: "rgba(15, 23, 42, 0.6)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div>
+                  <span style={{ fontSize: "0.65rem", fontWeight: 800, background: "rgba(255,255,255,0.1)", padding: "2px 8px", borderRadius: "20px", color: "#94a3b8" }}>TAHAP 3 • EKSKLUSIF</span>
+                  <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Kepemimpinan Strategis</h4>
+                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.6 }}>Visi organisasi, manajemen perubahan, dan eksekusi.</p>
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(13, 148, 136, 0.08))", padding: "14px 20px", borderRadius: "16px", border: "1px solid rgba(251, 191, 36, 0.35)", flexWrap: "wrap", gap: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                <div className="pro-shimmer-trophy" style={{ padding: "12px", borderRadius: "14px", background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff", boxShadow: "0 4px 12px rgba(245, 158, 11, 0.3)" }}>
+                  <Award size={24} color="#fff" />
+                </div>
+                <div>
+                  <h5 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>Target Kelulusan Eksekutif Anda: Certified Leadership Executive (CLE)</h5>
+                  <p style={{ margin: "2px 0 0", fontSize: "0.78rem", color: "#64748b" }}>Selesaikan seluruh modul di atas untuk mendapatkan lencana holografik dan gelar profesional kepemimpinan.</p>
+                </div>
+              </div>
+              <Link href="/program" className="btn btn-primary btn-small hover-lift" style={{ whiteSpace: "nowrap" }}>Lihat Semua Modul</Link>
+            </div>
+          </div>
+        </div>
+
         {/* ── Main Content Grid ── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "1.5rem" }} className="responsive-main-grid">
           {/* Program Aktif */}

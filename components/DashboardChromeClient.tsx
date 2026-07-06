@@ -7,6 +7,7 @@ import { Award, Bell, BookOpen, Check, ClipboardCheck, FolderUp, Gauge, LayoutDa
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { initials } from "@/lib/utils";
+import { CommandPalette } from "./CommandPalette";
 
 type UserShape = { name:string;username?:string|null;email:string;role:string;avatar?:string|null;headline?:string|null };
 type NotificationItem = { id: string; title: string; message: string; read: boolean; link: string | null; createdAt: string };
@@ -21,6 +22,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
   const [showNotifs,setShowNotifs]=useState(false);
   const [notifs,setNotifs]=useState<NotificationItem[]>([]);
   const [unreadCount,setUnreadCount]=useState(0);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const router=useRouter();
   const pathname=usePathname();
   const nav=user.role==="MENTOR"?mentorNav:user.role==="SUPER_ADMIN"?adminNav:studentNav;
@@ -35,6 +37,15 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
         }
       })
       .catch(()=>null);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsCommandOpen(prev => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   },[]);
 
   async function markReadAll(){
@@ -106,12 +117,43 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
     <div className="dashboard-canvas">
       <header className="dashboard-header glass">
         <button className="dash-menu" onClick={()=>setOpen(true)} aria-label="Buka menu"><Menu/></button>
-        <div className="dash-welcome"><span>PROFAS LEADERSHIP</span></div>
-        <div className="dash-actions" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ position: "relative", display: "flex" }} className="dash-search-container">
-            <Search size={16} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
-            <input type="text" placeholder="Cari materi, forum..." style={{ padding: "0.5rem 1rem 0.5rem 2.25rem", borderRadius: "20px", border: "1px solid #e2e8f0", fontSize: "0.875rem", width: "200px", background: "#f8fafc" }} />
+        <div className="dash-welcome" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <span>PROFAS LEADERSHIP</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }} className="hide-on-mobile">
+            <div className="pro-live-pulse" title="Terhubung langsung ke Supabase Cloud DB">
+              <span className="pro-live-pulse-dot"></span>
+              <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "#10b981", letterSpacing: "0.05em" }}>LIVE CLOUD DB</span>
+            </div>
+            <div className="pro-streak-flame" title="7 Hari Belajar Konsisten">
+              🔥 <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "#f59e0b" }}>7d Streak</span>
+            </div>
           </div>
+        </div>
+        <div className="dash-actions" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {/* Executive Command Palette Trigger */}
+          <button
+            onClick={() => setIsCommandOpen(true)}
+            className="hover-lift"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "0.5rem 1rem",
+              borderRadius: "20px",
+              border: "1px solid #cbd5e1",
+              background: "#f8fafc",
+              color: "#475569",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.03)"
+            }}
+            title="Cari Cepat (Ctrl+K)"
+          >
+            <Search size={16} style={{ color: "#0d9488" }} />
+            <span>Cari atau Perintah...</span>
+            <kbd style={{ background: "#e2e8f0", padding: "2px 6px", borderRadius: "6px", fontSize: "0.7rem", fontWeight: 800, color: "#334155" }}>Ctrl+K</kbd>
+          </button>
           <button onClick={()=>setShowNotifs(v=>!v)} aria-label="Tampilkan notifikasi" aria-expanded={showNotifs} className="notif-btn">
             <Bell/>{unreadCount > 0 && <i className="notification-badge">{unreadCount}</i>}
           </button>
@@ -139,6 +181,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
         </div>
       </header>
       <main className="dashboard-content">{children}</main>
+      <CommandPalette isOpen={isCommandOpen} onClose={() => setIsCommandOpen(false)} />
     </div>
   </div>;
 }

@@ -82,8 +82,14 @@ export async function GET() {
       interactiveConfettiButtonsUI: "ACTIVE",
       executiveStudentIdCardUI: "ACTIVE",
       mentorVerifiedPillUI: "ACTIVE",
+      executiveCommandPaletteUI: "ACTIVE",
+      aiTutorVoiceTTS: "ACTIVE",
+      aiTutorCaseSimulation: "ACTIVE",
+      executiveRoadmapDashboardUI: "ACTIVE",
+      liveCloudDbPulseHeader: "ACTIVE",
+      studyStreakHeaderBadge: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "11 (Hourly Schedule V8)",
+      autonomousIteration: "12 (Hourly Schedule V9 - Fullstack Upgrade)",
     },
   };
 

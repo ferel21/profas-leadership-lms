@@ -1,27 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, Send, Sparkles, User, Loader2, Lightbulb } from "lucide-react";
+import { Bot, Send, Sparkles, User, Loader2, Lightbulb, Volume2, VolumeX } from "lucide-react";
 
 type Message = { role: "user" | "ai"; text: string; time: string };
 
 const SUGGESTED_PROMPTS = [
-  "Bagaimana cara mendelegasikan tugas tanpa kehilangan kendali?",
-  "Apa yang harus dilakukan saat terjadi konflik antar anggota tim?",
-  "Bagaimana cara memotivasi anggota tim yang sedang menurun semangatnya?",
-  "Jelaskan perbedaan mendasar antara manajer dan pemimpin sejati."
+  "💡 Simulasi Studi Kasus: Bagaimana menangani krisis kepercayaan tim di masa transisi?",
+  "🎯 Refleksi Eksekutif: Apa gaya kepemimpinan dominan saya dan bagaimana mengoptimalkannya?",
+  "Bagaimana cara mendelegasikan tugas strategis tanpa kehilangan kendali mutu?",
+  "Apa langkah konkret menyelesaikan konflik antar manajer senior di divisi?"
 ];
 
 export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "ai",
-      text: `Halo! Saya adalah **Asisten AI PROFAS Leadership** 🤖✨\n\nSaya siap membantu Anda mendalami konsep kepemimpinan pada modul **"${lessonTitle || "Kepemimpinan Strategis"}"**. Apa yang ingin Anda diskusikan atau tanyakan hari ini?`,
+      text: `Halo! Saya adalah **Asisten AI PROFAS Leadership** 🤖✨\n\nSaya siap membantu Anda mendalami konsep kepemimpinan eksekutif pada modul **"${lessonTitle || "Kepemimpinan Strategis"}"**. Apa studi kasus atau tantangan kepemimpinan yang ingin Anda diskusikan hari ini?`,
       time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
     }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  function speakText(text: string) {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/[*#_`~]/g, "");
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = "id-ID";
+    utterance.rate = 1.0;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  }
 
   async function handleSend(questionText?: string) {
     const q = questionText || input;
@@ -76,7 +95,9 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
             <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.9 }}>Tanya Jawab Pedagogis & Refleksi Kepemimpinan PROFAS</p>
           </div>
         </div>
-        <span style={{ fontSize: "0.7rem", background: "rgba(255, 255, 255, 0.2)", padding: "4px 10px", borderRadius: "20px", fontWeight: 600 }}>Claude-style AI</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "0.7rem", background: "rgba(255, 255, 255, 0.2)", padding: "4px 10px", borderRadius: "20px", fontWeight: 600 }}>Claude-style AI</span>
+        </div>
       </div>
 
       {/* Chat Messages */}
@@ -97,9 +118,34 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
                 boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                 fontSize: "0.9rem",
                 lineHeight: "1.5",
-                whiteSpace: "pre-line"
+                whiteSpace: "pre-line",
+                position: "relative"
               }}>
                 {m.text}
+                {m.role === "ai" && (
+                  <button
+                    onClick={() => speakText(m.text)}
+                    style={{
+                      marginTop: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      background: "rgba(13, 148, 136, 0.08)",
+                      border: "1px solid rgba(13, 148, 136, 0.3)",
+                      borderRadius: "8px",
+                      padding: "4px 10px",
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      color: "#0f766e",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    title="Dengarkan pembacaan suara AI"
+                  >
+                    {isSpeaking ? <VolumeX size={14} color="#ef4444" /> : <Volume2 size={14} />}
+                    {isSpeaking ? "Hentikan Suara" : "Dengarkan Suara AI"}
+                  </button>
+                )}
               </div>
               <div style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "4px", textAlign: m.role === "user" ? "right" : "left" }}>
                 {m.time}
@@ -123,7 +169,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
       {/* Suggested Prompts */}
       <div style={{ padding: "10px 16px", background: "var(--card-bg, #fff)", borderTop: "1px solid rgba(0,0,0,0.05)" }}>
         <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 600, marginBottom: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
-          <Lightbulb size={14} color="#f59e0b" /> Topik Diskusi Cepat:
+          <Lightbulb size={14} color="#f59e0b" /> Topik & Simulasi Cepat:
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
           {SUGGESTED_PROMPTS.map((p, idx) => (

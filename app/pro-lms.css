@@ -540,7 +540,76 @@
   box-shadow: var(--shadow-gold);
 }
 
-/* --- 13. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+/* --- 13. LEARNING ROADMAP NODES & SHIMMER TROPHIES (24/7 HOURLY AUDIT V9) --- */
+.pro-roadmap-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pro-roadmap-node::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 4px solid #0f172a;
+  box-shadow: 0 0 15px var(--color-primary);
+  z-index: 2;
+}
+
+.pro-roadmap-node:hover {
+  transform: translateX(8px);
+  border-color: var(--color-accent);
+  box-shadow: 0 15px 30px -5px rgba(6, 182, 212, 0.25);
+}
+
+.pro-shimmer-trophy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.05));
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 20px;
+  color: #f59e0b;
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.2);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.pro-shimmer-trophy::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  animation: shimmer-swipe 4s infinite;
+}
+
+.pro-shimmer-trophy:hover {
+  transform: translateY(-4px) scale(1.05);
+  border-color: #fde047;
+  box-shadow: 0 15px 35px -5px rgba(234, 179, 8, 0.35);
+}
+
+/* --- 14. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
 @media print {
   body * {
     visibility: hidden !important;

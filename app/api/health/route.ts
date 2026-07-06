@@ -76,8 +76,10 @@ export async function GET() {
       glassBookmarkCardsUI: "ACTIVE",
       interactiveVideoScrubberUI: "ACTIVE",
       shimmeringXpBadgesUI: "ACTIVE",
+      learningRoadmapNodesUI: "ACTIVE",
+      shimmeringTrophiesUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "8 (Hourly Schedule V5)",
+      autonomousIteration: "9 (Hourly Schedule V6)",
     },
   };
 

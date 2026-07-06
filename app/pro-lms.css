@@ -270,7 +270,57 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* --- 8. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+/* --- 8. LIVE ACTIVITY PULSE & EXECUTIVE BADGES (24/7 HOURLY AUDIT V4) --- */
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.pro-live-pulse-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+  margin-right: 8px;
+  animation: pulse-dot 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+.pro-executive-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.15), rgba(251, 191, 36, 0.15));
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  color: var(--color-primary);
+  box-shadow: 0 4px 12px -2px rgba(13, 148, 136, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.pro-executive-badge:hover {
+  transform: translateY(-2px) scale(1.03);
+  border-color: var(--color-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+/* --- 9. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
 @media print {
   body * {
     visibility: hidden !important;

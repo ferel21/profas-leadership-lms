@@ -80,8 +80,10 @@ export async function GET() {
       shimmeringTrophiesUI: "ACTIVE",
       certificateQrVerificationUI: "ACTIVE",
       interactiveConfettiButtonsUI: "ACTIVE",
+      executiveStudentIdCardUI: "ACTIVE",
+      mentorVerifiedPillUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "10 (Hourly Schedule V7)",
+      autonomousIteration: "11 (Hourly Schedule V8)",
     },
   };
 

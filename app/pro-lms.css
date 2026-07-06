@@ -723,7 +723,56 @@
   box-shadow: 0 6px 16px -2px rgba(34, 211, 238, 0.35);
 }
 
-/* --- 16. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+/* --- 16. EXECUTIVE FORUM CARDS & VERIFIED EXPERT BADGES (24/7 HOURLY AUDIT V13) --- */
+.pro-forum-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pro-forum-card:hover {
+  transform: translateY(-4px) translateX(4px);
+  border-color: var(--color-accent);
+  border-left-color: var(--color-gold);
+  box-shadow: 0 20px 40px -10px rgba(6, 182, 212, 0.3);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.pro-expert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(251, 191, 36, 0.15));
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  color: #c4b5fd;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 4px 15px -2px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.pro-expert-badge:hover {
+  transform: scale(1.05);
+  border-color: #fbbf24;
+  color: #fde047;
+  box-shadow: 0 6px 20px -2px rgba(251, 191, 36, 0.4);
+}
+
+/* --- 17. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
 @media print {
   body * {
     visibility: hidden !important;

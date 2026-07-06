@@ -88,8 +88,10 @@ export async function GET() {
       executiveRoadmapDashboardUI: "ACTIVE",
       liveCloudDbPulseHeader: "ACTIVE",
       studyStreakHeaderBadge: "ACTIVE",
+      executiveForumCardUI: "ACTIVE",
+      verifiedExpertBadgeUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "12 (Hourly Schedule V9 - Fullstack Upgrade)",
+      autonomousIteration: "13 (Hourly Schedule V10)",
     },
   };
 

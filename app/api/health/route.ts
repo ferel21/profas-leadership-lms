@@ -100,8 +100,10 @@ export async function GET() {
       executiveMentorBioCardUI: "ACTIVE",
       executivePeerScorecardUI: "ACTIVE",
       interactiveSyllabusAccordionUI: "ACTIVE",
+      executiveMentorCalendarUI: "ACTIVE",
+      vipPrioritySupportPillUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "18 (Hourly Schedule V15)",
+      autonomousIteration: "19 (Hourly Schedule V16)",
     },
   };
 

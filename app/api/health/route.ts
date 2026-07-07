@@ -90,8 +90,10 @@ export async function GET() {
       studyStreakHeaderBadge: "ACTIVE",
       executiveForumCardUI: "ACTIVE",
       verifiedExpertBadgeUI: "ACTIVE",
+      executiveAudioWaveformUI: "ACTIVE",
+      shimmeringPodcastBadgeUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "13 (Hourly Schedule V10)",
+      autonomousIteration: "14 (Hourly Schedule V11)",
     },
   };
 

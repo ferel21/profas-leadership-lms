@@ -104,8 +104,10 @@ export async function GET() {
       vipPrioritySupportPillUI: "ACTIVE",
       aiVoiceEqualizerPulseUI: "ACTIVE",
       featuredCourseRibbonUI: "ACTIVE",
+      executiveNftSealUI: "ACTIVE",
+      mentorAvailabilityStatusUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "20 (Hourly Schedule V17)",
+      autonomousIteration: "21 (Hourly Schedule V18)",
     },
   };
 

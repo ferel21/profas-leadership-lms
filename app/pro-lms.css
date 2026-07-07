@@ -1113,7 +1113,56 @@
   border-right: 8px solid transparent;
 }
 
-/* --- 24. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+/* --- 24. EXECUTIVE NFT HOLOGRAPHIC SEAL & MENTOR STATUS (24/7 HOURLY AUDIT V21) --- */
+.pro-nft-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(236, 72, 153, 0.18));
+  border: 1px solid rgba(168, 85, 247, 0.55);
+  color: #e879f9;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
+  animation: nft-shimmer 3s infinite linear;
+}
+
+@keyframes nft-shimmer {
+  0% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); border-color: rgba(168, 85, 247, 0.5); }
+  50% { box-shadow: 0 0 28px rgba(236, 72, 153, 0.6); border-color: rgba(236, 72, 153, 0.8); color: #f472b6; }
+  100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); border-color: rgba(168, 85, 247, 0.5); }
+}
+
+.pro-mentor-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.pro-mentor-status::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  animation: status-ping 1.5s infinite ease-in-out;
+}
+
+@keyframes status-ping {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; box-shadow: 0 0 16px #34d399; }
+}
+
+/* --- 25. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
 @media print {
   body * {
     visibility: hidden !important;

@@ -94,8 +94,10 @@ export async function GET() {
       shimmeringPodcastBadgeUI: "ACTIVE",
       executiveLiveWebinarUI: "ACTIVE",
       interactiveBookmarkRibbonUI: "ACTIVE",
+      aiReflectionSparkleUI: "ACTIVE",
+      executiveMasterclassBadgeUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "15 (Hourly Schedule V12)",
+      autonomousIteration: "16 (Hourly Schedule V13)",
     },
   };
 

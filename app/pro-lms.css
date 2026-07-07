@@ -1061,7 +1061,59 @@
   box-shadow: 0 6px 20px -2px rgba(251, 191, 36, 0.45);
 }
 
-/* --- 23. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+/* --- 23. EXECUTIVE VOICE EQUALIZER & FEATURED COURSE RIBBONS (24/7 HOURLY AUDIT V20) --- */
+.pro-voice-eq {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+  padding: 0 6px;
+}
+
+.pro-voice-eq span {
+  display: block;
+  width: 3px;
+  background: var(--color-primary);
+  border-radius: 3px;
+  animation: eq-pulse 0.9s infinite ease-in-out alternate;
+}
+
+.pro-voice-eq span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+.pro-voice-eq span:nth-child(2) { height: 14px; animation-delay: 0.3s; }
+.pro-voice-eq span:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+.pro-voice-eq span:nth-child(4) { height: 16px; animation-delay: 0.4s; }
+
+@keyframes eq-pulse {
+  0% { transform: scaleY(0.5); background: var(--color-primary); }
+  100% { transform: scaleY(1.4); background: var(--color-accent); box-shadow: 0 0 6px var(--color-accent); }
+}
+
+.pro-course-ribbon {
+  position: absolute;
+  top: 14px;
+  right: -8px;
+  padding: 4px 16px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 4px 0 0 4px;
+  box-shadow: -4px 4px 12px rgba(16, 185, 129, 0.4);
+  z-index: 5;
+}
+
+.pro-course-ribbon::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  border-top: 8px solid #047857;
+  border-right: 8px solid transparent;
+}
+
+/* --- 24. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
 @media print {
   body * {
     visibility: hidden !important;

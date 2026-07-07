@@ -102,8 +102,10 @@ export async function GET() {
       interactiveSyllabusAccordionUI: "ACTIVE",
       executiveMentorCalendarUI: "ACTIVE",
       vipPrioritySupportPillUI: "ACTIVE",
+      aiVoiceEqualizerPulseUI: "ACTIVE",
+      featuredCourseRibbonUI: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "19 (Hourly Schedule V16)",
+      autonomousIteration: "20 (Hourly Schedule V17)",
     },
   };
 

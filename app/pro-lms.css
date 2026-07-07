@@ -969,7 +969,50 @@
   background: rgba(15, 23, 42, 0.95);
 }
 
-/* --- 21. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+/* --- 21. EXECUTIVE PEER REVIEW SCORECARDS & SYLLABUS ACCORDIONS (24/7 HOURLY AUDIT V18) --- */
+.pro-peer-scorecard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  border-top: 4px solid var(--color-gold);
+  border-radius: 18px;
+  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pro-peer-scorecard:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: var(--color-gold);
+  box-shadow: 0 20px 45px -10px rgba(251, 191, 36, 0.35);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.pro-syllabus-accordion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.pro-syllabus-accordion:hover {
+  background: rgba(13, 148, 136, 0.12);
+  border-color: var(--color-primary);
+  transform: translateX(6px);
+  box-shadow: 0 4px 15px rgba(13, 148, 136, 0.2);
+}
+
+/* --- 22. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
 @media print {
   body * {
     visibility: hidden !important;

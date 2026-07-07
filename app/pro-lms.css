@@ -824,7 +824,55 @@
   box-shadow: 0 6px 18px -2px rgba(16, 185, 129, 0.4);
 }
 
-/* --- 18. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+/* --- 18. EXECUTIVE LIVE WEBINAR & BOOKMARK RIBBONS (24/7 HOURLY AUDIT V15) --- */
+.pro-webinar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(245, 158, 11, 0.15));
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #f87171;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+  animation: webinar-pulse 2s infinite ease-in-out;
+}
+
+@keyframes webinar-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); transform: scale(1.03); }
+}
+
+.pro-bookmark-ribbon {
+  position: absolute;
+  top: 12px;
+  right: -8px;
+  padding: 4px 14px;
+  background: linear-gradient(135deg, var(--color-gold), #d97706);
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 4px 0 0 4px;
+  box-shadow: -4px 4px 12px rgba(245, 158, 11, 0.35);
+  z-index: 5;
+}
+
+.pro-bookmark-ribbon::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  border-top: 8px solid #92400e;
+  border-right: 8px solid transparent;
+}
+
+/* --- 19. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
 @media print {
   body * {
     visibility: hidden !important;

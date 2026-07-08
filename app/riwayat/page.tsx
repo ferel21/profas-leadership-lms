@@ -82,7 +82,7 @@ export default async function RiwayatPembelajaran() {
       <div className="history-timeline">
         {timeline.length === 0 ? (
           <div className="empty-state">
-            <Award size={48} color="#cbd5e1" style={{ marginBottom: "1rem" }} />
+            <Award size={48} className="mb-4 text-slate-300" />
             <h3>Belum Ada Aktivitas</h3>
             <p>Mulailah belajar dan raih XP pertama Anda.</p>
             <Link href="/program" className="btn btn-primary">Jelajahi Program</Link>

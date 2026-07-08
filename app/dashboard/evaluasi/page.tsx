@@ -37,14 +37,14 @@ export default async function MentorEvaluasiPage({ searchParams }: { searchParam
         </div>
       </div>
 
-      <div className="data-card" style={{ marginTop: "2rem" }}>
-        <div className="data-title" style={{ borderBottom: "1px solid #e2e8f0", paddingBottom: "1rem", marginBottom: "1rem" }}>
+      <div className="data-card mt-8">
+        <div className="data-title border-b border-slate-200 pb-4 mb-4 flex justify-between items-center flex-wrap gap-4">
           <div>
             <h2>Riwayat Kiriman Evaluasi ({attempts.length})</h2>
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div className="flex gap-2">
             {userId && <Link href="/dashboard/evaluasi" className="btn btn-outline btn-small">Hapus Filter</Link>}
-            <button className="btn btn-outline btn-small"><Filter size={14} /> Filter</button>
+            <button className="btn btn-outline btn-small flex items-center gap-1"><Filter size={14} /> Filter</button>
           </div>
         </div>
 
@@ -64,29 +64,29 @@ export default async function MentorEvaluasiPage({ searchParams }: { searchParam
             <tbody>
               {attempts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: "2rem" }}>Belum ada evaluasi yang dikirim.</td>
+                  <td colSpan={7} className="text-center p-8 text-muted">Belum ada evaluasi yang dikirim.</td>
                 </tr>
               ) : attempts.map(a => (
                 <tr key={a.id}>
-                  <td><small>{formatDate(a.submittedAt)}</small></td>
+                  <td><small className="text-slate-500">{formatDate(a.submittedAt)}</small></td>
                   <td>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <strong>{a.user.name}</strong>
-                      <small style={{ color: "#64748b" }}>{a.user.email}</small>
+                    <div className="flex flex-col">
+                      <strong className="text-slate-800">{a.user.name}</strong>
+                      <small className="text-slate-500">{a.user.email}</small>
                     </div>
                   </td>
                   <td>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <strong>{a.assessment.title}</strong>
-                      <small style={{ color: "#64748b" }}>{a.assessment.course.title}</small>
+                    <div className="flex flex-col">
+                      <strong className="text-slate-800">{a.assessment.title}</strong>
+                      <small className="text-slate-500">{a.assessment.course.title}</small>
                     </div>
                   </td>
                   <td><span className="meta-badge">{a.assessment.type}</span></td>
-                  <td><strong>{a.score}</strong></td>
+                  <td><strong className="text-slate-900">{a.score}</strong></td>
                   <td>
                     {a.passed ? 
-                      <span style={{ color: "var(--color-success)", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.875rem" }}><CheckCircle2 size={14}/> Lulus</span> : 
-                      <span style={{ color: "var(--color-error)", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.875rem" }}><XCircle size={14}/> Gagal</span>
+                      <span className="flex items-center gap-1 text-emerald-500 text-sm font-semibold"><CheckCircle2 size={14}/> Lulus</span> : 
+                      <span className="flex items-center gap-1 text-red-500 text-sm font-semibold"><XCircle size={14}/> Gagal</span>
                     }
                   </td>
                   <td>

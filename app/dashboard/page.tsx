@@ -28,53 +28,25 @@ function StatCard({
   icon: React.ElementType; gradient: string; trend?: string;
 }) {
   return (
-    <div style={{
-      background: "#fff",
-      borderRadius: "20px",
-      padding: "1.5rem",
-      border: "1px solid #f1f5f9",
-      boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.75rem",
-      transition: "all 0.25s ease",
-      position: "relative",
-      overflow: "hidden"
-    }}
-      className="hover-lift"
-    >
-      {/* Background decoration */}
-      <div style={{
-        position: "absolute", top: "-20px", right: "-20px",
-        width: "100px", height: "100px", borderRadius: "50%",
-        background: gradient, opacity: 0.06
-      }} />
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{
-          width: "46px", height: "46px", borderRadius: "14px",
-          background: gradient, display: "flex", alignItems: "center",
-          justifyContent: "center", boxShadow: `0 4px 12px ${gradient}40`
-        }}>
+    <div className="stat-card-clean">
+      <div className="stat-card-header">
+        <div className="stat-card-icon" style={{ background: gradient }}>
           <Icon size={22} color="#fff" />
         </div>
         {trend && (
-          <span style={{
-            fontSize: "11px", fontWeight: 700, color: "#10b981",
-            background: "#ecfdf5", padding: "3px 8px", borderRadius: "20px",
-            display: "flex", alignItems: "center", gap: "2px"
-          }}>
-            <ArrowUpRight size={11} /> {trend}
+          <span className="stat-card-trend">
+            <ArrowUpRight size={12} /> {trend}
           </span>
         )}
       </div>
       <div>
-        <div style={{ fontSize: "2rem", fontWeight: 800, color: "#0f172a", lineHeight: 1 }}>
+        <div className="stat-card-value">
           {value}
         </div>
-        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#334155", marginTop: "4px" }}>
+        <div className="stat-card-label">
           {label}
         </div>
-        <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "2px" }}>
+        <div className="stat-card-desc">
           {desc}
         </div>
       </div>
@@ -84,10 +56,10 @@ function StatCard({
 
 function SectionTitle({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+    <div className="section-title-clean flex items-center justify-between">
       <div>
-        <h2 style={{ fontSize: "1.15rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>{title}</h2>
-        {subtitle && <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "2px 0 0" }}>{subtitle}</p>}
+        <h2>{title}</h2>
+        {subtitle && <p>{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -96,12 +68,13 @@ function SectionTitle({ title, subtitle, action }: { title: string; subtitle?: s
 
 function EmptyCard({ text, icon: Icon }: { text: string; icon?: React.ElementType }) {
   return (
-    <div style={{
-      textAlign: "center", padding: "2.5rem 1rem", color: "#94a3b8",
-      display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem"
-    }}>
-      {Icon && <Icon size={40} strokeWidth={1} />}
-      <p style={{ margin: 0, fontSize: "0.9rem" }}>{text}</p>
+    <div className="empty-card-clean">
+      {Icon && (
+        <div className="empty-card-icon">
+          <Icon size={24} strokeWidth={1.5} />
+        </div>
+      )}
+      <p className="m-0">{text}</p>
     </div>
   );
 }
@@ -114,7 +87,7 @@ export default async function DashboardPage() {
   // STUDENT DASHBOARD
   // ═══════════════════════════════════════════════════════════
   if (user.role === "STUDENT") {
-    let [enrollments, certificates] = await Promise.all([
+    const [initialEnrollments, certificates] = await Promise.all([
       prisma.enrollment.findMany({
         where: { userId: user.id },
         include: {
@@ -128,6 +101,7 @@ export default async function DashboardPage() {
         orderBy: { issuedAt: "desc" }
       })
     ]);
+    let enrollments = initialEnrollments;
 
     // Auto-enrollment / Self-Healing: Jika peserta (termasuk yang login via Google) belum memiliki kelas, otomatis daftarkan ke seluruh program kepemimpinan aktif!
     if (enrollments.length === 0) {
@@ -175,28 +149,20 @@ export default async function DashboardPage() {
     return (
       <DashboardChrome user={user}>
         {/* ── Hero greeting ── */}
-        <div style={{
-          background: "linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%)",
-          borderRadius: "24px", padding: "2rem 2.5rem", marginBottom: "1.5rem",
-          position: "relative", overflow: "hidden", color: "#fff"
-        }}>
-          <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "220px", height: "220px", borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
-          <div style={{ position: "absolute", bottom: "-60px", right: "80px", width: "160px", height: "160px", borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <p style={{ margin: "0 0 4px", fontSize: "0.85rem", opacity: 0.8, fontWeight: 600, letterSpacing: "0.5px" }}>
-              SELAMAT DATANG KEMBALI 👋
-            </p>
-            <h1 style={{ margin: "0 0 6px", fontSize: "1.75rem", fontWeight: 800, lineHeight: 1.2 }}>
-              {user.name.split(" ")[0]}!
-            </h1>
-            <p style={{ margin: 0, opacity: 0.85, fontSize: "0.95rem" }}>
-              Lanjutkan perjalanan kepemimpinan Anda hari ini.
-            </p>
-          </div>
+        <div className="hero-banner-student">
+          <p className="eyebrow-teal" style={{ margin: "0 0 4px", opacity: 0.85 }}>
+            SELAMAT DATANG KEMBALI 👋
+          </p>
+          <h1 className="hero-banner-title">
+            {user.name.split(" ")[0]}!
+          </h1>
+          <p className="hero-banner-subtitle">
+            Lanjutkan perjalanan kepemimpinan Anda hari ini.
+          </p>
         </div>
 
         {/* ── Stat Cards ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "1.5rem" }} className="responsive-stat-grid">
+        <div className="responsive-stat-grid">
           <StatCard label="Program Diikuti" value={enrollments.length} desc="Kelas kepemimpinan aktif" icon={BookOpen} gradient="linear-gradient(135deg, #0d9488, #14b8a6)" trend={enrollments.length > 0 ? "Aktif" : undefined} />
           <StatCard label="Sertifikat" value={certificates.length} desc="Bukti kelulusan terverifikasi" icon={Award} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" trend={certificates.length > 0 ? "Diperoleh" : undefined} />
           <StatCard label="Progres Rata-rata" value={`${avgProgress}%`} desc="Penyelesaian materi" icon={TrendingUp} gradient="linear-gradient(135deg, #6366f1, #818cf8)" />
@@ -204,51 +170,49 @@ export default async function DashboardPage() {
         </div>
 
         {/* ── Executive Learning Roadmap & Career Pathway ── */}
-        <div style={{ marginBottom: "1.5rem" }}>
-          <div style={{ background: "#fff", borderRadius: "20px", padding: "1.5rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-            <SectionTitle title="🗺️ Alur Kepemimpinan Eksekutif (*Executive Career Roadmap*)" subtitle="Jalur tahapan evolusi kepemimpinan Anda di PROFAS Institute" />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginTop: "1rem" }} className="responsive-stat-grid">
-              <div className="pro-roadmap-node hover-lift" style={{ background: "linear-gradient(135deg, #0f172a, #1e293b)", color: "#fff", border: "1px solid #0d9488" }}>
-                <div>
-                  <span style={{ fontSize: "0.65rem", fontWeight: 800, background: "#0d9488", padding: "2px 8px", borderRadius: "20px", color: "#fff" }}>TAHAP 1 • AKTIF</span>
-                  <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Fondasi & Self-Leadership</h4>
-                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.8 }}>Memimpin diri, integritas, dan kecerdasan emosional.</p>
-                </div>
-              </div>
-              <div className="pro-roadmap-node hover-lift" style={{ background: "rgba(15, 23, 42, 0.8)", color: "#e2e8f0", border: "1px solid rgba(255,255,255,0.15)" }}>
-                <div>
-                  <span style={{ fontSize: "0.65rem", fontWeight: 800, background: "rgba(255,255,255,0.15)", padding: "2px 8px", borderRadius: "20px", color: "#cbd5e1" }}>TAHAP 2 • BERIKUTNYA</span>
-                  <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Manajemen Tim & Kolaborasi</h4>
-                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.7 }}>Resolusi konflik, delegasi efektif, dan budaya agile.</p>
-                </div>
-              </div>
-              <div className="pro-roadmap-node hover-lift" style={{ background: "rgba(15, 23, 42, 0.6)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div>
-                  <span style={{ fontSize: "0.65rem", fontWeight: 800, background: "rgba(255,255,255,0.1)", padding: "2px 8px", borderRadius: "20px", color: "#94a3b8" }}>TAHAP 3 • EKSKLUSIF</span>
-                  <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Kepemimpinan Strategis</h4>
-                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.6 }}>Visi organisasi, manajemen perubahan, dan eksekusi.</p>
-                </div>
+        <div className="dash-roadmap-box">
+          <SectionTitle title="🗺️ Alur Kepemimpinan Eksekutif (*Executive Career Roadmap*)" subtitle="Jalur tahapan evolusi kepemimpinan Anda di PROFAS Institute" />
+          <div className="dash-roadmap-grid">
+            <div className="dash-roadmap-node active hover-lift">
+              <div>
+                <span className="dash-node-badge active">TAHAP 1 • AKTIF</span>
+                <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Fondasi & Self-Leadership</h4>
+                <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.8 }}>Memimpin diri, integritas, dan kecerdasan emosional.</p>
               </div>
             </div>
-            <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(13, 148, 136, 0.08))", padding: "14px 20px", borderRadius: "16px", border: "1px solid rgba(251, 191, 36, 0.35)", flexWrap: "wrap", gap: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                <div className="pro-shimmer-trophy" style={{ padding: "12px", borderRadius: "14px", background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff", boxShadow: "0 4px 12px rgba(245, 158, 11, 0.3)" }}>
-                  <Award size={24} color="#fff" />
-                </div>
-                <div>
-                  <h5 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>Target Kelulusan Eksekutif Anda: Certified Leadership Executive (CLE)</h5>
-                  <p style={{ margin: "2px 0 0", fontSize: "0.78rem", color: "#64748b" }}>Selesaikan seluruh modul di atas untuk mendapatkan lencana holografik dan gelar profesional kepemimpinan.</p>
-                </div>
+            <div className="dash-roadmap-node next hover-lift">
+              <div>
+                <span className="dash-node-badge next">TAHAP 2 • BERIKUTNYA</span>
+                <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Manajemen Tim & Kolaborasi</h4>
+                <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.7 }}>Resolusi konflik, delegasi efektif, dan budaya agile.</p>
               </div>
-              <Link href="/program" className="btn btn-primary btn-small hover-lift" style={{ whiteSpace: "nowrap" }}>Lihat Semua Modul</Link>
             </div>
+            <div className="dash-roadmap-node locked hover-lift">
+              <div>
+                <span className="dash-node-badge locked">TAHAP 3 • EKSKLUSIF</span>
+                <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Kepemimpinan Strategis</h4>
+                <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.6 }}>Visi organisasi, manajemen perubahan, dan eksekusi.</p>
+              </div>
+            </div>
+          </div>
+          <div className="dash-roadmap-banner">
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <div className="pro-shimmer-trophy" style={{ padding: "12px", borderRadius: "14px", background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff", boxShadow: "0 4px 12px rgba(245, 158, 11, 0.3)" }}>
+                <Award size={24} color="#fff" />
+              </div>
+              <div>
+                <h5 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>Target Kelulusan Eksekutif Anda: Certified Leadership Executive (CLE)</h5>
+                <p style={{ margin: "2px 0 0", fontSize: "0.78rem", color: "#64748b" }}>Selesaikan seluruh modul di atas untuk mendapatkan lencana holografik dan gelar profesional kepemimpinan.</p>
+              </div>
+            </div>
+            <Link href="/program" className="btn btn-primary btn-small hover-lift" style={{ whiteSpace: "nowrap" }}>Lihat Semua Modul</Link>
           </div>
         </div>
 
         {/* ── Main Content Grid ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "1.5rem" }} className="responsive-main-grid">
+        <div className="responsive-main-grid">
           {/* Program Aktif */}
-          <div style={{ background: "#fff", borderRadius: "20px", padding: "1.5rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }} id="program">
+          <div className="dash-card-clean" id="program">
             <SectionTitle
               title="Program Aktif Anda"
               subtitle="Lanjutkan dari modul terakhir"
@@ -261,45 +225,35 @@ export default async function DashboardPage() {
             {enrollments.length === 0 ? (
               <EmptyCard text="Belum ada program yang diikuti. Eksplorasi katalog program sekarang." icon={BookOpen} />
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="dash-enroll-list">
                 {sortedEnrollments.map(item => {
                   const isCompleted = item.status === "COMPLETED" || item.progressPercent === 100;
                   return (
                     <Link href={`/belajar/${item.course.slug}`} key={item.id} style={{ textDecoration: "none" }}>
-                      <div className="hover-lift" style={{
-                        display: "flex", gap: "1rem", alignItems: "center",
-                        padding: "1rem", borderRadius: "16px",
-                        border: `1px solid ${isCompleted ? "#bbf7d0" : "#f1f5f9"}`,
-                        background: isCompleted ? "#f0fdf4" : "#fafafa",
-                        transition: "all 0.2s", cursor: "pointer"
-                      }}>
-                        <div style={{ width: "64px", height: "64px", borderRadius: "12px", overflow: "hidden", flexShrink: 0, position: "relative" }}>
+                      <div className={`dash-enroll-item hover-lift ${isCompleted ? "completed" : ""}`}>
+                        <div className="dash-enroll-thumb">
                           <Image src={item.course.image} fill alt={item.course.title} style={{ objectFit: "cover" }} />
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
-                            <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#0d9488", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                        <div className="dash-enroll-info">
+                          <div className="dash-enroll-tags">
+                            <span className="dash-enroll-category">
                               {item.course.category}
                             </span>
-                            <span style={{
-                              fontSize: "0.65rem", fontWeight: 700, padding: "1px 7px", borderRadius: "20px",
-                              background: isCompleted ? "#dcfce7" : "#dbeafe",
-                              color: isCompleted ? "#15803d" : "#1d4ed8"
-                            }}>
+                            <span className={`dash-enroll-status ${isCompleted ? "done" : "active"}`}>
                               {isCompleted ? "✓ Selesai" : "Aktif"}
                             </span>
                           </div>
-                          <h3 style={{ margin: "0 0 4px", fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <h3 className="dash-enroll-title">
                             {item.course.title}
                           </h3>
-                          <p style={{ margin: "0 0 8px", fontSize: "0.75rem", color: "#64748b" }}>
+                          <p className="dash-enroll-meta">
                             {item.course.nodes.length} materi • {item.course.durationHours} jam
                           </p>
                           {/* Progress bar */}
-                          <div style={{ height: "6px", borderRadius: "999px", background: "#e2e8f0", overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${item.progressPercent}%`, background: isCompleted ? "linear-gradient(90deg, #10b981, #34d399)" : "linear-gradient(90deg, #0d9488, #14b8a6)", borderRadius: "999px" }} />
+                          <div className="dash-progress-track">
+                            <div className={`dash-progress-fill ${isCompleted ? "done" : "active"}`} style={{ width: `${item.progressPercent}%` }} />
                           </div>
-                          <p style={{ margin: "4px 0 0", fontSize: "0.72rem", color: "#64748b" }}>
+                          <p className="dash-progress-text">
                             {item.progressPercent}% selesai
                           </p>
                         </div>
@@ -313,41 +267,28 @@ export default async function DashboardPage() {
           </div>
 
           {/* Sidebar kanan */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div className="dash-sidebar-col">
             {/* Sertifikat */}
-            <div style={{ background: "#fff", borderRadius: "20px", padding: "1.25rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }} id="sertifikat">
+            <div className="dash-card-clean" id="sertifikat">
               <SectionTitle title="Sertifikat & Pencapaian" subtitle="Lulusan terverifikasi" />
               {certificates.length === 0 ? (
                 <EmptyCard text="Sertifikat muncul setelah program selesai." icon={Award} />
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <div className="dash-cert-list">
                   {certificates.slice(0, 3).map(cert => (
-                    <div key={cert.id} style={{
-                      display: "flex", alignItems: "center", gap: "0.75rem",
-                      padding: "0.875rem", borderRadius: "14px", background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)",
-                      border: "1px solid #bbf7d0"
-                    }}>
-                      <div style={{
-                        width: "36px", height: "36px", borderRadius: "10px", flexShrink: 0,
-                        background: "linear-gradient(135deg, #f59e0b, #fbbf24)",
-                        display: "flex", alignItems: "center", justifyContent: "center"
-                      }}>
+                    <div key={cert.id} className="dash-cert-mini">
+                      <div className="dash-cert-mini-icon">
                         <Award size={18} color="#fff" />
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ margin: 0, fontSize: "0.82rem", fontWeight: 700, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <div className="dash-cert-mini-info">
+                        <p className="dash-cert-mini-title">
                           {cert.course.title}
                         </p>
-                        <p style={{ margin: "2px 0 0", fontSize: "0.7rem", color: "#64748b" }}>
+                        <p className="dash-cert-mini-no">
                           No: {cert.uniqueNumber}
                         </p>
                       </div>
-                      <Link href={`/sertifikat/${cert.uniqueNumber}`} style={{
-                        fontSize: "0.72rem", fontWeight: 700, color: "#0f766e",
-                        background: "#fff", padding: "4px 10px", borderRadius: "8px",
-                        border: "1px solid #a7f3d0", textDecoration: "none", flexShrink: 0,
-                        transition: "all 0.2s"
-                      }}>
+                      <Link href={`/sertifikat/${cert.uniqueNumber}`} className="dash-cert-mini-btn">
                         Lihat
                       </Link>
                     </div>
@@ -357,13 +298,9 @@ export default async function DashboardPage() {
             </div>
 
             {/* Quick tip card */}
-            <div style={{
-              background: "linear-gradient(135deg, #0f766e, #0d9488)",
-              borderRadius: "20px", padding: "1.25rem", color: "#fff", position: "relative", overflow: "hidden"
-            }}>
-              <div style={{ position: "absolute", top: "-20px", right: "-20px", width: "80px", height: "80px", borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />
+            <div className="dash-tip-card">
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", position: "relative", zIndex: 1 }}>
-                <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div className="dash-tip-icon">
                   <Zap size={18} color="#fef08a" />
                 </div>
                 <div>
@@ -399,18 +336,13 @@ export default async function DashboardPage() {
     return (
       <DashboardChrome user={user}>
         {/* Hero Mentor */}
-        <div style={{
-          background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 60%, #60a5fa 100%)",
-          borderRadius: "24px", padding: "2rem 2.5rem", marginBottom: "1.5rem",
-          position: "relative", overflow: "hidden", color: "#fff"
-        }}>
-          <div style={{ position: "absolute", top: "-30px", right: "-30px", width: "180px", height: "180px", borderRadius: "50%", background: "rgba(255,255,255,0.07)" }} />
+        <div className="hero-banner-mentor">
           <p style={{ margin: "0 0 4px", fontSize: "0.8rem", opacity: 0.8, fontWeight: 600, letterSpacing: "0.5px" }}>DASHBOARD MENTOR</p>
-          <h1 style={{ margin: "0 0 6px", fontSize: "1.6rem", fontWeight: 800 }}>{user.name.split(" ")[0]}</h1>
-          <p style={{ margin: 0, opacity: 0.85, fontSize: "0.9rem" }}>Kelola materi, evaluasi tugas, dan pantau progres peserta Anda.</p>
+          <h1 className="hero-banner-title">{user.name.split(" ")[0]}</h1>
+          <p className="hero-banner-subtitle">Kelola materi, evaluasi tugas, dan pantau progres peserta Anda.</p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "1.5rem" }} className="responsive-stat-grid">
+        <div className="responsive-stat-grid">
           <StatCard label="Program Aktif" value={courses.length} desc="Program berjalan" icon={BookOpen} gradient="linear-gradient(135deg, #3b82f6, #60a5fa)" />
           <StatCard label="Total Peserta" value={totalStudents} desc="Dalam semua program" icon={UsersRound} gradient="linear-gradient(135deg, #8b5cf6, #a78bfa)" />
           <StatCard label="Tugas Menunggu" value={0} desc="Perlu dinilai" icon={Clock} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" />
@@ -421,32 +353,23 @@ export default async function DashboardPage() {
           <MentorCourseActions courses={courseOptions} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem" }} className="responsive-main-grid">
-          <div style={{ background: "#fff", borderRadius: "20px", padding: "1.5rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }} id="program">
+        <div className="responsive-main-grid">
+          <div className="dash-card-clean" id="program">
             <SectionTitle title="Kurikulum & Program" subtitle="Kelola struktur materi Anda" />
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+            <div className="dash-enroll-list">
               {courses.map(course => (
-                <div key={course.id} className="hover-lift" style={{
-                  display: "flex", gap: "1rem", alignItems: "center",
-                  padding: "1rem", borderRadius: "16px", border: "1px solid #f1f5f9", background: "#fafafa"
-                }}>
-                  <div style={{ width: "56px", height: "56px", borderRadius: "12px", overflow: "hidden", flexShrink: 0, position: "relative" }}>
+                <div key={course.id} className="dash-mentor-course-item hover-lift">
+                  <div className="dash-mentor-course-thumb">
                     <Image src={course.image} fill alt={course.title} style={{ objectFit: "cover" }} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#3b82f6", textTransform: "uppercase" }}>{course.category}</span>
-                    <h3 style={{ margin: "2px 0 2px", fontSize: "0.9rem", fontWeight: 700, color: "#0f172a" }}>{course.title}</h3>
-                    <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>
+                  <div className="dash-mentor-course-info">
+                    <span className="dash-mentor-course-cat">{course.category}</span>
+                    <h3 className="dash-mentor-course-title">{course.title}</h3>
+                    <p className="dash-mentor-course-meta">
                       {course.nodes.filter(n => n.type === "FOLDER").length} modul • {course.enrollments.length} peserta
                     </p>
                   </div>
-                  <Link href={`/mentor/courses/${course.id}/builder`} style={{
-                    padding: "8px 14px", borderRadius: "10px",
-                    background: "linear-gradient(135deg, #3b82f6, #60a5fa)",
-                    color: "#fff", fontSize: "0.78rem", fontWeight: 700,
-                    textDecoration: "none", flexShrink: 0, whiteSpace: "nowrap",
-                    transition: "all 0.2s"
-                  }}>
+                  <Link href={`/mentor/courses/${course.id}/builder`} className="dash-mentor-btn">
                     Buka Builder
                   </Link>
                 </div>
@@ -455,23 +378,18 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <div style={{ background: "#fff", borderRadius: "20px", padding: "1.25rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+          <div className="dash-sidebar-col">
+            <div className="dash-card-clean">
               <SectionTitle title="Aksi Cepat" subtitle="Pintu akses fitur pengajaran" />
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <div className="dash-quick-list">
                 {[
                   { href: "/dashboard/evaluasi", label: "Periksa Tugas & Evaluasi", icon: ClipboardIcon, color: "#3b82f6" },
                   { href: "/dashboard/peserta", label: "Pantau Progres Peserta", icon: UsersRound, color: "#8b5cf6" },
                   { href: "/forum", label: "Forum & Komunitas Belajar", icon: MessageIcon, color: "#0d9488" },
                 ].map(({ href, label, icon: Icon, color }) => (
-                  <Link key={href} href={href} style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    padding: "10px 14px", borderRadius: "12px", background: "#f8fafc",
-                    border: "1px solid #f1f5f9", textDecoration: "none", color: "#334155",
-                    fontSize: "0.85rem", fontWeight: 600, transition: "all 0.2s"
-                  }} className="hover-lift">
+                  <Link key={href} href={href} className="dash-quick-item hover-lift">
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div style={{ width: "30px", height: "30px", borderRadius: "8px", background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div className="dash-quick-icon" style={{ background: `${color}18` }}>
                         <Icon size={15} color={color} />
                       </div>
                       {label}
@@ -481,12 +399,9 @@ export default async function DashboardPage() {
                 ))}
               </div>
             </div>
-            <div style={{
-              background: "linear-gradient(135deg, #1e40af, #3b82f6)",
-              borderRadius: "20px", padding: "1.25rem", color: "#fff"
-            }}>
+            <div className="dash-tip-card-blue">
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-                <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div className="dash-tip-icon">
                   <Target size={18} color="#fef08a" />
                 </div>
                 <div>
@@ -548,35 +463,17 @@ export default async function DashboardPage() {
   return (
     <DashboardChrome user={user}>
       {/* Hero Admin */}
-      <div style={{
-        background: "linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%)",
-        borderRadius: "24px", padding: "2rem 2.5rem", marginBottom: "1.5rem",
-        position: "relative", overflow: "hidden", color: "#fff"
-      }}>
-        <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "220px", height: "220px", borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
-        <div style={{ position: "absolute", bottom: "-50px", left: "40%", width: "150px", height: "150px", borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", position: "relative", zIndex: 1 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-              <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: "8px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.5px" }}>
-                SUPER ADMIN
-              </div>
-            </div>
-            <h1 style={{ margin: "0 0 6px", fontSize: "1.6rem", fontWeight: 800 }}>Analytics & Control Center</h1>
-            <p style={{ margin: 0, opacity: 0.85, fontSize: "0.9rem" }}>Pemantauan menyeluruh seluruh operasi LMS PROFAS Leadership.</p>
-          </div>
-          <div style={{
-            background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)",
-            borderRadius: "16px", padding: "1rem 1.5rem", border: "1px solid rgba(255,255,255,0.2)"
-          }}>
-            <p style={{ margin: "0 0 2px", fontSize: "0.75rem", opacity: 0.8 }}>Tingkat Kelulusan</p>
-            <p style={{ margin: 0, fontSize: "2rem", fontWeight: 800 }}>{graduationRate}%</p>
-          </div>
+      <div className="hero-banner-admin">
+        <div className="hero-banner-title" style={{ fontSize: "1.6rem" }}>
+          Analytics & Control Center
         </div>
+        <p className="hero-banner-subtitle">
+          Pemantauan menyeluruh seluruh operasi LMS PROFAS Leadership.
+        </p>
       </div>
 
       {/* ── 4 KPI Cards ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "1.5rem" }} className="responsive-stat-grid">
+      <div className="responsive-stat-grid">
         <StatCard label="Total Pengguna" value={userCount} desc="Akun terdaftar" icon={UsersRound} gradient="linear-gradient(135deg, #6d28d9, #7c3aed)" trend="+12%" />
         <StatCard label="Peserta Aktif" value={activeStudentsCount} desc="Sedang aktif belajar" icon={Activity} gradient="linear-gradient(135deg, #0d9488, #14b8a6)" trend="Live" />
         <StatCard label="Program Terbit" value={courseCount} desc="Dapat diakses peserta" icon={BookOpen} gradient="linear-gradient(135deg, #3b82f6, #60a5fa)" />
@@ -584,29 +481,25 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Analytics Charts Row ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }} className="responsive-main-grid">
+      <div className="responsive-main-grid">
         {/* Distribusi Pengguna - Bar chart */}
-        <div style={{ background: "#fff", borderRadius: "20px", padding: "1.5rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+        <div className="dash-chart-card">
           <SectionTitle
             title="Distribusi Pengguna"
             subtitle="Berdasarkan peran akun saat ini"
-            action={<span style={{ fontSize: "0.8rem", fontWeight: 700, background: "#f1f5f9", color: "#6d28d9", padding: "4px 10px", borderRadius: "8px" }}>{userCount} akun</span>}
+            action={<span className="badge badge-purple">{userCount} akun</span>}
           />
-          <div style={{ display: "flex", alignItems: "flex-end", gap: "1.5rem", height: "140px", marginTop: "1rem" }}>
+          <div className="dash-chart-row">
             {roleCounts.map(item => {
               const pct = Math.max(10, (item._count._all / maxRole) * 100);
               const color = barColors[item.role] || "#94a3b8";
               return (
-                <div key={item.role} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", flex: 1 }}>
-                  <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#0f172a" }}>{item._count._all}</span>
-                  <div style={{
-                    width: "100%", height: `${pct}%`, borderRadius: "8px 8px 0 0",
-                    background: color, opacity: 0.85, transition: "height 0.8s ease",
-                    position: "relative", overflow: "hidden"
-                  }}>
-                    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0.2), transparent)" }} />
+                <div key={item.role} className="dash-chart-bar-col">
+                  <span className="dash-chart-bar-val">{item._count._all}</span>
+                  <div className="dash-chart-bar-track" style={{ height: `${pct}%`, background: color }}>
+                    <div className="dash-chart-bar-glow" />
                   </div>
-                  <span style={{ fontSize: "0.7rem", color: "#64748b", fontWeight: 600, textAlign: "center" }}>
+                  <span className="dash-chart-bar-lbl">
                     {labels[item.role] ?? item.role}
                   </span>
                 </div>
@@ -616,26 +509,26 @@ export default async function DashboardPage() {
         </div>
 
         {/* Performa Pembelajaran */}
-        <div style={{ background: "#fff", borderRadius: "20px", padding: "1.5rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+        <div className="dash-chart-card">
           <SectionTitle title="Performa Platform" subtitle="Ringkasan data pembelajaran" />
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "0.5rem" }}>
+          <div className="dash-perf-list">
             {[
               { label: "Rata-rata Progres", value: `${avgProgress}%`, pct: avgProgress, color: "#0d9488", icon: TrendingUp },
               { label: "Tingkat Kelulusan", value: `${graduationRate}%`, pct: graduationRate, color: "#8b5cf6", icon: GraduationCap },
               { label: "Total Pendaftaran", value: enrollmentCount, pct: Math.min(100, enrollmentCount * 2), color: "#3b82f6", icon: BookMarked },
             ].map(({ label, value, pct, color, icon: Icon }) => (
               <div key={label}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div className="dash-perf-item-hdr">
+                  <div className="dash-perf-item-title">
+                    <div className="dash-perf-icon-box" style={{ background: `${color}18` }}>
                       <Icon size={14} color={color} />
                     </div>
-                    <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "#334155" }}>{label}</span>
+                    <span className="dash-perf-lbl">{label}</span>
                   </div>
-                  <span style={{ fontSize: "0.9rem", fontWeight: 800, color: "#0f172a" }}>{value}</span>
+                  <span className="dash-perf-val">{value}</span>
                 </div>
-                <div style={{ height: "8px", borderRadius: "999px", background: "#f1f5f9", overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: "999px", transition: "width 1s ease" }} />
+                <div className="dash-perf-track">
+                  <div className="dash-perf-fill" style={{ width: `${pct}%`, background: color }} />
                 </div>
               </div>
             ))}
@@ -644,24 +537,24 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Quick Actions Admin ── */}
-      <div style={{ background: "#fff", borderRadius: "20px", padding: "1.5rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", marginBottom: "1.5rem" }}>
+      <div className="dash-chart-card" style={{ marginBottom: "1.5rem" }}>
         <SectionTitle title="Aksi Cepat Admin" subtitle="Manajemen platform" />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.75rem" }} className="responsive-stat-grid">
+        <div className="dash-quick-admin-grid">
           {[
             { label: "Manajemen Pengguna", icon: Users, color: "#6d28d9", desc: "Kelola akun & role" },
             { label: "Siaran Pengumuman", icon: Megaphone, color: "#0d9488", desc: "Broadcast ke peserta" },
             { label: "Laporan & Analitik", icon: BarChart3, color: "#3b82f6", desc: "Ekspor data Excel" },
             { label: "Verifikasi Sertifikat", icon: ShieldCheck, color: "#f59e0b", desc: "Cek keabsahan" },
           ].map(({ label, icon: Icon, color, desc }) => (
-            <div key={label} className="hover-lift" style={{
-              padding: "1rem", borderRadius: "16px", background: `${color}08`,
-              border: `1px solid ${color}20`, cursor: "pointer", transition: "all 0.2s"
+            <div key={label} className="dash-quick-admin-item hover-lift" style={{
+              background: `${color}08`,
+              border: `1px solid ${color}20`
             }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "12px", background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.75rem" }}>
+              <div className="dash-quick-admin-icon" style={{ background: `${color}18` }}>
                 <Icon size={20} color={color} />
               </div>
-              <p style={{ margin: "0 0 2px", fontSize: "0.85rem", fontWeight: 700, color: "#0f172a" }}>{label}</p>
-              <p style={{ margin: 0, fontSize: "0.72rem", color: "#64748b" }}>{desc}</p>
+              <p className="dash-quick-admin-lbl">{label}</p>
+              <p className="dash-quick-admin-desc">{desc}</p>
             </div>
           ))}
         </div>

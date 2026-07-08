@@ -35,8 +35,8 @@ export default async function CourseBuilderPage({ params }: { params: Promise<{ 
 
   return (
     <DashboardChrome user={user}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <Link href="/mentor" className="text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="mb-6">
+        <Link href="/mentor" className="text-link inline-flex items-center gap-2">
           <ArrowLeft size={16} /> Kembali ke Dashboard
         </Link>
       </div>

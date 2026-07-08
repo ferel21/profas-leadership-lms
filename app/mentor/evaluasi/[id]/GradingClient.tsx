@@ -50,12 +50,12 @@ export function GradingClient({ attempt }: { attempt: any }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: '12px', padding: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+    <div className="flex flex-col gap-8">
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+        <div className="flex justify-between items-start mb-6 flex-wrap gap-4">
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Tinjauan Jawaban Peserta</h2>
-            <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>Berikan skor per soal, dan isi feedback keseluruhan.</p>
+            <h2 className="text-xl font-bold text-slate-900 m-0">Tinjauan Jawaban Peserta</h2>
+            <p className="text-slate-500 text-sm mt-1 mb-0">Berikan skor per soal, dan isi feedback keseluruhan.</p>
           </div>
           <button className="btn btn-outline btn-small" onClick={calculateTotalScore}>
             Hitung Skor Otomatis
@@ -67,37 +67,37 @@ export function GradingClient({ attempt }: { attempt: any }) {
           const currentAns = answersScores.find(a => a.questionId === q.id);
 
           return (
-            <div key={ans.id} style={{ borderBottom: '1px solid var(--line)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <b style={{ fontSize: '1.05rem', color: 'var(--teal-dark)' }}>Soal {i + 1} ({q.type})</b>
-                <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Poin Maksimal: {q.points}</span>
+            <div key={ans.id} className="border-b border-slate-200 pb-6 mb-6 last:border-0 last:pb-0 last:mb-0">
+              <div className="flex justify-between items-center mb-2">
+                <b className="text-lg text-primary">Soal {i + 1} ({q.type})</b>
+                <span className="text-sm text-slate-500">Poin Maksimal: {q.points}</span>
               </div>
-              <p style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>{q.prompt}</p>
+              <p className="mt-2 mb-4 text-slate-800 font-medium">{q.prompt}</p>
 
-              <div style={{ background: '#f8fbfc', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
-                <b style={{ display: 'block', fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>Jawaban Peserta:</b>
+              <div className="bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100">
+                <b className="block text-xs text-slate-400 uppercase tracking-wider mb-2">Jawaban Peserta:</b>
                 
                 {q.type === 'FILE_UPLOAD' ? (
                   ans.fileUrl ? (
-                    <a href={ans.fileUrl} target="_blank" rel="noreferrer" className="btn btn-primary btn-small" style={{ display: 'inline-flex', gap: '0.5rem' }}>
+                    <a href={ans.fileUrl} target="_blank" rel="noreferrer" className="btn btn-primary btn-small inline-flex gap-2">
                       <Download size={14}/> Unduh Lampiran
                     </a>
                   ) : (
-                    <span style={{ color: 'var(--error)' }}>Tidak ada lampiran.</span>
+                    <span className="text-red-500 font-medium">Tidak ada lampiran.</span>
                   )
                 ) : (
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{ans.answerText || <span style={{ color:'var(--muted)'}}>(Kosong)</span>}</div>
+                  <div className="whitespace-pre-wrap text-slate-700">{ans.answerText || <span className="text-slate-400 italic">(Kosong)</span>}</div>
                 )}
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <div style={{ width: '120px' }}>
-                  <label className="form-label">Beri Skor</label>
-                  <input type="number" max={q.points} min={0} className="form-input" style={{ width: '100%' }} value={currentAns?.score || 0} onChange={(e) => updateAnswerScore(q.id, 'score', parseInt(e.target.value) || 0)} />
+              <div className="flex gap-4 items-center flex-wrap">
+                <div className="w-32">
+                  <label className="form-label text-xs font-semibold">Beri Skor</label>
+                  <input type="number" max={q.points} min={0} className="form-input w-full" value={currentAns?.score || 0} onChange={(e) => updateAnswerScore(q.id, 'score', parseInt(e.target.value) || 0)} />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label className="form-label">Komentar / Feedback Spesifik (Opsional)</label>
-                  <input type="text" className="form-input" style={{ width: '100%' }} placeholder="Catatan untuk soal ini..." value={currentAns?.feedback || ""} onChange={(e) => updateAnswerScore(q.id, 'feedback', e.target.value)} />
+                <div className="flex-1 min-w-[200px]">
+                  <label className="form-label text-xs font-semibold">Komentar / Feedback Spesifik (Opsional)</label>
+                  <input type="text" className="form-input w-full" placeholder="Catatan untuk soal ini..." value={currentAns?.feedback || ""} onChange={(e) => updateAnswerScore(q.id, 'feedback', e.target.value)} />
                 </div>
               </div>
             </div>
@@ -105,25 +105,25 @@ export function GradingClient({ attempt }: { attempt: any }) {
         })}
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: '12px', padding: '2rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Penilaian Akhir & Keputusan</h2>
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+        <h2 className="text-xl font-bold mb-6 text-slate-900">Penilaian Akhir & Keputusan</h2>
         
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-          <div style={{ width: '150px' }}>
-            <label className="form-label">Nilai Akhir (0-100)</label>
-            <input type="number" className="form-input" style={{ width: '100%', fontSize: '1.5rem', fontWeight: 'bold' }} value={score} onChange={(e) => setScore(parseInt(e.target.value)||0)} />
+        <div className="flex gap-4 mb-4 flex-wrap">
+          <div className="w-36">
+            <label className="form-label text-xs font-semibold">Nilai Akhir (0-100)</label>
+            <input type="number" className="form-input w-full text-2xl font-bold text-center text-primary" value={score} onChange={(e) => setScore(parseInt(e.target.value)||0)} />
           </div>
-          <div style={{ flex: 1 }}>
-            <label className="form-label">Feedback Keseluruhan</label>
-            <textarea className="form-input" style={{ width: '100%', minHeight: '60px' }} value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Tuliskan umpan balik yang membangun untuk peserta..."></textarea>
+          <div className="flex-1 min-w-[250px]">
+            <label className="form-label text-xs font-semibold">Feedback Keseluruhan</label>
+            <textarea className="form-input w-full min-h-[60px]" value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Tuliskan umpan balik yang membangun untuk peserta..."></textarea>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '2rem' }}>
-          <button className="btn btn-outline" onClick={() => saveGrade(false)} disabled={saving} style={{ color: 'var(--error)', borderColor: 'var(--error)' }}>
+        <div className="flex gap-4 justify-end mt-8 flex-wrap">
+          <button className="btn btn-outline text-red-600 border-red-600 hover:bg-red-50 flex items-center gap-2" onClick={() => saveGrade(false)} disabled={saving}>
             <XCircle size={16}/> {saving ? "Loading..." : "Gagalkan"}
           </button>
-          <button className="btn btn-primary" onClick={() => saveGrade(true)} disabled={saving}>
+          <button className="btn btn-primary flex items-center gap-2" onClick={() => saveGrade(true)} disabled={saving}>
             <CheckCircle size={16}/> {saving ? "Loading..." : "Luluskan & Selesai"}
           </button>
         </div>

@@ -31,8 +31,8 @@ export default async function GradingPage({ params }: { params: Promise<{ id: st
 
   return (
     <DashboardChrome user={user}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <Link href="/mentor/evaluasi" className="text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="mb-6">
+        <Link href="/mentor/evaluasi" className="text-link inline-flex items-center gap-2">
           <ArrowLeft size={16} /> Kembali ke Evaluasi
         </Link>
       </div>

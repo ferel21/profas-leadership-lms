@@ -88,8 +88,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     revalidatePath(`/mentor/evaluasi/${assessmentId}`);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Error saving assessment:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Gagal menyimpan asesmen";
+    console.error("Error saving assessment:", error);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

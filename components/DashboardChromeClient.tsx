@@ -133,7 +133,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
           {/* Executive Command Palette Trigger */}
           <button
             onClick={() => setIsCommandOpen(true)}
-            className="hover-lift"
+            className="hover-lift command-palette-btn"
             style={{
               display: "flex",
               alignItems: "center",
@@ -177,7 +177,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
               )}
             </div>
           </div>}
-          <Link href="/program" className="btn btn-primary btn-small">Jelajahi Program</Link>
+          <Link href="/program" className="btn btn-primary btn-small hide-on-mobile">Jelajahi Program</Link>
         </div>
       </header>
       <main className="dashboard-content">{children}</main>

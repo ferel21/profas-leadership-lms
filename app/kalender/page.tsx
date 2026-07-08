@@ -40,7 +40,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
 
   return (
     <DashboardChrome user={user}>
-      <div className="dash-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+      <div className="dash-title dash-title-flex">
         <div>
           <h1>Kalender Akademik</h1>
           <p>Pantau jadwal kelas *live*, tenggat waktu tugas, dan agenda penting lainnya.</p>
@@ -50,19 +50,19 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         )}
       </div>
 
-      <div className="calendar-layout" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "2rem", marginTop: "2rem", alignItems: "start" }}>
+      <div className="calendar-layout calendar-grid-layout">
         <main className="calendar-main">
-          <div className="data-card" style={{ padding: "0" }}>
-            <div style={{ padding: "1.5rem", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={{ fontSize: "1.25rem", margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div className="data-card calendar-card-p0">
+            <div className="calendar-card-head">
+              <h2 className="calendar-card-title">
                 <CalendarIcon size={20} /> Jadwal Bulan Ini ({new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(startDate)})
               </h2>
             </div>
             
-            <div className="event-list" style={{ display: "flex", flexDirection: "column" }}>
+            <div className="event-list calendar-event-list">
               {events.length === 0 ? (
-                <div style={{ padding: "4rem 2rem", textAlign: "center", color: "#64748b" }}>
-                  <CalendarIcon size={48} style={{ opacity: 0.2, margin: "0 auto 1rem" }} />
+                <div className="calendar-empty-box">
+                  <CalendarIcon size={48} className="calendar-empty-icon" />
                   <p>Tidak ada jadwal terdaftar pada bulan ini.</p>
                 </div>
               ) : (
@@ -71,35 +71,35 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                   const isPast = eventDate < new Date();
                   
                   return (
-                    <div key={event.id} style={{ display: "flex", padding: "1.5rem", borderBottom: "1px solid #f1f5f9", opacity: isPast ? 0.6 : 1, transition: "background 0.2s" }} className="event-row">
-                      <div style={{ minWidth: "100px", textAlign: "center", borderRight: "1px solid #e2e8f0", paddingRight: "1.5rem", marginRight: "1.5rem" }}>
-                        <strong style={{ display: "block", fontSize: "2rem", lineHeight: 1, color: "var(--color-primary)" }}>{eventDate.getDate()}</strong>
-                        <small style={{ textTransform: "uppercase", fontWeight: 600, color: "#64748b" }}>
+                    <div key={event.id} className={`event-row calendar-event-row ${isPast ? "is-past" : ""}`}>
+                      <div className="calendar-date-col">
+                        <strong className="calendar-date-num">{eventDate.getDate()}</strong>
+                        <small className="calendar-date-day">
                           {new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(eventDate)}
                         </small>
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.5rem" }}>
-                          <span className="meta-badge type-evaluation" style={{ fontSize: "0.65rem", padding: "2px 6px" }}>
+                      <div className="calendar-event-body">
+                        <div className="calendar-badge-wrap">
+                          <span className="meta-badge type-evaluation calendar-badge-pill">
                             {event.course?.title ?? "Agenda Global"}
                           </span>
                         </div>
-                        <h3 style={{ fontSize: "1.125rem", color: "#0f172a", margin: "0 0 0.5rem 0", fontWeight: "600" }}>{event.title}</h3>
-                        {event.description && <p style={{ margin: "0 0 1rem 0", fontSize: "0.875rem", color: "#475569" }}>{event.description}</p>}
+                        <h3 className="calendar-event-title">{event.title}</h3>
+                        {event.description && <p className="calendar-event-desc">{event.description}</p>}
                         
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", color: "#64748b", fontSize: "0.875rem" }}>
-                          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <div className="calendar-event-meta-row">
+                          <span className="calendar-meta-item">
                             <Clock size={14} /> 
                             {new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(event.startTime)} - 
                             {new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(event.endTime)}
                           </span>
                           {event.location && (
-                            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: event.location.includes("http") ? "var(--color-primary)" : "inherit" }}>
+                            <span className={event.location.includes("http") ? "calendar-meta-primary" : "calendar-meta-item"}>
                               {event.location.includes("http") ? <Video size={14} /> : <MapPin size={14} />} 
-                              {event.location.includes("http") ? <a href={event.location} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>Link Pertemuan</a> : event.location}
+                              {event.location.includes("http") ? <a href={event.location} target="_blank" rel="noreferrer" className="calendar-meta-link">Link Pertemuan</a> : event.location}
                             </span>
                           )}
-                          <Link href="/absensi" style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "var(--color-primary)", fontWeight: 700 }}>
+                          <Link href="/absensi" className="calendar-absensi-link">
                             <ClipboardCheck size={14} /> {user.role === "STUDENT" ? "Isi Absensi" : "Kelola Absensi"}
                           </Link>
                         </div>
@@ -113,11 +113,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         </main>
         
         <aside className="calendar-sidebar">
-          <div className="data-card" style={{ background: "#f8fafc", border: "1px dashed #cbd5e1", marginBottom: "1rem" }}>
-            <h3 style={{ fontSize: "1rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", color: "#334155" }}>
+          <div className="data-card calendar-info-card">
+            <h3 className="calendar-info-title">
               <Info size={16} /> Info Kalender
             </h3>
-            <p style={{ fontSize: "0.875rem", color: "#64748b", margin: 0 }}>
+            <p className="calendar-info-desc">
               Jadwal yang ditampilkan di sini adalah agenda spesifik dari program yang Anda ikuti, serta pengumuman global dari institusi.
             </p>
           </div>

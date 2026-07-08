@@ -67,12 +67,12 @@ export default async function MentorPesertaPage() {
         </div>
       </div>
 
-      <div className="data-card" style={{ marginTop: "2rem" }}>
-        <div className="data-title" style={{ borderBottom: "1px solid #e2e8f0", paddingBottom: "1rem", marginBottom: "1rem" }}>
+      <div className="data-card mt-8">
+        <div className="data-title border-b border-slate-200 pb-4 mb-4 flex justify-between items-center flex-wrap gap-4">
           <div>
             <h2>Daftar Peserta Kelas ({students.length})</h2>
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div className="flex gap-2">
             <div className="search-box">
               <Search size={16} />
               <input type="text" placeholder="Cari nama atau email..." />
@@ -95,36 +95,36 @@ export default async function MentorPesertaPage() {
             <tbody>
               {students.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: "center", padding: "2rem" }}>Belum ada peserta yang mendaftar.</td>
+                  <td colSpan={6} className="text-center p-8 text-muted">Belum ada peserta yang mendaftar.</td>
                 </tr>
               ) : students.map(s => (
                 <tr key={s.id}>
                   <td>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <strong>{s.name}</strong>
-                      <small style={{ color: "#64748b" }}>{s.email}</small>
+                    <div className="flex flex-col">
+                      <strong className="text-slate-800">{s.name}</strong>
+                      <small className="text-slate-500">{s.email}</small>
                     </div>
                   </td>
                   <td>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
+                    <div className="flex flex-wrap gap-1">
                       {s.programs.map((p, i) => (
                         <span key={i} className="meta-badge type-lesson">{p}</span>
                       ))}
                     </div>
                   </td>
                   <td>
-                    <div className="progress-line" style={{ margin: 0, width: "120px" }}>
-                      <i><em style={{ width: `${s.avgProgress}%`, background: s.avgProgress === 100 ? "var(--color-success)" : "" }} /></i>
-                      <b style={{ color: s.avgProgress === 100 ? "var(--color-success)" : "" }}>{s.avgProgress}%</b>
+                    <div className="progress-line m-0 w-[120px]">
+                      <i><em className={s.avgProgress === 100 ? "bg-emerald-500" : ""} style={{ width: `${s.avgProgress}%` }} /></i>
+                      <b className={s.avgProgress === 100 ? "text-emerald-500 font-bold" : ""}>{s.avgProgress}%</b>
                     </div>
                   </td>
                   <td>
-                    <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-warning)", fontWeight: "bold" }}>
+                    <span className="flex items-center gap-1 text-amber-500 font-bold">
                       <Trophy size={14} /> {s.totalXp}
                     </span>
                   </td>
                   <td>
-                    <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-success)", fontSize: "0.875rem" }}>
+                    <span className="flex items-center gap-1 text-emerald-500 text-sm">
                       <Activity size={14} /> {s.lastActive}
                     </span>
                   </td>

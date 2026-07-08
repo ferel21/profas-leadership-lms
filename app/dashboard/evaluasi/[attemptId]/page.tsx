@@ -32,19 +32,19 @@ export default async function MentorEvaluasiDetailPage({ params }: { params: Pro
 
   return (
     <DashboardChrome user={user}>
-      <header className="review-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-        <Link href="/dashboard/evaluasi" className="btn btn-small btn-outline"><ArrowLeft/> Kembali ke Daftar</Link>
-        <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: "1.5rem", margin: 0 }}>Review Jawaban: {attempt.user.name}</h2>
-          <p style={{ margin: 0, color: "#64748b" }}>{attempt.assessment.title} • {attempt.assessment.course.title}</p>
+      <header className="review-header mb-8 flex items-center gap-4 flex-wrap">
+        <Link href="/dashboard/evaluasi" className="btn btn-small btn-outline flex items-center gap-1"><ArrowLeft size={16}/> Kembali ke Daftar</Link>
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold m-0 text-slate-900">Review Jawaban: {attempt.user.name}</h2>
+          <p className="m-0 text-slate-500">{attempt.assessment.title} • {attempt.assessment.course.title}</p>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <strong style={{ fontSize: "1.5rem", display: "block", color: attempt.passed ? "var(--color-success)" : "var(--color-error)" }}>Skor: {attempt.score}</strong>
-          <small>{attempt.passed ? "Lulus" : "Belum Lulus"}</small>
+        <div className="text-right">
+          <strong className={`text-2xl block ${attempt.passed ? "text-emerald-600" : "text-red-600"}`}>Skor: {attempt.score}</strong>
+          <small className="text-slate-500">{attempt.passed ? "Lulus" : "Belum Lulus"}</small>
         </div>
       </header>
 
-      <main className="review-list">
+      <main className="review-list flex flex-col gap-6">
         {attempt.answers.map((ans: any, index: number) => {
           const q = ans.question;
           const isMultiple = q.type === 'MULTIPLE_CHOICE' || q.type === 'TRUE_FALSE';
@@ -58,7 +58,7 @@ export default async function MentorEvaluasiDetailPage({ params }: { params: Pro
                 <span>Soal {index + 1} ({q.type})</span>
                 {isMultiple && (isCorrect ? <strong className="status-correct"><CheckCircle2 size={16}/> Benar</strong> : <strong className="status-incorrect"><XCircle size={16}/> Salah</strong>)}
               </div>
-              <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>{q.prompt}</h3>
+              <h3 className="text-lg font-bold mb-4 text-slate-800">{q.prompt}</h3>
               
               {isMultiple ? (
                 <div className="review-options">
@@ -77,16 +77,16 @@ export default async function MentorEvaluasiDetailPage({ params }: { params: Pro
                   })}
                 </div>
               ) : (
-                <div style={{ background: '#f8fbfc', padding: '1rem', borderRadius: '8px' }}>
-                  <p><strong>Jawaban:</strong> {userAns}</p>
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <p className="m-0 mb-2 text-slate-700"><strong>Jawaban:</strong> {userAns}</p>
                   {q.type === 'FILE_UPLOAD' && ans.fileUrl && (
-                    <a href={ans.fileUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--teal)', fontWeight: 'bold' }}>Download Lampiran</a>
+                    <a href={ans.fileUrl} target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline inline-block mt-2">Download Lampiran</a>
                   )}
                 </div>
               )}
 
               {q.explanation && (
-                <div className="review-explanation" style={{ marginTop: '1rem' }}>
+                <div className="review-explanation mt-4">
                   <h4>Pembahasan / Kunci:</h4>
                   <p>{q.explanation}</p>
                 </div>

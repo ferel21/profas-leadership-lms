@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir, unlink } from "node:fs/promises";
-import { extname, join } from "node:path";
-import { existsSync } from "node:fs";
+
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES: Record<string, { extension: string; signatures: number[][] }> = {

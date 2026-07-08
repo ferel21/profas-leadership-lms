@@ -1,4 +1,4 @@
-import { PrismaClient, AssessmentType, ContentType, CourseLevel, EnrollmentStatus, Persona, Role } from "@prisma/client";
+import { PrismaClient, AssessmentType, NodeType, CourseLevel, EnrollmentStatus, Persona, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -93,7 +93,7 @@ async function main() {
     for (let m = 0; m < moduleTitles.length; m++) {
       const folder = await prisma.courseNode.create({ data: { courseId: course.id, title: moduleTitles[m], description: `Prinsip dan praktik ${moduleTitles[m].toLowerCase()}.`, type: "FOLDER", order: m + 1 } });
       for (let l = 0; l < 3; l++) {
-        const type = l === 1 ? ContentType.TEXT : ContentType.VIDEO;
+        const type = l === 1 ? NodeType.TEXT : NodeType.VIDEO;
         await prisma.courseNode.create({
           data: { courseId: course.id, parentId: folder.id, title: ["Konsep Inti", "Praktik Reflektif", "Studi Kasus"][l], type: type, order: l + 1, durationMin: 8 + l * 4, content: l === 1 ? "Kepemimpinan dimulai dari kemampuan membaca situasi, mengenali pola diri, dan memilih respons yang paling bertanggung jawab. Gunakan jurnal refleksi untuk menghubungkan konsep hari ini dengan tantangan nyata Anda." : null, fileUrl: l !== 1 ? "https://www.youtube.com/embed/ysz5S6PUM-U" : null },
         });

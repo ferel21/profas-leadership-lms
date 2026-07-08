@@ -43,35 +43,25 @@ export function AuthForm({
 
   return <form onSubmit={submit} className="auth-form">
     {(errorParam || error) && (
-      <div style={{
-        padding: "1rem",
-        borderRadius: "12px",
-        background: "#fef2f2",
-        border: "1px solid #f87171",
-        color: "#991b1b",
-        marginBottom: "1.5rem",
-        fontSize: "0.88rem",
-        lineHeight: "1.4",
-        boxShadow: "0 4px 12px rgba(239, 68, 68, 0.1)"
-      }}>
-        <div style={{ fontWeight: 700, marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+      <div className="auth-alert-box">
+        <div className="auth-alert-header">
           <span>⚠️ Gagal Masuk / Otorisasi Google</span>
         </div>
         <div>
           {reasonParam || error || "Terjadi kendala saat verifikasi akun Anda."}
         </div>
         {errorParam === "token_exchange_failed" && (
-          <div style={{ marginTop: "8px", padding: "8px", background: "#fff", borderRadius: "8px", fontSize: "0.8rem", color: "#b91c1c", border: "1px solid #fecaca" }}>
+          <div className="auth-alert-codebox">
             <b>💡 Solusi Konfigurasi Google Console &amp; Vercel:</b><br/>
             1. Pastikan di Dasbor Vercel tidak ada spasi/enter tambahan pada nilai <code>GOOGLE_CLIENT_ID</code> &amp; <code>GOOGLE_CLIENT_SECRET</code>.<br/>
             2. Pastikan di Google Cloud Console (&rarr; APIs &amp; Services &rarr; Credentials), pada bagian <b>Authorized redirect URIs</b>, sudah ditambahkan URL berikut secara persis:<br/>
-            <code style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", display: "inline-block", marginTop: "4px", color: "#0f172a" }}>https://profas-leadership-lms.vercel.app/api/auth/callback/google</code>
+            <code className="auth-code-pill">https://profas-leadership-lms.vercel.app/api/auth/callback/google</code>
           </div>
         )}
       </div>
     )}
 
-    <a href="/api/auth/google" className="btn btn-outline hover-lift" style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', marginBottom: '1.5rem', background: 'white', border: '1.5px solid var(--line)', padding: '0.85rem', fontWeight: 600, color: '#1e293b', borderRadius: '14px' }}>
+    <a href="/api/auth/google" className="auth-btn-google hover-lift">
       <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -80,17 +70,17 @@ export function AuthForm({
       </svg>
       {mode === "login" ? "Masuk dengan Google" : "Daftar dengan Google"}
     </a>
-    <div style={{ display: 'flex', alignItems: 'center', textAlign: 'center', marginBottom: '1.5rem', color: 'var(--muted)', fontSize: '0.85rem' }}>
-      <div style={{ flex: 1, borderBottom: '1px solid var(--line)' }}></div>
-      <span style={{ padding: '0 10px', fontWeight: 600 }}>atau dengan email</span>
-      <div style={{ flex: 1, borderBottom: '1px solid var(--line)' }}></div>
+    <div className="auth-divider-row">
+      <div className="auth-divider-line"></div>
+      <span className="auth-divider-text">atau dengan email</span>
+      <div className="auth-divider-line"></div>
     </div>
 
     {mode === "register" && <><label>Nama lengkap<input name="name" placeholder="Nama Anda" required minLength={3} maxLength={80}/></label><label>Nama akun<input name="username" placeholder="contoh: nadia.pratama" required minLength={3} maxLength={30} pattern="[a-z0-9][a-z0-9._-]*[a-z0-9]" title="Gunakan huruf kecil, angka, titik, garis bawah, atau tanda hubung." autoCapitalize="none"/></label><div className="persona-select"><span>Saya adalah</span><div>{[["STUDENT_ENTREPRENEUR","Pengusaha / Pelajar"],["ACADEMIC","Akademisi"],["ORGANIZATION","Organisasi"],["COOPERATIVE","Koperasi"]].map(([value,label])=><button type="button" key={value} onClick={()=>setPersona(value)} className={persona===value?"active":""}>{label}</button>)}</div></div></>}
     <label>Email<input name="email" type="email" placeholder="nama@email.com" required/></label>
     <label>Kata sandi<div className="password-input"><input name="password" type={show?"text":"password"} placeholder={mode==="login"?"Masukkan kata sandi":"Minimal 8 karakter"} required minLength={mode==="login"?6:8}/><button type="button" onClick={()=>setShow(!show)}>{show?<EyeOff/>:<Eye/>}</button></div></label>
     {mode === "login" && <div className="form-row"><label className="remember"><input name="remember" type="checkbox"/> Ingat saya</label><Link href="mailto:halo@profas.id?subject=Bantuan%20kata%20sandi%20PROFAS">Lupa kata sandi?</Link></div>}
-    <button className="btn btn-primary auth-submit hover-lift" disabled={loading} style={{ marginTop: "0.5rem" }}>{loading?<LoaderCircle className="spin"/>:<>{mode==="login"?"Masuk ke Dashboard":"Buat Akun Gratis"}<ArrowRight/></>}</button>
-    {mode === "login" && <div className="demo-box" style={{ marginTop: "1.5rem" }}><b>Akun demo</b><div><button type="button" onClick={()=>demo("peserta@profas.id")}>Peserta</button><button type="button" onClick={()=>demo("mentor@profas.id")}>Mentor</button><button type="button" onClick={()=>demo("admin@profas.id")}>Admin</button></div><small>Kata sandi semua akun: profas123</small></div>}
+    <button className="btn btn-primary auth-submit auth-submit-mt hover-lift" disabled={loading}>{loading?<LoaderCircle className="spin"/>:<>{mode==="login"?"Masuk ke Dashboard":"Buat Akun Gratis"}<ArrowRight/></>}</button>
+    {mode === "login" && <div className="demo-box auth-demo-mt"><b>Akun demo</b><div><button type="button" onClick={()=>demo("peserta@profas.id")}>Peserta</button><button type="button" onClick={()=>demo("mentor@profas.id")}>Mentor</button><button type="button" onClick={()=>demo("admin@profas.id")}>Admin</button></div><small>Kata sandi semua akun: profas123</small></div>}
   </form>;
 }

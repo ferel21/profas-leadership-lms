@@ -73,6 +73,13 @@ export async function POST(request: Request) {
 
     if (!enrollment) return NextResponse.json({ message: "Anda belum terdaftar di program ini." }, { status: 403 });
 
+    const validQuestionIds = new Set(assessment.questions.map(q => q.id));
+    const submittedQuestionIds = Object.keys(answers);
+    const hasInvalidQuestionId = submittedQuestionIds.some(id => !validQuestionIds.has(id));
+    if (hasInvalidQuestionId && assessment.questions.length > 0) {
+      return NextResponse.json({ message: "ID pertanyaan dalam jawaban tidak valid." }, { status: 400 });
+    }
+
     let correct = 0;
     let totalScore = 0;
     let maxPossibleScore = 0;

@@ -46,54 +46,54 @@ export default async function MentorDashboardPage() {
       </div>
       
       <div className="metric-grid">
-        <article className="glass hover-lift" style={{ padding: '20px', borderRadius: '15px' }}>
-          <span><BookOpen/></span>
-          <div><small>Program Aktif</small><b>{courses.length}</b><p>Program yang dikelola</p></div>
+        <article className="p-5 rounded-2xl bg-white/80 border border-slate-200 shadow-sm flex items-center gap-4 hover-lift">
+          <span className="p-3 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center"><BookOpen size={24}/></span>
+          <div><small className="text-slate-500 font-semibold block uppercase tracking-wider text-xs">Program Aktif</small><b className="text-2xl font-extrabold text-slate-900 block my-1">{courses.length}</b><p className="m-0 text-xs text-slate-400">Program yang dikelola</p></div>
         </article>
-        <article className="glass hover-lift" style={{ padding: '20px', borderRadius: '15px' }}>
-          <span><UsersRound/></span>
-          <div><small>Peserta Unik</small><b>{students}</b><p>Di seluruh program</p></div>
+        <article className="p-5 rounded-2xl bg-white/80 border border-slate-200 shadow-sm flex items-center gap-4 hover-lift">
+          <span className="p-3 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center"><UsersRound size={24}/></span>
+          <div><small className="text-slate-500 font-semibold block uppercase tracking-wider text-xs">Peserta Unik</small><b className="text-2xl font-extrabold text-slate-900 block my-1">{students}</b><p className="m-0 text-xs text-slate-400">Di seluruh program</p></div>
         </article>
-        <article className="glass hover-lift" style={{ padding: '20px', borderRadius: '15px' }}>
-          <span><TrendingUp/></span>
-          <div><small>Rata-rata Progres</small><b>{averageProgress}%</b><p>Berdasarkan enrollment</p></div>
+        <article className="p-5 rounded-2xl bg-white/80 border border-slate-200 shadow-sm flex items-center gap-4 hover-lift">
+          <span className="p-3 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><TrendingUp size={24}/></span>
+          <div><small className="text-slate-500 font-semibold block uppercase tracking-wider text-xs">Rata-rata Progres</small><b className="text-2xl font-extrabold text-slate-900 block my-1">{averageProgress}%</b><p className="m-0 text-xs text-slate-400">Berdasarkan enrollment</p></div>
         </article>
       </div>
 
-      <div style={{ marginTop: "2rem" }}>
+      <div className="mt-8">
         <MentorCourseActions courses={courseOptions} />
         <BroadcastManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
       </div>
 
-      <section className="role-grid" style={{ marginTop: "1rem" }}>
-        <article className="data-card glass hover-lift" id="program" style={{ width: '100%', gridColumn: '1 / -1' }}>
-          <div className="data-title">
+      <section className="role-grid mt-4">
+        <article className="data-card glass hover-lift w-full col-span-full" id="program">
+          <div className="data-title border-b border-slate-200 pb-4 mb-4">
             <div>
               <h2>Program yang Anda Kelola</h2>
               <p>Klik Course Builder untuk mengedit materi</p>
             </div>
           </div>
-          <div className="mentor-courses">
+          <div className="mentor-courses flex flex-col divide-y divide-slate-100">
             {courses.map(course => (
-              <div key={course.id} style={{ padding: '1rem', borderBottom: '1px solid var(--line)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <div className="program-thumb" style={{ width: 85, height: 60, position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
-                  <Image src={course.image || "/images/profas-leadership-hero.png"} fill alt={course.title} style={{ objectFit: 'cover' }} />
+              <div key={course.id} className="py-4 flex gap-4 items-center flex-wrap sm:flex-nowrap">
+                <div className="program-thumb w-[85px] h-[60px] relative rounded-lg overflow-hidden shrink-0 bg-slate-100">
+                  <Image src={course.image || "/images/profas-leadership-hero.png"} fill alt={course.title} className="object-cover" />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: '10px', color: 'var(--teal-dark)', fontWeight: 'bold' }}>{course.category}</span>
-                  <h3 style={{ margin: '4px 0', fontSize: '14px' }}>{course.title}</h3>
-                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>
+                <div className="flex-1 min-w-[200px]">
+                  <span className="text-[10px] text-primary font-bold uppercase tracking-wider block">{course.category}</span>
+                  <h3 className="my-1 text-sm font-bold text-slate-900">{course.title}</h3>
+                  <p className="m-0 text-xs text-slate-500">
                     {course.nodes.filter(n => n.type === "FOLDER").length} modul • {course.enrollments.length} enrollment
                   </p>
                 </div>
-                <div style={{ width: 60, display: 'flex', justifyContent: 'center' }}>
+                <div className="w-[60px] flex justify-center shrink-0">
                   <ProgressRing value={average(course.enrollments.map(item=>item.progressPercent))} size={50} />
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <Link href={`/mentor/courses/${course.id}/builder`} className="btn btn-outline btn-small hover-lift">
+                <div className="flex gap-2 shrink-0">
+                  <Link href={`/mentor/courses/${course.id}/builder`} className="btn btn-outline btn-small hover-lift flex items-center gap-1">
                     <Settings size={14} /> Builder
                   </Link>
-                  <Link href={`/program/${course.slug}`} aria-label={`Lihat ${course.title}`} className="btn btn-primary btn-small hover-lift">
+                  <Link href={`/program/${course.slug}`} aria-label={`Lihat ${course.title}`} className="btn btn-primary btn-small hover-lift flex items-center gap-1">
                     Lihat <ChevronRight size={14}/>
                   </Link>
                 </div>

@@ -101,37 +101,34 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
         </div>
 
         <div>
-          <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "6px" }}>Judul Pengumuman</label>
+          <label className="block text-sm font-semibold mb-1.5 text-slate-700">Judul Pengumuman</label>
           <input
             type="text"
             required
             placeholder="Contoh: Jadwal Live Mentoring Kohort 1 Malam Ini"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="form-input"
-            style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+            className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-teal-600 transition"
           />
         </div>
 
         <div>
-          <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "6px" }}>Pesan / Deskripsi</label>
+          <label className="block text-sm font-semibold mb-1.5 text-slate-700">Pesan / Deskripsi</label>
           <textarea
             required
             rows={3}
             placeholder="Tuliskan pesan lengkap pengumuman untuk peserta..."
             value={message}
             onChange={e => setMessage(e.target.value)}
-            className="form-input"
-            style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", resize: "vertical" }}
+            className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-teal-600 transition resize-y"
           />
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "4px" }}>
+        <div className="flex justify-end mt-1">
           <button
             type="submit"
             disabled={loading || !title.trim() || !message.trim()}
-            className="btn btn-primary hover-lift"
-            style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", borderRadius: "8px", background: "var(--teal, #0d9488)", color: "#fff", fontWeight: 600, border: "none", cursor: "pointer" }}
+            className="btn btn-primary hover-lift flex items-center gap-2 px-5 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold disabled:opacity-50 transition"
           >
             {loading ? <Loader2 size={16} className="spin" /> : <Send size={16} />}
             <span>Siarkan Pengumuman Sekarang</span>

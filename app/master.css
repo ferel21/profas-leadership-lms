@@ -2411,6 +2411,37 @@ input[type="text"]:focus, input[type="email"]:focus {
 }
 
 @media (max-width: 768px) {
+  /* Mobile Responsive Utilities & Header Fixes */
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .show-on-mobile {
+    display: block !important;
+  }
+  .dashboard-header {
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+  .dash-actions {
+    gap: 8px !important;
+  }
+  .dash-actions .command-palette-btn span,
+  .dash-actions .command-palette-btn kbd {
+    display: none !important;
+  }
+  .dash-actions .command-palette-btn {
+    padding: 8px !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+  .dash-welcome span {
+    font-size: 0.75rem !important;
+    letter-spacing: 0.5px !important;
+  }
+
   /* Dashboard Collapsible Sidebar fixes */
   .dashboard-sidebar {
     width: 80% !important;

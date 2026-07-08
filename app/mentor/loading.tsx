@@ -1,0 +1,18 @@
+export default function MentorLoading() {
+  return (
+    <div className="loader-container">
+      <div className="spinner-modern" />
+      <div className="skeleton-grid mt-4">
+        <div className="skeleton-card">
+          <div className="skeleton-block skeleton-h-20 skeleton-w-50" />
+          <div className="skeleton-block skeleton-h-40 skeleton-w-100" />
+        </div>
+        <div className="skeleton-card">
+          <div className="skeleton-block skeleton-h-20 skeleton-w-50" />
+          <div className="skeleton-block skeleton-h-40 skeleton-w-100" />
+        </div>
+      </div>
+      <p className="text-muted text-sm mt-2">Memuat Ruang Manajemen Mentor...</p>
+    </div>
+  );
+}

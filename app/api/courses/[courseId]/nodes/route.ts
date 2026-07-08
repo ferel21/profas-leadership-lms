@@ -15,13 +15,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
     return NextResponse.json({ message: "Course tidak ditemukan atau bukan milik Anda" }, { status: 404 });
   }
 
-  const { nodes, deletedIds } = await request.json();
+  const { nodes } = await request.json();
 
   try {
     // 1. MASTER SKILL: Total Clean Deletion (Hapus node yang dieksplisitkan ATAU yang tidak ada lagi di daftar aktif frontend)
     const activeIds = (nodes || [])
-      .map((n: any) => n.id)
-      .filter((id: string) => id && !id.startsWith("tmp_") && id !== "new_node");
+      .map((n: { id?: string }) => n.id)
+      .filter((id?: string): id is string => typeof id === "string" && !id.startsWith("tmp_") && id !== "new_node");
 
     await prisma.courseNode.deleteMany({
       where: {

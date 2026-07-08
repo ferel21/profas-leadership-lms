@@ -199,12 +199,12 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
         return (
           <details key={node.id} open>
             <summary>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="player-tree-folder">
                 <Folder size={16} /> <b>{node.title}</b>
               </div>
               <ChevronDown />
             </summary>
-            <div style={{ marginLeft: '12px', paddingLeft: '8px', borderLeft: '1px solid var(--line)' }}>
+            <div className="player-tree-children">
               {renderTree(node.children)}
             </div>
           </details>
@@ -239,97 +239,97 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
       {sidebar && <button className="player-backdrop" onClick={() => setSidebar(false)} aria-label="Tutup daftar materi" />}
       <main className="player-main">
         <header><button onClick={() => setSidebar(true)} aria-label="Buka daftar materi"><Menu /></button><div><span>{current.title}</span><b>{current.title}</b></div><Link href="/dashboard">Keluar Kelas</Link></header>
-        <section className="lesson-stage" style={{ marginBottom: "2rem" }}>
+        <section className="lesson-stage">
           {current.type === "VIDEO" || (current.fileUrl && (current.fileUrl.endsWith(".mp4") || current.fileUrl.endsWith(".webm") || current.fileUrl.includes("/video/"))) ? (
-            <div className="video-shell hover-lift glass" style={{ borderRadius: "24px", padding: "12px", background: "rgba(255,255,255,0.4)" }}>
-              <div style={{ position: "relative", width: "100%", paddingTop: "56.25%", borderRadius: "16px", overflow: "hidden", background: "#0b2229", zIndex: 1 }}>
+            <div className="player-video-shell hover-lift glass">
+              <div className="player-video-frame">
                 {(current.fileUrl && (current.fileUrl.endsWith(".mp4") || current.fileUrl.endsWith(".webm") || current.fileUrl.startsWith("/api/uploads/"))) || (current.content && (current.content.endsWith(".mp4") || current.content.endsWith(".webm"))) ? (
                   <video 
                     controls 
                     controlsList="nodownload"
                     src={current.fileUrl || current.content || ""} 
-                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 2, background: "#000" }} 
+                    className="player-video-inner"
                   />
                 ) : (
                   <>
-                    <iframe src={current.fileUrl || current.content || undefined} title={current.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0, zIndex: 2 }} />
-                    <div className="video-fallback" style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center" }}><Play fill="currentColor" style={{ width: "60px", color: "white" }} /></div>
+                    <iframe src={current.fileUrl || current.content || undefined} title={current.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="player-video-inner" />
+                    <div className="player-video-fallback"><Play fill="currentColor" size={60} /></div>
                   </>
                 )}
               </div>
             </div>
           ) : (current.type === "QUIZ" || current.type === "ASSIGNMENT") ? (
-            <article className="pro-quiz-launch-card pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', textAlign: 'center' }}>
-              <div className="pro-pulse-badge" style={{ width: '88px', height: '88px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'white', boxShadow: '0 8px 25px rgba(13, 148, 136, 0.4)' }}>
+            <article className="player-card-center hover-lift">
+              <div className="player-pulse-circle">
                 {current.type === "QUIZ" ? <Award size={44} /> : <FileCheck size={44} />}
               </div>
-              <span className="eyebrow" style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '14px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+              <span className="eyebrow-teal">
                 {current.type === "QUIZ" ? "⚡ EVALUASI & KUIS PEMAHAMAN PRO" : "💼 TUGAS EKSEKUTIF & STUDI KASUS"}
               </span>
-              <h1 style={{ marginTop: '0.75rem', marginBottom: '1.25rem', fontSize: '38px', color: 'var(--ink)', fontWeight: 800, letterSpacing: '-0.5px' }}>
+              <h1 className="player-title-xl">
                 {current.title}
               </h1>
-              <p style={{ maxWidth: '640px', margin: '0 auto 2.5rem', fontSize: '1.2rem', color: '#475569', lineHeight: 1.7 }}>
+              <p className="player-desc-lead">
                 {current.content || (current.type === "QUIZ" 
                   ? "Uji tingkat pemahaman strategi dan konsep kepemimpinan Anda pada modul ini. Klik tombol di bawah untuk memulai kuis interaktif." 
                   : "Selesaikan instruksi tugas eksekutif ini untuk memvalidasi penerapan kepemimpinan Anda di lapangan nyata.")}
               </p>
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div className="player-actions-row">
                 <Link 
                   href={`/evaluasi/${current.assessmentId || current.id}`} 
-                  className="pro-btn-glow hover-lift" 
-                  style={{ padding: '18px 42px', fontSize: '18px', borderRadius: '16px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
+                  className="player-btn-quiz"
                 >
                   <Play fill="currentColor" size={22} /> Mulai {current.type === "QUIZ" ? "Mengerjakan Kuis" : "Mengerjakan Tugas"} Sekarang 🚀
                 </Link>
               </div>
-              <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center', gap: '2.5rem', color: '#64748b', fontSize: '15px', fontWeight: 600 }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0fdfa', padding: '6px 14px', borderRadius: '20px', color: 'var(--color-primary-dark)' }}><Clock3 size={18} /> Durasi: {current.durationMin || 30} Menit</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fef3c7', padding: '6px 14px', borderRadius: '20px', color: '#b45309' }}><CheckCircle2 size={18} /> Bobot Nilai: 100 Poin</span>
+              <div className="player-meta-badges">
+                <span className="player-badge-duration"><Clock3 size={18} /> Durasi: {current.durationMin || 30} Menit</span>
+                <span className="player-badge-score"><CheckCircle2 size={18} /> Bobot Nilai: 100 Poin</span>
               </div>
             </article>
           ) : (current.type === "PDF" || (current.fileUrl && current.fileUrl.endsWith(".pdf"))) ? (
-            <article className="pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '2.5rem', borderRadius: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div>
-                  <span className="eyebrow" style={{ color: '#dc2626', fontWeight: 'bold', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '6px' }}><FileText size={18} /> 📑 DOKUMEN MODUL PEMBELAJARAN (PDF)</span>
-                  <h1 style={{ marginTop: '0.5rem', marginBottom: '0.5rem', fontSize: '32px', color: 'var(--ink)', fontWeight: 800 }}>{current.title}</h1>
+            <article className="player-card-center hover-lift">
+              <div className="player-pdf-top">
+                <div className="player-pdf-left">
+                  <span className="player-eyebrow-pdf"><FileText size={18} /> 📑 DOKUMEN MODUL PEMBELAJARAN (PDF)</span>
+                  <h1 className="player-title-xl" style={{ margin: "6px 0 0" }}>{current.title}</h1>
                 </div>
                 {current.fileUrl && (
-                  <a className="pro-btn-glow hover-lift" href={current.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', padding: '12px 24px', borderRadius: '12px', textDecoration: 'none', fontSize: '15px', background: '#dc2626', color: '#fff' }}>
-                    <Download size={18} style={{ marginRight: '8px' }} /> Unduh Modul PDF ({current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi"})
+                  <a className="player-btn-download-sm hover-lift" href={current.fileUrl} target="_blank" rel="noreferrer">
+                    <Download size={18} style={{ marginRight: "8px" }} /> Unduh Modul PDF ({current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi"})
                   </a>
                 )}
               </div>
-              {current.content && <p style={{ fontSize: '1.1rem', color: '#475569', marginBottom: '1.5rem', lineHeight: 1.7 }}>{current.content}</p>}
+              {current.content && <p className="player-desc-lead player-desc-left">{current.content}</p>}
               {current.fileUrl ? (
-                <div style={{ width: '100%', height: '700px', borderRadius: '16px', overflow: 'hidden', border: '1px solid #cbd5e1', background: '#f8fafc' }}>
-                  <iframe src={`${current.fileUrl}#toolbar=1&navpanes=0&scrollbar=1`} style={{ width: '100%', height: '100%', border: 'none' }} title={current.title} />
+                <div className="player-pdf-viewer">
+                  <iframe src={`${current.fileUrl}#toolbar=1&navpanes=0&scrollbar=1`} className="player-pdf-iframe" title={current.title} />
                 </div>
               ) : (
-                <div style={{ padding: '3rem', textAlign: 'center', background: '#fef2f2', borderRadius: '16px', color: '#991b1b' }}>
-                  <FileText size={48} style={{ margin: '0 auto 1rem', opacity: 0.6 }} />
-                  <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Berkas PDF belum diunggah untuk modul ini.</p>
+                <div className="player-pdf-missing">
+                  <FileText size={48} className="player-empty-icon" />
+                  <p className="player-empty-text">Berkas PDF belum diunggah untuk modul ini.</p>
                 </div>
               )}
             </article>
           ) : current.type === "IMAGE" ? (
-            <article className="pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '2.5rem', borderRadius: '24px', textAlign: 'center' }}>
-              <span className="eyebrow" style={{ color: '#16a34a', fontWeight: 'bold', letterSpacing: '1px' }}>🖼️ INFOGRAFIS & VISUAL PEMBELAJARAN</span>
-              <h1 style={{ marginTop: '0.5rem', marginBottom: '1.5rem', fontSize: '32px', color: 'var(--ink)', fontWeight: 800 }}>{current.title}</h1>
-              {current.content && <p style={{ fontSize: '1.1rem', color: '#475569', marginBottom: '1.5rem', lineHeight: 1.7, maxWidth: '720px', margin: '0 auto 1.5rem' }}>{current.content}</p>}
+            <article className="player-card-center hover-lift">
+              <span className="eyebrow-teal">🖼️ INFOGRAFIS & VISUAL PEMBELAJARAN</span>
+              <h1 className="player-title-xl">{current.title}</h1>
+              {current.content && <p className="player-desc-lead">{current.content}</p>}
               {current.fileUrl ? (
-                <img src={current.fileUrl} alt={current.title} style={{ maxWidth: '100%', maxHeight: '650px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', margin: '0 auto' }} />
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={current.fileUrl} alt={current.title} className="player-img-view" />
               ) : null}
             </article>
           ) : current.type === "LINK" ? (
-            <article className="pro-glass-card hover-lift" style={{ maxWidth: '800px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px', textAlign: 'center' }}>
-              <div style={{ width: '80px', height: '80px', background: '#f3e8ff', color: '#7e22ce', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <article className="player-card-compact hover-lift">
+              <div className="player-link-circle">
                 <Link2 size={40} />
               </div>
-              <span className="eyebrow" style={{ color: '#7e22ce', fontWeight: 'bold', letterSpacing: '1px' }}>🔗 TAUTAN SUMBER DAYA EKSTERNAL</span>
-              <h1 style={{ marginTop: '0.5rem', marginBottom: '1.25rem', fontSize: '32px', color: 'var(--ink)', fontWeight: 800 }}>{current.title}</h1>
-              <p style={{ fontSize: '1.15rem', color: '#475569', marginBottom: '2.5rem', lineHeight: 1.7 }}>
+              <span className="eyebrow-teal player-eyebrow-purple">🔗 TAUTAN SUMBER DAYA EKSTERNAL</span>
+              <h1 className="player-title-xl">{current.title}</h1>
+              <p className="player-desc-lead">
                 {current.content || "Modul ini merujuk pada tautan daya eksternal (Google Drive / Web / Zoom / Artikel) yang disiapkan oleh mentor Anda."}
               </p>
               {(current.fileUrl || current.content) && (
@@ -337,20 +337,19 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                   href={current.fileUrl || current.content || "#"} 
                   target="_blank" 
                   rel="noreferrer"
-                  className="pro-btn-glow hover-lift"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '16px 36px', fontSize: '18px', borderRadius: '14px', background: '#7e22ce', color: '#fff', textDecoration: 'none', fontWeight: 700 }}
+                  className="player-btn-external hover-lift"
                 >
                   <Link2 size={22} /> Buka Tautan Eksternal Sekarang 🚀
                 </a>
               )}
             </article>
           ) : (
-            <article className="pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px' }}>
-              <span className="eyebrow" style={{ color: 'var(--color-primary)', fontWeight: 'bold', letterSpacing: '1px' }}>📖 MATERI BACAAN EKSKLUSIF</span>
-              <h1 style={{ marginTop: '0.75rem', marginBottom: '1.75rem', fontSize: '40px', color: 'var(--ink)', fontWeight: 800, letterSpacing: '-0.5px' }}>{current.title}</h1>
-              <div style={{ lineHeight: 1.9, fontSize: '1.18rem', color: '#334155' }}>{current.content}</div>
+            <article className="player-card-read hover-lift">
+              <span className="eyebrow-teal">📖 MATERI BACAAN EKSKLUSIF</span>
+              <h1 className="player-title-read">{current.title}</h1>
+              <div className="player-desc-read">{current.content}</div>
               {current.fileUrl && (
-                <a className="pro-btn-glow hover-lift" href={current.fileUrl} target="_blank" rel="noreferrer" style={{ marginTop: '2rem', display: 'inline-flex', alignItems: 'center', padding: '14px 28px', borderRadius: '12px', textDecoration: 'none', fontSize: '16px' }}><Download size={18} style={{ marginRight: '10px' }} /> Unduh Berkas Materi</a>
+                <a className="player-btn-quiz hover-lift player-btn-dl-mat" href={current.fileUrl} target="_blank" rel="noreferrer"><Download size={18} style={{ marginRight: "10px" }} /> Unduh Berkas Materi</a>
               )}
             </article>
           )}
@@ -361,7 +360,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           <button onClick={() => setTab("lampiran")} className={tab === "lampiran" ? "active" : ""}><Download /> Lampiran</button>
           <button onClick={() => setTab("catatan")} className={tab === "catatan" ? "active" : ""}><FileText /> Catatan Saya</button>
         </nav>
-        <section className="lesson-notes glass" style={{ maxWidth: '1080px', margin: '0 auto 4rem', width: '100%', padding: '2.5rem', borderRadius: '0 0 24px 24px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--line)', borderTop: 'none' }}>
+        <section className="player-notes-section">
           {tab === "materi" && <>
             <h2>Deskripsi</h2>
             <p>{current.content}</p>
@@ -369,25 +368,25 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           {tab === "diskusi" && <><h2>Diskusi bersama</h2>{currentPosts.length === 0 ? <p>Belum ada diskusi. Jadilah yang pertama membagikan refleksi.</p> : <div className="discussion-list">{currentPosts.map(post => <div className="discussion" key={post.id}><b>{initials(post.user.name)}</b><p><strong>{post.user.id === currentUser.id ? "Anda" : post.user.name}</strong>{post.content}</p></div>)}</div>}<form className="discussion-form" onSubmit={submitDiscussion}><textarea value={discussion} onChange={event => setDiscussion(event.target.value)} placeholder="Bagikan pemikiran atau pertanyaan Anda..." maxLength={1000} aria-label="Pesan diskusi" /><button type="submit" className="btn btn-primary btn-small" disabled={busy || discussion.trim().length < 3}>{busy ? <LoaderCircle className="spin" /> : <><Send /> Kirim</>}</button></form></>}
           {tab === "lampiran" && (
             <div className="materials-container">
-              <h2 style={{ fontSize: "1.5rem", marginBottom: "0.5rem", color: "var(--ink)" }}>Lampiran & Berkas Pendukung</h2>
-              <p style={{ color: "#64748b", marginBottom: "1.5rem" }}>Unduh berkas materi, lembar kerja eksekutif, dan panduan belajar untuk modul ini.</p>
+              <h2 className="player-tab-header">Lampiran & Berkas Pendukung</h2>
+              <p className="player-tab-desc">Unduh berkas materi, lembar kerja eksekutif, dan panduan belajar untuk modul ini.</p>
               {current.fileUrl ? (
-                <div className="materials-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
-                  <a href={current.fileUrl} target="_blank" rel="noreferrer" className="material-download-card glass hover-lift" style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1.25rem", borderRadius: "16px", textDecoration: "none", color: "var(--ink)" }}>
-                    <div style={{ background: "#f0fdfa", color: "var(--color-primary)", padding: "12px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div className="player-materials-grid">
+                  <a href={current.fileUrl} target="_blank" rel="noreferrer" className="player-mat-card hover-lift">
+                    <div className="player-mat-icon">
                       <Download size={24} />
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{current.fileName || "Berkas Materi Pembelajaran"}</h3>
-                      <small style={{ color: "#64748b" }}>{current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi PROFAS"}</small>
+                    <div className="player-mat-info">
+                      <h3>{current.fileName || "Berkas Materi Pembelajaran"}</h3>
+                      <small>{current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi PROFAS"}</small>
                     </div>
-                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--color-primary)", background: "#e0f2fe", padding: "4px 10px", borderRadius: "20px" }}>Unduh</span>
+                    <span className="player-mat-badge">Unduh</span>
                   </a>
                 </div>
               ) : (
-                <div className="glass" style={{ padding: "2.5rem", textAlign: "center", borderRadius: "16px", color: "#64748b" }}>
-                  <Folder size={40} style={{ margin: "0 auto 1rem", opacity: 0.5 }} />
-                  <p style={{ margin: 0, fontWeight: 500 }}>Tidak ada berkas lampiran khusus untuk sesi ini.</p>
+                <div className="player-empty-glass">
+                  <Folder size={40} className="player-folder-icon" />
+                  <p className="player-folder-text">Tidak ada berkas lampiran khusus untuk sesi ini.</p>
                   <small>Seluruh intisari pembelajaran telah tertuang pada teks materi dan video di atas.</small>
                 </div>
               )}
@@ -395,22 +394,22 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           )}
           {tab === "catatan" && (
             <div className="notes-container">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
+              <div className="player-notes-top">
                 <div>
-                  <h2 style={{ fontSize: "1.5rem", margin: 0, color: "var(--ink)" }}>Catatan & Jurnal Refleksi Eksekutif</h2>
-                  <small style={{ color: "#64748b" }}>Catatan ini tersimpan secara lokal dan dapat diunduh ke berbagai format dokumen resmi.</small>
+                  <h2 className="player-tab-title">Catatan & Jurnal Refleksi Eksekutif</h2>
+                  <small className="player-tab-sub">Catatan ini tersimpan secara lokal dan dapat diunduh ke berbagai format dokumen resmi.</small>
                 </div>
-                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                  <button type="button" onClick={downloadNote} disabled={!noteText.trim()} className="btn btn-outline btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                <div className="player-notes-btns">
+                  <button type="button" onClick={downloadNote} disabled={!noteText.trim()} className="btn btn-outline btn-small player-btn-txt">
                     <Download size={14} /> Txt
                   </button>
-                  <button type="button" onClick={downloadNoteDocx} disabled={!noteText.trim()} className="btn btn-outline btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px", borderColor: "#2563eb", color: "#2563eb", fontWeight: 600 }}>
+                  <button type="button" onClick={downloadNoteDocx} disabled={!noteText.trim()} className="btn btn-outline btn-small player-btn-docx">
                     <FileCheck size={14} /> Word (.docx)
                   </button>
-                  <button type="button" onClick={downloadNotePdf} disabled={!noteText.trim()} className="btn btn-outline btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px", borderColor: "#dc2626", color: "#dc2626", fontWeight: 600 }}>
+                  <button type="button" onClick={downloadNotePdf} disabled={!noteText.trim()} className="btn btn-outline btn-small player-btn-pdf">
                     <FileCode size={14} /> PDF (.pdf)
                   </button>
-                  <button type="button" onClick={saveNote} className="btn btn-primary btn-small" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <button type="button" onClick={saveNote} className="btn btn-primary btn-small player-btn-save">
                     <CheckCircle2 size={14} /> {noteSaved ? "Tersimpan!" : "Simpan"}
                   </button>
                 </div>
@@ -419,9 +418,9 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                 value={noteText}
                 onChange={e => { setNoteText(e.target.value); setNoteSaved(false); }}
                 placeholder="Tulis poin-poin penting, kepanjangan akronim, strategi eksekusi, atau ide kepemimpinan yang Anda dapatkan dari modul ini..."
-                style={{ width: "100%", minHeight: "220px", padding: "1.25rem", borderRadius: "16px", border: "1px solid var(--line)", background: "rgba(255,255,255,0.8)", fontSize: "1rem", lineHeight: 1.6, color: "var(--ink)", fontFamily: "inherit", resize: "vertical", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)" }}
+                className="player-textarea"
               />
-              {noteSaved && <p style={{ color: "#10b981", fontSize: "0.875rem", marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "4px" }}><CheckCircle2 size={14} /> Catatan berhasil disimpan ke perangkat Anda.</p>}
+              {noteSaved && <p className="player-note-saved"><CheckCircle2 size={14} /> Catatan berhasil disimpan ke perangkat Anda.</p>}
             </div>
           )}
           {message && <p className="player-message" role="alert">{message}</p>}

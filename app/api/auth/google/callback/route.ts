@@ -157,8 +157,9 @@ export async function GET(request: Request) {
     });
 
     return response;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
     console.error("Google Auth Error:", err);
-    return NextResponse.redirect(`${origin}/masuk?error=server_error&reason=${encodeURIComponent(err?.message || "Terjadi gangguan sistem internal.")}`);
+    return NextResponse.redirect(`${origin}/masuk?error=server_error&reason=${encodeURIComponent(message || "Terjadi gangguan sistem internal.")}`);
   }
 }

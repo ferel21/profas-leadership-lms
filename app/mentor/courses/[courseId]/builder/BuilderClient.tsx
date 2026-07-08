@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, GripVertical, FileText, PlayCircle, Folder, ChevronRight, ChevronDown, Save, Upload, Link2, HelpCircle, Loader2, Sparkles, Megaphone, CheckCircle2, FileUp, X } from "lucide-react";
+import { Plus, Edit2, Trash2, GripVertical, FileText, PlayCircle, Folder, ChevronRight, ChevronDown, Save, Link2, HelpCircle, Loader2, Sparkles, FileUp, X } from "lucide-react";
 
 export type NodeType = "FOLDER" | "VIDEO" | "PDF" | "DOCUMENT" | "IMAGE" | "LINK" | "QUIZ" | "ASSIGNMENT" | "TEXT";
 
@@ -217,8 +217,9 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
         const errData = await res.json().catch(() => ({}));
         alert(`Gagal menyimpan: ${errData.message || errData.error || res.statusText}`);
       }
-    } catch (e: any) {
-      alert(`Terjadi kesalahan: ${e?.message || "Koneksi jaringan gagal"}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Koneksi jaringan gagal";
+      alert(`Terjadi kesalahan: ${msg}`);
     } finally {
       setSaving(false);
     }
@@ -230,7 +231,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
     setShowFolderModal(false);
   };
 
-  const addFile = (title: string, type: NodeType, extra?: any) => {
+  const addFile = (title: string, type: NodeType, extra?: Partial<CourseNode> | Record<string, unknown>) => {
     if (editingNode) {
       const updateTree = (list: CourseNode[]): CourseNode[] => {
         return list.map(n => {
@@ -552,7 +553,7 @@ function FolderModal({ onClose, onSave }: { onClose: () => void; onSave: (title:
   );
 }
 
-function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { courseId: string; parentId: string|null; initialNode: CourseNode | null; onClose: () => void; onSave: (title: string, type: NodeType, extra?: any) => void }) {
+function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { courseId: string; parentId: string|null; initialNode: CourseNode | null; onClose: () => void; onSave: (title: string, type: NodeType, extra?: Partial<CourseNode> | Record<string, unknown>) => void }) {
   const [type, setType] = useState<NodeType>(initialNode?.type || "VIDEO");
   const [title, setTitle] = useState(initialNode?.title || "");
   const [file, setFile] = useState<File | null>(null);
@@ -608,8 +609,9 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
           content: description || link || title,
           description: description || link || title
         });
-      } catch (e: any) {
-        alert(`Terjadi kesalahan jaringan saat unggah: ${e?.message}`);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        alert(`Terjadi kesalahan jaringan saat unggah: ${msg}`);
       } finally {
         setUploading(false);
       }

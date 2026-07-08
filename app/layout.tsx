@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./typography.css";
+import "./design-system.css";
 import "./master.css";
 import "./landing.css";
 import "./premium.css";

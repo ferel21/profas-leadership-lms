@@ -9,3 +9,6 @@ node_modules
 .env*
 .vercel
 .env*.local
+
+# Local Netlify folder
+.netlify

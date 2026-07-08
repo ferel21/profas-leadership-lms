@@ -240,11 +240,22 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
       <main className="player-main">
         <header><button onClick={() => setSidebar(true)} aria-label="Buka daftar materi"><Menu /></button><div><span>{current.title}</span><b>{current.title}</b></div><Link href="/dashboard">Keluar Kelas</Link></header>
         <section className="lesson-stage" style={{ marginBottom: "2rem" }}>
-          {current.type === "VIDEO" ? (
+          {current.type === "VIDEO" || (current.fileUrl && (current.fileUrl.endsWith(".mp4") || current.fileUrl.endsWith(".webm") || current.fileUrl.includes("/video/"))) ? (
             <div className="video-shell hover-lift glass" style={{ borderRadius: "24px", padding: "12px", background: "rgba(255,255,255,0.4)" }}>
               <div style={{ position: "relative", width: "100%", paddingTop: "56.25%", borderRadius: "16px", overflow: "hidden", background: "#0b2229", zIndex: 1 }}>
-                <iframe src={current.content || undefined} title={current.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0, zIndex: 2 }} />
-                <div className="video-fallback" style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center" }}><Play fill="currentColor" style={{ width: "60px", color: "white" }} /></div>
+                {(current.fileUrl && (current.fileUrl.endsWith(".mp4") || current.fileUrl.endsWith(".webm") || current.fileUrl.startsWith("/api/uploads/"))) || (current.content && (current.content.endsWith(".mp4") || current.content.endsWith(".webm"))) ? (
+                  <video 
+                    controls 
+                    controlsList="nodownload"
+                    src={current.fileUrl || current.content || ""} 
+                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 2, background: "#000" }} 
+                  />
+                ) : (
+                  <>
+                    <iframe src={current.fileUrl || current.content || undefined} title={current.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0, zIndex: 2 }} />
+                    <div className="video-fallback" style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center" }}><Play fill="currentColor" style={{ width: "60px", color: "white" }} /></div>
+                  </>
+                )}
               </div>
             </div>
           ) : (current.type === "QUIZ" || current.type === "ASSIGNMENT") ? (
@@ -276,6 +287,62 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0fdfa', padding: '6px 14px', borderRadius: '20px', color: 'var(--color-primary-dark)' }}><Clock3 size={18} /> Durasi: {current.durationMin || 30} Menit</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fef3c7', padding: '6px 14px', borderRadius: '20px', color: '#b45309' }}><CheckCircle2 size={18} /> Bobot Nilai: 100 Poin</span>
               </div>
+            </article>
+          ) : (current.type === "PDF" || (current.fileUrl && current.fileUrl.endsWith(".pdf"))) ? (
+            <article className="pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '2.5rem', borderRadius: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div>
+                  <span className="eyebrow" style={{ color: '#dc2626', fontWeight: 'bold', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '6px' }}><FileText size={18} /> 📑 DOKUMEN MODUL PEMBELAJARAN (PDF)</span>
+                  <h1 style={{ marginTop: '0.5rem', marginBottom: '0.5rem', fontSize: '32px', color: 'var(--ink)', fontWeight: 800 }}>{current.title}</h1>
+                </div>
+                {current.fileUrl && (
+                  <a className="pro-btn-glow hover-lift" href={current.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', padding: '12px 24px', borderRadius: '12px', textDecoration: 'none', fontSize: '15px', background: '#dc2626', color: '#fff' }}>
+                    <Download size={18} style={{ marginRight: '8px' }} /> Unduh Modul PDF ({current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi"})
+                  </a>
+                )}
+              </div>
+              {current.content && <p style={{ fontSize: '1.1rem', color: '#475569', marginBottom: '1.5rem', lineHeight: 1.7 }}>{current.content}</p>}
+              {current.fileUrl ? (
+                <div style={{ width: '100%', height: '700px', borderRadius: '16px', overflow: 'hidden', border: '1px solid #cbd5e1', background: '#f8fafc' }}>
+                  <iframe src={`${current.fileUrl}#toolbar=1&navpanes=0&scrollbar=1`} style={{ width: '100%', height: '100%', border: 'none' }} title={current.title} />
+                </div>
+              ) : (
+                <div style={{ padding: '3rem', textAlign: 'center', background: '#fef2f2', borderRadius: '16px', color: '#991b1b' }}>
+                  <FileText size={48} style={{ margin: '0 auto 1rem', opacity: 0.6 }} />
+                  <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Berkas PDF belum diunggah untuk modul ini.</p>
+                </div>
+              )}
+            </article>
+          ) : current.type === "IMAGE" ? (
+            <article className="pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '2.5rem', borderRadius: '24px', textAlign: 'center' }}>
+              <span className="eyebrow" style={{ color: '#16a34a', fontWeight: 'bold', letterSpacing: '1px' }}>🖼️ INFOGRAFIS & VISUAL PEMBELAJARAN</span>
+              <h1 style={{ marginTop: '0.5rem', marginBottom: '1.5rem', fontSize: '32px', color: 'var(--ink)', fontWeight: 800 }}>{current.title}</h1>
+              {current.content && <p style={{ fontSize: '1.1rem', color: '#475569', marginBottom: '1.5rem', lineHeight: 1.7, maxWidth: '720px', margin: '0 auto 1.5rem' }}>{current.content}</p>}
+              {current.fileUrl ? (
+                <img src={current.fileUrl} alt={current.title} style={{ maxWidth: '100%', maxHeight: '650px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', margin: '0 auto' }} />
+              ) : null}
+            </article>
+          ) : current.type === "LINK" ? (
+            <article className="pro-glass-card hover-lift" style={{ maxWidth: '800px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px', textAlign: 'center' }}>
+              <div style={{ width: '80px', height: '80px', background: '#f3e8ff', color: '#7e22ce', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <Link2 size={40} />
+              </div>
+              <span className="eyebrow" style={{ color: '#7e22ce', fontWeight: 'bold', letterSpacing: '1px' }}>🔗 TAUTAN SUMBER DAYA EKSTERNAL</span>
+              <h1 style={{ marginTop: '0.5rem', marginBottom: '1.25rem', fontSize: '32px', color: 'var(--ink)', fontWeight: 800 }}>{current.title}</h1>
+              <p style={{ fontSize: '1.15rem', color: '#475569', marginBottom: '2.5rem', lineHeight: 1.7 }}>
+                {current.content || "Modul ini merujuk pada tautan daya eksternal (Google Drive / Web / Zoom / Artikel) yang disiapkan oleh mentor Anda."}
+              </p>
+              {(current.fileUrl || current.content) && (
+                <a 
+                  href={current.fileUrl || current.content || "#"} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="pro-btn-glow hover-lift"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '16px 36px', fontSize: '18px', borderRadius: '14px', background: '#7e22ce', color: '#fff', textDecoration: 'none', fontWeight: 700 }}
+                >
+                  <Link2 size={22} /> Buka Tautan Eksternal Sekarang 🚀
+                </a>
+              )}
             </article>
           ) : (
             <article className="pro-glass-card hover-lift" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '3.5rem', borderRadius: '24px' }}>

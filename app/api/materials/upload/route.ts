@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "node:fs/promises";
@@ -24,50 +25,71 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
   const lessonId = formData.get("lessonId") as string | null;
+  const courseIdParam = formData.get("courseId") as string | null;
   const description = (formData.get("description") as string || "").trim();
   const linkUrl = (formData.get("linkUrl") as string || "").trim();
 
-  if (!lessonId) return NextResponse.json({ message: "Lesson ID diperlukan." }, { status: 400 });
+  let courseId = courseIdParam;
+  let existingLesson = null;
 
-  // Verify lesson belongs to mentor's course
-  const lesson = await prisma.courseNode.findFirst({
-    where: { id: lessonId, course: { mentorId: user.id } },
-    select: { id: true, course: { select: { id: true, title: true } } }
+  if (lessonId && lessonId !== "new_node" && !lessonId.startsWith("tmp_")) {
+    existingLesson = await prisma.courseNode.findFirst({
+      where: { id: lessonId, course: { mentorId: user.id } },
+      select: { id: true, type: true, course: { select: { id: true, title: true } } }
+    });
+    if (existingLesson) {
+      courseId = existingLesson.course.id;
+    }
+  }
+
+  if (!courseId) {
+    return NextResponse.json({ message: "Course ID atau Lesson ID yang valid diperlukan." }, { status: 400 });
+  }
+
+  const course = await prisma.course.findFirst({
+    where: { id: courseId, mentorId: user.id },
+    select: { id: true, title: true, slug: true }
   });
-  if (!lesson) {
-    return NextResponse.json({ message: "Materi tidak ditemukan atau Anda bukan mentor program ini." }, { status: 404 });
+  if (!course) {
+    return NextResponse.json({ message: "Program tidak ditemukan atau Anda bukan mentor program ini." }, { status: 404 });
   }
 
   // Handle link type upload (no file needed)
   if (linkUrl && !file) {
     try { new URL(linkUrl); } catch { return NextResponse.json({ message: "URL tidak valid." }, { status: 400 }); }
-    const material = await prisma.courseNode.create({
-      data: { parentId: lessonId, courseId: lesson.course.id, title: description || linkUrl, type: "LINK", fileUrl: linkUrl, fileName: linkUrl, fileSize: 0, description: description || linkUrl, order: 999 }
-    });
-    // Notify enrolled students
-    const enrollments = await prisma.enrollment.findMany({ where: { courseId: lesson.course.id, status: "ACTIVE" }, select: { userId: true } });
-    if (enrollments.length > 0) {
-      await prisma.notification.createMany({
-        data: enrollments.map(e => ({
-          userId: e.userId,
-          title: "Materi Baru Tersedia",
-          message: `Mentor menambahkan materi baru di ${lesson.course.title}`,
-          type: "MATERIAL_ADDED",
-          link: `/belajar/${lesson.course.id}`
-        }))
+    
+    if (existingLesson && existingLesson.type !== "FOLDER") {
+      await prisma.courseNode.update({
+        where: { id: existingLesson.id },
+        data: { fileUrl: linkUrl, fileName: linkUrl, content: description || linkUrl, description: description || linkUrl, type: "LINK" }
+      });
+    } else if (existingLesson && existingLesson.type === "FOLDER") {
+      await prisma.courseNode.create({
+        data: { parentId: existingLesson.id, courseId, title: description || linkUrl, type: "LINK", fileUrl: linkUrl, fileName: linkUrl, fileSize: 0, description: description || linkUrl, content: description || linkUrl, order: 999 }
       });
     }
-    return NextResponse.json(material);
+
+    revalidatePath(`/belajar/${course.slug}`);
+    revalidatePath(`/belajar/${courseId}`);
+    revalidatePath("/dashboard");
+    revalidatePath(`/mentor/courses/${courseId}/builder`);
+
+    return NextResponse.json({
+      fileUrl: linkUrl,
+      fileName: linkUrl,
+      fileSize: 0,
+      fileType: "LINK",
+      description: description || linkUrl,
+      content: description || linkUrl
+    });
   }
 
   if (!file) return NextResponse.json({ message: "File atau URL diperlukan." }, { status: 400 });
   if (file.size > MAX_FILE_SIZE) return NextResponse.json({ message: "Ukuran file maksimal 50MB." }, { status: 400 });
 
-  const fileType = ALLOWED_TYPES.get(file.type);
-  if (!fileType) return NextResponse.json({ message: `Tipe file ${file.type} tidak didukung.` }, { status: 400 });
+  const fileType = ALLOWED_TYPES.get(file.type) || "FILE";
 
   // Save file dengan Fallback ke /tmp untuk Vercel Serverless
-  const courseId = lesson.course.id;
   const timestamp = Date.now();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const fileName = `${timestamp}-${safeName}`;
@@ -85,11 +107,26 @@ export async function POST(request: Request) {
   }
 
   const fileUrl = `/api/uploads/${courseId}/${fileName}`;
-  const material = await prisma.courseNode.create({
-    data: { parentId: lessonId, courseId, title: file.name, type: fileType as import("@prisma/client").NodeType, fileName: file.name, fileUrl, fileSize: file.size, description, order: 999 }
-  });
 
-  // Notify enrolled students
+  if (existingLesson && existingLesson.type !== "FOLDER") {
+    await prisma.courseNode.update({
+      where: { id: existingLesson.id },
+      data: {
+        fileUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        type: fileType as import("@prisma/client").NodeType,
+        description: description || file.name,
+        content: description || file.name
+      }
+    });
+  } else if (existingLesson && existingLesson.type === "FOLDER") {
+    await prisma.courseNode.create({
+      data: { parentId: existingLesson.id, courseId, title: file.name, type: fileType as import("@prisma/client").NodeType, fileName: file.name, fileUrl, fileSize: file.size, description: description || file.name, content: description || file.name, order: 999 }
+    });
+  }
+
+  // Notify enrolled students jika materi baru diunggah
   const enrollments = await prisma.enrollment.findMany({ where: { courseId, status: "ACTIVE" }, select: { userId: true } });
   if (enrollments.length > 0) {
     await prisma.notification.createMany({
@@ -98,10 +135,22 @@ export async function POST(request: Request) {
         title: "Materi Baru Tersedia",
         message: `Mentor menambahkan materi baru: ${file.name}`,
         type: "MATERIAL_ADDED",
-        link: `/belajar/${lesson.course.id}`
+        link: `/belajar/${courseId}`
       }))
     });
   }
 
-  return NextResponse.json(material);
+  revalidatePath(`/belajar/${course.slug}`);
+  revalidatePath(`/belajar/${courseId}`);
+  revalidatePath("/dashboard");
+  revalidatePath(`/mentor/courses/${courseId}/builder`);
+
+  return NextResponse.json({
+    fileUrl,
+    fileName: file.name,
+    fileSize: file.size,
+    fileType,
+    description: description || file.name,
+    content: description || file.name
+  });
 }

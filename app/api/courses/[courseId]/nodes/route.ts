@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -9,7 +10,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
   }
 
   const { courseId } = await params;
-  const course = await prisma.course.findFirst({ where: { id: courseId, mentorId: user.id } });
+  const course = await prisma.course.findFirst({ where: { id: courseId, mentorId: user.id }, select: { id: true, slug: true } });
   if (!course) {
     return NextResponse.json({ message: "Course tidak ditemukan atau bukan milik Anda" }, { status: 404 });
   }
@@ -83,8 +84,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
         update: {
           parentId: node.parentId || null,
           title: node.title,
+          type: node.type || "TEXT",
           order: node.order, // Dijamin unik dan sekuensial dari frontend & Phase 2!
           description: node.description || "",
+          content: node.content || null,
+          fileUrl: node.fileUrl || null,
+          fileName: node.fileName || null,
+          fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
           durationMin: node.durationMin || 0,
           ...(assessmentId ? { assessmentId } : {})
         },
@@ -96,11 +102,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
           type: node.type || "TEXT",
           order: node.order, // Dijamin unik dan sekuensial!
           description: node.description || "",
+          content: node.content || null,
+          fileUrl: node.fileUrl || null,
+          fileName: node.fileName || null,
+          fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
           durationMin: node.durationMin || 0,
           assessmentId
         }
       });
     }
+
+    revalidatePath(`/belajar/${course.slug}`);
+    revalidatePath(`/belajar/${courseId}`);
+    revalidatePath("/dashboard");
+    revalidatePath(`/mentor/courses/${courseId}/builder`);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

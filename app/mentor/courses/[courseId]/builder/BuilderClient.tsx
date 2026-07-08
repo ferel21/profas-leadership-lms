@@ -11,6 +11,12 @@ export type CourseNode = {
   title: string;
   type: NodeType;
   order: number;
+  durationMin?: number;
+  content?: string | null;
+  fileUrl?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
+  description?: string | null;
   children: CourseNode[];
   isNew?: boolean;
   assessmentId?: string | null;
@@ -75,13 +81,13 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
     }
   }, [nodes, course.id]);
 
-  // Modals state
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiTopic, setAiTopic] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [activeParentId, setActiveParentId] = useState<string | null>(null);
+  const [editingNode, setEditingNode] = useState<CourseNode | null>(null);
 
   const toggleExpand = (id: string) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
@@ -158,14 +164,20 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
     }
   };
 
-  const flattenNodes = (list: CourseNode[], parentId: string | null = null): Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null }> => {
-    let result: Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null }> = [];
+  const flattenNodes = (list: CourseNode[], parentId: string | null = null): Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null, durationMin: number, content: string | null, description: string | null, fileUrl: string | null, fileName: string | null, fileSize: number | null }> => {
+    let result: Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null, durationMin: number, content: string | null, description: string | null, fileUrl: string | null, fileName: string | null, fileSize: number | null }> = [];
     list.forEach((n, idx) => {
       // MASTER SKILL: Enforce strict sequential order (0, 1, 2...) to prevent SQLite unique constraint collision
       n.order = idx;
       n.parentId = parentId;
       result.push({
-        id: n.id, parentId: parentId, title: n.title, type: n.type, order: idx, isNew: n.isNew, assessmentId: n.assessmentId || ((n.type === "QUIZ" || n.type === "ASSIGNMENT") ? n.id : null)
+        id: n.id, parentId: parentId, title: n.title, type: n.type, order: idx, isNew: n.isNew, assessmentId: n.assessmentId || ((n.type === "QUIZ" || n.type === "ASSIGNMENT") ? n.id : null),
+        durationMin: n.durationMin || 0,
+        content: n.content || n.description || null,
+        description: n.description || n.content || null,
+        fileUrl: n.fileUrl || null,
+        fileName: n.fileName || null,
+        fileSize: typeof n.fileSize === "number" ? n.fileSize : null
       });
       result = result.concat(flattenNodes(n.children, n.id));
     });
@@ -205,7 +217,22 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
     setShowFolderModal(false);
   };
 
-  const addFile = (title: string, type: NodeType) => {
+  const addFile = (title: string, type: NodeType, extra?: any) => {
+    if (editingNode) {
+      const updateTree = (list: CourseNode[]): CourseNode[] => {
+        return list.map(n => {
+          if (n.id === editingNode.id) {
+            return { ...n, title, type, ...extra };
+          }
+          return { ...n, children: updateTree(n.children) };
+        });
+      };
+      setNodes(updateTree([...nodes]));
+      setEditingNode(null);
+      setShowUploadModal(false);
+      return;
+    }
+
     const newNode: CourseNode = { 
       id: generateId(), 
       parentId: activeParentId, 
@@ -214,9 +241,11 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
       order: 999, 
       children: [], 
       isNew: true,
-      assessmentId: (type === "QUIZ" || type === "ASSIGNMENT") ? `asm_${generateId()}` : undefined
+      assessmentId: (type === "QUIZ" || type === "ASSIGNMENT") ? `asm_${generateId()}` : undefined,
+      ...extra
     };
     insertIntoTree(newNode);
+    setEditingNode(null);
     setShowUploadModal(false);
   };
 
@@ -303,7 +332,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
             {node.isNew && <span style={{fontSize:'10px', background:'var(--teal)', color:'white', padding:'2px 8px', borderRadius:'10px', fontWeight:700}}>BARU</span>}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            {(node.type === "QUIZ" || node.type === "ASSIGNMENT") && (
+            {(node.type === "QUIZ" || node.type === "ASSIGNMENT") ? (
               <button 
                 onClick={async () => {
                   setSaving(true);
@@ -326,7 +355,18 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
               >
                 <Edit2 size={14}/> Edit Soal / Tugas
               </button>
-            )}
+            ) : node.type !== "FOLDER" ? (
+              <button 
+                onClick={() => {
+                  setEditingNode(node);
+                  setShowUploadModal(true);
+                }} 
+                className="btn btn-ghost btn-small hover-lift" 
+                style={{ color: '#0f766e', background: '#ccfbf1', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Edit2 size={14}/> Edit Materi / Berkas
+              </button>
+            ) : null}
             <button onClick={() => handleDelete(node.id)} className="btn btn-ghost btn-small hover-lift" style={{ color: 'var(--error)', padding: '6px' }}><Trash2 size={16}/></button>
           </div>
         </div>
@@ -440,7 +480,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
       )}
       
       {showUploadModal && (
-        <UploadModal parentId={activeParentId} onClose={() => setShowUploadModal(false)} onSave={addFile} />
+        <UploadModal courseId={course.id} parentId={activeParentId} initialNode={editingNode} onClose={() => { setShowUploadModal(false); setEditingNode(null); }} onSave={addFile} />
       )}
 
       {showAiModal && (
@@ -499,36 +539,92 @@ function FolderModal({ onClose, onSave }: { onClose: () => void; onSave: (title:
   );
 }
 
-function UploadModal({ parentId, onClose, onSave }: { parentId: string|null; onClose: () => void; onSave: (title: string, type: NodeType) => void }) {
-  const [type, setType] = useState<NodeType>("VIDEO");
-  const [title, setTitle] = useState("");
+function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { courseId: string; parentId: string|null; initialNode: CourseNode | null; onClose: () => void; onSave: (title: string, type: NodeType, extra?: any) => void }) {
+  const [type, setType] = useState<NodeType>(initialNode?.type || "VIDEO");
+  const [title, setTitle] = useState(initialNode?.title || "");
   const [file, setFile] = useState<File | null>(null);
-  const [link, setLink] = useState("");
+  const [link, setLink] = useState(initialNode?.fileUrl || initialNode?.content || "");
+  const [description, setDescription] = useState(initialNode?.description || initialNode?.content || "");
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
   const handleSubmit = async () => {
     if (!title) return alert("Judul materi harus diisi.");
     if (type === "LINK" && !link) return alert("URL Tautan harus diisi.");
-    if (type !== "LINK" && type !== "QUIZ" && type !== "ASSIGNMENT" && !file) return alert("Silakan pilih atau tarik file terlebih dahulu.");
+    if (type !== "LINK" && type !== "QUIZ" && type !== "ASSIGNMENT" && !file && !link && !initialNode?.fileUrl) {
+      return alert("Silakan pilih atau tarik file, atau masukkan tautan terlebih dahulu.");
+    }
 
     if (type === "QUIZ" || type === "ASSIGNMENT") {
-       onSave(title, type);
+       onSave(title, type, { content: description || title, description: description || title });
        return;
     }
 
-    setUploading(true);
-    setTimeout(() => {
-      onSave(title, type);
-      setUploading(false);
-    }, 600);
+    if (type === "LINK") {
+       onSave(title, "LINK", { fileUrl: link, fileName: link, content: description || link, description: description || link });
+       return;
+    }
+
+    if (file) {
+      setUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("courseId", courseId);
+        formData.append("lessonId", initialNode?.id || parentId || "new_node");
+        formData.append("description", description || title);
+        formData.append("linkUrl", link || "");
+
+        const res = await fetch("/api/materials/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          alert(`Gagal mengunggah materi: ${errData.message || res.statusText}`);
+          setUploading(false);
+          return;
+        }
+
+        const data = await res.json();
+        onSave(title, type, {
+          fileUrl: data.fileUrl,
+          fileName: data.fileName || file.name,
+          fileSize: data.fileSize || file.size,
+          content: description || link || title,
+          description: description || link || title
+        });
+      } catch (e: any) {
+        alert(`Terjadi kesalahan jaringan saat unggah: ${e?.message}`);
+      } finally {
+        setUploading(false);
+      }
+    } else {
+      let formattedUrl = link || initialNode?.fileUrl || null;
+      if (type === "VIDEO" && formattedUrl && formattedUrl.includes("youtube.com/watch?v=")) {
+        const videoId = formattedUrl.split("v=")[1]?.split("&")[0];
+        if (videoId) formattedUrl = `https://www.youtube.com/embed/${videoId}`;
+      } else if (type === "VIDEO" && formattedUrl && formattedUrl.includes("youtu.be/")) {
+        const videoId = formattedUrl.split("youtu.be/")[1]?.split("?")[0];
+        if (videoId) formattedUrl = `https://www.youtube.com/embed/${videoId}`;
+      }
+
+      onSave(title, type, {
+        fileUrl: formattedUrl,
+        fileName: initialNode?.fileName || formattedUrl || title,
+        fileSize: initialNode?.fileSize || 0,
+        content: formattedUrl || description || title,
+        description: description || formattedUrl || title
+      });
+    }
   };
 
   return (
     <div className="completion-overlay fade-in" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-      <div className="data-card scale-in" style={{ width: '100%', maxWidth: '520px', padding: '2.2rem', borderRadius: '20px', background: '#fff', boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
+      <div className="data-card scale-in" style={{ width: '100%', maxWidth: '540px', padding: '2.2rem', borderRadius: '20px', background: '#fff', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
-          <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.25rem', color: 'var(--ink)' }}>Unggah Materi Pembelajaran</h3>
+          <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.25rem', color: 'var(--ink)' }}>{initialNode ? "Edit Materi Pembelajaran" : "Unggah Materi Pembelajaran"}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={20}/></button>
         </div>
         
@@ -549,6 +645,15 @@ function UploadModal({ parentId, onClose, onSave }: { parentId: string|null; onC
           className="form-input" 
           placeholder="Contoh: Studi Kasus Kepemimpinan Situasional..." 
           style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', marginBottom: '1.2rem' }}
+        />
+
+        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: '#475569' }}>Deskripsi / Instruksi Materi (Opsional)</label>
+        <textarea 
+          value={description} 
+          onChange={e => setDescription(e.target.value)} 
+          className="form-input" 
+          placeholder="Jelaskan poin penting atau panduan belajar untuk materi ini..." 
+          style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', marginBottom: '1.2rem', minHeight: '70px', fontFamily: 'inherit' }}
         />
 
         {type === "LINK" ? (
@@ -573,7 +678,7 @@ function UploadModal({ parentId, onClose, onSave }: { parentId: string|null; onC
                 border: `2px dashed ${dragOver ? '#0d9488' : '#cbd5e1'}`, 
                 textAlign: 'center', 
                 borderRadius: '16px', 
-                marginBottom: '1.5rem',
+                marginBottom: '1.2rem',
                 background: dragOver ? 'rgba(13, 148, 136, 0.05)' : '#f8fafc',
                 cursor: 'pointer',
                 transition: 'all 0.2s'
@@ -592,6 +697,11 @@ function UploadModal({ parentId, onClose, onSave }: { parentId: string|null; onC
                   <b style={{ color: '#0d9488', fontSize: '0.95rem', display: 'block' }}>{file.name}</b>
                   <small style={{ color: '#64748b' }}>{(file.size / (1024 * 1024)).toFixed(2)} MB • Klik untuk ganti berkas</small>
                 </div>
+              ) : initialNode?.fileUrl ? (
+                <div>
+                  <b style={{ color: '#0f766e', fontSize: '0.95rem', display: 'block' }}>Berkas Tersimpan: {initialNode.fileName || "Berkas Materi"}</b>
+                  <small style={{ color: '#64748b' }}>Klik atau tarik berkas baru ke sini jika ingin mengganti</small>
+                </div>
               ) : (
                 <div>
                   <b style={{ fontSize: '0.95rem', color: '#334155', display: 'block' }}>Tarik & Lepas Berkas di Sini</b>
@@ -599,6 +709,12 @@ function UploadModal({ parentId, onClose, onSave }: { parentId: string|null; onC
                 </div>
               )}
             </div>
+            {type === "VIDEO" && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: '#475569' }}>Atau Masukkan Tautan Video (YouTube / Vimeo / Drive / MP4 URL)</label>
+                <input type="url" value={link} onChange={e=>setLink(e.target.value)} className="form-input" placeholder="Contoh: https://www.youtube.com/watch?v=..." style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #cbd5e1' }}/>
+              </div>
+            )}
           </>
         ) : (
           <div style={{ padding: '12px 16px', borderRadius: '10px', background: '#fffbeb', border: '1px solid #fde68a', color: '#b45309', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
@@ -610,7 +726,7 @@ function UploadModal({ parentId, onClose, onSave }: { parentId: string|null; onC
           <button onClick={onClose} disabled={uploading} className="btn btn-outline" style={{ padding: '10px 20px', borderRadius: '10px', fontWeight: 600 }}>Batal</button>
           <button onClick={handleSubmit} disabled={uploading} className="btn btn-primary" style={{ padding: '10px 24px', borderRadius: '10px', background: 'var(--teal)', color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
             {uploading && <Loader2 size={16} className="spin" />}
-            {uploading ? "Memproses..." : "Tambahkan ke Kurikulum"}
+            {uploading ? "Memproses..." : "Simpan Materi"}
           </button>
         </div>
       </div>

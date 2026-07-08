@@ -15,6 +15,9 @@ import { MentorCourseActions } from "@/components/MentorCourseActions";
 import { AdminUserManagement } from "@/components/AdminUserManagement";
 import { BroadcastManager } from "@/components/BroadcastManager";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const average = (arr: number[]) => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
 
 // ─── Komponen Metric Card Premium ────────────────────────────────────────────

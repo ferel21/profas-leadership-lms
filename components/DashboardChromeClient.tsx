@@ -117,42 +117,27 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
     <div className="dashboard-canvas">
       <header className="dashboard-header glass">
         <button className="dash-menu" onClick={()=>setOpen(true)} aria-label="Buka menu"><Menu/></button>
-        <div className="dash-welcome" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span>PROFAS LEADERSHIP</span>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }} className="hide-on-mobile">
+        <div className="dash-welcome flex items-center gap-4">
+          <span className="font-extrabold text-slate-900 tracking-tight">PROFAS LEADERSHIP</span>
+          <div className="flex items-center gap-2 hide-on-mobile">
             <div className="pro-live-pulse" title="Terhubung langsung ke Supabase Cloud DB">
               <span className="pro-live-pulse-dot"></span>
-              <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "#10b981", letterSpacing: "0.05em" }}>LIVE CLOUD DB</span>
+              <span className="text-[11px] font-extrabold text-emerald-600 tracking-wider">LIVE CLOUD DB</span>
             </div>
             <div className="pro-streak-flame" title="7 Hari Belajar Konsisten">
-              🔥 <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "#f59e0b" }}>7d Streak</span>
+              🔥 <span className="text-xs font-extrabold text-amber-500">7d Streak</span>
             </div>
           </div>
         </div>
-        <div className="dash-actions" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          {/* Executive Command Palette Trigger */}
+        <div className="dash-actions flex items-center gap-3">
           <button
             onClick={() => setIsCommandOpen(true)}
-            className="hover-lift command-palette-btn"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "0.5rem 1rem",
-              borderRadius: "20px",
-              border: "1px solid #cbd5e1",
-              background: "#f8fafc",
-              color: "#475569",
-              fontSize: "0.85rem",
-              fontWeight: 600,
-              cursor: "pointer",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.03)"
-            }}
+            className="hover-lift flex items-center gap-2.5 px-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold shadow-sm hover:border-teal-600 transition"
             title="Cari Cepat (Ctrl+K)"
           >
-            <Search size={16} style={{ color: "#0d9488" }} />
+            <Search size={15} className="text-teal-600" />
             <span>Cari atau Perintah...</span>
-            <kbd style={{ background: "#e2e8f0", padding: "2px 6px", borderRadius: "6px", fontSize: "0.7rem", fontWeight: 800, color: "#334155" }}>Ctrl+K</kbd>
+            <kbd className="bg-slate-200 px-1.5 py-0.5 rounded text-[10px] font-extrabold text-slate-700">Ctrl+K</kbd>
           </button>
           <button onClick={()=>setShowNotifs(v=>!v)} aria-label="Tampilkan notifikasi" aria-expanded={showNotifs} className="notif-btn">
             <Bell/>{unreadCount > 0 && <i className="notification-badge">{unreadCount}</i>}

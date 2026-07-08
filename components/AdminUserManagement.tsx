@@ -9,19 +9,19 @@ export type AdminUserRow = {
   id: string;
   name: string;
   email: string;
-  role: "STUDENT" | "MENTOR" | "SUPER_ADMIN";
+  role: "STUDENT" | "MENTOR" | "SUPER_ADMIN" | string;
   authProvider: string;
   createdAt: string;
-  _count: {
-    enrollments: number;
-    certificates: number;
-    mentoredCourses: number;
+  _count?: {
+    enrollments?: number;
+    certificates?: number;
+    mentoredCourses?: number;
   };
 };
 
 export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserRow[] }) {
   const router = useRouter();
-  const [users, setUsers] = useState<AdminUserRow[]>(initialUsers);
+  const [users, setUsers] = useState<AdminUserRow[]>(initialUsers || []);
   const [search, setSearch] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -48,24 +48,32 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Gagal menambah pengguna");
 
-      setUsers(prev => [data.user, ...prev]);
+      const newUser: AdminUserRow = {
+        ...data.user,
+        _count: data.user._count || { enrollments: 0, certificates: 0, mentoredCourses: 0 }
+      };
+
+      setUsers(prev => [newUser, ...prev]);
       setMessage({ type: "success", text: `Akun ${data.user.name} (${data.user.email}) berhasil ditambahkan dan didaftarkan ke kelas!` });
       setShowAddModal(false);
       setNewName("");
       setNewEmail("");
       router.refresh();
     } catch (err: any) {
-      setMessage({ type: "error", text: err.message });
+      setMessage({ type: "error", text: err.message || "Terjadi kesalahan sistem" });
     } finally {
       setCreating(false);
     }
   };
 
-  const filteredUsers = users.filter(u =>
-    u.name.toLowerCase().includes(search.toLowerCase()) ||
-    u.email.toLowerCase().includes(search.toLowerCase()) ||
-    u.role.toLowerCase().includes(search.toLowerCase())
-  );
+  const safeUsers = users || [];
+  const filteredUsers = safeUsers.filter(u => {
+    const nameStr = (u.name || "").toLowerCase();
+    const emailStr = (u.email || "").toLowerCase();
+    const roleStr = (u.role || "").toLowerCase();
+    const queryStr = search.toLowerCase();
+    return nameStr.includes(queryStr) || emailStr.includes(queryStr) || roleStr.includes(queryStr);
+  });
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     setLoadingId(userId);
@@ -81,18 +89,18 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Gagal mengubah role");
 
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole as any } : u));
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
       setMessage({ type: "success", text: `Role untuk pengguna berhasil diubah ke ${newRole}!` });
       router.refresh();
     } catch (err: any) {
-      setMessage({ type: "error", text: err.message });
+      setMessage({ type: "error", text: err.message || "Terjadi kesalahan saat mengubah role" });
     } finally {
       setLoadingId(null);
     }
   };
 
   const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus akun ${userName}? Semua progres dan data terkait akan dihapus permanen.`)) return;
+    if (!confirm(`Apakah Anda yakin ingin menghapus akun ${userName || "pengguna ini"}? Semua progres dan data terkait akan dihapus permanen.`)) return;
 
     setLoadingId(userId);
     setMessage(null);
@@ -106,132 +114,115 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       if (!res.ok) throw new Error(data.message || "Gagal menghapus pengguna");
 
       setUsers(prev => prev.filter(u => u.id !== userId));
-      setMessage({ type: "success", text: `Akun ${userName} berhasil dihapus.` });
+      setMessage({ type: "success", text: `Akun ${userName || "pengguna"} berhasil dihapus.` });
       router.refresh();
     } catch (err: any) {
-      setMessage({ type: "error", text: err.message });
+      setMessage({ type: "error", text: err.message || "Terjadi kesalahan saat menghapus akun" });
     } finally {
       setLoadingId(null);
     }
   };
 
   return (
-    <article className="data-card glass-card hover-lift" style={{ marginTop: "24px" }}>
-      <div className="data-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+    <article className="data-card mt-8 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-[0_10px_30px_-10px_rgba(13,148,136,0.08)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
         <div>
-          <h2 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Shield className="text-teal-600" size={20} /> Manajemen Pengguna & Hak Akses (Role Access)
+          <h2 className="flex items-center gap-2.5 text-xl font-bold text-slate-900 tracking-tight">
+            <Shield className="text-teal-600 shrink-0" size={22} />
+            <span>Manajemen Pengguna & Hak Akses (Role Access)</span>
           </h2>
-          <p>Atur peran pengguna sebagai Peserta, Mentor, atau Super Admin</p>
+          <p className="text-sm text-slate-500 mt-1">Atur peran pengguna sebagai Peserta (STUDENT), Mentor (MENTOR), atau Super Admin (SUPER_ADMIN)</p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-          <div style={{ position: "relative", minWidth: "250px" }}>
-            <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)" }} />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative w-full sm:w-64">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Cari nama, email, atau role..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ width: "100%", padding: "8px 12px 8px 36px", borderRadius: "8px", border: "1px solid var(--line)", fontSize: "13px" }}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white transition"
             />
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              padding: "8px 14px", borderRadius: "8px",
-              background: "linear-gradient(135deg, #0d9488, #14b8a6)",
-              color: "#fff", fontWeight: 700, fontSize: "13px",
-              border: "none", cursor: "pointer", boxShadow: "0 2px 8px rgba(13,148,136,0.25)"
-            }}
-            className="hover-lift"
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition shrink-0 hover-lift"
           >
-            <UserPlus size={16} /> Tambah / Sinkron Akun Google
+            <UserPlus size={16} className="shrink-0" />
+            <span>Tambah Akun Baru</span>
           </button>
         </div>
       </div>
 
       {showAddModal && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 9999,
-          background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(6px)",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: "16px"
-        }}>
-          <div style={{
-            background: "#fff", borderRadius: "20px", padding: "24px",
-            width: "100%", maxWidth: "480px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
-            border: "1px solid #e2e8f0"
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "#0f172a", display: "flex", alignItems: "center", gap: "8px" }}>
-                <UserPlus size={20} color="#0d9488" /> Tambah / Sinkron Akun
+        <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <UserPlus size={20} className="text-teal-600" />
+                <span>Tambah / Sinkron Akun</span>
               </h3>
-              <button onClick={() => setShowAddModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b" }}>
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 transition">
                 <X size={20} />
               </button>
             </div>
-            <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px", lineHeight: 1.5 }}>
-              Masukkan nama dan alamat email akun (contoh: akun Google OAuth Anda) agar muncul di dasbor admin dan otomatis terdaftar di kelas kepemimpinan.
+            <p className="text-xs text-slate-500 mb-5 leading-relaxed">
+              Masukkan nama dan alamat email akun agar terdaftar di sistem dan langsung memiliki akses ke kurikulum LMS.
             </p>
-            <form onSubmit={handleCreateUser} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <form onSubmit={handleCreateUser} className="flex flex-col gap-4">
               <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Nama Lengkap</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
                 <input
-                  type="text" required placeholder="Contoh: Keyra Ferel / Nadia"
+                  type="text" required placeholder="Contoh: Keyra Ferel / Nadia Pratama"
                   value={newName} onChange={e => setNewName(e.target.value)}
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px" }}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
                 />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Alamat Email (Google / Local)</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Alamat Email</label>
                 <input
                   type="email" required placeholder="email.anda@gmail.com"
                   value={newEmail} onChange={e => setNewEmail(e.target.value)}
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px" }}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
                 />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Peran (Role)</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Peran (Role)</label>
                   <select
                     value={newRole} onChange={e => setNewRole(e.target.value)}
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px", fontWeight: 600 }}
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
                   >
                     <option value="STUDENT">Peserta (STUDENT)</option>
                     <option value="MENTOR">Mentor (MENTOR)</option>
-                    <option value="SUPER_ADMIN">Super Admin (SUPER_ADMIN)</option>
+                    <option value="SUPER_ADMIN">Super Admin (ADMIN)</option>
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Metode Login</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Metode Login</label>
                   <select
                     value={newProvider} onChange={e => setNewProvider(e.target.value)}
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px", fontWeight: 600 }}
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
                   >
                     <option value="GOOGLE">Google OAuth</option>
                     <option value="LOCAL">Local / Email</option>
                   </select>
                 </div>
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "16px" }}>
+              <div className="flex justify-end gap-2.5 mt-4 pt-3 border-t border-slate-100">
                 <button
                   type="button" onClick={() => setShowAddModal(false)}
-                  style={{ padding: "10px 16px", borderRadius: "8px", background: "#f1f5f9", color: "#475569", fontWeight: 700, fontSize: "13px", border: "none", cursor: "pointer" }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition"
                 >
                   Batal
                 </button>
                 <button
                   type="submit" disabled={creating}
-                  style={{
-                    padding: "10px 20px", borderRadius: "8px",
-                    background: "linear-gradient(135deg, #0d9488, #14b8a6)",
-                    color: "#fff", fontWeight: 700, fontSize: "13px", border: "none", cursor: "pointer",
-                    display: "flex", alignItems: "center", gap: "6px"
-                  }}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50"
                 >
-                  {creating && <Loader2 size={16} className="animate-spin" />}
-                  {creating ? "Menyimpan..." : "Simpan & Daftarkan Kelas"}
+                  {creating && <Loader2 size={14} className="animate-spin" />}
+                  <span>{creating ? "Menyimpan..." : "Simpan Akun"}</span>
                 </button>
               </div>
             </form>
@@ -240,87 +231,86 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       )}
 
       {message && (
-        <div style={{
-          padding: "12px 16px",
-          borderRadius: "8px",
-          marginBottom: "16px",
-          fontSize: "13px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          background: message.type === "success" ? "#f0fdf4" : "#fef2f2",
-          color: message.type === "success" ? "#166534" : "#b91c1c",
-          border: `1px solid ${message.type === "success" ? "#bbf7d0" : "#fecaca"}`
-        }}>
-          {message.type === "success" ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+        <div className={`p-3.5 rounded-xl mb-5 text-sm flex items-center gap-3 font-medium border ${
+          message.type === "success"
+            ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+            : "bg-rose-50 text-rose-800 border-rose-200"
+        }`}>
+          {message.type === "success" ? <CheckCircle2 size={18} className="text-emerald-600 shrink-0" /> : <AlertTriangle size={18} className="text-rose-600 shrink-0" />}
           <span>{message.text}</span>
         </div>
       )}
 
-      <div style={{ overflowX: "auto", marginTop: "12px" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left" }}>
+      <div className="overflow-x-auto rounded-xl border border-slate-200/80">
+        <table className="w-full border-collapse text-left text-sm">
           <thead>
-            <tr style={{ borderBottom: "2px solid var(--line)", color: "var(--muted)" }}>
-              <th style={{ padding: "12px" }}>Nama Pengguna</th>
-              <th style={{ padding: "12px" }}>Email & Provider</th>
-              <th style={{ padding: "12px" }}>Statistik Belajar/Mengajar</th>
-              <th style={{ padding: "12px" }}>Hak Akses (Role)</th>
-              <th style={{ padding: "12px", textAlign: "center" }}>Aksi</th>
+            <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase text-xs tracking-wider">
+              <th className="py-3.5 px-4">Nama Pengguna</th>
+              <th className="py-3.5 px-4">Email & Provider</th>
+              <th className="py-3.5 px-4">Statistik Aktivitas</th>
+              <th className="py-3.5 px-4">Hak Akses (Role)</th>
+              <th className="py-3.5 px-4 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-100 bg-white">
             {filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ textAlign: "center", padding: "24px", color: "var(--muted)" }}>
-                  Tidak ada pengguna yang cocok dengan pencarian Anda.
+                <td colSpan={5} className="py-12 text-center text-slate-400 bg-slate-50/30">
+                  <p className="font-medium text-slate-500">Tidak ada pengguna yang cocok dengan pencarian Anda.</p>
                 </td>
               </tr>
             ) : (
               filteredUsers.map(u => (
-                <tr key={u.id} style={{ borderBottom: "1px solid var(--line)" }}>
-                  <td style={{ padding: "12px", fontWeight: 600 }}>{u.name}</td>
-                  <td style={{ padding: "12px" }}>
-                    <div>{u.email}</div>
-                    <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", background: "#f1f5f9", color: "#475569" }}>
-                      {u.authProvider}
+                <tr key={u.id} className="hover:bg-slate-50/60 transition">
+                  <td className="py-3.5 px-4 font-bold text-slate-900">{u.name || "Tanpa Nama"}</td>
+                  <td className="py-3.5 px-4">
+                    <div className="text-slate-700 font-medium">{u.email || "-"}</div>
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                      {u.authProvider || "LOCAL"}
                     </span>
                   </td>
-                  <td style={{ padding: "12px", color: "var(--muted)", fontSize: "12px" }}>
+                  <td className="py-3.5 px-4 text-xs text-slate-600 font-medium">
                     {u.role === "MENTOR" ? (
-                      <span>📚 {u._count.mentoredCourses} Program dikelola</span>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 font-semibold">
+                        📚 {(u._count?.mentoredCourses ?? 0)} Program dikelola
+                      </span>
+                    ) : u.role === "SUPER_ADMIN" ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 font-semibold">
+                        🛡️ Akses Penuh Sistem
+                      </span>
                     ) : (
-                      <span>📖 {u._count.enrollments} Kelas • 🎓 {u._count.certificates} Sertifikat</span>
+                      <span className="inline-flex items-center gap-2 text-slate-600 font-semibold">
+                        <span className="px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-100">📖 {(u._count?.enrollments ?? 0)} Kelas</span>
+                        <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-100">🎓 {(u._count?.certificates ?? 0)} Sertifikat</span>
+                      </span>
                     )}
                   </td>
-                  <td style={{ padding: "12px" }}>
+                  <td className="py-3.5 px-4">
                     <select
                       disabled={loadingId === u.id}
-                      value={u.role}
+                      value={u.role || "STUDENT"}
                       onChange={e => handleRoleChange(u.id, e.target.value)}
-                      style={{
-                        padding: "6px 10px",
-                        borderRadius: "6px",
-                        border: "1px solid var(--line)",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        background: u.role === "SUPER_ADMIN" ? "#fef3c7" : u.role === "MENTOR" ? "#e0e7ff" : "#f1f5f9",
-                        color: u.role === "SUPER_ADMIN" ? "#b45309" : u.role === "MENTOR" ? "#4338ca" : "#334155",
-                        cursor: "pointer"
-                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer focus:outline-none ${
+                        u.role === "SUPER_ADMIN"
+                          ? "bg-amber-100 text-amber-900 border-amber-300"
+                          : u.role === "MENTOR"
+                          ? "bg-indigo-100 text-indigo-900 border-indigo-300"
+                          : "bg-slate-100 text-slate-800 border-slate-300"
+                      }`}
                     >
                       <option value="STUDENT">Peserta (STUDENT)</option>
                       <option value="MENTOR">Mentor (MENTOR)</option>
-                      <option value="SUPER_ADMIN">Super Admin (SUPER_ADMIN)</option>
+                      <option value="SUPER_ADMIN">Super Admin (ADMIN)</option>
                     </select>
                   </td>
-                  <td style={{ padding: "12px", textAlign: "center" }}>
+                  <td className="py-3.5 px-4 text-center">
                     {loadingId === u.id ? (
-                      <Loader2 size={16} className="animate-spin" style={{ margin: "0 auto", color: "var(--teal)" }} />
+                      <Loader2 size={16} className="animate-spin mx-auto text-teal-600" />
                     ) : (
                       <button
                         onClick={() => handleDeleteUser(u.id, u.name)}
                         title="Hapus Akun Pengguna"
-                        style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444", padding: "4px" }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                       >
                         <Trash2 size={16} />
                       </button>

@@ -18,12 +18,17 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
   const { nodes, deletedIds } = await request.json();
 
   try {
-    // 1. Delete nodes if any
-    if (deletedIds && deletedIds.length > 0) {
-      await prisma.courseNode.deleteMany({
-        where: { id: { in: deletedIds }, courseId }
-      });
-    }
+    // 1. MASTER SKILL: Total Clean Deletion (Hapus node yang dieksplisitkan ATAU yang tidak ada lagi di daftar aktif frontend)
+    const activeIds = (nodes || [])
+      .map((n: any) => n.id)
+      .filter((id: string) => id && !id.startsWith("tmp_") && id !== "new_node");
+
+    await prisma.courseNode.deleteMany({
+      where: {
+        courseId,
+        id: { notIn: activeIds }
+      }
+    });
 
     // 2. MASTER SKILL: Total Order Wipeout & Bypass SQLite Unique Constraint (courseId, parentId, order)
     // Geser seluruh node yang ada di database untuk course ini ke urutan negatif yang aman

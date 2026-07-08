@@ -75,7 +75,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
   }, [course.id]);
 
   useEffect(() => {
-    if (nodes && nodes.length > 0) {
+    if (nodes) {
       const backupKey = `profas_lms_backup_${course.id}`;
       localStorage.setItem(backupKey, JSON.stringify(nodes));
     }
@@ -147,10 +147,23 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
     setDraggedNodeId(null);
   };
 
+  const getAllIds = (node: CourseNode): string[] => {
+    let ids = node.isNew ? [] : [node.id];
+    if (node.children && node.children.length > 0) {
+      node.children.forEach(c => {
+        ids = ids.concat(getAllIds(c));
+      });
+    }
+    return ids;
+  };
+
   const deleteNodeRecursive = (list: CourseNode[], idToDelete: string): CourseNode[] => {
     return list.filter(n => {
       if (n.id === idToDelete) {
-        if (!n.isNew) setDeletedIds(prev => [...prev, n.id]);
+        const allIdsToDelete = getAllIds(n);
+        if (allIdsToDelete.length > 0) {
+          setDeletedIds(prev => Array.from(new Set([...prev, ...allIdsToDelete])));
+        }
         return false;
       }
       n.children = deleteNodeRecursive(n.children, idToDelete);

@@ -4,6 +4,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Quiz } from "@/components/Quiz";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function KuisPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/masuk");

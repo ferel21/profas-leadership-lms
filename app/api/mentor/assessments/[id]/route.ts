@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 
@@ -78,6 +78,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         });
       }
     }
+
+    revalidatePath(`/evaluasi/${assessmentId}`);
+    revalidatePath(`/kuis/${assessmentId}`);
+    revalidatePath(`/belajar/${assessment.course.slug}`);
+    revalidatePath(`/belajar/${assessment.courseId}`);
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/evaluasi');
+    revalidatePath(`/mentor/evaluasi/${assessmentId}`);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

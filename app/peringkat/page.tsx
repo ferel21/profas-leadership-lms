@@ -53,8 +53,11 @@ export default async function LeaderboardPage(){
                 <span style={{ position: "absolute", bottom: "-10px", left: "50%", transform: "translateX(-50%)", background: "#d97706", color: "white", padding: "3px 14px", borderRadius: "12px", fontSize: "0.8rem", fontWeight: 800 }}>#1 EMAS</span>
               </div>
               <h2 style={{ margin: "0.5rem 0 0.25rem", fontSize: "1.35rem", color: "#78350f", fontWeight: 800 }}>{ranking[0].name}</h2>
-              <p style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}>{personaLabel(ranking[0].persona)}</p>
-              <div style={{ marginTop: "1.25rem", padding: "0.6rem", background: "rgba(255,255,255,0.9)", borderRadius: "14px", fontWeight: 800, color: "#b45309", fontSize: "1.1rem" }}>
+              <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#92400e" }}>{personaLabel(ranking[0].persona)}</p>
+              <div style={{ marginBottom: "0.5rem" }}>
+                <span className="pro-nft-seal" style={{ fontSize: "0.62rem", padding: "3px 10px" }}>👑 NFT VERIFIED CHAMPION</span>
+              </div>
+              <div style={{ marginTop: "0.75rem", padding: "0.6rem", background: "rgba(255,255,255,0.9)", borderRadius: "14px", fontWeight: 800, color: "#b45309", fontSize: "1.1rem" }}>
                 {ranking[0].xp.toLocaleString("id-ID")} XP
               </div>
             </div>
@@ -95,13 +98,14 @@ export default async function LeaderboardPage(){
               <b>{student.id===user.id?`${student.name} (Anda)`:student.name}</b>
             </span>
             <span style={{flex: 1, color: "#475569"}}>{personaLabel(student.persona)}</span>
-            <span style={{flex: 1, display: "flex", gap: "0.25rem", flexWrap: "wrap"}}>
+            <span style={{flex: 1, display: "flex", gap: "0.25rem", flexWrap: "wrap", alignItems: "center"}}>
+              {index === 0 && <span className="pro-ai-sparkle" style={{ fontSize: "0.62rem", padding: "2px 8px" }}>✨ Top 1 Champion</span>}
               {student.userBadges.map(ub => (
                 <span key={ub.id} title={ub.badge.name} style={{ display: "inline-block", padding: "2px 8px", background: "#fef3c7", color: "#b45309", fontSize: "0.75rem", borderRadius: "12px", border: "1px solid #fde68a", fontWeight: 600 }}>
-                  {ub.badge.name}
+                  🏆 {ub.badge.name}
                 </span>
               ))}
-              {student.userBadges.length === 0 && <span style={{ color: "#94a3b8", fontSize: "0.875rem" }}>—</span>}
+              {student.userBadges.length === 0 && index !== 0 && <span style={{ color: "#94a3b8", fontSize: "0.875rem" }}>—</span>}
             </span>
             <b style={{flex: "0 0 100px", textAlign: "right", color: "var(--color-primary)", fontSize: "1.05rem"}}>{student.xp.toLocaleString("id-ID")} XP</b>
           </div>

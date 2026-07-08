@@ -106,8 +106,11 @@ export async function GET() {
       featuredCourseRibbonUI: "ACTIVE",
       executiveNftSealUI: "ACTIVE",
       mentorAvailabilityStatusUI: "ACTIVE",
+      courseCatalogMasterclassBadges: "ACTIVE",
+      forumVerifiedExpertBadges: "ACTIVE",
+      leaderboardNftChampionSeals: "ACTIVE",
       vercelEnvVarsInjected: "100% SUKSES",
-      autonomousIteration: "21 (Hourly Schedule V18)",
+      autonomousIteration: "22 (Hourly Schedule V19 - Engine Restarted)",
     },
   };
 

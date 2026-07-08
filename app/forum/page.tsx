@@ -89,13 +89,18 @@ export default async function ForumPage({ searchParams }: { searchParams: Promis
                       </span>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.25rem" }}>
+                      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.25rem", flexWrap: "wrap" }}>
                         {thread.pinned && <span style={{ color: "var(--color-warning)", display: "flex", alignItems: "center", gap: "2px" }}><Pin size={14} fill="currentColor"/></span>}
                         <span className="meta-badge" style={{ fontSize: "0.65rem", padding: "2px 6px" }}>{thread.category.name}</span>
+                        {(thread.author.role === "MENTOR" || thread.author.role === "SUPER_ADMIN") && (
+                          <span className="pro-expert-badge" style={{ fontSize: "0.62rem", padding: "2px 8px" }}>
+                            👑 {thread.author.role === "MENTOR" ? "Mentor Eksekutif" : "Fasilitator PROFAS"}
+                          </span>
+                        )}
                       </div>
                       <h3 style={{ fontSize: "1.125rem", color: "#0f172a", margin: "0 0 0.25rem 0", fontWeight: "600" }}>{thread.title}</h3>
                       <p style={{ margin: 0, fontSize: "0.875rem", color: "#64748b" }}>
-                        Mulai oleh <b>{thread.author.name}</b> • {formatDate(thread.createdAt)}
+                        Mulai oleh <b style={{ color: thread.author.role === "MENTOR" ? "#0d9488" : "#0f172a" }}>{thread.author.name}</b> • {formatDate(thread.createdAt)}
                       </p>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b", fontSize: "0.875rem" }}>

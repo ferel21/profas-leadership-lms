@@ -4,9 +4,9 @@
    ========================================================================== */
 
 :root {
-  --enterprise-bg: #f6f8fb;
+  --enterprise-bg: #ffffff;
   --enterprise-surface: #ffffff;
-  --enterprise-surface-2: #f8fafc;
+  --enterprise-surface-2: #ffffff;
   --enterprise-ink: #102033;
   --enterprise-body: #405268;
   --enterprise-muted: #6b7a90;
@@ -562,7 +562,7 @@ iframe {
   gap: 10px !important;
 }
 
-.dash-actions > button,
+.dash-actions > .notif-btn,
 .notif-btn,
 .dash-menu {
   width: 42px !important;
@@ -571,6 +571,21 @@ iframe {
   background: #fff !important;
   border: 1px solid var(--enterprise-line) !important;
   box-shadow: var(--enterprise-shadow-sm) !important;
+}
+
+.dash-actions .command-palette-btn {
+  width: auto !important;
+  min-width: 185px !important;
+  height: 38px !important;
+  padding: 0 14px !important;
+  border-radius: 9999px !important;
+  background: #fff !important;
+  border: 1px solid var(--enterprise-line) !important;
+  box-shadow: var(--enterprise-shadow-sm) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
 }
 
 .notification-badge {
@@ -1059,6 +1074,15 @@ textarea {
   .dash-actions kbd,
   .dash-actions button span {
     display: none !important;
+  }
+
+  .dash-actions .command-palette-btn {
+    min-width: 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
   }
 
   .dash-enroll-item,
@@ -1972,3 +1996,115 @@ textarea {
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   CLEAR & BRIGHT THEME OVERRIDE (Clean White & Crisp Teal)
+   Menghapus kesan warna abu-abu kusam atau elemen gelap/cloudy di dasbor
+   ========================================================================== */
+:root {
+  --bg: #ffffff !important;
+  --bg-app: #ffffff !important;
+  --enterprise-bg: #ffffff !important;
+  --enterprise-surface: #ffffff !important;
+  --enterprise-surface-2: #ffffff !important;
+  --enterprise-line: #e6f0f2 !important;
+  --enterprise-line-soft: #f0f6f8 !important;
+}
+
+html, body, .dashboard-layout, .dashboard-canvas, .player-layout, .player-main {
+  background: #ffffff !important;
+}
+
+/* Mengubah seluruh card dasbor agar tampak jernih, bersih dan putih cemerlang */
+.stat-card-clean,
+.dash-card-clean,
+.dash-chart-card,
+.dash-roadmap-box,
+.continue-card,
+.data-card,
+.weekly-card,
+.rank-card,
+.bento-card-clean,
+.hero-mockup-clean,
+.course-card,
+.auth-card,
+.enroll-card,
+.mentor-detail,
+.question-card,
+.empty-card-clean {
+  background: #ffffff !important;
+  border: 1px solid #e5f0f1 !important;
+  box-shadow: 0 10px 32px rgba(15, 147, 135, 0.06) !important;
+  color: var(--enterprise-ink) !important;
+}
+
+/* Mengubah elemen gelap (certificate-mini, institution-bar, dll) menjadi terang & clear */
+.certificate-mini,
+.institution-bar {
+  background: #ffffff !important;
+  color: #102033 !important;
+  border: 1px solid #dcefec !important;
+  box-shadow: 0 10px 32px rgba(15, 147, 135, 0.06) !important;
+}
+.certificate-mini > span {
+  background: #e6f7f5 !important;
+  color: #0d9488 !important;
+}
+.certificate-mini small,
+.institution-bar span {
+  color: #64748b !important;
+}
+.certificate-mini b,
+.institution-bar b {
+  color: #0f172a !important;
+}
+.certificate-mini a {
+  color: #0d9488 !important;
+  font-weight: 700 !important;
+}
+.institution-bar i {
+  background: #e2e8f0 !important;
+}
+.institution-bar em {
+  background: #0d9488 !important;
+}
+
+/* Tombol dan action bar jernih dan putih bersih */
+.dash-actions > button:not(.command-palette-btn):not(.btn) {
+  background: #f8fcfa !important;
+  border: 1px solid #e0f0ee !important;
+  color: #334155 !important;
+}
+.dash-actions > button:not(.command-palette-btn):not(.btn):hover {
+  background: #e6f7f4 !important;
+  color: #0d9488 !important;
+}
+
+/* Sidebar & Header putih bersih */
+.dashboard-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #e6f0f2 !important;
+}
+.dashboard-header {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid #e6f0f2 !important;
+}
+
+/* Tombol pencarian cepat (command palette) yang clear */
+.command-palette-btn {
+  background: #f8fcfa !important;
+  border: 1px solid #dff0ed !important;
+  color: #334155 !important;
+}
+.command-palette-btn kbd {
+  background: #ffffff !important;
+  border: 1px solid #cde7e3 !important;
+  color: #0d9488 !important;
+}
+
+/* Mengubah kelas utility tailwind slate yang abu-abu agar ikut jernih */
+.bg-slate-50, .bg-slate-100, .bg-slate-200 {
+  background-color: #f8fcfb !important;
+  border-color: #e2f0ee !important;
+}
+

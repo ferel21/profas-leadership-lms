@@ -132,11 +132,14 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
         <div className="dash-actions flex items-center gap-3">
           <button
             onClick={() => setIsCommandOpen(true)}
-            className="hover-lift flex items-center gap-2.5 px-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold shadow-sm hover:border-teal-600 transition"
+            className="command-palette-btn hover-lift flex items-center justify-between gap-2.5 px-3.5 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold shadow-sm hover:border-teal-600 transition"
             title="Cari Cepat (Ctrl+K)"
+            style={{ width: "auto", minWidth: "185px", height: "38px", borderRadius: "9999px", display: "inline-flex" }}
           >
-            <Search size={15} className="text-teal-600" />
-            <span>Cari atau Perintah...</span>
+            <div className="flex items-center gap-2">
+              <Search size={15} className="text-teal-600" />
+              <span>Cari / Perintah...</span>
+            </div>
             <kbd className="bg-slate-200 px-1.5 py-0.5 rounded text-[10px] font-extrabold text-slate-700">Ctrl+K</kbd>
           </button>
           <button onClick={()=>setShowNotifs(v=>!v)} aria-label="Tampilkan notifikasi" aria-expanded={showNotifs} className="notif-btn">

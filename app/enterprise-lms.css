@@ -2080,14 +2080,36 @@ html, body, .dashboard-layout, .dashboard-canvas, .player-layout, .player-main {
   color: #0d9488 !important;
 }
 
-/* Sidebar & Header putih bersih */
-.dashboard-sidebar {
+/* Sidebar & Header putih bersih seutuhnya (menimpa mode gelap & glass) */
+html body .dashboard-sidebar,
+html body .dashboard-sidebar.glass,
+body:not(.light-mode) .dashboard-sidebar,
+body:not(.light-mode) .dashboard-sidebar.glass {
   background: #ffffff !important;
   border-right: 1px solid #e6f0f2 !important;
+  color: #1e293b !important;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.02) !important;
 }
-.dashboard-header {
-  background: rgba(255, 255, 255, 0.96) !important;
+
+html body .dashboard-header,
+html body .dashboard-header.glass,
+body:not(.light-mode) .dashboard-header,
+body:not(.light-mode) .dashboard-header.glass {
+  background: rgba(255, 255, 255, 0.98) !important;
   border-bottom: 1px solid #e6f0f2 !important;
+  color: #1e293b !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+html body .dashboard-sidebar nav a,
+body:not(.light-mode) .dashboard-sidebar nav a {
+  color: #475569 !important;
+}
+html body .dashboard-sidebar nav a.active,
+body:not(.light-mode) .dashboard-sidebar nav a.active {
+  background: #e6f7f5 !important;
+  color: #0d9488 !important;
+  border-left: 4px solid #0d9488 !important;
 }
 
 /* Tombol pencarian cepat (command palette) yang clear */

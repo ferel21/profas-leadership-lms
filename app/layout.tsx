@@ -6,10 +6,12 @@ import "./master.css";
 import "./landing.css";
 import "./premium.css";
 import "./pro-lms.css";
+import "./enterprise-lms.css";
 
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://profas-leadership-lms.netlify.app"),
   title: {
     template: "%s | PROFAS Leadership",
     default: "PROFAS Leadership — Tumbuh untuk Berdampak",
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "PROFAS Leadership — Tumbuh untuk Berdampak",
     description: "Platform pelatihan kepemimpinan terstruktur untuk individu, UMKM, akademisi, organisasi, dan koperasi.",
-    url: "https://profas-leadership.com",
+    url: "https://profas-leadership-lms.netlify.app",
     siteName: "PROFAS Leadership",
     images: [
       {

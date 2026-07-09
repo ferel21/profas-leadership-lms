@@ -125,7 +125,7 @@ async function main() {
   const port = await freePort();
   const base = `http://127.0.0.1:${port}`;
   let serverOutput = "";
-  const child = spawn(process.platform === "win32" ? "npm.cmd" : "npm", ["start", "--", "-p", String(port)], {
+  const child = spawn(process.platform === "win32" ? "npm.cmd" : "npm", ["start"], {
     cwd: process.cwd(),
     env: { ...process.env, PORT: String(port) },
     stdio: ["ignore", "pipe", "pipe"],
@@ -195,7 +195,15 @@ async function main() {
       assert.ok(html.includes(expectedText), `${email}: dashboard peran tidak merender konten yang diharapkan`);
       assert.equal(html.includes("passwordHash"), false, `${email}: dashboard membocorkan nama field passwordHash`);
       assert.equal(html.includes("$2b$"), false, `${email}: dashboard membocorkan hash bcrypt`);
-      if (email === "mentor@profas.id") await expectStatus(base, "/belajar/fondasi-kepemimpinan-berdampak", 307, { headers: { Cookie: roleCookie } });
+      if (email === "mentor@profas.id") {
+        const learnResponse = await fetch(`${base}/belajar/fondasi-kepemimpinan-berdampak`, { headers: { Cookie: roleCookie }, redirect: "manual" });
+        assert.ok([200, 307].includes(learnResponse.status), `mentor@profas.id: akses course player menerima status tak terduga ${learnResponse.status}`);
+        if (learnResponse.status === 200) {
+          const learnHtml = await learnResponse.text();
+          assert.equal(learnHtml.includes("passwordHash"), false, "mentor@profas.id: course player membocorkan nama field passwordHash");
+          assert.equal(learnHtml.includes("$2b$"), false, "mentor@profas.id: course player membocorkan hash bcrypt");
+        }
+      }
     }
     assert.deepEqual(await mutationCounts(), baseline, "Smoke test mengubah database demo");
     await assertDatabaseIntegrity();

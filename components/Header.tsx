@@ -19,7 +19,10 @@ export async function Header() {
         </nav>
         <div className="nav-actions">
           {user ? (
-            <Link href="/dashboard" className="user-chip"><span className={user.avatar ? "has-avatar" : ""}>{user.avatar ? <Image src={user.avatar} alt="" width={33} height={33} /> : initials(user.name)}</span>{user.username ? `@${user.username}` : user.name.split(" ")[0]}</Link>
+            <Link href="/dashboard" className="user-chip" aria-label="Buka dashboard">
+              <span className={user.avatar ? "has-avatar" : ""}>{user.avatar ? <Image src={user.avatar} alt="" width={33} height={33} /> : initials(user.name)}</span>
+              <b>{user.username ? `@${user.username}` : user.name.split(" ")[0]}</b>
+            </Link>
           ) : (
             <><Link href="/masuk" className="nav-login">Masuk</Link><Link href="/daftar" className="btn btn-primary btn-small">Mulai Belajar</Link></>
           )}

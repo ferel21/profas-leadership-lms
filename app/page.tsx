@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Award,
@@ -177,6 +178,30 @@ export default async function Home() {
                 <span>{label}</span>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="lms-activity" aria-labelledby="activity-title">
+          <div className="container">
+            <div className="lms-activity-intro">
+              <div>
+                <span className="lms-eyebrow">Belajar dalam aksi</span>
+                <h2 id="activity-title">Kepemimpinan tumbuh di ruang yang dijalani bersama.</h2>
+              </div>
+              <p>
+                Kelas PROFAS mempertemukan refleksi, praktik, dan percakapan yang membuat pembelajaran terasa dekat dengan tantangan kerja sehari-hari.
+              </p>
+            </div>
+            <figure className="lms-activity-frame">
+              <Image
+                src="/images/profas-activity-collage.jpeg"
+                alt="Kolase kegiatan pembelajaran dan diskusi peserta PROFAS Leadership"
+                width={1599}
+                height={899}
+                sizes="(max-width: 780px) calc(100vw - 28px), 1160px"
+              />
+              <figcaption>Potret proses belajar: berdiskusi, mencoba, dan bertumbuh sebagai satu komunitas.</figcaption>
+            </figure>
           </div>
         </section>
 

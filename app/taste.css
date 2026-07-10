@@ -61,6 +61,55 @@ html body .lms-home {
   color: var(--taste-ink) !important;
 }
 
+/* Brand lockup */
+
+html body .logo {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0;
+  line-height: 0;
+}
+
+html body .logo-image {
+  display: block;
+  width: clamp(150px, 16vw, 190px);
+  height: auto;
+  max-width: none;
+  object-fit: contain;
+  object-position: left center;
+}
+
+html body .logo-compact {
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+}
+
+html body .logo-compact .logo-image {
+  width: 153px;
+  max-width: none;
+  height: 42px;
+  object-fit: cover;
+  object-position: left center;
+}
+
+html body .dashboard-sidebar .logo-image {
+  width: 168px;
+}
+
+html body .sidebar-collapsed .sidebar-top {
+  display: flex;
+  justify-content: center;
+}
+
+html body .auth-visual .logo-image {
+  width: 210px;
+}
+
+html body .footer .logo-image {
+  width: 190px;
+}
+
 html body .lms-hero {
   min-height: min(860px, calc(100dvh - 74px));
   padding: clamp(68px, 9vw, 128px) 0 clamp(56px, 7vw, 92px);
@@ -267,6 +316,62 @@ html body .lms-hero {
   font-size: 0.78rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.lms-activity {
+  padding: clamp(72px, 9vw, 132px) 0;
+  background: var(--taste-surface);
+  border-bottom: 1px solid var(--taste-line);
+}
+
+.lms-activity-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: clamp(32px, 7vw, 100px);
+  align-items: end;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--taste-line);
+}
+
+.lms-activity-intro h2 {
+  max-width: 700px;
+  margin: 16px 0 0;
+  color: var(--taste-ink);
+  font-size: clamp(2.15rem, 4.3vw, 4.1rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.lms-activity-intro p {
+  max-width: 38ch;
+  margin: 0;
+  color: var(--taste-body);
+  font-size: 1rem;
+  line-height: 1.78;
+}
+
+.lms-activity-frame {
+  margin: clamp(28px, 4vw, 50px) 0 0;
+  overflow: hidden;
+  border: 1px solid var(--taste-line);
+  border-radius: 26px;
+  background: var(--taste-canvas);
+  box-shadow: var(--taste-shadow);
+}
+
+.lms-activity-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1599 / 899;
+  object-fit: cover;
+}
+
+.lms-activity-frame figcaption {
+  padding: 15px 20px 17px;
+  color: var(--taste-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
 }
 
 .lms-section {
@@ -576,8 +681,30 @@ html body .module-list button.active {
   }
 
   .lms-pathway-grid,
-  .lms-insight-cards {
+  .lms-insight-cards,
+  .lms-activity-intro {
     grid-template-columns: 1fr;
+  }
+
+  html body .logo-image {
+    width: 158px;
+  }
+
+  html body .dashboard-sidebar .logo-image {
+    width: 158px;
+  }
+
+  html body .auth-visual .logo-image,
+  html body .footer .logo-image {
+    width: 174px;
+  }
+
+  .lms-activity-intro {
+    gap: 22px;
+  }
+
+  .lms-activity-frame {
+    border-radius: 18px;
   }
 
   .lms-pathway-card:first-child,

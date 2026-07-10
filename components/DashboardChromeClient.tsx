@@ -84,7 +84,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
     <aside className={`dashboard-sidebar glass ${open?"open":""}`}>
       <div className="sidebar-top">
         {!collapsed && <Logo/>}
-        {collapsed && <span className="logo-mark"><i/><i/><i/></span>}
+        {collapsed && <Logo compact />}
         <button onClick={()=>setOpen(false)} aria-label="Tutup menu" className="mobile-close-btn"><X/></button>
       </div>
       <div className="sidebar-user">

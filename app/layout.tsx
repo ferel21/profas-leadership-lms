@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     url: appUrl,
     siteName: "PROFAS Leadership",
     images: [
-      { url: "/images/profas-leadership-hero.png", width: 1717, height: 916 },
+      { url: "/images/profas-activity-collage.jpeg", width: 1599, height: 899 },
     ],
     locale: "id_ID",
     type: "website",

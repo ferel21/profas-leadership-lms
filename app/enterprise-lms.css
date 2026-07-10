@@ -30,6 +30,18 @@
   --enterprise-ease: 180ms ease;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html {
   background: var(--enterprise-bg);
   text-rendering: optimizeLegibility;
@@ -2129,4 +2141,3 @@ body:not(.light-mode) .dashboard-sidebar nav a.active {
   background-color: #f8fcfb !important;
   border-color: #e2f0ee !important;
 }
-

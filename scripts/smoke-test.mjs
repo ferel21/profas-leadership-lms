@@ -5,7 +5,12 @@ import { createServer } from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+// Gunakan koneksi direct terpisah saat smoke test berjalan berdampingan dengan
+// server production lokal. Ini mencegah pooler `connection_limit=1` saling
+// menunggu antara test runner dan proses Next.js.
+const prisma = new PrismaClient(process.env.DIRECT_URL ? {
+  datasources: { db: { url: process.env.DIRECT_URL } },
+} : {});
 
 async function mutationCounts() {
   const users = await prisma.user.count();
@@ -154,6 +159,21 @@ async function main() {
 
     const cookie = await loginAs(base, "peserta@profas.id");
     const authHeaders = { Cookie: cookie };
+
+    if (!process.env.ANTHROPIC_API_KEY && !process.env.CLAUDE_API_KEY) {
+      const tutorResponse = await expectStatus(base, "/api/ai/tutor", 200, {
+        method: "POST",
+        headers: { ...authHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: "Bagaimana cara mendelegasikan tugas strategis dengan aman?",
+          lessonTitle: "Kepemimpinan Strategis",
+          history: [],
+        }),
+      });
+      const tutor = await tutorResponse.json();
+      assert.ok(typeof tutor.reply === "string" && tutor.reply.length > 0, "Tutor AI tidak mengembalikan jawaban");
+      assert.equal(tutor.source, "profas-local-ai", "Smoke test tanpa key seharusnya menggunakan fallback lokal");
+    }
 
     await expectStatus(base, "/dashboard", 200, { headers: authHeaders });
     await expectStatus(base, "/peringkat", 200, { headers: authHeaders });

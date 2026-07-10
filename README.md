@@ -24,6 +24,7 @@ Platform LMS (*Learning Management System*) full-stack berstandar produksi yang 
 - **Eksplorasi Katalog & Pendaftaran**: Memilih program kepemimpinan sesuai persona (*Entrepreneur, Academic, Organization, Cooperative*).
 - **Course Player Interaktif**: Menonton video materi, membaca modul teks/PDF, serta mengunduh berkas lampiran.
 - **Sistem Progres & XP Otomatis**: Progres dihitung akurat di sisi server (*server-authoritative*) setiap kali materi selesai.
+- **Asisten AI Leadership**: Tutor kontekstual menggunakan Claude melalui SDK Anthropic resmi jika `ANTHROPIC_API_KEY` tersedia, dengan fallback lokal agar alur belajar tetap bisa dipakai.
 - **🎉 Animasi Penyelesaian & Auto-Redirect**:
   - Setelah menyelesaikan materi, peserta menerima perayaan animasi (*confetti & badge scale-in*).
   - Sistem otomatis mengarahkan kembali ke dasbor atau materi berikutnya.
@@ -105,6 +106,7 @@ Proyek ini telah dikonfigurasi 100% kompatibel dengan arsitektur serverless **Ve
    - `JWT_SECRET` & `NEXTAUTH_SECRET`: Isi dengan string rahasia acak minimal 32 karakter.
    - `NEXTAUTH_URL` & `NEXT_PUBLIC_APP_URL`: Isi dengan domain produksi Anda (contoh: `https://profas-leadership-lms.vercel.app`).
    - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: Kredensial OAuth 2.0 dari Google Cloud Console.
+   - `ANTHROPIC_API_KEY`: Opsional untuk mengaktifkan tutor Claude di course player. Key ini hanya dipakai di server dan tidak boleh diawali `NEXT_PUBLIC_`.
 3. Klik **Deploy**.
 4. **PENTING (Google OAuth Callback)**: Pastikan Anda telah menambahkan URL callback produksi di Google Cloud Console:
    - `https://profas-leadership-lms.vercel.app/api/auth/google/callback`

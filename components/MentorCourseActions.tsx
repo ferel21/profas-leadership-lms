@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { Plus, Upload, Loader2, X, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ExportReportsButton } from "@/components/ExportReportsButton";
 
 type CourseOption = {
   id: string;
@@ -128,6 +129,8 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
         <Upload size={18} className="shrink-0 text-teal-600" />
         <span>Upload Materi Cepat</span>
       </button>
+
+      <ExportReportsButton label="Ekspor Rekap Nilai (.xlsx)" className="font-bold shrink-0" />
 
       {showCreateModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">

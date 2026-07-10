@@ -112,7 +112,13 @@ export default async function CertificatePage({ params }: { params?: Promise<{ n
 				</div>
 			</section>
 
-			<CertificateActions title={cert.course?.title || "Strategic Leadership Masterclass"} uniqueNumber={cert.uniqueNumber || number} />
+			<CertificateActions
+				title={cert.course?.title || "Strategic Leadership Masterclass"}
+				uniqueNumber={cert.uniqueNumber || number}
+				recipientName={cert.user?.name || "Peserta PROFAS Leadership"}
+				issuedAt={cert.issuedAt ? new Date(cert.issuedAt).toLocaleDateString("id-ID") : new Date().toLocaleDateString("id-ID")}
+				mentorName={cert.course?.mentor?.name || "Dr. Ratna Maharani"}
+			/>
 
 			<a
 				className="cert-verify-link"

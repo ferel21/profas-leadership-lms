@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState, useTransition } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 function RouteProgressBarInner() {
@@ -8,18 +8,23 @@ function RouteProgressBarInner() {
   const searchParams = useSearchParams();
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
-  const [, startTransition] = useTransition();
+  const previousRoute = useRef<string | null>(null);
 
   useEffect(() => {
-    // Selesai transisi saat pathname/searchParams berubah
-    if (visible || progress > 0) {
-      setProgress(100);
-      const timer = setTimeout(() => {
-        setVisible(false);
-        setProgress(0);
-      }, 300);
-      return () => clearTimeout(timer);
+    const route = `${pathname}?${searchParams.toString()}`;
+    if (previousRoute.current === null) {
+      previousRoute.current = route;
+      return;
     }
+    if (previousRoute.current === route) return;
+    previousRoute.current = route;
+    setVisible(true);
+    setProgress(100);
+    const timer = setTimeout(() => {
+      setVisible(false);
+      setProgress(0);
+    }, 300);
+    return () => clearTimeout(timer);
   }, [pathname, searchParams]);
 
   useEffect(() => {

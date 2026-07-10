@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, Filter, FileSpreadsheet } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { ExportReportsButton } from "@/components/ExportReportsButton";
 
 export type ReportRow = {
   id: string;
@@ -88,14 +89,17 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Laporan Detail Peserta</h2>
           <p className="text-sm text-slate-500 mt-1">Filter, urutkan, dan ekspor data analitik peserta ke format spreadsheet Excel profesional.</p>
         </div>
-        <button 
-          onClick={handleExport} 
-          disabled={exporting || filtered.length === 0}
-          className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-teal-600/30 hover:border-teal-600 bg-teal-50/50 hover:bg-teal-600 text-teal-700 hover:text-white font-semibold text-sm transition disabled:opacity-50"
-        >
-          <FileSpreadsheet size={18} className="shrink-0" />
-          <span>{exporting ? "Mengekspor..." : "Ekspor Excel (.xlsx)"}</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleExport}
+            disabled={exporting || filtered.length === 0}
+            className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-teal-600/30 hover:border-teal-600 bg-teal-50/50 hover:bg-teal-600 text-teal-700 hover:text-white font-semibold text-sm transition disabled:opacity-50"
+          >
+            <FileSpreadsheet size={18} className="shrink-0" />
+            <span>{exporting ? "Mengekspor..." : "Ekspor Excel (.xlsx)"}</span>
+          </button>
+          <ExportReportsButton label="Ekspor Multi-Sheet Executive (.xlsx)" className="font-semibold text-sm" />
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-3 mb-6">

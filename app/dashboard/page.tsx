@@ -431,12 +431,15 @@ export default async function DashboardPage() {
   // ═══════════════════════════════════════════════════════════
   // SUPER ADMIN DASHBOARD
   // ═══════════════════════════════════════════════════════════
-  const [userCount, courseCount, certificateCount, enrollmentCount, roleCounts, allEnrollments, allUsersList, allCoursesList] = await Promise.all([
+  // Pooler Supabase production memakai connection_limit=1. Jalankan seluruh
+  // query read admin dalam satu transaksi agar tidak membuat tujuh checkout
+  // koneksi paralel yang berisiko P2024 di serverless.
+  const [userCount, courseCount, certificateCount, enrollmentCount, roleCounts, allEnrollments, allUsersList, allCoursesList] = await prisma.$transaction([
     prisma.user.count(),
     prisma.course.count({ where: { published: true } }),
     prisma.certificate.count(),
     prisma.enrollment.count(),
-    prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
+    prisma.user.groupBy({ by: ["role"], orderBy: { role: "asc" }, _count: { _all: true } }),
     prisma.enrollment.findMany({
       include: {
         user: { select: { id: true, name: true, email: true } },
@@ -455,7 +458,7 @@ export default async function DashboardPage() {
     })
   ]);
 
-  const maxRole = Math.max(...roleCounts.map(item => item._count._all), 1);
+  const maxRole = Math.max(...roleCounts.map(item => typeof item._count === "object" && item._count !== null ? item._count._all ?? 0 : 0), 1);
   const labels: Record<string, string> = { STUDENT: "Peserta", MENTOR: "Mentor", SUPER_ADMIN: "Super Admin" };
   const barColors: Record<string, string> = { STUDENT: "#0d9488", MENTOR: "#3b82f6", SUPER_ADMIN: "#8b5cf6" };
 
@@ -501,11 +504,12 @@ export default async function DashboardPage() {
           />
           <div className="dash-chart-row">
             {roleCounts.map(item => {
-              const pct = Math.max(10, (item._count._all / maxRole) * 100);
+              const roleTotal = typeof item._count === "object" && item._count !== null ? item._count._all ?? 0 : 0;
+              const pct = Math.max(10, (roleTotal / maxRole) * 100);
               const color = barColors[item.role] || "#94a3b8";
               return (
                 <div key={item.role} className="dash-chart-bar-col">
-                  <span className="dash-chart-bar-val">{item._count._all}</span>
+                  <span className="dash-chart-bar-val">{roleTotal}</span>
                   <div className="dash-chart-bar-track" style={{ height: `${pct}%`, background: color }}>
                     <div className="dash-chart-bar-glow" />
                   </div>

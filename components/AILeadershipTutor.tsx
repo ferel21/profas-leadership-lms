@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bot, Send, Sparkles, User, Loader2, Lightbulb, Volume2, VolumeX } from "lucide-react";
 
 type Message = { role: "user" | "ai"; text: string; time: string };
@@ -23,6 +23,11 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [messages, loading]);
 
   function speakText(text: string) {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -60,7 +65,11 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
       const res = await fetch("/api/ai/tutor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, lessonTitle })
+        body: JSON.stringify({
+          question: q,
+          lessonTitle,
+          history: messages.slice(-8).map(({ role, text }) => ({ role, text })),
+        })
       });
 
       const data = await res.json();
@@ -101,7 +110,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
       </div>
 
       {/* Chat Messages */}
-      <div style={{ padding: "16px", maxHeight: "380px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "14px", background: "rgba(241, 245, 249, 0.4)" }}>
+      <div aria-live="polite" aria-busy={loading} style={{ padding: "16px", maxHeight: "380px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "14px", background: "rgba(241, 245, 249, 0.4)" }}>
         {messages.map((m, idx) => (
           <div key={idx} style={{ display: "flex", gap: "10px", alignSelf: m.role === "user" ? "flex-end" : "flex-start", maxWidth: "85%" }}>
             {m.role === "ai" && (
@@ -164,6 +173,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
             <span>Asisten AI sedang menyusun panduan kepemimpinan...</span>
           </div>
         )}
+        <div ref={messagesEndRef} aria-hidden="true" />
       </div>
 
       {/* Suggested Prompts */}
@@ -197,7 +207,9 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
 
       {/* Input Form */}
       <form onSubmit={e => { e.preventDefault(); handleSend(); }} style={{ display: "flex", gap: "8px", padding: "12px 16px", background: "var(--card-bg, #fff)", borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+        <label htmlFor="leadership-tutor-input" className="sr-only">Pertanyaan untuk Asisten AI Leadership</label>
         <input
+          id="leadership-tutor-input"
           type="text"
           placeholder="Tanyakan hal tentang kepemimpinan atau manajemen tim..."
           value={input}

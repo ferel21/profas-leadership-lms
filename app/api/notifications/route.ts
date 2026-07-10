@@ -7,15 +7,19 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ message: "Silakan masuk." }, { status: 401 });
 
-  const notifications = await prisma.notification.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
+  const [notifications, unreadCount] = await Promise.all([
+    prisma.notification.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+    prisma.notification.count({ where: { userId: user.id, read: false } }),
+  ]);
 
-  const unreadCount = await prisma.notification.count({ where: { userId: user.id, read: false } });
-
-  return NextResponse.json({ notifications, unreadCount });
+  return NextResponse.json(
+    { notifications, unreadCount },
+    { headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=45" } }
+  );
 }
 
 const patchSchema = z.object({

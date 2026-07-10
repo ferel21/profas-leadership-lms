@@ -15,7 +15,7 @@ export function CourseCard({ course }: CourseCardProps) {
   return (
     <article className="course-card course-card-enterprise hover-lift">
       {isMasterclass && <div className="pro-course-ribbon">MASTERCLASS</div>}
-      <Link href={`/program/${course.slug}`} className="course-image course-image-enterprise">
+      <Link href={`/program/${course.slug}`} prefetch={true} className="course-image course-image-enterprise">
         <Image src={course.image} alt={course.title} fill sizes="(max-width: 800px) 100vw, 33vw" />
         <span className="level-badge">{levels[course.level] ?? course.level}</span>
       </Link>
@@ -28,7 +28,7 @@ export function CourseCard({ course }: CourseCardProps) {
             <span className="course-quality-badge"><Sparkles size={12} /> Pilihan Eksekutif</span>
           ) : null}
         </div>
-        <h3><Link href={`/program/${course.slug}`}>{course.title}</Link></h3>
+        <h3><Link href={`/program/${course.slug}`} prefetch={true}>{course.title}</Link></h3>
         <p>{course.shortDescription}</p>
         {course.mentor && (
           <div className="course-mentor-chip">
@@ -37,7 +37,7 @@ export function CourseCard({ course }: CourseCardProps) {
           </div>
         )}
         <div className="course-meta"><span><Clock3 size={15}/>{course.durationHours} jam</span><span><Users size={15}/>{course.studentsCount.toLocaleString("id-ID")}</span><span><Star size={15} fill="currentColor"/>{course.rating}</span></div>
-        <div className="course-foot"><div><small>Mulai dari</small><strong>{formatRupiah(course.price)}</strong></div><Link href={`/program/${course.slug}`} aria-label={`Lihat ${course.title}`}><ArrowUpRight size={20}/></Link></div>
+        <div className="course-foot"><div><small>Mulai dari</small><strong>{formatRupiah(course.price)}</strong></div><Link href={`/program/${course.slug}`} prefetch={true} aria-label={`Lihat ${course.title}`}><ArrowUpRight size={20}/></Link></div>
       </div>
     </article>
   );

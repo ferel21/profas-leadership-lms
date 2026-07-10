@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.agents
+skills
+.autopilot
+*.log
+scratch
+tmp
+scripts/autopilot-control.sh

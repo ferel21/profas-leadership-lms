@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
+import { RouteProgressBar } from "@/components/RouteProgressBar";
 import "./typography.css";
 import "./design-system.css";
 import "./master.css";
@@ -35,5 +36,16 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="id"><body className={nunito.className}>{children}</body></html>;
+  return (
+    <html lang="id">
+      <head>
+        <link rel="preconnect" href="https://aws-1-ap-southeast-2.pooler.supabase.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://aws-1-ap-southeast-2.pooler.supabase.com" />
+      </head>
+      <body className={nunito.className}>
+        <RouteProgressBar />
+        {children}
+      </body>
+    </html>
+  );
 }

@@ -16,7 +16,6 @@ import { AdminUserManagement } from "@/components/AdminUserManagement";
 import { BroadcastManager } from "@/components/BroadcastManager";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 const average = (arr: number[]) => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
 
@@ -87,18 +86,25 @@ export default async function DashboardPage() {
   // STUDENT DASHBOARD
   // ═══════════════════════════════════════════════════════════
   if (user.role === "STUDENT") {
-    const initialEnrollments = await prisma.enrollment.findMany({
-      where: { userId: user.id },
-      include: {
-        course: { include: { nodes: { where: { type: { not: "FOLDER" } } } } }
-      },
-      orderBy: { enrolledAt: "desc" }
-    });
-    const certificates = await prisma.certificate.findMany({
-      where: { userId: user.id },
-      include: { course: true },
-      orderBy: { issuedAt: "desc" }
-    });
+    const [initialEnrollments, certificates] = await Promise.all([
+      prisma.enrollment.findMany({
+        where: { userId: user.id },
+        include: {
+          course: {
+            select: {
+              id: true, slug: true, title: true, shortDescription: true, category: true, level: true, price: true, durationHours: true, rating: true, studentsCount: true, image: true,
+              nodes: { where: { type: { not: "FOLDER" } }, select: { id: true } }
+            }
+          }
+        },
+        orderBy: { enrolledAt: "desc" }
+      }),
+      prisma.certificate.findMany({
+        where: { userId: user.id },
+        include: { course: { select: { id: true, title: true, slug: true, image: true } } },
+        orderBy: { issuedAt: "desc" }
+      })
+    ]);
     let enrollments = initialEnrollments;
 
     // Auto-enrollment / Self-Healing: Jika peserta (termasuk yang login via Google) belum memiliki kelas, otomatis daftarkan ke seluruh program kepemimpinan aktif!
@@ -115,7 +121,12 @@ export default async function DashboardPage() {
         enrollments = await prisma.enrollment.findMany({
           where: { userId: user.id },
           include: {
-            course: { include: { nodes: { where: { type: { not: "FOLDER" } } } } }
+            course: {
+              select: {
+                id: true, slug: true, title: true, shortDescription: true, category: true, level: true, price: true, durationHours: true, rating: true, studentsCount: true, image: true,
+                nodes: { where: { type: { not: "FOLDER" } }, select: { id: true } }
+              }
+            }
           },
           orderBy: { enrolledAt: "desc" }
         });
@@ -419,28 +430,29 @@ export default async function DashboardPage() {
   // ═══════════════════════════════════════════════════════════
   // SUPER ADMIN DASHBOARD
   // ═══════════════════════════════════════════════════════════
-  // Sequential execution to prevent Prisma connection pool timeout (connection limit: 1)
-  const userCount = await prisma.user.count();
-  const courseCount = await prisma.course.count({ where: { published: true } });
-  const certificateCount = await prisma.certificate.count();
-  const enrollmentCount = await prisma.enrollment.count();
-  const roleCounts = await prisma.user.groupBy({ by: ["role"], _count: { _all: true } });
-  const allEnrollments = await prisma.enrollment.findMany({
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-      course: { select: { id: true, title: true } }
-    }
-  });
-  const allUsersList = await prisma.user.findMany({
-    select: {
-      id: true, name: true, email: true, role: true, authProvider: true, createdAt: true,
-      _count: { select: { enrollments: true, certificates: true, mentoredCourses: true } }
-    },
-    orderBy: { createdAt: "desc" }
-  });
-  const allCoursesList = await prisma.course.findMany({
-    include: { nodes: { select: { id: true, type: true, title: true } } }
-  });
+  const [userCount, courseCount, certificateCount, enrollmentCount, roleCounts, allEnrollments, allUsersList, allCoursesList] = await Promise.all([
+    prisma.user.count(),
+    prisma.course.count({ where: { published: true } }),
+    prisma.certificate.count(),
+    prisma.enrollment.count(),
+    prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
+    prisma.enrollment.findMany({
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        course: { select: { id: true, title: true } }
+      }
+    }),
+    prisma.user.findMany({
+      select: {
+        id: true, name: true, email: true, role: true, authProvider: true, createdAt: true,
+        _count: { select: { enrollments: true, certificates: true, mentoredCourses: true } }
+      },
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.course.findMany({
+      include: { nodes: { select: { id: true, type: true, title: true } } }
+    })
+  ]);
 
   const maxRole = Math.max(...roleCounts.map(item => item._count._all), 1);
   const labels: Record<string, string> = { STUDENT: "Peserta", MENTOR: "Mentor", SUPER_ADMIN: "Super Admin" };

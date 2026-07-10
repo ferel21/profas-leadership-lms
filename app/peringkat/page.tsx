@@ -2,13 +2,19 @@ import { redirect } from "next/navigation";
 import { Trophy } from "lucide-react";
 import { DashboardChrome } from "@/components/DashboardChrome";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma, cachedQuery } from "@/lib/prisma";
 import { initials, personaLabel } from "@/lib/utils";
+
+const getLeaderboardStudents = cachedQuery(
+  async () => prisma.user.findMany({where:{role:"STUDENT"},select:{id:true,name:true,persona:true,xpLogs:{select:{points:true}},userBadges:{include:{badge:true}}}}),
+  ["leaderboard-students"],
+  60
+);
 
 export default async function LeaderboardPage(){
   const user=await getCurrentUser();
   if(!user)redirect("/masuk?next=/peringkat");
-  const students=await prisma.user.findMany({where:{role:"STUDENT"},select:{id:true,name:true,persona:true,xpLogs:{select:{points:true}},userBadges:{include:{badge:true}}}});
+  const students = await getLeaderboardStudents();
   const ranking=students.map(student=>({...student,xp:student.xpLogs.reduce((sum,log)=>sum+log.points,0)})).sort((a,b)=>b.xp-a.xp);
   return (
     <DashboardChrome user={user}>

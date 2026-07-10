@@ -1,5 +1,6 @@
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { prisma } from "./prisma";
 
 const secretString = (process.env.JWT_SECRET ?? "profas-development-secret").trim().replace(/^["']|["']$/g, "");
@@ -22,7 +23,7 @@ export async function createToken(payload: SessionPayload) {
     .sign(secret);
 }
 
-export async function getSession() {
+export const getSession = cache(async () => {
   const store = await cookies();
   const token = store.get("profas_session")?.value;
   if (!token) return null;
@@ -32,9 +33,9 @@ export async function getSession() {
   } catch {
     return null;
   }
-}
+});
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const session = await getSession();
   if (!session) return null;
   
@@ -76,4 +77,4 @@ export async function getCurrentUser() {
   }
   
   return user;
-}
+});

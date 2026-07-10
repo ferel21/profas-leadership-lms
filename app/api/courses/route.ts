@@ -10,5 +10,7 @@ export async function GET(request: Request) {
   const parsedLevel = z.nativeEnum(CourseLevel).safeParse(level);
   if (level && !parsedLevel.success) return NextResponse.json({ message: "Level program tidak valid." }, { status: 400 });
   const courses = await prisma.course.findMany({ where: { published: true, ...(category ? { category } : {}), ...(parsedLevel.success ? { level: parsedLevel.data } : {}) }, include: { mentor: { select: { name: true, headline: true } }, _count: { select: { enrollments: true, nodes: true } } } });
-  return NextResponse.json(courses);
+  return NextResponse.json(courses, {
+    headers: { "Cache-Control": "public, max-age=60, s-maxage=60" }
+  });
 }

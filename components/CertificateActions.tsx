@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { Check, Download, Share2, Loader2 } from "lucide-react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 export function CertificateActions({title, uniqueNumber}:{title:string, uniqueNumber:string}){
   const [copied,setCopied]=useState(false);
@@ -21,10 +19,15 @@ export function CertificateActions({title, uniqueNumber}:{title:string, uniqueNu
       const element = document.querySelector('.certificate-paper') as HTMLElement;
       if (!element) return window.print(); // Fallback
       
-      const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const [html2canvasMod, jsPDFMod] = await Promise.all([
+        import("html2canvas").then((m) => m.default),
+        import("jspdf").then((m) => m.default),
+      ]);
+
+      const canvas = await html2canvasMod(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
       const imgData = canvas.toDataURL('image/png');
       
-      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      const pdf = new jsPDFMod('landscape', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       

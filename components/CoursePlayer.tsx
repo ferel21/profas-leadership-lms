@@ -6,8 +6,6 @@ import { Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, Chevro
 import { initials } from "@/lib/utils";
 import { CompletionCelebration } from "./CompletionCelebration";
 import { AILeadershipTutor } from "./AILeadershipTutor";
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
-import { jsPDF } from "jspdf";
 
 export type NodeType = "FOLDER" | "VIDEO" | "PDF" | "DOCUMENT" | "IMAGE" | "LINK" | "QUIZ" | "ASSIGNMENT" | "TEXT";
 
@@ -107,6 +105,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
 
   async function downloadNoteDocx() {
     if (!noteText.trim() || !current) return;
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel } = await import("docx");
     const doc = new Document({
       sections: [{
         properties: {},
@@ -128,8 +127,9 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
     URL.revokeObjectURL(url);
   }
 
-  function downloadNotePdf() {
+  async function downloadNotePdf() {
     if (!noteText.trim() || !current) return;
+    const { jsPDF } = await import("jspdf");
     const pdf = new jsPDF();
     pdf.setFontSize(18);
     pdf.setTextColor(13, 148, 136); // Teal #0d9488

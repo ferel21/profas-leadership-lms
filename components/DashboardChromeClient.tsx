@@ -7,7 +7,9 @@ import { Award, Bell, BookOpen, Check, ClipboardCheck, FolderUp, Gauge, LayoutDa
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { initials } from "@/lib/utils";
-import { CommandPalette } from "./CommandPalette";
+import dynamic from "next/dynamic";
+
+const CommandPalette = dynamic(() => import("./CommandPalette").then(m => ({ default: m.CommandPalette })), { ssr: false });
 
 type UserShape = { name:string;username?:string|null;email:string;role:string;avatar?:string|null;headline?:string|null };
 type NotificationItem = { id: string; title: string; message: string; read: boolean; link: string | null; createdAt: string };
@@ -28,15 +30,27 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
   const nav=user.role==="MENTOR"?mentorNav:user.role==="SUPER_ADMIN"?adminNav:studentNav;
 
   useEffect(()=>{
-    fetch("/api/notifications")
-      .then(r=>r.ok?r.json():null)
-      .then(data=>{
-        if(data){
-          setNotifs(data.notifications ?? []);
-          setUnreadCount(data.unreadCount ?? 0);
-        }
-      })
-      .catch(()=>null);
+    const now = Date.now();
+    const globalCache = (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache;
+    if (globalCache && now - globalCache.time < 45000) {
+      setNotifs(globalCache.notifs);
+      setUnreadCount(globalCache.unreadCount);
+    } else {
+      fetch("/api/notifications")
+        .then(r=>r.ok?r.json():null)
+        .then(data=>{
+          if(data){
+            setNotifs(data.notifications ?? []);
+            setUnreadCount(data.unreadCount ?? 0);
+            (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache = {
+              time: Date.now(),
+              notifs: data.notifications ?? [],
+              unreadCount: data.unreadCount ?? 0,
+            };
+          }
+        })
+        .catch(()=>null);
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -90,6 +104,10 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
             <Link 
               href={href} 
               key={label} 
+              prefetch={true}
+              onMouseEnter={() => {
+                try { if (href.startsWith("/")) router.prefetch(href.split("#")[0]); } catch {}
+              }}
               className={`hover-lift ${isActive ? "active" : ""}`} 
               onClick={(e) => {
                 if (href.includes('#') && pathname === href.split('#')[0]) {
@@ -165,7 +183,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
               )}
             </div>
           </div>}
-          <Link href="/program" className="btn btn-primary btn-small hide-on-mobile">Jelajahi Program</Link>
+          <Link href="/program" prefetch={true} className="btn btn-primary btn-small hide-on-mobile">Jelajahi Program</Link>
         </div>
       </header>
       <main className="dashboard-content">{children}</main>

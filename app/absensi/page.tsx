@@ -22,30 +22,31 @@ export default async function AttendancePage() {
     courseIds = courses.map(item => item.id);
   }
 
-  const allStudents = user.role === Role.SUPER_ADMIN
-    ? await prisma.user.findMany({ where: { role: Role.STUDENT }, select: { id: true, name: true, email: true }, orderBy: { name: "asc" } })
-    : [];
-
-  const events = await prisma.calendarEvent.findMany({
-    where: {
-      startTime: { gte: start, lte: end },
-      ...(user.role === Role.STUDENT ? { OR: [{ courseId: null }, { courseId: { in: courseIds ?? [] } }] } : {}),
-      ...(user.role === Role.MENTOR ? { courseId: { in: courseIds ?? [] } } : {}),
-    },
-    include: {
-      course: {
-        select: {
-          title: true,
-          enrollments: { where: { user: { role: Role.STUDENT } }, select: { user: { select: { id: true, name: true, email: true } } }, orderBy: { user: { name: "asc" } } },
+  const [allStudents, events] = await Promise.all([
+    user.role === Role.SUPER_ADMIN
+      ? prisma.user.findMany({ where: { role: Role.STUDENT }, select: { id: true, name: true, email: true }, orderBy: { name: "asc" } })
+      : Promise.resolve([]),
+    prisma.calendarEvent.findMany({
+      where: {
+        startTime: { gte: start, lte: end },
+        ...(user.role === Role.STUDENT ? { OR: [{ courseId: null }, { courseId: { in: courseIds ?? [] } }] } : {}),
+        ...(user.role === Role.MENTOR ? { courseId: { in: courseIds ?? [] } } : {}),
+      },
+      include: {
+        course: {
+          select: {
+            title: true,
+            enrollments: { where: { user: { role: Role.STUDENT } }, select: { user: { select: { id: true, name: true, email: true } } }, orderBy: { user: { name: "asc" } } },
+          },
+        },
+        attendanceRecords: {
+          ...(user.role === Role.STUDENT ? { where: { userId: user.id } } : {}),
+          include: { user: { select: { name: true } } },
         },
       },
-      attendanceRecords: {
-        ...(user.role === Role.STUDENT ? { where: { userId: user.id } } : {}),
-        include: { user: { select: { name: true } } },
-      },
-    },
-    orderBy: { startTime: "desc" },
-  });
+      orderBy: { startTime: "desc" },
+    }),
+  ]);
 
   const viewEvents = events.map(event => ({
     id: event.id,

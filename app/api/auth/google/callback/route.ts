@@ -112,10 +112,11 @@ export async function GET(request: Request) {
       });
     }
 
-    // Auto-enrollment: Pastikan peserta baru yang login via Google langsung terdaftar di kelas-kelas aktif
+    // Auto-enrollment & Continuous Sync: Pastikan peserta yang login via Google langsung tersinkronisasi 100% dengan seluruh kelas yang diterbitkan mentor
     if (user.role === "STUDENT") {
       const enrCount = await prisma.enrollment.count({ where: { userId: user.id } });
-      if (enrCount === 0) {
+      const publishedCoursesCount = await prisma.course.count({ where: { published: true } });
+      if (enrCount < publishedCoursesCount) {
         const publishedCourses = await prisma.course.findMany({ where: { published: true } });
         for (const course of publishedCourses) {
           await prisma.enrollment.upsert({

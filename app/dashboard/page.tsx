@@ -107,8 +107,9 @@ export default async function DashboardPage() {
     ]);
     let enrollments = initialEnrollments;
 
-    // Auto-enrollment / Self-Healing: Jika peserta (termasuk yang login via Google) belum memiliki kelas, otomatis daftarkan ke seluruh program kepemimpinan aktif!
-    if (enrollments.length === 0) {
+    // Auto-enrollment & Continuous Sync: Pastikan peserta (termasuk yang login via Google) selalu tersinkronisasi dengan semua program kepemimpinan aktif yang diterbitkan oleh mentor!
+    const publishedCoursesCount = await prisma.course.count({ where: { published: true } });
+    if (enrollments.length < publishedCoursesCount) {
       const publishedCourses = await prisma.course.findMany({ where: { published: true } });
       if (publishedCourses.length > 0) {
         for (const course of publishedCourses) {

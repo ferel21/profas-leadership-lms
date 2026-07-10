@@ -40,7 +40,9 @@ function typeIcon(type: NodeType) {
     case "VIDEO": return <Film />;
     case "IMAGE": return <ImageIcon />;
     case "LINK": return <Link2 />;
-    default: return <Download />;
+    case "QUIZ": return <Award />;
+    case "ASSIGNMENT": return <CheckCircle2 />;
+    default: return <FileText />;
   }
 }
 
@@ -210,10 +212,11 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           </details>
         );
       }
+      const badgeText = node.type === "QUIZ" ? "🏆 Kuis • " : node.type === "ASSIGNMENT" ? "📋 Tugas • " : "";
       return (
         <button key={node.id} onClick={() => selectLesson(node.id)} className={node.id === current?.id ? "active" : ""}>
           {done.has(node.id) ? <CheckCircle2 /> : typeIcon(node.type)}
-          <span>{node.title} <small>{node.durationMin} menit</small></span>
+          <span>{node.title} <small>{badgeText}{node.durationMin} menit</small></span>
         </button>
       );
     });
@@ -233,7 +236,6 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           <button onClick={() => setSidebar(false)} aria-label="Tutup daftar materi"><X /></button>
         </div>
         <div className="overall-progress"><span><b>Progres Anda</b><strong>{percent}%</strong></span><i><em style={{ width: `${percent}%` }} /></i></div>
-        {course.assessments.length > 0 && <div className="course-assessments">{course.assessments.map(assessment => <Link href={`/evaluasi/${assessment.id}`} key={assessment.id}><Award /><span><b>{assessment.title}</b><small>{assessment.type === "PRETEST" ? "Pemetaan awal" : "Evaluasi akhir"}</small></span><ChevronRight /></Link>)}</div>}
         <div className="module-list">{renderTree(course.nodes)}</div>
       </aside>
       {sidebar && <button className="player-backdrop" onClick={() => setSidebar(false)} aria-label="Tutup daftar materi" />}

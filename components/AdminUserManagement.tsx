@@ -71,8 +71,9 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
     const nameStr = (u.name || "").toLowerCase();
     const emailStr = (u.email || "").toLowerCase();
     const roleStr = (u.role || "").toLowerCase();
+    const providerStr = (u.authProvider || "").toLowerCase();
     const queryStr = search.toLowerCase();
-    return nameStr.includes(queryStr) || emailStr.includes(queryStr) || roleStr.includes(queryStr);
+    return nameStr.includes(queryStr) || emailStr.includes(queryStr) || roleStr.includes(queryStr) || providerStr.includes(queryStr);
   });
 
   const handleRoleChange = async (userId: string, newRole: string) => {

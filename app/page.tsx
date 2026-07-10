@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { unstable_cache } from "next/cache";
 import {
   ArrowRight,
   Award,
@@ -70,8 +71,8 @@ const capabilities = [
   ["Production Flow", "Loading, empty, error, success state, dan akses mobile dirancang untuk pemakaian nyata."],
 ] as const;
 
-async function getFeaturedCourses(): Promise<FeaturedCourse[]> {
-  try {
+const getFeaturedCoursesCached = unstable_cache(
+  async (): Promise<FeaturedCourse[]> => {
     const courses = await prisma.course.findMany({
       where: { published: true, featured: true },
       include: { mentor: { select: { name: true } } },
@@ -81,6 +82,14 @@ async function getFeaturedCourses(): Promise<FeaturedCourse[]> {
       ...course,
       mentor: course.mentor ? { name: course.mentor.name } : undefined,
     }));
+  },
+  ["home-featured-courses-v2"],
+  { revalidate: 60, tags: ["courses", "featured-courses"] }
+);
+
+async function getFeaturedCourses(): Promise<FeaturedCourse[]> {
+  try {
+    return await getFeaturedCoursesCached();
   } catch (error) {
     console.warn("[HOME_FEATURED_COURSES_FALLBACK]", error);
     return [];

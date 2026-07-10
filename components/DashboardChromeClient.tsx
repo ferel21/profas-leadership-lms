@@ -30,16 +30,19 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
   const nav=user.role==="MENTOR"?mentorNav:user.role==="SUPER_ADMIN"?adminNav:studentNav;
 
   useEffect(()=>{
-    const now = Date.now();
-    const globalCache = (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache;
-    if (globalCache && now - globalCache.time < 45000) {
-      setNotifs(globalCache.notifs);
-      setUnreadCount(globalCache.unreadCount);
-    } else {
+    let cancelled = false;
+    const loadNotifications = () => {
+      const now = Date.now();
+      const globalCache = (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache;
+      if (globalCache && now - globalCache.time < 45000) {
+        setNotifs(globalCache.notifs);
+        setUnreadCount(globalCache.unreadCount);
+        return;
+      }
       fetch("/api/notifications")
         .then(r=>r.ok?r.json():null)
         .then(data=>{
-          if(data){
+          if(data && !cancelled){
             setNotifs(data.notifications ?? []);
             setUnreadCount(data.unreadCount ?? 0);
             (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache = {
@@ -50,7 +53,15 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
           }
         })
         .catch(()=>null);
-    }
+    };
+    const browserWindow = window as typeof window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    const hasIdleCallback = typeof browserWindow.requestIdleCallback === "function";
+    const idleId = hasIdleCallback
+      ? browserWindow.requestIdleCallback(loadNotifications, { timeout: 1200 })
+      : window.setTimeout(loadNotifications, 120);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -59,7 +70,12 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      cancelled = true;
+      if (hasIdleCallback && browserWindow.cancelIdleCallback) browserWindow.cancelIdleCallback(idleId as number);
+      else window.clearTimeout(idleId as number);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   },[]);
 
   async function markReadAll(){

@@ -733,3 +733,383 @@ html body .module-list button.active {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Modern-clean dashboard pass
+   Snap for navigation, Silk for route entry, and quiet surfaces for data density. */
+
+.route-progress-bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 999999;
+  height: 2px;
+  pointer-events: none;
+  background: transparent;
+}
+
+.route-progress-bar__fill {
+  height: 100%;
+  background: var(--taste-accent);
+  box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.08);
+  transition: width 180ms var(--taste-ease), opacity 180ms ease;
+}
+
+html body .dashboard-layout,
+html body .dashboard-canvas {
+  background: var(--taste-canvas) !important;
+  color: var(--taste-ink) !important;
+}
+
+html body .dashboard-sidebar {
+  background: #fbfcf9 !important;
+  border-right: 1px solid var(--taste-line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html body .dashboard-header {
+  min-height: 72px;
+  background: rgba(244, 246, 241, 0.96) !important;
+  border-bottom: 1px solid var(--taste-line) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+html body .dashboard-content {
+  max-width: 1340px;
+  padding: clamp(22px, 3.4vw, 44px) clamp(16px, 3.6vw, 52px) 64px;
+}
+
+html body .hero-banner-student,
+html body .hero-banner-mentor,
+html body .hero-banner-admin {
+  min-height: 188px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin-bottom: 22px;
+  border: 1px solid rgba(183, 230, 217, 0.16) !important;
+  border-radius: 24px !important;
+  background: var(--taste-deep) !important;
+  box-shadow: none !important;
+}
+
+html body .hero-banner-mentor {
+  background: #173d4a !important;
+}
+
+html body .hero-banner-admin {
+  background: #263b42 !important;
+}
+
+html body .hero-banner-title {
+  max-width: 720px;
+  font-size: clamp(1.75rem, 3vw, 2.8rem) !important;
+  letter-spacing: -0.045em !important;
+}
+
+html body .hero-banner-subtitle {
+  max-width: 620px;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+html body .responsive-stat-grid {
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+html body .stat-card-clean,
+html body .dash-card-clean,
+html body .dash-chart-card,
+html body .dash-roadmap-box {
+  border: 1px solid var(--taste-line) !important;
+  border-radius: 20px !important;
+  background: var(--taste-surface) !important;
+  box-shadow: none !important;
+}
+
+html body .stat-card-clean {
+  min-height: 148px;
+  padding: 20px !important;
+}
+
+html body .stat-card-clean:hover,
+html body .dash-card-clean:hover,
+html body .dash-chart-card:hover,
+html body .dash-roadmap-box:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 118, 110, 0.34) !important;
+  box-shadow: 0 16px 36px -28px rgba(23, 60, 55, 0.55) !important;
+}
+
+html body .stat-card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px !important;
+  background: var(--taste-accent) !important;
+  box-shadow: none !important;
+}
+
+html body .stat-card-value {
+  color: var(--taste-ink) !important;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: clamp(1.45rem, 2.4vw, 2.1rem) !important;
+  letter-spacing: -0.06em;
+}
+
+html body .stat-card-label {
+  color: var(--taste-ink) !important;
+  font-weight: 800;
+}
+
+html body .stat-card-desc,
+html body .section-title-clean p {
+  color: var(--taste-muted) !important;
+}
+
+html body .stat-card-trend {
+  border: 1px solid var(--taste-line);
+  background: var(--taste-accent-soft) !important;
+  color: var(--taste-accent) !important;
+}
+
+html body .section-title-clean {
+  margin-bottom: 18px;
+}
+
+html body .section-title-clean h2 {
+  color: var(--taste-ink) !important;
+  font-size: clamp(1.08rem, 1.8vw, 1.35rem) !important;
+  letter-spacing: -0.035em;
+}
+
+html body .dash-roadmap-box {
+  margin-bottom: 22px;
+  padding: clamp(18px, 2.5vw, 28px) !important;
+}
+
+html body .dash-roadmap-node {
+  min-height: 128px;
+  border: 1px solid var(--taste-line);
+  border-radius: 16px !important;
+  background: var(--taste-canvas) !important;
+}
+
+html body .dash-roadmap-node.active {
+  border-color: rgba(15, 118, 110, 0.42) !important;
+  background: var(--taste-accent-soft) !important;
+}
+
+html body .dash-roadmap-node.next,
+html body .dash-roadmap-node.locked {
+  background: #fbfcf9 !important;
+}
+
+html body .dash-roadmap-banner {
+  border: 1px solid var(--taste-line) !important;
+  border-radius: 16px !important;
+  background: var(--taste-canvas) !important;
+}
+
+html body .dash-enroll-item,
+html body .dash-mentor-course-item,
+html body .dash-quick-item,
+html body .dash-quick-admin-item {
+  border-color: var(--taste-line) !important;
+  border-radius: 14px !important;
+  background: var(--taste-canvas) !important;
+  box-shadow: none !important;
+}
+
+html body .dash-enroll-item:hover,
+html body .dash-mentor-course-item:hover,
+html body .dash-quick-item:hover,
+html body .dash-quick-admin-item:hover {
+  background: var(--taste-surface) !important;
+  border-color: rgba(15, 118, 110, 0.38) !important;
+}
+
+html body .dash-progress-track,
+html body .dash-perf-track {
+  background: #e5eee9 !important;
+}
+
+html body .dash-progress-fill,
+html body .dash-perf-fill {
+  background: var(--taste-accent) !important;
+}
+
+html body .dash-tip-card,
+html body .dash-tip-card-blue {
+  border: 1px solid rgba(183, 230, 217, 0.22) !important;
+  border-radius: 18px !important;
+  background: var(--taste-deep) !important;
+  box-shadow: none !important;
+}
+
+html body .dash-chart-row {
+  min-height: 220px;
+}
+
+/* Fast first paint: the dashboard loading shell has no client-side chrome. */
+.dashboard-loading-shell {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100dvh;
+  background: var(--taste-canvas);
+}
+
+.dashboard-loading-sidebar {
+  padding: 26px 18px;
+  border-right: 1px solid var(--taste-line);
+  background: #fbfcf9;
+}
+
+.dashboard-loading-logo,
+.dashboard-loading-nav,
+.dashboard-loading-header > div,
+.dashboard-loading-header > span,
+.dashboard-loading-hero,
+.dashboard-loading-shell .skeleton-card,
+.dashboard-loading-panel > div {
+  background: linear-gradient(100deg, #e7eee9 20%, #f7faf7 45%, #e7eee9 70%);
+  background-size: 220% 100%;
+  animation: taste-shimmer 1.35s linear infinite;
+}
+
+.dashboard-loading-logo {
+  width: 154px;
+  height: 42px;
+  margin-bottom: 48px;
+  border-radius: 8px;
+}
+
+.dashboard-loading-nav {
+  height: 42px;
+  margin: 12px 0;
+  border-radius: 10px;
+}
+
+.dashboard-loading-main {
+  min-width: 0;
+  padding: 22px clamp(16px, 4vw, 52px) 52px;
+}
+
+.dashboard-loading-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.dashboard-loading-header > div {
+  width: min(260px, 42%);
+  height: 30px;
+  border-radius: 8px;
+}
+
+.dashboard-loading-header > span {
+  width: 140px;
+  height: 30px;
+  border-radius: 999px;
+}
+
+.dashboard-loading-hero {
+  min-height: 170px;
+  margin-bottom: 18px;
+  border-radius: 22px;
+}
+
+.dashboard-loading-shell .skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.dashboard-loading-shell .skeleton-card {
+  min-height: 132px;
+  padding: 18px;
+  border: 1px solid var(--taste-line);
+  border-radius: 18px;
+}
+
+.dashboard-loading-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.8fr);
+  gap: 18px;
+}
+
+.dashboard-loading-panel > div {
+  min-height: 300px;
+  border: 1px solid var(--taste-line);
+  border-radius: 20px;
+}
+
+@keyframes taste-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -20% 0; }
+}
+
+@media (max-width: 960px) {
+  .dashboard-loading-shell {
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+
+  .dashboard-loading-sidebar {
+    padding-inline: 14px;
+  }
+
+  .dashboard-loading-logo {
+    width: 52px;
+  }
+
+  .dashboard-loading-nav {
+    height: 42px;
+  }
+
+  .dashboard-loading-shell .skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  html body .dashboard-content {
+    padding: 18px 14px 40px;
+  }
+
+  html body .hero-banner-student,
+  html body .hero-banner-mentor,
+  html body .hero-banner-admin {
+    min-height: 160px;
+    border-radius: 18px !important;
+  }
+
+  html body .stat-card-clean {
+    min-height: 124px;
+  }
+
+  html body .dash-roadmap-banner {
+    align-items: stretch;
+  }
+
+  html body .dash-roadmap-banner > * {
+    width: 100%;
+  }
+
+  .dashboard-loading-shell {
+    display: block;
+  }
+
+  .dashboard-loading-sidebar {
+    display: none;
+  }
+
+  .dashboard-loading-main {
+    padding: 16px 14px 36px;
+  }
+
+  .dashboard-loading-shell .skeleton-grid,
+  .dashboard-loading-panel {
+    grid-template-columns: 1fr;
+  }
+}

@@ -110,15 +110,13 @@ export default async function DashboardPage() {
     // Auto-enrollment & Continuous Sync: Pastikan peserta (termasuk yang login via Google) selalu tersinkronisasi dengan semua program kepemimpinan aktif yang diterbitkan oleh mentor!
     const publishedCoursesCount = await prisma.course.count({ where: { published: true } });
     if (enrollments.length < publishedCoursesCount) {
-      const publishedCourses = await prisma.course.findMany({ where: { published: true } });
+      const publishedCourses = await prisma.course.findMany({ where: { published: true }, select: { id: true } });
       if (publishedCourses.length > 0) {
-        for (const course of publishedCourses) {
-          await prisma.enrollment.upsert({
+        await prisma.$transaction(publishedCourses.map(course => prisma.enrollment.upsert({
             where: { userId_courseId: { userId: user.id, courseId: course.id } },
             update: {},
             create: { userId: user.id, courseId: course.id, status: "ACTIVE", progressPercent: 0 }
-          });
-        }
+          })));
         enrollments = await prisma.enrollment.findMany({
           where: { userId: user.id },
           include: {

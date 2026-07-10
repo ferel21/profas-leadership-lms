@@ -273,16 +273,16 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                   <td className="py-3.5 px-4 text-xs text-slate-600 font-medium">
                     {u.role === "MENTOR" ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 font-semibold">
-                        📚 {(u._count?.mentoredCourses ?? 0)} Program dikelola
+                        {(u._count?.mentoredCourses ?? 0)} Program dikelola
                       </span>
                     ) : u.role === "SUPER_ADMIN" ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 font-semibold">
-                        🛡️ Akses Penuh Sistem
+                        Akses Penuh Sistem
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-2 text-slate-600 font-semibold">
-                        <span className="px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-100">📖 {(u._count?.enrollments ?? 0)} Kelas</span>
-                        <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-100">🎓 {(u._count?.certificates ?? 0)} Sertifikat</span>
+                        <span className="px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-100">{(u._count?.enrollments ?? 0)} Kelas</span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">{(u._count?.certificates ?? 0)} Sertifikat</span>
                       </span>
                     )}
                   </td>

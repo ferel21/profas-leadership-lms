@@ -76,7 +76,7 @@ export function CompletionCelebration(props: Props) {
           <Sparkles />
           <Award />
         </div>
-        <h1 className="completion-title">Selamat! 🎉</h1>
+        <h1 className="completion-title">Selamat!</h1>
         <p className="completion-subtitle">
           <b>{props.userName}</b>, Anda telah menyelesaikan seluruh rangkaian pembelajaran
         </p>

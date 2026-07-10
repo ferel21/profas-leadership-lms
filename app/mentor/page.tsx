@@ -39,7 +39,7 @@ export default async function MentorDashboardPage() {
     <DashboardChrome user={user}>
       <div className="dash-title">
         <div>
-          <p>Halo, {user.name.split(" ")[0]} <span>👋</span></p>
+          <p>Halo, {user.name.split(" ")[0]}</p>
           <h1>Mentor Dashboard</h1>
           <small>Pantau program dan dampingi pertumbuhan peserta Anda.</small>
         </div>

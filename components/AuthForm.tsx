@@ -45,14 +45,14 @@ export function AuthForm({
     {(errorParam || error) && (
       <div className="auth-alert-box">
         <div className="auth-alert-header">
-          <span>⚠️ Gagal Masuk / Otorisasi Google</span>
+          <span>Gagal Masuk / Otorisasi Google</span>
         </div>
         <div>
           {reasonParam || error || "Terjadi kendala saat verifikasi akun Anda."}
         </div>
         {errorParam === "token_exchange_failed" && (
           <div className="auth-alert-codebox">
-            <b>💡 Solusi Konfigurasi Google Console &amp; Vercel:</b><br/>
+            <b>Solusi Konfigurasi Google Console &amp; Vercel:</b><br/>
             1. Pastikan di Dasbor Vercel tidak ada spasi/enter tambahan pada nilai <code>GOOGLE_CLIENT_ID</code> &amp; <code>GOOGLE_CLIENT_SECRET</code>.<br/>
             2. Pastikan di Google Cloud Console (&rarr; APIs &amp; Services &rarr; Credentials), pada bagian <b>Authorized redirect URIs</b>, sudah ditambahkan URL berikut secara persis:<br/>
             <code className="auth-code-pill">https://profas-leadership-lms.vercel.app/api/auth/callback/google</code>

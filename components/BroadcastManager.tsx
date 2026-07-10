@@ -76,9 +76,9 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
               onChange={e => setTargetCourseId(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
             >
-              <option value="ALL">🌐 Seluruh Peserta Platform (Semua Program)</option>
+              <option value="ALL">Seluruh Peserta Platform (Semua Program)</option>
               {safeCourses.map(c => (
-                <option key={c.id} value={c.id}>📚 Kohort Program: {c.title}</option>
+                <option key={c.id} value={c.id}>Kohort Program: {c.title}</option>
               ))}
             </select>
           </div>

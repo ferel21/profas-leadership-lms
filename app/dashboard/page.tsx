@@ -161,7 +161,7 @@ export default async function DashboardPage() {
         {/* ── Hero greeting ── */}
         <div className="hero-banner-student">
           <p className="eyebrow-teal" style={{ margin: "0 0 4px", opacity: 0.85 }}>
-            SELAMAT DATANG KEMBALI 👋
+            SELAMAT DATANG KEMBALI
           </p>
           <h1 className="hero-banner-title">
             {user.name}!
@@ -181,7 +181,7 @@ export default async function DashboardPage() {
 
         {/* ── Executive Learning Roadmap & Career Pathway ── */}
         <div className="dash-roadmap-box">
-          <SectionTitle title="🗺️ Alur Kepemimpinan Eksekutif (Executive Career Roadmap)" subtitle="Jalur tahapan evolusi kepemimpinan Anda di PROFAS Institute" />
+          <SectionTitle title="Alur Kepemimpinan Eksekutif" subtitle="Jalur tahapan evolusi kepemimpinan Anda di PROFAS Institute" />
           <div className="dash-roadmap-grid">
             <div className="dash-roadmap-node active hover-lift">
               <div>

@@ -99,14 +99,14 @@ export default async function Home() {
             <div className="lms-hero-copy">
               <span className="lms-eyebrow">
                 <Sparkles size={16} />
-                Enterprise LMS untuk kepemimpinan profesional
+                PROFAS Institute / Leadership learning system
               </span>
               <h1 id="home-title">
-                PROFAS Leadership LMS
-                <span>Belajar, bertumbuh, dan memimpin dengan dampak terukur.</span>
+                Belajar memimpin
+                <span className="lms-title-line"><span className="lms-inline-image" aria-hidden="true" />dengan dampak.</span>
               </h1>
               <p>
-                Platform pembelajaran kepemimpinan modern untuk peserta, mentor, dan admin. Semua alur penting LMS disusun rapi: katalog program, course player, progres, evaluasi, sertifikat, dashboard role, dan pelaporan.
+                Ruang belajar terstruktur untuk mengubah wawasan menjadi keputusan, kebiasaan kerja, dan capaian kepemimpinan yang bisa dilihat.
               </p>
               <div className="lms-hero-actions">
                 <Link href="/daftar" className="lms-btn lms-btn-primary">
@@ -122,7 +122,7 @@ export default async function Home() {
                 <div className="lms-rating">
                   <Star fill="currentColor" />
                   <b>4.9</b>
-                  <span>rating alumni</span>
+                  <span>rata-rata alumni</span>
                 </div>
                 <div className="lms-avatar-row" aria-hidden="true">
                   <span>RD</span>

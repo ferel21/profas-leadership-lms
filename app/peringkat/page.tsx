@@ -105,10 +105,10 @@ export default async function LeaderboardPage(){
             </span>
             <span className="lb-col-persona">{personaLabel(student.persona)}</span>
             <span className="lb-col-badge">
-              {index === 0 && <span className="pro-ai-sparkle podium-nft-seal-sm">✨ Top 1 Champion</span>}
+              {index === 0 && <span className="pro-ai-sparkle podium-nft-seal-sm">Top 1 Champion</span>}
               {student.userBadges.map(ub => (
                 <span key={ub.id} title={ub.badge.name} className="lb-badge-pill">
-                  🏆 {ub.badge.name}
+                  {ub.badge.name}
                 </span>
               ))}
               {student.userBadges.length === 0 && index !== 0 && <span className="lb-badge-empty">—</span>}

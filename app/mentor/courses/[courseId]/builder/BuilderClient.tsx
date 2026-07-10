@@ -646,8 +646,8 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: '#475569' }}>Jenis Materi</label>
         <select className="form-input" value={type} onChange={(e) => setType(e.target.value as NodeType)} style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', marginBottom: '1.2rem', fontWeight: 600 }}>
           <option value="VIDEO">🎬 Video Pembelajaran (.mp4 / link video)</option>
-          <option value="PDF">📑 Dokumen Modul / Bacaan (.pdf)</option>
-          <option value="LINK">🔗 Tautan Luar (Web / Google Drive / Zoom)</option>
+          <option value="PDF">Dokumen Modul / Bacaan (.pdf)</option>
+          <option value="LINK">Tautan Luar (Web / Google Drive / Zoom)</option>
           <option value="QUIZ">❓ Kuis / Evaluasi Pre-Test</option>
           <option value="ASSIGNMENT">📝 Tugas Praktik Action Plan</option>
         </select>
@@ -733,7 +733,7 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
           </>
         ) : (
           <div style={{ padding: '12px 16px', borderRadius: '10px', background: '#fffbeb', border: '1px solid #fde68a', color: '#b45309', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-            💡 <b>Catatan Evaluasi:</b> Anda dapat mengatur butir soal kuis atau instruksi tugas praktik secara mendetail setelah menyimpan struktur kurikulum ini.
+            <b>Catatan Evaluasi:</b> Anda dapat mengatur butir soal kuis atau instruksi tugas praktik secara mendetail setelah menyimpan struktur kurikulum ini.
           </div>
         )}
 

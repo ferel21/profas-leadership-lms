@@ -143,7 +143,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
               <span className="text-[11px] font-extrabold text-emerald-600 tracking-wider">LIVE CLOUD DB</span>
             </div>
             <div className="pro-streak-flame" title="7 Hari Belajar Konsisten">
-              🔥 <span className="text-xs font-extrabold text-amber-500">7d Streak</span>
+              <span className="text-xs font-extrabold text-amber-500">7 hari konsisten</span>
             </div>
           </div>
         </div>

@@ -37,7 +37,7 @@ function getLocalReply(question: string, lessonTitle?: string) {
     advice = LEADERSHIP_KNOWLEDGE_BASE.motivasi;
   }
 
-  return `**💡 Panduan Kepemimpinan (Konteks: ${lessonTitle || "PROFAS Leadership"})**\n\n${advice}\n\n*Tips Refleksi:* Bagaimana Anda akan menerapkan konsep ini dalam memimpin tim Anda minggu ini? Tuliskan langkah konkret Anda pada jurnal refleksi modul ini.`;
+  return `**Panduan Kepemimpinan (Konteks: ${lessonTitle || "PROFAS Leadership"})**\n\n${advice}\n\n*Tips Refleksi:* Bagaimana Anda akan menerapkan konsep ini dalam memimpin tim Anda minggu ini? Tuliskan langkah konkret Anda pada jurnal refleksi modul ini.`;
 }
 
 function buildClaudeMessages(question: string, history: z.infer<typeof tutorRequestSchema>["history"]): Anthropic.MessageParam[] {

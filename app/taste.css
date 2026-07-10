@@ -1,0 +1,609 @@
+/*
+   PROFAS TASTE LAYER
+   Tidal Editorial: calm, asymmetric, tactile, and deliberately free of neon UI.
+   Loaded after the legacy style layers so the design direction stays coherent.
+*/
+
+:root {
+  --taste-canvas: #f4f6f1;
+  --taste-surface: #ffffff;
+  --taste-ink: #1c2825;
+  --taste-body: #586761;
+  --taste-muted: #82908a;
+  --taste-line: #dbe5df;
+  --taste-accent: #0f766e;
+  --taste-accent-soft: #e4f2ec;
+  --taste-deep: #173c37;
+  --taste-shadow: 0 24px 52px -28px rgba(29, 67, 58, 0.28);
+  --taste-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html,
+body {
+  background: var(--taste-canvas) !important;
+  color: var(--taste-ink) !important;
+}
+
+body {
+  font-family: var(--font-body) !important;
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+button,
+a,
+summary,
+input,
+select,
+textarea {
+  transition-timing-function: var(--taste-ease) !important;
+}
+
+button:active,
+.btn:active,
+.lms-btn:active {
+  transform: translateY(1px) scale(0.985) !important;
+}
+
+/* Landing page */
+
+html body .lms-home {
+  --home-ink: var(--taste-ink);
+  --home-body: var(--taste-body);
+  --home-muted: var(--taste-muted);
+  --home-line: var(--taste-line);
+  --home-soft: var(--taste-canvas);
+  --home-teal: var(--taste-accent);
+  --home-blue: var(--taste-accent);
+  background: var(--taste-canvas) !important;
+  color: var(--taste-ink) !important;
+}
+
+html body .lms-hero {
+  min-height: min(860px, calc(100dvh - 74px));
+  padding: clamp(68px, 9vw, 128px) 0 clamp(56px, 7vw, 92px);
+  background: var(--taste-canvas) !important;
+}
+
+.lms-hero::after {
+  display: none;
+}
+
+.lms-hero-media {
+  inset: 0 0 0 54%;
+  opacity: 0.9;
+  border-left: 1px solid rgba(219, 229, 223, 0.8);
+  background:
+    linear-gradient(90deg, var(--taste-canvas) 0%, rgba(244, 246, 241, 0.82) 24%, rgba(244, 246, 241, 0.08) 70%),
+    url("/images/profas-leadership-hero.png") 70% center / cover no-repeat;
+}
+
+.lms-hero-grid {
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.78fr);
+  gap: clamp(36px, 7vw, 96px);
+}
+
+.lms-hero-copy {
+  color: var(--taste-ink);
+  max-width: 650px;
+}
+
+.lms-hero .lms-eyebrow {
+  min-height: 30px;
+  padding: 8px 0;
+  border: 0;
+  border-block: 1px solid var(--taste-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--taste-accent);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  backdrop-filter: none;
+}
+
+.lms-hero h1 {
+  max-width: 700px;
+  margin-top: 24px;
+  color: var(--taste-ink);
+  font-size: clamp(3.35rem, 7vw, 6.2rem);
+  line-height: 0.96;
+  letter-spacing: -0.055em !important;
+}
+
+.lms-hero h1 .lms-title-line {
+  display: block;
+  max-width: 620px;
+  margin-top: 18px;
+  color: var(--taste-accent);
+  font-size: clamp(1.65rem, 3vw, 2.65rem);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+.lms-inline-image {
+  width: clamp(58px, 7vw, 96px);
+  height: 0.82em;
+  display: inline-block;
+  margin: 0 10px 0 2px;
+  vertical-align: -0.06em;
+  border: 5px solid var(--taste-surface);
+  border-radius: 14px;
+  background: url("/images/profas-leadership-hero.png") center / cover no-repeat;
+  box-shadow: 0 10px 24px -16px rgba(23, 60, 55, 0.6);
+}
+
+.lms-hero h1 .lms-inline-image {
+  display: inline-block;
+  max-width: none;
+  margin-top: 0;
+  color: transparent;
+  font-size: inherit;
+  line-height: 0.82;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+.lms-hero-copy > p {
+  max-width: 570px;
+  margin-top: 28px;
+  color: var(--taste-body);
+  font-size: 1.05rem;
+  line-height: 1.78;
+}
+
+.lms-btn {
+  min-height: 50px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+  box-shadow: none !important;
+}
+
+.lms-btn-primary {
+  color: #fff;
+  background: var(--taste-accent) !important;
+}
+
+.lms-btn-primary:hover {
+  background: #0b625c !important;
+}
+
+.lms-btn-secondary {
+  color: var(--taste-ink);
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: var(--taste-line);
+}
+
+.lms-btn-secondary:hover {
+  background: var(--taste-surface) !important;
+  border-color: var(--taste-accent);
+}
+
+.lms-hero-trust {
+  margin-top: 32px;
+}
+
+.lms-rating {
+  color: var(--taste-accent);
+}
+
+.lms-rating b {
+  color: var(--taste-ink);
+}
+
+.lms-rating span {
+  color: var(--taste-muted);
+}
+
+.lms-avatar-row span {
+  background: var(--taste-accent) !important;
+  border-color: var(--taste-canvas);
+}
+
+.lms-avatar-row span:nth-child(2),
+.lms-avatar-row span:nth-child(3),
+.lms-avatar-row span:nth-child(4) {
+  background: var(--taste-deep) !important;
+}
+
+.lms-dashboard-preview {
+  border: 1px solid rgba(219, 229, 223, 0.98);
+  border-radius: 28px;
+  padding: clamp(20px, 3vw, 30px);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--taste-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.lms-preview-top small {
+  color: var(--taste-accent);
+  background: var(--taste-accent-soft);
+}
+
+.lms-progress-card,
+.lms-preview-grid div,
+.lms-preview-list p {
+  border-color: var(--taste-line);
+  background: var(--taste-canvas);
+}
+
+.lms-progress-card em,
+.lms-lesson-panel em {
+  background: var(--taste-accent);
+}
+
+.lms-preview-grid svg,
+.lms-preview-list svg {
+  color: var(--taste-accent);
+}
+
+.lms-metrics {
+  margin-top: 0;
+  padding-bottom: 18px;
+}
+
+.lms-metrics-grid {
+  border-radius: 0;
+  border-inline: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.lms-metrics-grid div {
+  padding: 28px 22px;
+  border-color: var(--taste-line);
+}
+
+.lms-metrics-grid b {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--taste-ink);
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+}
+
+.lms-metrics-grid span {
+  color: var(--taste-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lms-section {
+  padding: clamp(76px, 9vw, 132px) 0;
+}
+
+.lms-section-muted {
+  background: #edf2ed;
+  border-block: 1px solid var(--taste-line);
+}
+
+.lms-section-head h2,
+.lms-split h2,
+.lms-insight h2,
+.lms-final-box h2 {
+  max-width: 720px;
+  color: var(--taste-ink);
+  font-size: clamp(2.15rem, 4.3vw, 4.1rem);
+  letter-spacing: -0.055em !important;
+}
+
+.lms-section-head p,
+.lms-split > div > p,
+.lms-insight p,
+.lms-final-box p {
+  color: var(--taste-body);
+  max-width: 62ch;
+}
+
+.lms-pathway-grid {
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  gap: 14px;
+}
+
+.lms-pathway-card {
+  min-height: 210px;
+  padding: clamp(24px, 3vw, 34px);
+  border-color: var(--taste-line);
+  border-radius: 22px;
+  box-shadow: none;
+  background: var(--taste-surface);
+}
+
+.lms-pathway-card:first-child {
+  grid-row: span 2;
+  min-height: 434px;
+  background: var(--taste-deep);
+}
+
+.lms-pathway-card:first-child h3,
+.lms-pathway-card:first-child p,
+.lms-pathway-card:first-child a {
+  color: #fff;
+}
+
+.lms-pathway-card > span {
+  background: var(--taste-accent-soft);
+  color: var(--taste-accent);
+}
+
+.lms-pathway-card h3 {
+  color: var(--taste-ink);
+}
+
+.lms-pathway-card p {
+  color: var(--taste-body);
+}
+
+.lms-pathway-card a {
+  color: var(--taste-accent);
+}
+
+.lms-feature-list > div {
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--taste-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.lms-product-shot {
+  border-color: #244a44;
+  border-radius: 26px;
+  background: var(--taste-deep);
+  box-shadow: var(--taste-shadow);
+}
+
+.lms-product-toolbar {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.lms-product-toolbar span {
+  background: #9fd4c6 !important;
+}
+
+.lms-product-toolbar span:nth-child(2),
+.lms-product-toolbar span:nth-child(3) {
+  background: #577d75 !important;
+}
+
+.lms-video-placeholder {
+  background:
+    linear-gradient(135deg, rgba(23, 60, 55, 0.18), rgba(15, 118, 110, 0.56)),
+    url("/images/profas-leadership-hero.png") center / cover no-repeat;
+}
+
+.lms-insight {
+  background: var(--taste-deep);
+}
+
+.lms-insight .lms-eyebrow {
+  color: #b7e6d9;
+  border-color: rgba(183, 230, 217, 0.28);
+}
+
+.lms-insight-cards {
+  grid-template-columns: 1.15fr 0.85fr;
+}
+
+.lms-insight-cards article {
+  min-height: 180px;
+  border-color: rgba(183, 230, 217, 0.22);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: none;
+}
+
+.lms-insight-cards article:first-child {
+  grid-column: span 2;
+}
+
+.lms-insight-cards svg {
+  color: #9fd4c6;
+}
+
+.lms-final-cta {
+  background: var(--taste-canvas);
+}
+
+.lms-final-box {
+  border-radius: 28px;
+  background: var(--taste-deep);
+  box-shadow: var(--taste-shadow);
+}
+
+/* Shared public and LMS shell */
+
+html body .site-header {
+  background: rgba(244, 246, 241, 0.9) !important;
+  border-bottom-color: var(--taste-line) !important;
+  box-shadow: 0 10px 28px -24px rgba(23, 60, 55, 0.5) !important;
+}
+
+.desktop-nav {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.desktop-nav a {
+  color: var(--taste-body) !important;
+}
+
+.desktop-nav a:hover {
+  color: var(--taste-accent) !important;
+  background: var(--taste-accent-soft) !important;
+}
+
+.course-card,
+.catalog-empty,
+.enroll-card,
+.mentor-detail,
+.data-card,
+.auth-card {
+  border-color: var(--taste-line) !important;
+  border-radius: 22px !important;
+  box-shadow: none !important;
+}
+
+.course-card:hover {
+  border-color: rgba(15, 118, 110, 0.55) !important;
+  box-shadow: var(--taste-shadow) !important;
+}
+
+/* Dashboard and course player */
+
+html body .dashboard-layout,
+html body .dashboard-canvas,
+html body .player-layout,
+html body .player-main {
+  background: var(--taste-canvas) !important;
+}
+
+html body .dashboard-sidebar {
+  background: #fbfcf9 !important;
+  border-right-color: var(--taste-line) !important;
+  box-shadow: none !important;
+}
+
+html body .dashboard-sidebar nav a,
+html body .sidebar-bottom button {
+  color: var(--taste-body) !important;
+  border-radius: 0 12px 12px 0 !important;
+}
+
+html body .dashboard-sidebar nav a:hover,
+html body .dashboard-sidebar nav a.active {
+  background: var(--taste-accent-soft) !important;
+  color: var(--taste-accent) !important;
+  border-left: 3px solid var(--taste-accent) !important;
+}
+
+html body .dashboard-header {
+  background: rgba(244, 246, 241, 0.9) !important;
+  border-bottom-color: var(--taste-line) !important;
+  box-shadow: none !important;
+}
+
+html body .dashboard-content {
+  max-width: 1320px;
+  padding: clamp(22px, 4vw, 44px);
+}
+
+html body .hero-banner-student,
+html body .hero-banner-mentor,
+html body .hero-banner-admin {
+  border-radius: 28px !important;
+  background: var(--taste-deep) !important;
+  box-shadow: none !important;
+}
+
+html body .stat-card-clean,
+html body .dash-card-clean,
+html body .dash-chart-card,
+html body .dash-roadmap-box {
+  border: 1px solid var(--taste-line) !important;
+  border-radius: 22px !important;
+  background: var(--taste-surface) !important;
+  box-shadow: none !important;
+}
+
+html body .stat-card-icon {
+  background: var(--taste-accent) !important;
+}
+
+html body .stat-card-value,
+html body .stat-card-label,
+html body .section-title-clean h2 {
+  color: var(--taste-ink) !important;
+}
+
+html body .dash-enroll-item,
+html body .dash-mentor-course-item,
+html body .dash-quick-admin-item {
+  border-color: var(--taste-line) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+html body .dash-progress-fill,
+html body .dash-perf-fill,
+html body .overall-progress em {
+  background: var(--taste-accent) !important;
+}
+
+html body .player-sidebar {
+  background: #fbfcf9 !important;
+  border-right-color: var(--taste-line) !important;
+  box-shadow: none !important;
+}
+
+html body .player-main > header {
+  background: rgba(244, 246, 241, 0.92) !important;
+  box-shadow: none !important;
+}
+
+html body .player-card-center,
+html body .player-card-read,
+html body .player-card-compact,
+html body .lesson-notes,
+html body .player-notes-section {
+  border-color: var(--taste-line) !important;
+  border-radius: 24px !important;
+  box-shadow: none !important;
+}
+
+html body .module-list button.active {
+  background: var(--taste-accent-soft) !important;
+  box-shadow: inset 3px 0 0 var(--taste-accent) !important;
+}
+
+@media (max-width: 780px) {
+  .lms-hero {
+    min-height: auto;
+    padding-top: 56px;
+  }
+
+  .lms-hero-media {
+    inset: auto 0 0;
+    height: 300px;
+    opacity: 0.34;
+    border-left: 0;
+    border-top: 1px solid var(--taste-line);
+  }
+
+  .lms-hero h1 {
+    font-size: clamp(3rem, 16vw, 4.6rem);
+  }
+
+  .lms-pathway-grid,
+  .lms-insight-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .lms-pathway-card:first-child,
+  .lms-insight-cards article:first-child {
+    grid-row: auto;
+    grid-column: auto;
+    min-height: 250px;
+  }
+
+  .lms-inline-image {
+    width: 58px;
+    border-width: 4px;
+  }
+
+  html body .dashboard-content {
+    padding: 22px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -8,6 +8,7 @@ import "./landing.css";
 import "./premium.css";
 import "./pro-lms.css";
 import "./enterprise-lms.css";
+import "./taste.css";
 
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito" });
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";

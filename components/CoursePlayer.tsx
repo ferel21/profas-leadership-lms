@@ -212,7 +212,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           </details>
         );
       }
-      const badgeText = node.type === "QUIZ" ? "🏆 Kuis • " : node.type === "ASSIGNMENT" ? "📋 Tugas • " : "";
+      const badgeText = node.type === "QUIZ" ? "Kuis • " : node.type === "ASSIGNMENT" ? "Tugas • " : "";
       return (
         <button key={node.id} onClick={() => selectLesson(node.id)} className={node.id === current?.id ? "active" : ""}>
           {done.has(node.id) ? <CheckCircle2 /> : typeIcon(node.type)}
@@ -266,7 +266,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                 {current.type === "QUIZ" ? <Award size={44} /> : <FileCheck size={44} />}
               </div>
               <span className="eyebrow-teal">
-                {current.type === "QUIZ" ? "⚡ EVALUASI & KUIS PEMAHAMAN PRO" : "💼 TUGAS EKSEKUTIF & STUDI KASUS"}
+                {current.type === "QUIZ" ? "EVALUASI & KUIS PEMAHAMAN" : "TUGAS EKSEKUTIF & STUDI KASUS"}
               </span>
               <h1 className="player-title-xl">
                 {current.title}
@@ -281,7 +281,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                   href={`/evaluasi/${current.assessmentId || current.id}`} 
                   className="player-btn-quiz"
                 >
-                  <Play fill="currentColor" size={22} /> Mulai {current.type === "QUIZ" ? "Mengerjakan Kuis" : "Mengerjakan Tugas"} Sekarang 🚀
+                  <Play fill="currentColor" size={22} /> Mulai {current.type === "QUIZ" ? "Mengerjakan Kuis" : "Mengerjakan Tugas"}
                 </Link>
               </div>
               <div className="player-meta-badges">
@@ -293,7 +293,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
             <article className="player-card-center hover-lift">
               <div className="player-pdf-top">
                 <div className="player-pdf-left">
-                  <span className="player-eyebrow-pdf"><FileText size={18} /> 📑 DOKUMEN MODUL PEMBELAJARAN (PDF)</span>
+                  <span className="player-eyebrow-pdf"><FileText size={18} /> DOKUMEN MODUL PEMBELAJARAN (PDF)</span>
                   <h1 className="player-title-xl" style={{ margin: "6px 0 0" }}>{current.title}</h1>
                 </div>
                 {current.fileUrl && (
@@ -316,7 +316,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
             </article>
           ) : current.type === "IMAGE" ? (
             <article className="player-card-center hover-lift">
-              <span className="eyebrow-teal">🖼️ INFOGRAFIS & VISUAL PEMBELAJARAN</span>
+              <span className="eyebrow-teal">INFOGRAFIS & VISUAL PEMBELAJARAN</span>
               <h1 className="player-title-xl">{current.title}</h1>
               {current.content && <p className="player-desc-lead">{current.content}</p>}
               {current.fileUrl ? (
@@ -329,7 +329,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <div className="player-link-circle">
                 <Link2 size={40} />
               </div>
-              <span className="eyebrow-teal player-eyebrow-purple">🔗 TAUTAN SUMBER DAYA EKSTERNAL</span>
+              <span className="eyebrow-teal player-eyebrow-purple">TAUTAN SUMBER DAYA EKSTERNAL</span>
               <h1 className="player-title-xl">{current.title}</h1>
               <p className="player-desc-lead">
                 {current.content || "Modul ini merujuk pada tautan daya eksternal (Google Drive / Web / Zoom / Artikel) yang disiapkan oleh mentor Anda."}
@@ -341,13 +341,13 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                   rel="noreferrer"
                   className="player-btn-external hover-lift"
                 >
-                  <Link2 size={22} /> Buka Tautan Eksternal Sekarang 🚀
+                  <Link2 size={22} /> Buka Tautan Eksternal
                 </a>
               )}
             </article>
           ) : (
             <article className="player-card-read hover-lift">
-              <span className="eyebrow-teal">📖 MATERI BACAAN EKSKLUSIF</span>
+              <span className="eyebrow-teal">MATERI BACAAN EKSKLUSIF</span>
               <h1 className="player-title-read">{current.title}</h1>
               <div className="player-desc-read">{current.content}</div>
               {current.fileUrl && (

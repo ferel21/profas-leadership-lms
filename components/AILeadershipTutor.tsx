@@ -6,8 +6,8 @@ import { Bot, Send, Sparkles, User, Loader2, Lightbulb, Volume2, VolumeX } from 
 type Message = { role: "user" | "ai"; text: string; time: string };
 
 const SUGGESTED_PROMPTS = [
-  "💡 Simulasi Studi Kasus: Bagaimana menangani krisis kepercayaan tim di masa transisi?",
-  "🎯 Refleksi Eksekutif: Apa gaya kepemimpinan dominan saya dan bagaimana mengoptimalkannya?",
+  "Simulasi Studi Kasus: Bagaimana menangani krisis kepercayaan tim di masa transisi?",
+  "Refleksi Eksekutif: Apa gaya kepemimpinan dominan saya dan bagaimana mengoptimalkannya?",
   "Bagaimana cara mendelegasikan tugas strategis tanpa kehilangan kendali mutu?",
   "Apa langkah konkret menyelesaikan konflik antar manajer senior di divisi?"
 ];
@@ -16,7 +16,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "ai",
-      text: `Halo! Saya adalah **Asisten AI PROFAS Leadership** 🤖✨\n\nSaya siap membantu Anda mendalami konsep kepemimpinan eksekutif pada modul **"${lessonTitle || "Kepemimpinan Strategis"}"**. Apa studi kasus atau tantangan kepemimpinan yang ingin Anda diskusikan hari ini?`,
+      text: `Halo. Saya adalah **Asisten AI PROFAS Leadership**.\n\nSaya siap membantu Anda mendalami konsep kepemimpinan eksekutif pada modul **"${lessonTitle || "Kepemimpinan Strategis"}"**. Apa studi kasus atau tantangan kepemimpinan yang ingin Anda diskusikan hari ini?`,
       time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
     }
   ]);

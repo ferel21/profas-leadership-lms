@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ChevronRight,
   ClipboardCheck,
+  Compass,
   FileText,
   Gauge,
   Layers3,
@@ -17,6 +18,7 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
+  Target,
   Users2,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -69,6 +71,27 @@ const capabilities = [
   ["Role Dashboard", "Tampilan khusus Admin, Mentor, dan Peserta agar setiap pengguna langsung menemukan aksi penting."],
   ["Progress Engine", "Progres belajar, kelulusan, XP, dan sertifikat ditangani oleh sistem secara konsisten."],
   ["Production Flow", "Loading, empty, error, success state, dan akses mobile dirancang untuk pemakaian nyata."],
+] as const;
+
+const learningMethod = [
+  {
+    icon: Compass,
+    index: "01",
+    title: "Orientasi",
+    copy: "Mulai dari konteks kerja yang nyata. Setiap modul membantu peserta melihat tantangan kepemimpinan dengan lebih jernih.",
+  },
+  {
+    icon: Users2,
+    index: "02",
+    title: "Percakapan",
+    copy: "Uji pemikiran melalui diskusi, studi kasus, dan perspektif rekan belajar maupun mentor praktisi.",
+  },
+  {
+    icon: Target,
+    index: "03",
+    title: "Penerapan",
+    copy: "Tutup setiap sesi dengan langkah yang bisa dicoba. Progres menjadi kebiasaan, bukan sekadar checklist materi.",
+  },
 ] as const;
 
 const getFeaturedCoursesCached = unstable_cache(
@@ -143,39 +166,57 @@ export default async function Home() {
               </div>
             </div>
 
-            <aside className="lms-dashboard-preview" aria-label="Cuplikan dashboard LMS">
-              <div className="lms-preview-top">
-                <div>
-                  <span>Dashboard Peserta</span>
-                  <b>Strategic Leadership</b>
-                </div>
-                <small>Live</small>
+            <div className="lms-hero-visual">
+              <div className="lms-hero-visual-topline">
+                <span>Field note / 01</span>
+                <span>Makassar · Indonesia</span>
               </div>
-              <div className="lms-progress-card">
-                <div>
-                  <span>Progres Program</span>
-                  <strong>85%</strong>
+              <figure className="lms-hero-photo">
+                <Image
+                  src="/images/profas-activity-collage.jpeg"
+                  alt="Peserta PROFAS berdiskusi dan berlatih dalam ruang pembelajaran"
+                  width={1599}
+                  height={899}
+                  priority
+                  sizes="(max-width: 780px) 100vw, 48vw"
+                />
+                <figcaption>Belajar memimpin lewat ruang, percakapan, dan praktik.</figcaption>
+              </figure>
+              <aside className="lms-dashboard-preview" aria-label="Cuplikan dashboard LMS">
+                <div className="lms-preview-top">
+                  <div>
+                    <span>Dashboard Peserta</span>
+                    <b>Strategic Leadership</b>
+                  </div>
+                  <small>Live</small>
                 </div>
-                <i><em /></i>
-              </div>
-              <div className="lms-preview-grid">
-                <div>
-                  <BookOpen size={18} />
-                  <b>18</b>
-                  <span>Materi selesai</span>
+                <div className="lms-progress-card">
+                  <div>
+                    <span>Progres Program</span>
+                    <strong>85%</strong>
+                  </div>
+                  <i><em /></i>
                 </div>
-                <div>
-                  <ClipboardCheck size={18} />
-                  <b>94</b>
-                  <span>Skor evaluasi</span>
+                <div className="lms-preview-grid">
+                  <div>
+                    <BookOpen size={18} />
+                    <b>18</b>
+                    <span>Materi selesai</span>
+                  </div>
+                  <div>
+                    <ClipboardCheck size={18} />
+                    <b>94</b>
+                    <span>Skor evaluasi</span>
+                  </div>
                 </div>
-              </div>
-              <div className="lms-preview-list">
-                <p><CheckCircle2 /> Modul keputusan strategis selesai</p>
-                <p><FileText /> Jurnal refleksi tersimpan</p>
-                <p><Award /> Sertifikat siap setelah post-test</p>
-              </div>
-            </aside>
+                <div className="lms-preview-list">
+                  <p><CheckCircle2 /> Modul keputusan strategis selesai</p>
+                  <p><FileText /> Jurnal refleksi tersimpan</p>
+                  <p><Award /> Sertifikat siap setelah post-test</p>
+                </div>
+              </aside>
+              <span className="lms-hero-visual-note">Lead / Learn / Practice</span>
+            </div>
           </div>
         </section>
 
@@ -211,6 +252,32 @@ export default async function Home() {
               />
               <figcaption>Potret proses belajar: berdiskusi, mencoba, dan bertumbuh sebagai satu komunitas.</figcaption>
             </figure>
+          </div>
+        </section>
+
+        <section className="lms-method" aria-labelledby="method-title">
+          <div className="container">
+            <div className="lms-method-heading">
+              <div>
+                <span className="lms-eyebrow">Cara kami bekerja</span>
+                <h2 id="method-title">Kepemimpinan bukan teori yang disimpan.</h2>
+              </div>
+              <p>
+                PROFAS menghubungkan insight dengan tindakan melalui ritme belajar yang singkat, reflektif, dan relevan dengan ruang kerja peserta.
+              </p>
+            </div>
+            <div className="lms-method-grid">
+              {learningMethod.map(({ icon: Icon, index, title, copy }) => (
+                <article key={title} className="lms-method-card">
+                  <div className="lms-method-card-top">
+                    <Icon size={22} />
+                    <span>{index}</span>
+                  </div>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -312,6 +379,21 @@ export default async function Home() {
               <article><ShieldCheck /><b>Akses aman</b><span>Role dan session diarahkan sesuai kebutuhan pengguna.</span></article>
               <article><BarChart3 /><b>Data terlihat</b><span>Metrik progres, evaluasi, dan aktivitas mudah dipindai.</span></article>
               <article><Users2 /><b>Multi-role</b><span>Admin, Mentor, dan Peserta punya dashboard berbeda.</span></article>
+            </div>
+          </div>
+        </section>
+
+        <section className="lms-outcomes" aria-labelledby="outcomes-title">
+          <div className="container lms-outcomes-grid">
+            <div>
+              <span className="lms-eyebrow">Yang dibawa pulang</span>
+              <h2 id="outcomes-title">Setiap pembelajaran meninggalkan jejak.</h2>
+              <p>Progress terlihat bukan hanya dari persentase, tetapi dari cara peserta mengambil keputusan dan menggerakkan tim setelah kelas selesai.</p>
+            </div>
+            <div className="lms-outcome-list">
+              <div><span>01</span><p><b>Clarity</b><small>Melihat masalah, peran, dan prioritas dengan lebih jernih.</small></p></div>
+              <div><span>02</span><p><b>Capability</b><small>Mengubah insight menjadi percakapan dan keputusan yang lebih baik.</small></p></div>
+              <div><span>03</span><p><b>Continuity</b><small>Menjaga ritme refleksi agar perubahan bertahan di luar ruang kelas.</small></p></div>
             </div>
           </div>
         </section>

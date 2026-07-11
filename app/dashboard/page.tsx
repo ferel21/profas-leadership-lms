@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import {
   BookOpen, UsersRound, Award, ChevronRight, Activity, TrendingUp,
-  BarChart3, Target, Zap, Clock, Star, ArrowUpRight, GraduationCap, Users,
+  BarChart3, Target, Zap, Clock, Star, ArrowUpRight, ArrowRight, GraduationCap, Users,
   Megaphone, ShieldCheck, BookMarked, PieChart
 } from "lucide-react";
 import Image from "next/image";
@@ -153,20 +153,34 @@ export default async function DashboardPage() {
       if (a.status !== "ACTIVE" && b.status === "ACTIVE") return 1;
       return b.progressPercent - a.progressPercent;
     });
+    const nextCourseSlug = sortedEnrollments[0]?.course.slug;
+    const nextCourseTitle = sortedEnrollments[0]?.course.title;
 
     return (
       <DashboardChrome user={user}>
         {/* ── Hero greeting ── */}
         <div className="hero-banner-student">
-          <p className="eyebrow-teal" style={{ margin: "0 0 4px", opacity: 0.85 }}>
-            SELAMAT DATANG KEMBALI
-          </p>
-          <h1 className="hero-banner-title">
-            {user.name}!
-          </h1>
-          <p className="hero-banner-subtitle">
-            Lanjutkan perjalanan kepemimpinan Anda hari ini.
-          </p>
+          <div className="dash-hero-layout">
+            <div>
+              <p className="eyebrow-teal" style={{ margin: "0 0 4px", opacity: 0.85 }}>
+                SELAMAT DATANG KEMBALI
+              </p>
+              <h1 className="hero-banner-title">
+                {user.name}!
+              </h1>
+              <p className="hero-banner-subtitle">
+                Lanjutkan perjalanan kepemimpinan Anda hari ini.
+              </p>
+            </div>
+            <div className="dash-hero-momentum">
+              <div className="dash-hero-momentum-label"><span>Momentum belajar</span><span>LIVE</span></div>
+              <strong>{avgProgress}%</strong>
+              <div className="dash-hero-meter" aria-label={`${avgProgress}% progres rata-rata`}><i style={{ width: `${avgProgress}%` }} /></div>
+              <Link href={nextCourseSlug ? `/belajar/${nextCourseSlug}` : "/program"}>
+                {nextCourseSlug ? "Lanjutkan program" : "Pilih program"} <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* ── Stat Cards ── */}
@@ -175,6 +189,26 @@ export default async function DashboardPage() {
           <StatCard label="Sertifikat" value={certificates.length} desc="Bukti kelulusan terverifikasi" icon={Award} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" trend={certificates.length > 0 ? "Diperoleh" : undefined} />
           <StatCard label="Progres Rata-rata" value={`${avgProgress}%`} desc="Penyelesaian materi" icon={TrendingUp} gradient="linear-gradient(135deg, #6366f1, #818cf8)" />
           <StatCard label="Program Selesai" value={completedEnrollments.length} desc="Dari total program" icon={GraduationCap} gradient="linear-gradient(135deg, #10b981, #34d399)" />
+        </div>
+
+        <div className="dash-focus-grid">
+          <section className="dash-focus-card primary" aria-labelledby="focus-title">
+            <div className="dash-focus-kicker"><span>Fokus berikutnya</span><Target size={16} /></div>
+            <h2 id="focus-title">{nextCourseTitle || "Pilih langkah belajar pertama Anda"}</h2>
+            <p>{nextCourseSlug ? "Satu sesi kecil hari ini menjaga perjalanan kepemimpinan tetap bergerak." : "Jelajahi katalog untuk menemukan program yang paling dekat dengan tantangan Anda."}</p>
+            <Link href={nextCourseSlug ? `/belajar/${nextCourseSlug}` : "/program"} className="dash-focus-action">
+              {nextCourseSlug ? "Masuk ke course player" : "Jelajahi katalog"} <ArrowRight size={16} />
+            </Link>
+          </section>
+          <section className="dash-focus-card" aria-labelledby="snapshot-title">
+            <div className="dash-focus-kicker"><span id="snapshot-title">Snapshot minggu ini</span><Activity size={16} /></div>
+            <div className="dash-focus-snapshot">
+              <div><b>{avgProgress}%</b><span>rata-rata progres</span></div>
+              <div><b>{completedEnrollments.length}</b><span>program selesai</span></div>
+              <div><b>{certificates.length}</b><span>sertifikat aktif</span></div>
+            </div>
+            <p className="dash-focus-note">Gunakan ringkasan ini untuk menentukan ritme belajar berikutnya.</p>
+          </section>
         </div>
 
         {/* ── Executive Learning Roadmap & Career Pathway ── */}

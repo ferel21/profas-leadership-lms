@@ -152,7 +152,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
       <header className="dashboard-header glass">
         <button className="dash-menu" onClick={()=>setOpen(true)} aria-label="Buka menu"><Menu/></button>
         <div className="dash-welcome flex items-center gap-4">
-          <span className="font-extrabold text-slate-900 tracking-tight">PROFAS LEADERSHIP</span>
+          <span className="dash-brand-lockup"><b>PROFAS</b><span>LEADERSHIP OS</span></span>
           <div className="flex items-center gap-2 hide-on-mobile">
             <div className="pro-live-pulse" title="Terhubung langsung ke Supabase Cloud DB">
               <span className="pro-live-pulse-dot"></span>
@@ -172,7 +172,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
           >
             <div className="flex items-center gap-2">
               <Search size={15} className="text-teal-600" />
-              <span>Cari / Perintah...</span>
+              <span>Cari modul atau aksi...</span>
             </div>
             <kbd className="bg-slate-200 px-1.5 py-0.5 rounded text-[10px] font-extrabold text-slate-700">Ctrl+K</kbd>
           </button>

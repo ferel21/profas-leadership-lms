@@ -29,3 +29,13 @@ A calm, asymmetric learning interface inspired by a well-lit architecture studio
 - Use local product imagery only; never add fragile external image URLs.
 - Avoid neon, purple gradients, pure black, excessive gradient text, and emoji in interface copy.
 - Collapse asymmetric grids to one column below 780px and respect `prefers-reduced-motion`.
+
+## Field Notes v2
+
+The public landing page now treats PROFAS activity as proof of practice: the real training collage anchors the hero, while the LMS preview sits as a product layer over it. The narrative continues through three editorial beats — Orientasi, Percakapan, and Penerapan — before closing with measurable outcomes: Clarity, Capability, and Continuity.
+
+The student dashboard follows a Leadership Operating System pattern. The top of the workspace answers three questions immediately: how far the learner has moved, what to do next, and what changed this week. This keeps the visual treatment distinctive while making the interface more operational for daily use.
+
+- Hero imagery is locally hosted in `/public/images` and loaded with explicit dimensions; the activity collage is reused as the primary proof asset.
+- Dashboard focus cards use live enrollment, progress, certificate, and course-slug data rather than decorative placeholder metrics.
+- Motion stays purposeful: transform/opacity for interaction, linear progress movement, and reduced-motion overrides for every new interactive layer.

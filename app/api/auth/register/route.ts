@@ -21,16 +21,6 @@ export async function POST(request: Request) {
     if (duplicate) return NextResponse.json({ message: duplicate.email === input.email ? "Email sudah terdaftar." : "Nama akun sudah digunakan." }, { status: 409 });
     const user = await prisma.user.create({ data: { name: input.name, username: input.username, email: input.email, passwordHash: await bcrypt.hash(input.password, 10), persona: input.persona, role: "STUDENT" } });
     
-    // Auto-enrollment untuk peserta baru
-    if (user.role === "STUDENT") {
-      const publishedCourses = await prisma.course.findMany({ where: { published: true } });
-      for (const course of publishedCourses) {
-        await prisma.enrollment.create({
-          data: { userId: user.id, courseId: course.id, status: "ACTIVE", progressPercent: 0 }
-        });
-      }
-    }
-
     const token = await createToken({ userId: user.id, role: user.role, email: user.email, name: user.name, avatar: user.avatar || undefined, authProvider: "LOCAL" });
     
     const cookieStore = await cookies();

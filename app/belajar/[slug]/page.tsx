@@ -39,7 +39,7 @@ export default async function LearnPage({ params }: { params: Promise<{ slug: st
           progress: { where: { userId: user.id }, select: { id: true } },
           discussionPosts: {
             orderBy: { createdAt: "desc" },
-            take: 50,
+            take: 15,
             select: { id: true, content: true, createdAt: true, user: { select: { id: true, name: true } } }
           }
         }

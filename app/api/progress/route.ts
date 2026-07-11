@@ -14,10 +14,19 @@ export async function POST(request: Request) {
   const parsed = inputSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ message: "Data progres tidak valid." }, { status: 400 });
   const { action, courseId } = parsed.data;
-  const course = await prisma.course.findFirst({ where: { id: courseId, published: true }, select: { id: true, slug: true } });
+  const course = await prisma.course.findFirst({ where: { id: courseId, published: true }, select: { id: true, slug: true, price: true } });
   if (!course) return NextResponse.json({ message: "Program tidak ditemukan." }, { status: 404 });
 
   if (action === "enroll") {
+    if (course.price > 0) {
+      const paidPayment = await prisma.payment.findFirst({
+        where: { userId: user.id, courseId: course.id, status: "PAID" },
+        select: { id: true },
+      });
+      if (!paidPayment) {
+        return NextResponse.json({ message: "Program ini membutuhkan pembayaran yang terverifikasi sebelum akses diberikan." }, { status: 402 });
+      }
+    }
     const enrollment = await prisma.enrollment.upsert({ where: { userId_courseId: { userId: user.id, courseId } }, update: {}, create: { userId: user.id, courseId } });
     return NextResponse.json(enrollment);
   }

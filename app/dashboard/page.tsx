@@ -105,32 +105,9 @@ export default async function DashboardPage() {
         orderBy: { issuedAt: "desc" }
       })
     ]);
-    let enrollments = initialEnrollments;
-
-    // Auto-enrollment & Continuous Sync: Pastikan peserta (termasuk yang login via Google) selalu tersinkronisasi dengan semua program kepemimpinan aktif yang diterbitkan oleh mentor!
-    const publishedCoursesCount = await prisma.course.count({ where: { published: true } });
-    if (enrollments.length < publishedCoursesCount) {
-      const publishedCourses = await prisma.course.findMany({ where: { published: true }, select: { id: true } });
-      if (publishedCourses.length > 0) {
-        await prisma.$transaction(publishedCourses.map(course => prisma.enrollment.upsert({
-            where: { userId_courseId: { userId: user.id, courseId: course.id } },
-            update: {},
-            create: { userId: user.id, courseId: course.id, status: "ACTIVE", progressPercent: 0 }
-          })));
-        enrollments = await prisma.enrollment.findMany({
-          where: { userId: user.id },
-          include: {
-            course: {
-              select: {
-                id: true, slug: true, title: true, shortDescription: true, category: true, level: true, price: true, durationHours: true, rating: true, studentsCount: true, image: true,
-                nodes: { where: { type: { not: "FOLDER" } }, select: { id: true } }
-              }
-            }
-          },
-          orderBy: { enrolledAt: "desc" }
-        });
-      }
-    }
+    // Enrollment adalah entitlement peserta. Jangan auto-enroll semua course
+    // yang dipublish: dashboard harus mencerminkan paket/program yang dibeli.
+    const enrollments = initialEnrollments;
 
     const completedEnrollments = enrollments.filter(e => e.status === "COMPLETED" || e.progressPercent === 100);
     const existingCourseIds = new Set(certificates.map(c => c.courseId));

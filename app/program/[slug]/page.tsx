@@ -11,7 +11,7 @@ import { formatRupiah, initials } from "@/lib/utils";
 
 export default async function CourseDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [course,user] = await Promise.all([prisma.course.findFirst({ where: { OR: [{ slug }, { id: slug }], published: true }, include: { mentor: true, nodes: { orderBy: [{ parentId: "asc" }, { order: "asc" }], include: { assessment: true } }, assessments: { where: { type: "PRETEST" } } } }), getCurrentUser()]);
+  const [course,user] = await Promise.all([prisma.course.findFirst({ where: { OR: [{ slug }, { id: slug }], published: true }, select: { id: true, slug: true, title: true, description: true, category: true, level: true, price: true, durationHours: true, rating: true, studentsCount: true, image: true, outcomes: true, mentor: { select: { name: true, headline: true } }, nodes: { orderBy: [{ parentId: "asc" }, { order: "asc" }], select: { id: true, parentId: true, title: true, description: true, type: true, durationMin: true } }, assessments: { where: { type: "PRETEST" }, select: { id: true } } } }), getCurrentUser()]);
   if (!course) notFound(); const outcomes = JSON.parse(course.outcomes) as string[]; const lessonCount = course.nodes.filter(n=>n.type !== "FOLDER").length;
   const enrolled = user ? !!await prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId: course.id } }, select: { id: true } }) : false;
   const folders = course.nodes.filter(n => n.type === "FOLDER");

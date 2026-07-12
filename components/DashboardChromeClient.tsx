@@ -30,6 +30,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
   const router=useRouter();
   const pathname=usePathname();
   const nav=user.role==="MENTOR"?mentorNav:user.role==="SUPER_ADMIN"?adminNav:studentNav;
+  const roleClass = `role-${user.role.toLowerCase().replace(/_/g, "-")}`;
 
   useEffect(()=>{
     let cancelled = false;
@@ -98,15 +99,15 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
 
   async function logout(){try{await fetch("/api/auth/logout",{method:"POST"})}finally{router.push("/");router.refresh()}}
 
-  return <div className={`dashboard-layout ${collapsed ? "sidebar-collapsed" : ""}`}>
-    <aside className={`dashboard-sidebar glass ${open?"open":""}`}>
+  return <div className={`dashboard-layout dashboard-fresh ${roleClass} ${collapsed ? "sidebar-collapsed" : ""}`}>
+    <aside className={`dashboard-sidebar ${open?"open":""}`}>
       <div className="sidebar-top">
         {!collapsed && <Logo/>}
         {collapsed && <Logo compact />}
         <button onClick={()=>setOpen(false)} aria-label="Tutup menu" className="mobile-close-btn"><X/></button>
       </div>
       <div className="sidebar-user">
-        <span className={user.avatar ? "has-avatar" : ""} style={!user.avatar ? {
+        <span className={`sidebar-user-avatar ${user.avatar ? "has-avatar" : ""}`} style={!user.avatar ? {
           background: "linear-gradient(135deg, #0d9488, #14b8a6)",
           color: "#fff",
           fontWeight: 800,
@@ -126,7 +127,8 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
               onMouseEnter={() => {
                 try { if (href.startsWith("/")) router.prefetch(href.split("#")[0]); } catch {}
               }}
-              className={`hover-lift ${isActive ? "active" : ""}`} 
+              className={isActive ? "active" : ""}
+              aria-current={isActive ? "page" : undefined}
               onClick={(e) => {
                 if (href.includes('#') && pathname === href.split('#')[0]) {
                   const id = href.split('#')[1];
@@ -147,46 +149,44 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
       </nav>
       <div className="sidebar-bottom">
         <button onClick={()=>setCollapsed(!collapsed)} className="desktop-toggle-btn" title="Toggle Sidebar"><Menu/>{!collapsed && "Kecilkan Menu"}</button>
-        <button onClick={logout} className="hover-lift" title="Keluar"><LogOut/>{!collapsed && "Keluar"}</button>
+        <button onClick={logout} title="Keluar"><LogOut/>{!collapsed && "Keluar"}</button>
       </div>
     </aside>
+    {open && <button className="dashboard-backdrop" onClick={()=>setOpen(false)} aria-label="Tutup navigasi" />}
     <div className="dashboard-canvas">
-      <header className="dashboard-header glass">
+      <header className="dashboard-header">
         <button className="dash-menu" onClick={()=>setOpen(true)} aria-label="Buka menu"><Menu/></button>
         <div className="dash-welcome flex items-center gap-4">
-          <span className="dash-brand-lockup"><b>PROFAS</b><span>LEADERSHIP OS</span></span>
+          <span className="dash-brand-lockup"><b>PROFAS</b><span>LEADERSHIP WORKSPACE</span></span>
           <div className="flex items-center gap-2 hide-on-mobile">
-            <div className="pro-live-pulse" title="Terhubung langsung ke Supabase Cloud DB">
+            <div className="pro-live-pulse" title="Sistem pembelajaran aktif">
               <span className="pro-live-pulse-dot"></span>
-              <span className="text-[11px] font-extrabold text-emerald-600 tracking-wider">LIVE CLOUD DB</span>
+              <span>Sistem aktif</span>
             </div>
-            <div className="pro-streak-flame" title="7 Hari Belajar Konsisten">
-              <span className="text-xs font-extrabold text-amber-500">7 hari konsisten</span>
+            <div className="pro-streak-flame" title="7 hari belajar konsisten">
+              <span>7 hari beruntun</span>
             </div>
           </div>
         </div>
         <div className="dash-actions flex items-center gap-2.5">
           <button
             onClick={() => setIsExportHubOpen(true)}
-            className="hover-lift flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-teal-500/40 bg-gradient-to-r from-teal-500/15 to-emerald-500/15 text-teal-300 hover:text-white text-xs font-extrabold shadow-sm hover:border-teal-400 transition"
+            className="dashboard-tool-btn dashboard-export-btn"
             title="Pusat Ekspor & Pelaporan (31 Antigravity Skills: Excel, PDF, PPTX, DOCX)"
-            style={{ height: "38px", borderRadius: "9999px", display: "inline-flex" }}
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-0.5" />
-            <span className="hide-on-mobile">Pusat Ekspor</span>
-            <span className="bg-teal-500/20 text-teal-300 text-[10px] font-mono px-1.5 py-0.5 rounded border border-teal-500/30">31 Skills</span>
+            <PieChart size={15} />
+            <span className="hide-on-mobile">Pusat laporan</span>
           </button>
           <button
             onClick={() => setIsCommandOpen(true)}
-            className="command-palette-btn hover-lift flex items-center justify-between gap-2.5 px-3.5 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold shadow-sm hover:border-teal-600 transition hide-on-mobile"
+            className="command-palette-btn dashboard-search-btn hide-on-mobile"
             title="Cari Cepat (Ctrl+K)"
-            style={{ width: "auto", minWidth: "165px", height: "38px", borderRadius: "9999px", display: "inline-flex" }}
           >
-            <div className="flex items-center gap-2">
-              <Search size={15} className="text-teal-600" />
+            <div>
+              <Search size={15} />
               <span>Cari...</span>
             </div>
-            <kbd className="bg-slate-200 px-1.5 py-0.5 rounded text-[10px] font-extrabold text-slate-700">Ctrl+K</kbd>
+            <kbd>Ctrl K</kbd>
           </button>
           <button onClick={()=>setShowNotifs(v=>!v)} aria-label="Tampilkan notifikasi" aria-expanded={showNotifs} className="notif-btn">
             <Bell/>{unreadCount > 0 && <i className="notification-badge">{unreadCount}</i>}

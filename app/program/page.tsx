@@ -51,5 +51,5 @@ async function getCourses(): Promise<CatalogCourse[]> {
 
 export default async function ProgramsPage() {
   const courses = await getCourses();
-  return <><Header/><main className="catalog-page"><section className="catalog-hero"><div className="container"><span className="eyebrow">PROGRAM PROFAS LEADERSHIP</span><h1>Temukan jalur tumbuh<br/><em>yang tepat untuk Anda.</em></h1><p>Program terstruktur, kontekstual, dan terukur untuk setiap tahap kepemimpinan.</p></div></section><ProgramCatalog courses={courses}/></main><Footer/></>;
+  return <div className="al-page"><Header/><main className="catalog-page"><section className="catalog-hero"><div className="container"><span className="eyebrow">PROGRAM PROFAS LEADERSHIP</span><h1>Temukan jalur tumbuh<br/><em>yang tepat untuk Anda.</em></h1><p>Program terstruktur, kontekstual, dan terukur untuk setiap tahap kepemimpinan.</p></div></section><ProgramCatalog courses={courses}/></main><Footer/></div>;
 }

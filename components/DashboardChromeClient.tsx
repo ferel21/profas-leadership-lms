@@ -10,6 +10,7 @@ import { initials } from "@/lib/utils";
 import dynamic from "next/dynamic";
 
 const CommandPalette = dynamic(() => import("./CommandPalette").then(m => ({ default: m.CommandPalette })), { ssr: false });
+const ExecutiveExportHubModal = dynamic(() => import("./ExecutiveExportHubModal").then(m => ({ default: m.ExecutiveExportHubModal })), { ssr: false });
 
 type UserShape = { name:string;username?:string|null;email:string;role:string;avatar?:string|null;headline?:string|null };
 type NotificationItem = { id: string; title: string; message: string; read: boolean; link: string | null; createdAt: string };
@@ -25,6 +26,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
   const [notifs,setNotifs]=useState<NotificationItem[]>([]);
   const [unreadCount,setUnreadCount]=useState(0);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const [isExportHubOpen, setIsExportHubOpen] = useState(false);
   const router=useRouter();
   const pathname=usePathname();
   const nav=user.role==="MENTOR"?mentorNav:user.role==="SUPER_ADMIN"?adminNav:studentNav;
@@ -163,16 +165,26 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
             </div>
           </div>
         </div>
-        <div className="dash-actions flex items-center gap-3">
+        <div className="dash-actions flex items-center gap-2.5">
+          <button
+            onClick={() => setIsExportHubOpen(true)}
+            className="hover-lift flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-teal-500/40 bg-gradient-to-r from-teal-500/15 to-emerald-500/15 text-teal-300 hover:text-white text-xs font-extrabold shadow-sm hover:border-teal-400 transition"
+            title="Pusat Ekspor & Pelaporan (31 Antigravity Skills: Excel, PDF, PPTX, DOCX)"
+            style={{ height: "38px", borderRadius: "9999px", display: "inline-flex" }}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-0.5" />
+            <span className="hide-on-mobile">Pusat Ekspor</span>
+            <span className="bg-teal-500/20 text-teal-300 text-[10px] font-mono px-1.5 py-0.5 rounded border border-teal-500/30">31 Skills</span>
+          </button>
           <button
             onClick={() => setIsCommandOpen(true)}
-            className="command-palette-btn hover-lift flex items-center justify-between gap-2.5 px-3.5 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold shadow-sm hover:border-teal-600 transition"
+            className="command-palette-btn hover-lift flex items-center justify-between gap-2.5 px-3.5 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold shadow-sm hover:border-teal-600 transition hide-on-mobile"
             title="Cari Cepat (Ctrl+K)"
-            style={{ width: "auto", minWidth: "185px", height: "38px", borderRadius: "9999px", display: "inline-flex" }}
+            style={{ width: "auto", minWidth: "165px", height: "38px", borderRadius: "9999px", display: "inline-flex" }}
           >
             <div className="flex items-center gap-2">
               <Search size={15} className="text-teal-600" />
-              <span>Cari modul atau aksi...</span>
+              <span>Cari...</span>
             </div>
             <kbd className="bg-slate-200 px-1.5 py-0.5 rounded text-[10px] font-extrabold text-slate-700">Ctrl+K</kbd>
           </button>
@@ -204,6 +216,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
       </header>
       <main className="dashboard-content">{children}</main>
       <CommandPalette isOpen={isCommandOpen} onClose={() => setIsCommandOpen(false)} />
+      <ExecutiveExportHubModal isOpen={isExportHubOpen} onClose={() => setIsExportHubOpen(false)} initialRole={user.role} />
     </div>
   </div>;
 }

@@ -151,6 +151,7 @@ async function main() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "enroll", courseId: "course-leadership-foundation" }),
     });
+    await expectStatus(base, "/api/uploads/assignments/not-issued.pdf", 401);
     await expectStatus(base, "/api/courses?level=INVALID", 400);
 
     const coursesResponse = await expectStatus(base, "/api/courses", 200);
@@ -202,7 +203,11 @@ async function main() {
     const verification = await verify.json();
     assert.equal(verification.valid, true, "Sertifikat demo tidak terverifikasi");
     assert.equal(containsSensitiveKey(verification), false, "Verifikasi sertifikat membocorkan field sensitif");
+    const invalidVerification = await expectStatus(base, "/api/certificates/verify?number=PROFAS-LDR-NOT-ISSUED", 200);
+    assert.equal((await invalidVerification.json()).valid, false, "Nomor sertifikat yang tidak diterbitkan tidak boleh dianggap valid");
     await expectStatus(base, "/sertifikat/PROFAS-LDR-2026-SLM-0001", 200);
+    const invalidCertificatePage = await expectStatus(base, "/sertifikat/PROFAS-LDR-NOT-ISSUED", 200);
+    assert.ok((await invalidCertificatePage.text()).includes("404 - Halaman Tidak Ditemukan"), "Halaman sertifikat yang tidak diterbitkan tidak boleh menampilkan sertifikat");
 
     const roleDashboards = [
       ["mentor@profas.id", "DASHBOARD MENTOR"],

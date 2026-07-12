@@ -1693,3 +1693,185 @@ html body .hero-banner-admin {
     transition: none !important;
   }
 }
+
+/* ==========================================================================
+   🚀 ULTRA-FRESH MODERN DYNAMIC AESTHETICS (Inspired by Akses Legal & 31 Skills)
+   Transforms rigid enterprise layouts into a glowing, dynamic, and lively experience.
+   ========================================================================== */
+
+@keyframes blob {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+@keyframes float-sway {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1.5deg); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-blob {
+  animation: blob 8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+.animate-float-sway {
+  animation: float-sway 5s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 4s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 3s ease-in-out infinite;
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Glassmorphism Floating Cards */
+.glass-badge-top,
+.glass-badge-bottom,
+.glass-badge-side {
+  position: absolute;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 16px 36px -10px rgba(15, 147, 135, 0.22), 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 18px !important;
+  padding: 12px 16px !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-badge-top:hover,
+.glass-badge-bottom:hover,
+.glass-badge-side:hover {
+  transform: scale(1.04) translateY(-3px) !important;
+  box-shadow: 0 20px 45px -12px rgba(15, 147, 135, 0.35) !important;
+}
+
+.glass-badge-top {
+  top: 15px;
+  right: -10px;
+}
+
+.glass-badge-bottom {
+  bottom: 85px;
+  left: -15px;
+}
+
+.glass-badge-side {
+  top: 52%;
+  left: -25px;
+}
+
+@media (max-width: 900px) {
+  .glass-badge-top,
+  .glass-badge-bottom,
+  .glass-badge-side {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 8px 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Fresh Hero Container Override */
+html body .lms-hero {
+  background:
+    linear-gradient(to right, rgba(128, 128, 128, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(128, 128, 128, 0.045) 1px, transparent 1px),
+    radial-gradient(circle at 15% 20%, rgba(15, 147, 135, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(36, 107, 254, 0.07) 0%, transparent 45%),
+    linear-gradient(180deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%) !important;
+  background-size: 28px 28px, 28px 28px, 100% 100%, 100% 100%, 100% 100% !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Elevated Modern Cards with Interactive Gradients */
+html body .lms-method-card,
+html body .lms-pathway-card,
+html body .lms-insight-cards article,
+html body .lms-course-card {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  border-radius: 20px !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html body .lms-method-card:hover,
+html body .lms-pathway-card:hover,
+html body .lms-insight-cards article:hover,
+html body .lms-course-card:hover {
+  transform: translateY(-6px) scale(1.01) !important;
+  box-shadow: 0 22px 50px -15px rgba(15, 147, 135, 0.18), 0 0 0 1px rgba(15, 147, 135, 0.25) !important;
+  border-color: rgba(15, 147, 135, 0.35) !important;
+}
+
+/* Fresh Typography Glow */
+.lms-title-fresh {
+  background: linear-gradient(135deg, #0f172a 0%, #0f766e 55%, #2563eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 950 !important;
+}
+
+/* Ticker Marquee Container */
+.ticker-marquee-box {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 999px;
+  padding: 10px 24px;
+  box-shadow: 0 10px 30px -10px rgba(15, 147, 135, 0.15);
+  overflow: hidden;
+  position: relative;
+  max-width: 95%;
+  margin: 28px auto 0;
+}
+

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { join, extname } from "node:path";
+import { extname, resolve, relative, sep } from "node:path";
+import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const MIME_TYPES: Record<string, string> = {
   ".pdf": "application/pdf",
@@ -21,17 +23,71 @@ const MIME_TYPES: Record<string, string> = {
 
 export async function GET(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   try {
+    const user = await getCurrentUser();
+    if (!user) return NextResponse.json({ error: "Silakan masuk untuk mengakses berkas." }, { status: 401 });
+
     const { path } = await params;
     if (!path || path.length === 0) {
       return NextResponse.json({ error: "Path tidak ditemukan." }, { status: 404 });
     }
 
     const relativePath = path.join("/");
-    let filePath = join(process.cwd(), "public", "uploads", relativePath);
+    const publicUploadsRoot = resolve(process.cwd(), "public", "uploads");
+    const tmpUploadsRoot = resolve("/tmp", "uploads");
+    const isInside = (root: string, candidate: string) => {
+      const childPath = relative(root, candidate);
+      return childPath === "" || (!childPath.startsWith("..") && childPath !== ".." && !childPath.includes(`${sep}..${sep}`));
+    };
+    const publicCandidate = resolve(publicUploadsRoot, ...path);
+    const tmpCandidate = resolve(tmpUploadsRoot, ...path);
+    if (!isInside(publicUploadsRoot, publicCandidate) || !isInside(tmpUploadsRoot, tmpCandidate)) {
+      return NextResponse.json({ error: "Path berkas tidak valid." }, { status: 400 });
+    }
+
+    const storedUrl = `/api/uploads/${relativePath}`;
+    if (path[0] === "assignments") {
+      const answer = await prisma.attemptAnswer.findFirst({
+        where: { fileUrl: storedUrl },
+        select: {
+          attempt: {
+            select: {
+              userId: true,
+              assessment: { select: { course: { select: { mentorId: true } } } },
+            },
+          },
+        },
+      });
+      const canAccess = answer && (
+        answer.attempt.userId === user.id ||
+        user.role === "SUPER_ADMIN" ||
+        (user.role === "MENTOR" && answer.attempt.assessment.course.mentorId === user.id)
+      );
+      if (!canAccess) return NextResponse.json({ error: "Berkas tidak ditemukan." }, { status: 404 });
+    } else {
+      const courseId = path[0];
+      const material = await prisma.courseNode.findFirst({
+        where: {
+          courseId,
+          fileUrl: storedUrl,
+          course: {
+            OR: [
+              { mentorId: user.id },
+              { published: true, enrollments: { some: { userId: user.id } } },
+            ],
+          },
+        },
+        select: { id: true },
+      });
+      if (!material && user.role !== "SUPER_ADMIN") {
+        return NextResponse.json({ error: "Berkas tidak ditemukan." }, { status: 404 });
+      }
+    }
+
+    let filePath = publicCandidate;
 
     // MASTER SKILL: Fallback ke /tmp/uploads untuk Vercel Serverless Read-Only Filesystem!
     if (!existsSync(filePath)) {
-      filePath = join("/tmp", "uploads", relativePath);
+      filePath = tmpCandidate;
     }
 
     if (!existsSync(filePath)) {

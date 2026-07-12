@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Award, CheckCircle2, ExternalLink, QrCode } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Logo } from "@/components/Logo";
 import { CertificateActions } from "@/components/CertificateActions";
-import { getCurrentUser } from "@/lib/auth";
 
 export default async function CertificatePage({ params }: { params?: Promise<{ number: string }> }) {
 	const resolvedParams = await params;
@@ -13,35 +11,11 @@ export default async function CertificatePage({ params }: { params?: Promise<{ n
 	const number = rawNumber ? decodeURIComponent(rawNumber) : null;
 	if (!number) notFound();
 
-	let cert: any = await prisma.certificate.findUnique({
+	const cert = await prisma.certificate.findUnique({
 		where: { uniqueNumber: number },
 		include: { user: true, course: { include: { mentor: true, _count: { select: { nodes: true } } } } },
 	});
-
-	if (!cert) {
-		// Fallback dinamis untuk mengatasi isolasi multi-instance /tmp SQLite di lingkungan serverless Vercel
-		const currentUser = await getCurrentUser();
-		const fallbackCourse = await prisma.course.findFirst({
-			include: { mentor: true, _count: { select: { nodes: true } } },
-			orderBy: { featured: "desc" }
-		});
-
-		cert = {
-			id: "fallback-cert",
-			uniqueNumber: number,
-			issuedAt: new Date(),
-			userId: currentUser?.id || "student-nadia",
-			courseId: fallbackCourse?.id || "course-strategic",
-			user: currentUser || { id: "student-nadia", name: "Peserta PROFAS Leadership", email: "peserta@profas.id", role: "STUDENT", headline: "Leadership Practitioner" },
-			course: fallbackCourse || {
-				id: "course-strategic",
-				title: "Strategic Leadership Masterclass",
-				durationHours: 14,
-				_count: { nodes: 12 },
-				mentor: { name: "Dr. Ratna Maharani" }
-			}
-		};
-	}
+	if (!cert) notFound();
 
 	return (
 		<main className="certificate-page">

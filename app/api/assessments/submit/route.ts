@@ -5,6 +5,20 @@ import { prisma } from "@/lib/prisma";
 import { finalizeCourseCompletion } from "@/lib/completion";
 import fs from 'fs';
 import path from 'path';
+import { randomUUID } from "node:crypto";
+
+const MAX_SUBMISSION_FILE_SIZE = 20 * 1024 * 1024;
+const SUBMISSION_FILE_TYPES: Record<string, string> = {
+  "application/pdf": ".pdf",
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "text/plain": ".txt",
+  "application/msword": ".doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+  "application/vnd.ms-powerpoint": ".ppt",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
+};
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -14,45 +28,47 @@ export async function POST(request: Request) {
     const contentType = request.headers.get('content-type') || '';
     let assessmentId = '';
     let answers: Record<string, any> = {};
+    const pendingFiles: Array<{ questionId: string; file: File }> = [];
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
-      assessmentId = formData.get('assessmentId') as string;
+      const assessmentValue = formData.get('assessmentId');
+      assessmentId = typeof assessmentValue === "string" ? assessmentValue.trim() : "";
       
-      const answersStr = formData.get('answers') as string;
-      if (answersStr) {
-        answers = JSON.parse(answersStr);
+      const answersValue = formData.get('answers');
+      if (typeof answersValue === "string" && answersValue.trim()) {
+        let parsedAnswers: unknown;
+        try {
+          parsedAnswers = JSON.parse(answersValue);
+        } catch {
+          return NextResponse.json({ message: "Jawaban evaluasi tidak valid." }, { status: 400 });
+        }
+        if (!parsedAnswers || typeof parsedAnswers !== "object" || Array.isArray(parsedAnswers)) {
+          return NextResponse.json({ message: "Jawaban evaluasi tidak valid." }, { status: 400 });
+        }
+        answers = parsedAnswers as Record<string, any>;
       }
 
-      // Handle file uploads dengan Fallback ke /tmp untuk Vercel Serverless
+      // Kumpulkan dulu file. Validasi ID pertanyaan dilakukan setelah asesmen
+      // dimuat, sebelum ada byte apa pun yang ditulis ke filesystem.
       for (const [key, value] of formData.entries()) {
         if (key.startsWith('file_')) {
           const questionId = key.replace('file_', '');
-          const file = value as File;
-          const ext = path.extname(file.name);
-          const fileName = `${assessmentId}_${user.id}_${questionId}_${Date.now()}${ext}`;
-          const buffer = Buffer.from(await file.arrayBuffer());
-
-          try {
-            const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'assignments');
-            if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-            fs.writeFileSync(path.join(uploadsDir, fileName), buffer);
-          } catch {
-            const tmpDir = path.join('/tmp', 'uploads', 'assignments');
-            if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
-            fs.writeFileSync(path.join(tmpDir, fileName), buffer);
+          if (!(value instanceof File)) {
+            return NextResponse.json({ message: "Berkas evaluasi tidak valid." }, { status: 400 });
           }
-          
-          answers[questionId] = {
-            ...answers[questionId],
-            fileUrl: `/api/uploads/assignments/${fileName}`
-          };
+          pendingFiles.push({ questionId, file: value });
         }
       }
     } else {
-      const json = await request.json();
-      assessmentId = json.assessmentId;
-      answers = json.answers || {};
+      const json = await request.json() as { assessmentId?: unknown; answers?: unknown };
+      assessmentId = typeof json.assessmentId === "string" ? json.assessmentId.trim() : "";
+      if (json.answers !== undefined) {
+        if (!json.answers || typeof json.answers !== "object" || Array.isArray(json.answers)) {
+          return NextResponse.json({ message: "Jawaban evaluasi tidak valid." }, { status: 400 });
+        }
+        answers = json.answers as Record<string, any>;
+      }
     }
 
     if (!assessmentId) {
@@ -74,10 +90,50 @@ export async function POST(request: Request) {
     if (!enrollment) return NextResponse.json({ message: "Anda belum terdaftar di program ini." }, { status: 403 });
 
     const validQuestionIds = new Set(assessment.questions.map(q => q.id));
+    const questionById = new Map(assessment.questions.map(question => [question.id, question]));
     const submittedQuestionIds = Object.keys(answers);
     const hasInvalidQuestionId = submittedQuestionIds.some(id => !validQuestionIds.has(id));
     if (hasInvalidQuestionId && assessment.questions.length > 0) {
       return NextResponse.json({ message: "ID pertanyaan dalam jawaban tidak valid." }, { status: 400 });
+    }
+
+    for (const pending of pendingFiles) {
+      const question = questionById.get(pending.questionId);
+      if (!question || question.type !== "FILE_UPLOAD") {
+        return NextResponse.json({ message: "Berkas hanya boleh dikirim untuk pertanyaan unggah berkas yang valid." }, { status: 400 });
+      }
+      if (pending.file.size > MAX_SUBMISSION_FILE_SIZE) {
+        return NextResponse.json({ message: "Ukuran berkas evaluasi maksimal 20MB." }, { status: 400 });
+      }
+      if (!SUBMISSION_FILE_TYPES[pending.file.type]) {
+        return NextResponse.json({ message: "Format berkas evaluasi tidak didukung." }, { status: 400 });
+      }
+    }
+
+    // Simpan dengan nama acak dan ekstensi dari MIME type yang diizinkan.
+    // ID dari request tidak pernah dipakai sebagai bagian path filesystem.
+    for (const pending of pendingFiles) {
+      const fileName = `${randomUUID()}${SUBMISSION_FILE_TYPES[pending.file.type]}`;
+      const buffer = Buffer.from(await pending.file.arrayBuffer());
+
+      try {
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'assignments');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        fs.writeFileSync(path.join(uploadsDir, fileName), buffer);
+      } catch {
+        const tmpDir = path.join('/tmp', 'uploads', 'assignments');
+        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+        fs.writeFileSync(path.join(tmpDir, fileName), buffer);
+      }
+
+      const existingAnswer = answers[pending.questionId];
+      const answerObject = existingAnswer && typeof existingAnswer === "object" && !Array.isArray(existingAnswer)
+        ? existingAnswer as Record<string, unknown>
+        : {};
+      answers[pending.questionId] = {
+        ...answerObject,
+        fileUrl: `/api/uploads/assignments/${fileName}`,
+      };
     }
 
     let correct = 0;
@@ -123,7 +179,7 @@ export async function POST(request: Request) {
         questionId: q.id,
         answerText,
         fileUrl,
-        score: needsManualGrading ? 0 : questionScore
+        score: q.type === 'ESSAY' || q.type === 'FILE_UPLOAD' ? 0 : questionScore
       });
     }
 

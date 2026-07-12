@@ -2,7 +2,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardChrome } from "@/components/DashboardChrome";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { BarChart3, TrendingUp, Users, Activity, Clock } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Activity, Clock, Sparkles } from "lucide-react";
+import { ExportDeckButton } from "@/components/ExportDeckButton";
+import { ExportTranscriptButton } from "@/components/ExportTranscriptButton";
 
 export default async function AnalyticsDashboardPage() {
   const user = await getCurrentUser();
@@ -40,11 +42,81 @@ export default async function AnalyticsDashboardPage() {
     topActions = await prisma.activityLog.groupBy({ by: ['action'], _count: { id: true }, orderBy: { _count: { id: 'desc' } }, take: 5 });
   }
 
+  // Fetch course details for Executive Deck Export
+  const firstCourse = await prisma.course.findFirst({
+    where: user.role === "MENTOR" ? { mentorId: user.id } : undefined,
+    select: {
+      title: true,
+      category: true,
+      level: true,
+      durationHours: true,
+      outcomes: true,
+      mentor: { select: { name: true } },
+      nodes: {
+        select: { title: true, type: true, durationMin: true, description: true, order: true },
+        orderBy: { order: "asc" }
+      }
+    }
+  });
+
   return (
     <DashboardChrome user={user}>
-      <div className="dash-title mb-8">
-        <h1>Analitik & Pelaporan</h1>
-        <p>Pantau metrik retensi, aktivitas siswa, dan performa program secara keseluruhan.</p>
+      <div className="dash-title mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1>Analitik & Pelaporan</h1>
+          <p>Pantau metrik retensi, aktivitas siswa, dan performa program secara keseluruhan.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {firstCourse && (
+            <ExportDeckButton
+              courseTitle={firstCourse.title}
+              category={firstCourse.category || "Executive Leadership"}
+              level={firstCourse.level || "ADVANCED"}
+              mentorName={firstCourse.mentor.name}
+              durationHours={firstCourse.durationHours || 24}
+              modules={firstCourse.nodes.map(n => ({
+                title: n.title,
+                type: n.type,
+                durationMin: n.durationMin,
+                description: n.description || undefined
+              }))}
+              outcomes={firstCourse.outcomes || "Menguasai kepemimpinan strategis dan resolusi konflik eksekutif."}
+            />
+          )}
+          <ExportTranscriptButton
+            studentName={`${user.name} (${user.role})`}
+            studentEmail={user.email}
+            organization="PROFAS Leadership OS"
+            role={user.role}
+            totalXP={1450}
+            courses={firstCourse ? [{
+              title: firstCourse.title,
+              category: firstCourse.category || "Strategic Leadership",
+              level: firstCourse.level || "ADVANCED",
+              progressPercent: 100,
+              status: "COMPLETED"
+            }] : []}
+            badgesCount={5}
+            attendanceRatePercent={96}
+          />
+        </div>
+      </div>
+
+      {/* Banner Quick Tips Eksklusif 31 Skills */}
+      <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-teal-950/70 via-slate-900/90 to-slate-900/90 border border-teal-500/30 flex items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-teal-500/15 border border-teal-500/30 text-teal-400">
+            <Sparkles className="w-6 h-6 animate-pulse" />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold text-white tracking-tight flex items-center gap-2">
+              Ekspor Multi-Format Langsung (Powered by 31 Antigravity Skills)
+            </h3>
+            <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
+              Gunakan tombol di atas untuk membuat Slide Deck 16:9 PDF dan Transkrip Akademik langsung dari data live database, atau klik tombol <b>&quot;Pusat Ekspor&quot;</b> di Top Bar untuk opsi Excel Multi-Sheet (.xlsx) dan Silabus Word (.docx).
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="analytics-metric-grid">

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DashboardChrome } from "@/components/DashboardChrome";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -108,19 +107,7 @@ export default async function DashboardPage() {
     // Enrollment adalah entitlement peserta. Jangan auto-enroll semua course
     // yang dipublish: dashboard harus mencerminkan paket/program yang dibeli.
     const enrollments = initialEnrollments;
-
     const completedEnrollments = enrollments.filter(e => e.status === "COMPLETED" || e.progressPercent === 100);
-    const existingCourseIds = new Set(certificates.map(c => c.courseId));
-    for (const enr of completedEnrollments) {
-      if (!existingCourseIds.has(enr.courseId)) {
-        const virtualCertNumber = `PROFAS-LDR-${new Date().getFullYear()}-${enr.courseId.slice(-4).toUpperCase()}-${user.id.slice(-4).toUpperCase()}`;
-        certificates.push({
-          id: `virt-${enr.courseId}`, uniqueNumber: virtualCertNumber,
-          issuedAt: enr.completedAt || new Date(),
-          userId: user.id, courseId: enr.courseId, course: enr.course
-        } as any);
-      }
-    }
 
     const avgProgress = average(enrollments.map(e => e.progressPercent));
     // Tampilkan semua enrollment (aktif maupun selesai) agar course tidak hilang

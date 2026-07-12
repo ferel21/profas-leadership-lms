@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         role: role as Role,
         authProvider: authProvider,
         passwordHash: "",
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0d9488&color=fff`
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2a6ba7&color=fff`
       }
     });
 

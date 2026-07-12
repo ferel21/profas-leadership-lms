@@ -108,11 +108,11 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
       </div>
       <div className="sidebar-user">
         <span className={`sidebar-user-avatar ${user.avatar ? "has-avatar" : ""}`} style={!user.avatar ? {
-          background: "linear-gradient(135deg, #0d9488, #14b8a6)",
+          background: "linear-gradient(135deg, #2a6ba7, #1e5a8f)",
           color: "#fff",
           fontWeight: 800,
           fontSize: "1rem",
-          boxShadow: "0 4px 14px rgba(13,148,136,0.35)"
+          boxShadow: "0 4px 14px rgba(42,107,167,0.35)"
         } : {}}>{user.avatar ? <Image src={user.avatar} alt="" width={38} height={38} /> : initials(user.name)}</span>
         {!collapsed && <div><b>{user.username ? `@${user.username}` : user.name}</b><small>{user.name} · {user.role==="STUDENT"?"Peserta":user.role==="MENTOR"?"Mentor":"Super Admin"}</small></div>}
       </div>

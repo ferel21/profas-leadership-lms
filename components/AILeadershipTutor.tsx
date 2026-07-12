@@ -90,9 +90,9 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
   }
 
   return (
-    <div className="glass-card hover-lift" style={{ borderRadius: "16px", border: "1px solid rgba(13, 148, 136, 0.2)", overflow: "hidden", marginTop: "1.5rem", display: "flex", flexDirection: "column", background: "var(--card-bg, rgba(255, 255, 255, 0.8))" }}>
+    <div className="glass-card hover-lift" style={{ borderRadius: "16px", border: "1px solid rgba(42, 107, 167, 0.2)", overflow: "hidden", marginTop: "1.5rem", display: "flex", flexDirection: "column", background: "var(--card-bg, rgba(255, 255, 255, 0.8))" }}>
       {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #0f766e, #0d9488)", padding: "16px 20px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ background: "linear-gradient(135deg, #1e5a8f, #2a6ba7)", padding: "16px 20px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ background: "rgba(255, 255, 255, 0.2)", padding: "8px", borderRadius: "10px", display: "flex" }}>
             <Bot size={22} color="#fff" />
@@ -114,7 +114,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
         {messages.map((m, idx) => (
           <div key={idx} style={{ display: "flex", gap: "10px", alignSelf: m.role === "user" ? "flex-end" : "flex-start", maxWidth: "85%" }}>
             {m.role === "ai" && (
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#0d9488", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px" }}>
+              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#2a6ba7", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px" }}>
                 <Bot size={18} />
               </div>
             )}
@@ -122,7 +122,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
               <div style={{
                 padding: "12px 16px",
                 borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                background: m.role === "user" ? "#0d9488" : "#fff",
+                background: m.role === "user" ? "#2a6ba7" : "#fff",
                 color: m.role === "user" ? "#fff" : "var(--text, #1e293b)",
                 boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                 fontSize: "0.9rem",
@@ -168,7 +168,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
           </div>
         ))}
         {loading && (
-          <div style={{ display: "flex", gap: "10px", alignSelf: "flex-start", alignItems: "center", color: "#0d9488", fontSize: "0.85rem", fontStyle: "italic" }}>
+          <div style={{ display: "flex", gap: "10px", alignSelf: "flex-start", alignItems: "center", color: "#2a6ba7", fontSize: "0.85rem", fontStyle: "italic" }}>
             <Loader2 size={18} className="spin" />
             <span>Asisten AI sedang menyusun panduan kepemimpinan...</span>
           </div>
@@ -191,9 +191,9 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
                 fontSize: "0.75rem",
                 padding: "6px 10px",
                 borderRadius: "12px",
-                border: "1px solid rgba(13, 148, 136, 0.3)",
-                background: "rgba(13, 148, 136, 0.05)",
-                color: "#0f766e",
+                border: "1px solid rgba(42, 107, 167, 0.3)",
+                background: "rgba(42, 107, 167, 0.05)",
+                color: "#1e5a8f",
                 cursor: "pointer",
                 transition: "all 0.2s"
               }}
@@ -228,7 +228,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
           type="submit"
           disabled={loading || !input.trim()}
           style={{
-            background: "#0d9488",
+            background: "#2a6ba7",
             color: "#fff",
             border: "none",
             borderRadius: "10px",

@@ -1,14 +1,14 @@
 :root {
   /* Colors */
-  --teal: #0d9488;
-  --teal-dark: #0f766e;
-  --teal-light: #ccfbf1;
-  --blue: #3b82f6;
+  --teal: #2a6ba7;
+  --teal-dark: #1e5a8f;
+  --teal-light: #eff6ff;
+  --blue: #2a6ba7;
   --navy: #0f172a;
-  --ink: #1e293b;
-  --muted: #64748b;
-  --bg: #ffffff;
-  --line: #e2e8f0;
+  --ink: #101519;
+  --muted: #6b7280;
+  --bg: #f9fafb;
+  --line: #e5e7eb;
   --white: #ffffff;
   
   /* Shadows */
@@ -130,10 +130,10 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
    ========================================================================== */
 
 :root {
-  --color-primary: #0d9488;
-  --color-primary-dark: #0f766e;
-  --color-primary-light: #ccfbf1;
-  --color-primary-ghost: rgba(13, 148, 136, 0.08);
+  --color-primary: #2a6ba7;
+  --color-primary-dark: #1e5a8f;
+  --color-primary-light: #eff6ff;
+  --color-primary-ghost: rgba(42, 107, 167, 0.08);
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
@@ -2357,21 +2357,21 @@ input[type="text"]:focus, input[type="email"]:focus {
 .profile-summary, .profile-editor { background: #fff; border: 1px solid #e5e7eb; }
 .profile-summary { position: sticky; top: 1.5rem; padding: 2rem 1.5rem; text-align: center; }
 .profile-avatar-wrap { position: relative; width: 112px; margin: 0 auto 1rem; }
-.profile-avatar { width: 112px; height: 112px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #0d9488, #22c55e); box-shadow: 0 10px 30px rgba(13,148,136,.18); }
-.profile-avatar img, .profile-avatar span { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: #ecfdf5; color: #0f766e; font-size: 1.8rem; font-weight: 800; border: 3px solid #fff; }
+.profile-avatar { width: 112px; height: 112px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #2a6ba7, #0284c7); box-shadow: 0 10px 30px rgba(42,107,167,.18); }
+.profile-avatar img, .profile-avatar span { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: #eff6ff; color: #1e5a8f; font-size: 1.8rem; font-weight: 800; border: 3px solid #fff; }
 .avatar-camera { position: absolute; right: -2px; bottom: 2px; width: 36px; height: 36px; border: 3px solid #fff; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--color-primary); cursor: pointer; }
 .avatar-camera svg { width: 16px; }
 .profile-summary h2 { margin: .5rem 0 .25rem; font-size: 1.15rem; }
 .profile-handle { color: #64748b; margin: 0 0 1rem; font-size: .85rem; }
-.role-pill { display: inline-flex; align-items: center; gap: .35rem; padding: .4rem .7rem; border-radius: 999px; color: #0f766e; background: #ccfbf1; font-size: .75rem; font-weight: 700; }
+.role-pill { display: inline-flex; align-items: center; gap: .35rem; padding: .4rem .7rem; border-radius: 999px; color: #1e5a8f; background: #eff6ff; font-size: .75rem; font-weight: 700; }
 .role-pill svg { width: 14px; height: 14px; }
-.role-mentor { color: #6d28d9; background: #ede9fe; }
-.role-super_admin { color: #9a3412; background: #ffedd5; }
+.role-mentor { color: #1e5a8f; background: #eff6ff; }
+.role-super_admin { color: #1e5a8f; background: #eff6ff; }
 .profile-completeness { margin-top: 1.75rem; text-align: left; }
 .profile-completeness div { display: flex; justify-content: space-between; color: #64748b; font-size: .75rem; }
 .profile-completeness b { color: #0f172a; }
 .profile-completeness > i { display: block; height: 7px; margin-top: .55rem; overflow: hidden; border-radius: 99px; background: #e2e8f0; }
-.profile-completeness > i span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #0d9488, #22c55e); transition: width .3s; }
+.profile-completeness > i span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #2a6ba7, #0284c7); transition: width .3s; }
 .profile-role-note { margin: 1.25rem 0 0; color: #94a3b8; font-size: .72rem; line-height: 1.55; }
 .profile-editor { padding: 0; overflow: hidden; }
 .profile-editor-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.5rem 1.75rem; border-bottom: 1px solid #e5e7eb; }

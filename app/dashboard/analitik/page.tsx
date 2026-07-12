@@ -175,9 +175,9 @@ export default async function AnalyticsDashboardPage() {
                   className="analytics-bar-fill"
                   style={{ 
                     height: `${item.val}%`,
-                    background: item.val === 100 ? "linear-gradient(180deg, #0d9488, #0f766e)" : "linear-gradient(180deg, #5eead4, #0d9488)",
+                    background: item.val === 100 ? "linear-gradient(180deg, #2a6ba7, #1e5a8f)" : "linear-gradient(180deg, #60a5fa, #2a6ba7)",
                     opacity: item.val === 100 ? 1 : 0.75,
-                    boxShadow: item.val === 100 ? "0 6px 16px rgba(13,148,136,0.3)" : "none"
+                    boxShadow: item.val === 100 ? "0 6px 16px rgba(42,107,167,0.3)" : "none"
                   }} 
                 />
                 <span className="analytics-bar-label">{item.day}</span>

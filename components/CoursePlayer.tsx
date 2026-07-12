@@ -134,7 +134,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
     const { jsPDF } = await import("jspdf");
     const pdf = new jsPDF();
     pdf.setFontSize(18);
-    pdf.setTextColor(13, 148, 136); // Teal #0d9488
+    pdf.setTextColor(42, 107, 167); // Royal Blue #2a6ba7
     pdf.text("Catatan Pembelajaran PROFAS Leadership", 15, 20);
     pdf.setFontSize(12);
     pdf.setTextColor(50, 50, 50);

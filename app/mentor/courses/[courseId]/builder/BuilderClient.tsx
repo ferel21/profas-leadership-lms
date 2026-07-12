@@ -415,7 +415,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
   return (
     <div className="builder-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* AI Curriculum Generator Banner */}
-      <div style={{ background: "linear-gradient(135deg, #0f766e, #0d9488)", padding: "18px 24px", borderRadius: "16px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", boxShadow: "0 4px 12px rgba(13, 148, 136, 0.2)" }}>
+      <div style={{ background: "linear-gradient(135deg, #1e5a8f, #2a6ba7)", padding: "18px 24px", borderRadius: "16px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", boxShadow: "0 4px 12px rgba(42, 107, 167, 0.2)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
           <div style={{ background: "rgba(255, 255, 255, 0.2)", padding: "10px", borderRadius: "12px", display: "flex" }}>
             <Sparkles size={24} style={{ color: "#fef08a" }} />
@@ -690,11 +690,11 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
               }}
               style={{ 
                 padding: '2rem', 
-                border: `2px dashed ${dragOver ? '#0d9488' : '#cbd5e1'}`, 
+                border: `2px dashed ${dragOver ? '#2a6ba7' : '#cbd5e1'}`, 
                 textAlign: 'center', 
                 borderRadius: '16px', 
                 marginBottom: '1.2rem',
-                background: dragOver ? 'rgba(13, 148, 136, 0.05)' : '#f8fafc',
+                background: dragOver ? 'rgba(42, 107, 167, 0.06)' : '#f8fafc',
                 cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
@@ -706,10 +706,10 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
                 style={{ display: 'none' }}
                 onChange={e => setFile(e.target.files?.[0] || null)} 
               />
-              <FileUp size={36} style={{ color: file ? '#0d9488' : '#94a3b8', margin: '0 auto 10px' }} />
+              <FileUp size={36} style={{ color: file ? '#2a6ba7' : '#94a3b8', margin: '0 auto 10px' }} />
               {file ? (
                 <div>
-                  <b style={{ color: '#0d9488', fontSize: '0.95rem', display: 'block' }}>{file.name}</b>
+                  <b style={{ color: '#2a6ba7', fontSize: '0.95rem', display: 'block' }}>{file.name}</b>
                   <small style={{ color: '#64748b' }}>{(file.size / (1024 * 1024)).toFixed(2)} MB • Klik untuk ganti berkas</small>
                 </div>
               ) : initialNode?.fileUrl ? (

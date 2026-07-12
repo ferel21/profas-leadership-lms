@@ -66,10 +66,10 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
     }
   };
 
-  if (result && !showReview) return <div className="quiz-result pro-glass-card pro-celebrate-check hover-lift" style={{ maxWidth: '640px', margin: '4rem auto', padding: '3.5rem', borderRadius: '28px', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 50px rgba(13, 148, 136, 0.2)' }}>
+  if (result && !showReview) return <div className="quiz-result pro-glass-card pro-celebrate-check hover-lift" style={{ maxWidth: '640px', margin: '4rem auto', padding: '3.5rem', borderRadius: '28px', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 50px rgba(42, 107, 167, 0.2)' }}>
     {result.passed && (
       <div className="confetti-wrapper" aria-hidden="true">
-        {['#0d9488', '#06b6d4', '#fbbf24', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#3b82f6'].map((color, i) => (
+        {['#2a6ba7', '#0284c7', '#f3b444', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#38bdf8'].map((color, i) => (
           <span
             key={i}
             className="pro-confetti-particle"

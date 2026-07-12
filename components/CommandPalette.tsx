@@ -102,7 +102,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
         
         {/* Input Bar */}
         <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", gap: "12px", background: "rgba(255, 255, 255, 0.03)" }}>
-          <Search size={20} style={{ color: "#0d9488" }} />
+          <Search size={20} style={{ color: "#2a6ba7" }} />
           <input
             type="text"
             placeholder="Ketik perintah atau cari materi eksekutif (misal: 'Sertifikat', 'Modul')..."
@@ -150,8 +150,8 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
                       padding: "12px 16px",
                       borderRadius: "12px",
                       cursor: "pointer",
-                      background: isSelected ? "linear-gradient(90deg, rgba(13, 148, 136, 0.25), rgba(6, 182, 212, 0.15))" : "transparent",
-                      border: isSelected ? "1px solid rgba(13, 148, 136, 0.5)" : "1px solid transparent",
+                      background: isSelected ? "linear-gradient(90deg, rgba(42, 107, 167, 0.25), rgba(30, 90, 143, 0.15))" : "transparent",
+                      border: isSelected ? "1px solid rgba(42, 107, 167, 0.5)" : "1px solid transparent",
                       transition: "all 0.15s ease"
                     }}
                   >
@@ -160,7 +160,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
                         width: "36px",
                         height: "36px",
                         borderRadius: "10px",
-                        background: isSelected ? "#0d9488" : "rgba(255, 255, 255, 0.08)",
+                        background: isSelected ? "#2a6ba7" : "rgba(255, 255, 255, 0.08)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -192,7 +192,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
             <span><kbd style={{ background: "rgba(255, 255, 255, 0.1)", padding: "2px 6px", borderRadius: "4px", color: "#fff" }}>↑↓</kbd> Navigasi</span>
             <span><kbd style={{ background: "rgba(255, 255, 255, 0.1)", padding: "2px 6px", borderRadius: "4px", color: "#fff" }}>Enter</kbd> Pilih</span>
           </div>
-          <span style={{ color: "#0d9488", fontWeight: 700 }}>PROFAS Executive Command V1</span>
+          <span style={{ color: "#2a6ba7", fontWeight: 700 }}>PROFAS Executive Command V1</span>
         </div>
       </div>
     </div>

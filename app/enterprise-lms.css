@@ -12,11 +12,11 @@
   --enterprise-muted: #6b7a90;
   --enterprise-line: #dfe7ef;
   --enterprise-line-soft: #eef3f7;
-  --enterprise-teal: #0f9387;
-  --enterprise-teal-dark: #0b6f66;
-  --enterprise-blue: #246bfe;
+  --enterprise-teal: #2a6ba7;
+  --enterprise-teal-dark: #1e5a8f;
+  --enterprise-blue: #2a6ba7;
   --enterprise-gold: #d79526;
-  --enterprise-green: #108a5f;
+  --enterprise-green: #2a6ba7;
   --enterprise-red: #c94b4b;
   --enterprise-radius-xs: 8px;
   --enterprise-radius-sm: 10px;
@@ -213,10 +213,10 @@ iframe {
 .btn-primary,
 .btn-cyan-primary,
 .complete-btn {
-  background: linear-gradient(135deg, var(--enterprise-teal), #1282a2) !important;
+  background: linear-gradient(135deg, var(--enterprise-teal), #1e5a8f) !important;
   color: #fff !important;
   border: 0 !important;
-  box-shadow: 0 12px 24px rgba(15, 147, 135, 0.24) !important;
+  box-shadow: 0 12px 24px rgba(42, 107, 167, 0.28) !important;
 }
 
 .btn-ghost,

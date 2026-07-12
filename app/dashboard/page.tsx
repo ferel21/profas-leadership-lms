@@ -13,6 +13,7 @@ import { AdminReportTable, ReportRow } from "@/components/AdminReportTable";
 import { MentorCourseActions } from "@/components/MentorCourseActions";
 import { AdminUserManagement } from "@/components/AdminUserManagement";
 import { BroadcastManager } from "@/components/BroadcastManager";
+import { SuperAdminAnalyticsPanel } from "@/components/SuperAdminAnalyticsPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -454,10 +455,6 @@ export default async function DashboardPage() {
     })
   ]);
 
-  const maxRole = Math.max(...roleCounts.map(item => typeof item._count === "object" && item._count !== null ? item._count._all ?? 0 : 0), 1);
-  const labels: Record<string, string> = { STUDENT: "Peserta", MENTOR: "Mentor", SUPER_ADMIN: "Super Admin" };
-  const barColors: Record<string, string> = { STUDENT: "#2a6ba7", MENTOR: "#1e5a8f", SUPER_ADMIN: "#0284c7" };
-
   const reportData: ReportRow[] = allEnrollments.map(e => ({
     id: e.id, name: e.user.name, email: e.user.email,
     course: e.course.title, progress: e.progressPercent,
@@ -489,82 +486,43 @@ export default async function DashboardPage() {
         <StatCard label="Sertifikat Terbit" value={certificateCount} desc="Terverifikasi publik" icon={Award} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" trend={`${graduationRate}%`} />
       </div>
 
-      {/* ── Analytics Charts Row ── */}
-      <div className="responsive-main-grid">
-        {/* Distribusi Pengguna - Bar chart */}
-        <div className="dash-chart-card">
-          <SectionTitle
-            title="Distribusi Pengguna"
-            subtitle="Berdasarkan peran akun saat ini"
-            action={<span className="badge badge-purple">{userCount} akun</span>}
-          />
-          <div className="dash-chart-row">
-            {roleCounts.map(item => {
-              const roleTotal = typeof item._count === "object" && item._count !== null ? item._count._all ?? 0 : 0;
-              const pct = Math.max(10, (roleTotal / maxRole) * 100);
-              const color = barColors[item.role] || "#94a3b8";
-              return (
-                <div key={item.role} className="dash-chart-bar-col">
-                  <span className="dash-chart-bar-val">{roleTotal}</span>
-                  <div className="dash-chart-bar-track" style={{ height: `${pct}%`, background: color }}>
-                    <div className="dash-chart-bar-glow" />
-                  </div>
-                  <span className="dash-chart-bar-lbl">
-                    {labels[item.role] ?? item.role}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      {/* ── Analytics & Admin Control System ── */}
+      <SuperAdminAnalyticsPanel
+        roleCounts={roleCounts.map(item => ({
+          role: item.role,
+          total: typeof item._count === "number" ? item._count : ((item._count as any)?._all ?? (item._count as any)?.id ?? 0)
+        }))}
+        userCount={userCount}
+        courseCount={courseCount}
+        certificateCount={certificateCount}
+        activeStudentsCount={activeStudentsCount}
+        avgProgress={avgProgress}
+        graduationRate={graduationRate}
+        enrollmentCount={enrollmentCount}
+      />
 
-        {/* Performa Pembelajaran */}
-        <div className="dash-chart-card">
-          <SectionTitle title="Performa Platform" subtitle="Ringkasan data pembelajaran" />
-          <div className="dash-perf-list">
-            {[
-              { label: "Rata-rata Progres", value: `${avgProgress}%`, pct: avgProgress, color: "#2a6ba7", icon: TrendingUp },
-              { label: "Tingkat Kelulusan", value: `${graduationRate}%`, pct: graduationRate, color: "#8b5cf6", icon: GraduationCap },
-              { label: "Total Pendaftaran", value: enrollmentCount, pct: Math.min(100, enrollmentCount * 2), color: "#3b82f6", icon: BookMarked },
-            ].map(({ label, value, pct, color, icon: Icon }) => (
-              <div key={label}>
-                <div className="dash-perf-item-hdr">
-                  <div className="dash-perf-item-title">
-                    <div className="dash-perf-icon-box" style={{ background: `${color}18` }}>
-                      <Icon size={14} color={color} />
-                    </div>
-                    <span className="dash-perf-lbl">{label}</span>
-                  </div>
-                  <span className="dash-perf-val">{value}</span>
-                </div>
-                <div className="dash-perf-track">
-                  <div className="dash-perf-fill" style={{ width: `${pct}%`, background: color }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Quick Actions Admin ── */}
-      <div className="dash-chart-card" style={{ marginBottom: "1.5rem" }}>
-        <SectionTitle title="Aksi Cepat Admin" subtitle="Manajemen platform" />
-        <div className="dash-quick-admin-grid">
+      {/* Performa Platform */}
+      <div className="dash-chart-card mb-6">
+        <SectionTitle title="Performa Platform & Pembelajaran" subtitle="Ringkasan data kemajuan belajar seluruh peserta" />
+        <div className="dash-perf-list mt-4">
           {[
-            { label: "Manajemen Pengguna", icon: Users, color: "#6d28d9", desc: "Kelola akun & role" },
-            { label: "Siaran Pengumuman", icon: Megaphone, color: "#2a6ba7", desc: "Broadcast ke peserta" },
-            { label: "Laporan & Analitik", icon: BarChart3, color: "#3b82f6", desc: "Ekspor data Excel" },
-            { label: "Verifikasi Sertifikat", icon: ShieldCheck, color: "#f59e0b", desc: "Cek keabsahan" },
-          ].map(({ label, icon: Icon, color, desc }) => (
-            <div key={label} className="dash-quick-admin-item hover-lift" style={{
-              background: `${color}08`,
-              border: `1px solid ${color}20`
-            }}>
-              <div className="dash-quick-admin-icon" style={{ background: `${color}18` }}>
-                <Icon size={20} color={color} />
+            { label: "Rata-rata Progres Belajar", value: `${avgProgress}%`, pct: avgProgress, color: "#2a6ba7", icon: TrendingUp },
+            { label: "Tingkat Kelulusan Alumni", value: `${graduationRate}%`, pct: graduationRate, color: "#8b5cf6", icon: GraduationCap },
+            { label: "Total Pendaftaran Kelas", value: enrollmentCount, pct: Math.min(100, enrollmentCount * 2), color: "#3b82f6", icon: BookMarked },
+          ].map(({ label, value, pct, color, icon: Icon }) => (
+            <div key={label}>
+              <div className="dash-perf-item-hdr">
+                <div className="dash-perf-item-title">
+                  <div className="dash-perf-icon-box" style={{ background: `${color}18` }}>
+                    <Icon size={14} color={color} />
+                  </div>
+                  <span className="dash-perf-lbl">{label}</span>
+                </div>
+                <span className="dash-perf-val">{value}</span>
               </div>
-              <p className="dash-quick-admin-lbl">{label}</p>
-              <p className="dash-quick-admin-desc">{desc}</p>
+              <div className="dash-perf-track">
+                <div className="dash-perf-fill" style={{ width: `${pct}%`, background: color }} />
+              </div>
             </div>
           ))}
         </div>

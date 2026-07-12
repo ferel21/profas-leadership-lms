@@ -446,10 +446,20 @@ html body .dashboard-fresh input:focus,
 html body .dashboard-fresh select:focus,
 html body .dashboard-fresh textarea:focus { outline: none !important; border-color: var(--ws-accent) !important; background: #fff !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--ws-accent) 10%, transparent) !important; }
 
-html body .dashboard-fresh .btn { min-height: 42px; border-radius: 12px !important; box-shadow: none !important; }
-html body .dashboard-fresh .btn-primary { color: #fff !important; background: var(--ws-accent) !important; }
-html body .dashboard-fresh .btn-primary:hover { background: var(--ws-accent-dark) !important; }
-html body .dashboard-fresh .btn-outline { color: var(--ws-ink) !important; border-color: var(--ws-line) !important; background: #fff !important; }
+html body .dashboard-fresh .btn { min-height: 42px; border-radius: 12px !important; box-shadow: 0 4px 12px rgba(42, 107, 167, 0.15) !important; transition: all 0.2s ease !important; }
+html body .dashboard-fresh .btn:hover { transform: translateY(-2px) !important; }
+html body .dashboard-fresh .btn-primary,
+html body .dashboard-fresh .btn-cyan-primary { color: #fff !important; background: linear-gradient(135deg, #1e5a8f, #2a6ba7) !important; border: none !important; box-shadow: 0 8px 20px rgba(42, 107, 167, 0.3) !important; }
+html body .dashboard-fresh .btn-primary:hover,
+html body .dashboard-fresh .btn-cyan-primary:hover { background: linear-gradient(135deg, #2a6ba7, #38bdf8) !important; box-shadow: 0 12px 28px rgba(42, 107, 167, 0.4) !important; }
+html body .dashboard-fresh .btn-secondary,
+html body .dashboard-fresh .btn-cyan-secondary { color: #fff !important; background: linear-gradient(135deg, #2a6ba7, #1e5a8f) !important; border: none !important; box-shadow: 0 6px 16px rgba(42, 107, 167, 0.22) !important; }
+html body .dashboard-fresh .btn-secondary:hover,
+html body .dashboard-fresh .btn-cyan-secondary:hover { background: linear-gradient(135deg, #38bdf8, #2a6ba7) !important; }
+html body .dashboard-fresh .btn-outline,
+html body .dashboard-fresh .btn-ghost { color: var(--ws-accent-dark) !important; border-color: var(--ws-accent) !important; background: #fff !important; }
+html body .dashboard-fresh .btn-outline:hover,
+html body .dashboard-fresh .btn-ghost:hover { background: var(--ws-mint) !important; color: #1e5a8f !important; }
 html body .dashboard-fresh .badge,
 html body .dashboard-fresh .meta-badge,
 html body .dashboard-fresh .lb-badge-pill { border: 1px solid var(--ws-line) !important; border-radius: 999px !important; color: var(--ws-accent-dark) !important; background: var(--ws-mint) !important; }

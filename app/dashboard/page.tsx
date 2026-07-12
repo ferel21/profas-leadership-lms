@@ -204,12 +204,12 @@ export default async function DashboardPage() {
           </div>
           <div className="dash-roadmap-banner">
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-              <div className="pro-shimmer-trophy" style={{ padding: "12px", borderRadius: "14px", background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff", boxShadow: "0 4px 12px rgba(245, 158, 11, 0.3)" }}>
+              <div className="pro-shimmer-trophy" style={{ padding: "12px", borderRadius: "14px", background: "linear-gradient(135deg, #1e5a8f, #2a6ba7)", color: "#fff", boxShadow: "0 4px 12px rgba(42, 107, 167, 0.3)" }}>
                 <Award size={24} color="#fff" />
               </div>
               <div>
                 <h5 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>Target Kelulusan Eksekutif Anda: Certified Leadership Executive (CLE)</h5>
-                <p style={{ margin: "2px 0 0", fontSize: "0.78rem", color: "#64748b" }}>Selesaikan seluruh modul di atas untuk mendapatkan lencana holografik dan gelar profesional kepemimpinan.</p>
+                <p style={{ margin: "2px 0 0", fontSize: "0.78rem", color: "#334155", fontWeight: 600 }}>Selesaikan seluruh modul di atas untuk mendapatkan lencana holografik dan gelar profesional kepemimpinan.</p>
               </div>
             </div>
             <Link href="/program" className="btn btn-primary btn-small hover-lift" style={{ whiteSpace: "nowrap" }}>Lihat Semua Modul</Link>

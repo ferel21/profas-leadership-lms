@@ -126,202 +126,190 @@ export default async function Home() {
     <>
       <Header />
       <main className="lms-home">
-        <section className="lms-hero relative pt-12 pb-20 overflow-hidden" aria-labelledby="home-title">
+        <section className="relative pt-12 pb-24 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100" aria-labelledby="home-title">
           {/* Animated Glow Blobs (Inspired by Akses Legal) */}
-          <div className="absolute inset-0 pointer-events-none z-0">
-            <div className="absolute -top-24 left-1/4 w-[480px] h-[480px] bg-teal-500/25 rounded-full blur-[130px] animate-blob mix-blend-multiply" />
-            <div className="absolute -bottom-24 right-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[140px] animate-blob mix-blend-multiply animation-delay-2000" />
-            <div className="absolute top-1/3 right-1/3 w-[400px] h-[400px] bg-amber-500/20 rounded-full blur-[120px] animate-blob mix-blend-multiply animation-delay-4000" />
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <div className="absolute -top-24 left-1/4 w-[480px] h-[480px] bg-teal-500/20 rounded-full blur-[130px] animate-blob mix-blend-multiply" />
+            <div className="absolute -bottom-24 right-1/4 w-[500px] h-[500px] bg-blue-600/15 rounded-full blur-[140px] animate-blob mix-blend-multiply animation-delay-2000" />
+            <div className="absolute top-1/3 right-1/3 w-[400px] h-[400px] bg-amber-500/15 rounded-full blur-[120px] animate-blob mix-blend-multiply animation-delay-4000" />
+            {/* Grid Pattern Overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:28px_28px]" />
           </div>
 
-          <div className="container lms-hero-grid relative z-10">
-            <div className="lms-hero-copy">
-              <div className="flex items-start mb-4">
-                <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/90 border border-teal-500/30 backdrop-blur-md shadow-sm hover:shadow-md transition-all cursor-default">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+              {/* LEFT COLUMN: Copy & Actions (7 columns on desktop) */}
+              <div className="lg:col-span-7 flex flex-col justify-center text-left relative z-20">
+                <div className="flex items-start mb-6">
+                  <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/95 border border-teal-500/30 backdrop-blur-md shadow-sm hover:shadow-md transition-all cursor-default">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Ekosistem LMS #1 Terstruktur & Terverifikasi
+                    </span>
+                  </div>
+                </div>
+
+                <h1 id="home-title" className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.08] tracking-tight text-slate-900 mb-6">
+                  Belajar memimpin
+                  <span className="block mt-2 bg-gradient-to-r from-teal-600 via-emerald-600 to-blue-600 bg-clip-text text-transparent font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight">
+                    dengan dampak nyata & terukur.
                   </span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Ekosistem LMS #1 Terstruktur & Terverifikasi
-                  </span>
+                </h1>
+
+                <p className="text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed font-normal mb-8">
+                  Ruang belajar terstruktur berbasis studi kasus nyata untuk mengubah wawasan menjadi keputusan strategis, kebiasaan kerja efektif, dan capaian kepemimpinan yang terverifikasi.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                  <Link
+                    href="/daftar"
+                    className="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-teal-600 to-blue-600 text-white font-bold flex items-center justify-center gap-3 shadow-lg shadow-teal-600/30 hover:shadow-teal-600/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                    <span className="text-lg tracking-wide">Mulai Sekarang</span>
+                    <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <Link
+                    href="/program"
+                    className="px-8 py-4 rounded-2xl bg-white/95 text-slate-800 font-bold border border-slate-200/90 flex items-center justify-center gap-3 hover:border-teal-500 hover:text-teal-700 hover:shadow-md transition-all duration-300 group"
+                  >
+                    <Play className="size-5 text-teal-600 group-hover:scale-110 transition-transform" fill="currentColor" />
+                    <span className="text-lg">Lihat Program</span>
+                  </Link>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mt-10 pt-8 border-t border-slate-200/80" aria-label="Ringkasan kepercayaan platform">
+                  <div className="flex -space-x-3 items-center">
+                    <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-teal-600 to-emerald-400 flex items-center justify-center text-xs font-black text-white shadow-sm">RD</div>
+                    <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-xs font-black text-white shadow-sm">NP</div>
+                    <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-purple-600 to-pink-400 flex items-center justify-center text-xs font-black text-white shadow-sm">AY</div>
+                    <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-sm">+2k</div>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1 text-amber-500">
+                      <Star className="size-4 fill-current" />
+                      <Star className="size-4 fill-current" />
+                      <Star className="size-4 fill-current" />
+                      <Star className="size-4 fill-current" />
+                      <Star className="size-4 fill-current" />
+                      <span className="ml-1.5 text-xs font-extrabold text-slate-900">4.9/5</span>
+                    </div>
+                    <span className="text-xs font-medium text-slate-600 mt-0.5">
+                      dari <strong className="text-slate-800 font-bold">2.500+ Alumni Puas</strong> di seluruh Indonesia
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <h1 id="home-title" className="lms-title-fresh text-5xl md:text-6xl lg:text-7xl font-black leading-[1.08] tracking-tight text-slate-900 mb-6">
-                Belajar memimpin
-                <span className="block mt-2 text-teal-600 font-extrabold text-3xl md:text-4xl tracking-tight">
-                  dengan dampak nyata & terukur.
+              {/* RIGHT COLUMN: Visual & Floating Badges (5 columns on desktop) */}
+              <div className="lg:col-span-5 relative flex flex-col items-center justify-center w-full z-10 pt-6 lg:pt-0">
+                <div className="w-full flex justify-between items-center mb-3 px-2 text-slate-500 text-xs font-mono font-semibold uppercase tracking-wider">
+                  <span className="px-2.5 py-1 rounded bg-teal-50 text-teal-800 font-bold border border-teal-200/60">Field Note / 01</span>
+                  <span>Makassar · Indonesia</span>
+                </div>
+
+                <figure className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden border border-slate-200/90 shadow-2xl bg-slate-900 group">
+                  <Image
+                    src="/images/profas-activity-collage.jpeg"
+                    alt="Peserta PROFAS berdiskusi dan berlatih dalam ruang pembelajaran"
+                    width={1599}
+                    height={899}
+                    priority
+                    className="w-full h-auto aspect-[16/10] object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 1024px) 100vw, 45vw"
+                  />
+                  <figcaption className="bg-slate-900/95 backdrop-blur-md px-5 py-3.5 text-xs text-slate-300 flex items-center justify-between border-t border-slate-800">
+                    <span>Belajar memimpin lewat ruang, percakapan, dan praktik nyata.</span>
+                    <span className="text-teal-400 font-extrabold flex items-center gap-1.5 shrink-0">
+                      <CheckCircle2 className="size-4 text-teal-400" /> Live Case
+                    </span>
+                  </figcaption>
+                </figure>
+
+                {/* Floating Glass Badge 1: Top Right */}
+                <div className="absolute -top-4 -right-2 md:-right-6 z-30 bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl rounded-2xl p-3 md:p-3.5 flex items-center gap-3 animate-float-medium">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white shadow-md shadow-teal-500/30 shrink-0">
+                    <ShieldCheck className="size-5 md:size-6" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Digital Seal</p>
+                    <p className="text-xs md:text-sm font-black text-slate-800 leading-none mt-0.5">Terverifikasi Resmi!</p>
+                  </div>
+                </div>
+
+                {/* Floating Glass Badge 2: Side Center Left */}
+                <div className="absolute top-1/3 -left-2 md:-left-6 z-30 bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl rounded-2xl p-3 md:p-3.5 flex items-center gap-3 animate-float-sway">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-blue-500/30 shrink-0">
+                    <Sparkles className="size-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Powered by</p>
+                    <p className="text-xs md:text-sm font-black text-slate-800 leading-none mt-0.5">31 AI Skills Engine</p>
+                  </div>
+                </div>
+
+                {/* Dashboard Preview Card at Bottom Right */}
+                <aside className="mt-4 lg:mt-0 lg:absolute lg:-bottom-10 lg:-right-6 z-30 w-full sm:w-80 bg-white/95 backdrop-blur-md border border-slate-200/95 shadow-2xl rounded-2xl p-4 md:p-5" aria-label="Cuplikan dashboard LMS">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                    <div>
+                      <span className="text-[11px] text-slate-500 font-bold block">Dashboard Peserta</span>
+                      <b className="text-xs md:text-sm font-black text-slate-900 block mt-0.5">Strategic Leadership</b>
+                    </div>
+                    <span className="bg-emerald-500 text-white text-[10px] uppercase font-black px-2 py-0.5 rounded-full">Live</span>
+                  </div>
+                  <div className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl p-2.5 mb-3">
+                    <span className="text-xs font-semibold text-slate-600">Progres Program</span>
+                    <strong className="text-sm font-black text-teal-600">85%</strong>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-center text-xs">
+                    <div className="bg-teal-50/70 border border-teal-100/80 rounded-xl p-2">
+                      <BookOpen className="size-4 text-teal-600 mx-auto mb-1" />
+                      <b className="font-black text-slate-900 block">18</b>
+                      <span className="text-[10px] text-slate-500">Materi selesai</span>
+                    </div>
+                    <div className="bg-blue-50/70 border border-blue-100/80 rounded-xl p-2">
+                      <ClipboardCheck className="size-4 text-blue-600 mx-auto mb-1" />
+                      <b className="font-black text-slate-900 block">94</b>
+                      <span className="text-[10px] text-slate-500">Skor evaluasi</span>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </div>
+
+            {/* Live Ticker Marquee Strip */}
+            <div className="mt-20 lg:mt-24 w-full max-w-5xl mx-auto bg-white/85 backdrop-blur-md border border-slate-200/90 rounded-full py-3 px-6 shadow-md overflow-hidden relative">
+              <div className="animate-marquee whitespace-nowrap flex items-center gap-10">
+                <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+                  <CheckCircle2 className="size-4 text-teal-600" /> Terverifikasi Kemenkumham & Kurikulum Eksekutif
                 </span>
-              </h1>
-
-              <p className="text-lg md:text-xl text-slate-600 max-w-xl leading-relaxed font-medium mb-8">
-                Ruang belajar terstruktur berbasis studi kasus nyata untuk mengubah wawasan menjadi keputusan strategis, kebiasaan kerja efektif, dan capaian kepemimpinan yang terverifikasi.
-              </p>
-
-              <div className="lms-hero-actions flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/daftar"
-                  className="group relative px-8 h-14 rounded-2xl bg-gradient-to-r from-teal-600 to-blue-600 text-white font-bold flex items-center justify-center gap-3 shadow-lg shadow-teal-600/30 hover:shadow-teal-600/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                >
-                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                  <span className="text-lg tracking-wide">Mulai Sekarang</span>
-                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-
-                <Link
-                  href="/program"
-                  className="px-8 h-14 rounded-2xl bg-white/95 text-slate-800 font-bold border border-slate-200/90 flex items-center justify-center gap-3 hover:border-teal-500 hover:text-teal-700 hover:shadow-md transition-all duration-300 group"
-                >
-                  <Play className="size-5 text-teal-600 group-hover:scale-110 transition-transform" fill="currentColor" />
-                  <span className="text-lg">Lihat Program</span>
-                </Link>
+                <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+                  <CheckCircle2 className="size-4 text-teal-600" /> Ekspor Multi-Format Langsung (Excel, PDF, PPTX, DOCX)
+                </span>
+                <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+                  <CheckCircle2 className="size-4 text-teal-600" /> Role Access Control (RAC) Admin, Mentor & Peserta
+                </span>
+                <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+                  <CheckCircle2 className="size-4 text-teal-600" /> 40+ Modul Studi Kasus Kepemimpinan Nyata
+                </span>
+                <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+                  <CheckCircle2 className="size-4 text-teal-600" /> Sertifikat Digital Akreditasi Industri Terkemuka
+                </span>
+                {/* Duplicate for seamless loop */}
+                <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+                  <CheckCircle2 className="size-4 text-teal-600" /> Terverifikasi Kemenkumham & Kurikulum Eksekutif
+                </span>
+                <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+                  <CheckCircle2 className="size-4 text-teal-600" /> Ekspor Multi-Format Langsung (Excel, PDF, PPTX, DOCX)
+                </span>
+                <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+                  <CheckCircle2 className="size-4 text-teal-600" /> Role Access Control (RAC) Admin, Mentor & Peserta
+                </span>
               </div>
-
-              <div className="lms-hero-trust flex items-center gap-5 mt-8 pt-6 border-t border-slate-200/60" aria-label="Ringkasan kepercayaan platform">
-                <div className="flex -space-x-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-teal-600 to-emerald-400 flex items-center justify-center text-xs font-black text-white shadow-sm">RD</div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-xs font-black text-white shadow-sm">NP</div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-purple-600 to-pink-400 flex items-center justify-center text-xs font-black text-white shadow-sm">AY</div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-sm">+2k</div>
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex gap-1 text-amber-500">
-                    <Star className="size-4 fill-current" />
-                    <Star className="size-4 fill-current" />
-                    <Star className="size-4 fill-current" />
-                    <Star className="size-4 fill-current" />
-                    <Star className="size-4 fill-current" />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-600 mt-0.5">
-                    <span className="text-slate-900 font-extrabold">4.9/5</span> dari 2.500+ Alumni Puas
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Visual with Floating Micro-Animated Badges (Akses Legal signature) */}
-            <div className="lms-hero-visual relative">
-              <div className="lms-hero-visual-topline">
-                <span className="px-2.5 py-1 rounded-md bg-teal-50 text-teal-800 font-bold border border-teal-200/60">Field Note / 01</span>
-                <span>Makassar · Indonesia</span>
-              </div>
-
-              <figure className="lms-hero-photo relative z-10 transition-transform duration-500 hover:scale-[1.015]">
-                <Image
-                  src="/images/profas-activity-collage.jpeg"
-                  alt="Peserta PROFAS berdiskusi dan berlatih dalam ruang pembelajaran"
-                  width={1599}
-                  height={899}
-                  priority
-                  sizes="(max-width: 780px) 100vw, 48vw"
-                />
-                <figcaption className="flex items-center justify-between">
-                  <span>Belajar memimpin lewat ruang, percakapan, dan praktik nyata.</span>
-                  <span className="text-teal-400 font-extrabold flex items-center gap-1.5">
-                    <CheckCircle2 className="size-4" /> Live Case
-                  </span>
-                </figcaption>
-              </figure>
-
-              {/* Floating Glass Badge 1: Top Right */}
-              <div className="glass-badge-top animate-float-medium">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white shadow-md shadow-teal-500/30 flex-shrink-0">
-                  <ShieldCheck className="size-6" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Digital Seal</p>
-                  <p className="text-sm font-black text-slate-800 leading-none">Terverifikasi Resmi!</p>
-                </div>
-              </div>
-
-              {/* Floating Glass Badge 2: Side Center */}
-              <div className="glass-badge-side animate-float-sway">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-blue-500/30 flex-shrink-0">
-                  <Sparkles className="size-5" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Powered by</p>
-                  <p className="text-sm font-black text-slate-800 leading-none">31 AI Skills Engine</p>
-                </div>
-              </div>
-
-              {/* Floating Glass Badge 3: Bottom Left */}
-              <div className="glass-badge-bottom animate-float-fast">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md shadow-amber-500/30 flex-shrink-0">
-                  <FileText className="size-5" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Multi-Export</p>
-                  <p className="text-sm font-black text-slate-800 leading-none">Excel, PDF & PPTX</p>
-                </div>
-              </div>
-
-              <aside className="lms-dashboard-preview relative z-20" aria-label="Cuplikan dashboard LMS">
-                <div className="lms-preview-top">
-                  <div>
-                    <span>Dashboard Peserta</span>
-                    <b>Strategic Leadership</b>
-                  </div>
-                  <small className="bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold">Live</small>
-                </div>
-                <div className="lms-progress-card">
-                  <div>
-                    <span>Progres Program</span>
-                    <strong>85%</strong>
-                  </div>
-                  <i><em style={{ width: "85%" }} /></i>
-                </div>
-                <div className="lms-preview-grid">
-                  <div>
-                    <BookOpen size={18} className="text-teal-600" />
-                    <b>18</b>
-                    <span>Materi selesai</span>
-                  </div>
-                  <div>
-                    <ClipboardCheck size={18} className="text-blue-600" />
-                    <b>94</b>
-                    <span>Skor evaluasi</span>
-                  </div>
-                </div>
-                <div className="lms-preview-list">
-                  <p><CheckCircle2 className="text-emerald-500 size-4" /> Modul keputusan strategis selesai</p>
-                  <p><FileText className="text-blue-500 size-4" /> Jurnal refleksi & PPTX tersimpan</p>
-                  <p><Award className="text-amber-500 size-4" /> Sertifikat siap dengan stempel digital</p>
-                </div>
-              </aside>
-              <span className="lms-hero-visual-note">Lead / Learn / Practice</span>
-            </div>
-          </div>
-
-          {/* Live Ticker Marquee Strip */}
-          <div className="ticker-marquee-box relative z-10">
-            <div className="animate-marquee whitespace-nowrap flex items-center gap-10">
-              <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-                <CheckCircle2 className="size-4 text-teal-600" /> Terverifikasi Kemenkumham & Kurikulum Eksekutif
-              </span>
-              <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-                <CheckCircle2 className="size-4 text-teal-600" /> Ekspor Multi-Format Langsung (Excel, PDF, PPTX, DOCX)
-              </span>
-              <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-                <CheckCircle2 className="size-4 text-teal-600" /> Role Access Control (RAC) Admin, Mentor & Peserta
-              </span>
-              <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-                <CheckCircle2 className="size-4 text-teal-600" /> 40+ Modul Studi Kasus Kepemimpinan Nyata
-              </span>
-              <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-                <CheckCircle2 className="size-4 text-teal-600" /> Sertifikat Digital Akreditasi Industri Terkemuka
-              </span>
-              {/* Duplicate for seamless loop */}
-              <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-                <CheckCircle2 className="size-4 text-teal-600" /> Terverifikasi Kemenkumham & Kurikulum Eksekutif
-              </span>
-              <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-                <CheckCircle2 className="size-4 text-teal-600" /> Ekspor Multi-Format Langsung (Excel, PDF, PPTX, DOCX)
-              </span>
-              <span className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-                <CheckCircle2 className="size-4 text-teal-600" /> Role Access Control (RAC) Admin, Mentor & Peserta
-              </span>
             </div>
           </div>
         </section>

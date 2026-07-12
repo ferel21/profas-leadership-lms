@@ -50,16 +50,16 @@ export function ExportReportsButton({
       className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 shadow-sm border ${
         success
           ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-emerald-500/10"
-          : "bg-teal-500/15 hover:bg-teal-500/25 border-teal-500/30 text-teal-300 hover:shadow-teal-500/10 hover:-translate-y-0.5"
+          : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white hover:shadow-blue-500/10 hover:-translate-y-0.5"
       } backdrop-blur-md ${className}`}
       title="Ekspor laporan multi-sheet dalam format Excel (.xlsx)"
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin text-teal-400" />
+        <Loader2 className="w-4 h-4 animate-spin text-white" />
       ) : success ? (
         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
       ) : (
-        <FileSpreadsheet className="w-4 h-4 text-teal-400" />
+        <FileSpreadsheet className="w-4 h-4 text-white" />
       )}
       <span>{success ? "Laporan Excel Terunduh!" : label}</span>
       {!loading && !success && <Download className="w-3.5 h-3.5 opacity-75" />}

@@ -112,7 +112,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
     <div className="flex flex-wrap items-center gap-3">
       <button
         onClick={() => setShowCreateModal(true)}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition hover-lift shrink-0"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-sm shadow-md hover:shadow-lg transition hover-lift shrink-0"
       >
         <Plus size={18} className="shrink-0" />
         <span>Buat Program Baru</span>
@@ -220,7 +220,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                 </button>
                 <button
                   type="submit" disabled={loading}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50"
                 >
                   {loading && <Loader2 size={14} className="animate-spin shrink-0" />}
                   <span>Buat & Buka Builder</span>
@@ -302,7 +302,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
 
               <div className="flex justify-end gap-2.5 mt-3 pt-3 border-t border-slate-100">
                 <button type="button" onClick={() => setShowUploadModal(false)} className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition">Batal</button>
-                <button type="submit" disabled={loading} className="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50">
+                <button type="submit" disabled={loading} className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50">
                   {loading && <Loader2 size={14} className="animate-spin shrink-0" />}
                   <span>Unggah Materi</span>
                 </button>

@@ -122,7 +122,7 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
           <button
             type="submit"
             disabled={loading || !title.trim() || !message.trim()}
-            className="btn btn-primary hover-lift flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-sm shadow-md hover:shadow-lg disabled:opacity-50 transition"
+            className="btn btn-primary hover-lift flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-sm shadow-md hover:shadow-lg disabled:opacity-50 transition"
           >
             {loading ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Send size={16} className="shrink-0" />}
             <span>Siarkan Pengumuman Sekarang</span>

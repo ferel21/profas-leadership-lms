@@ -1561,3 +1561,70 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   ULTRA-SHARP FONT CLARITY & BUTTON STANDARDIZATION OVERRIDES
+   ========================================================================== */
+
+.al-page * {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* Eliminate any blurry or washed out fonts */
+.al-page .al-eyebrow,
+.al-page .al-badge-pill span,
+.al-page .al-hero-title span,
+.al-page .al-method-card-top span,
+.al-page .al-trust-item,
+.al-page .al-marquee-item,
+.al-page .al-metrics span {
+  color: #1e5a8f !important;
+  opacity: 1 !important;
+  filter: none !important;
+  font-weight: 750 !important;
+}
+
+.al-page p,
+.al-page span,
+.al-page small,
+.al-page li,
+.al-page a {
+  opacity: 1 !important;
+}
+
+.al-page .al-hero-desc,
+.al-page .al-section-head p,
+.al-page .al-method-card p,
+.al-page .al-pathway-card p,
+.al-page .al-outcome-list small {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Ensure ALL buttons in landing page are crisp Royal Blue */
+.al-page .al-btn-primary,
+.al-page .al-btn-green,
+.al-page .btn,
+.al-page .btn-primary {
+  background: linear-gradient(135deg, #1e5a8f, #2a6ba7) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 750 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow: 0 10px 25px -5px rgba(42, 107, 167, 0.35) !important;
+}
+
+.al-page .al-btn-primary:hover,
+.al-page .al-btn-green:hover,
+.al-page .btn:hover,
+.al-page .btn-primary:hover {
+  background: linear-gradient(135deg, #2a6ba7, #38bdf8) !important;
+  box-shadow: 0 14px 30px -5px rgba(42, 107, 167, 0.45) !important;
+  transform: translateY(-2px) !important;
+}
+

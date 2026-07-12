@@ -58,7 +58,7 @@ export function ExportTranscriptButton({
       className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-sm border ${
         success
           ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-emerald-500/10"
-          : "bg-gradient-to-r from-emerald-900/80 to-teal-900/80 hover:from-emerald-800/90 hover:to-teal-800/90 border-emerald-500/30 text-emerald-200 hover:text-white hover:shadow-emerald-500/10 hover:-translate-y-0.5"
+          : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-blue-100 hover:text-white hover:shadow-blue-500/10 hover:-translate-y-0.5"
       } backdrop-blur-md ${className}`}
       title="Unduh Transkrip Akademik & Rekapitulasi Portofolio Kepemimpinan dalam format PDF Resmi"
     >

@@ -52,7 +52,7 @@ export function CertificatePDFButton({
       className={`inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-md border ${
         success
           ? "bg-emerald-600 border-emerald-500 text-white shadow-emerald-600/20"
-          : "bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 border-teal-500/40 text-white hover:shadow-teal-500/20 hover:-translate-y-0.5"
+          : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/40 text-white hover:shadow-blue-500/20 hover:-translate-y-0.5"
       } backdrop-blur-md ${className}`}
       title="Unduh sertifikat PDF berbingkai emas dengan verifikasi QR digital"
     >

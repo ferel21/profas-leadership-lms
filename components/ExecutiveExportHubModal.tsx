@@ -320,8 +320,8 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     disabled={downloadingXlsx}
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successXlsx
-                        ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300"
-                        : "bg-teal-500/15 hover:bg-teal-500/25 border-teal-500/30 text-teal-200 hover:text-white"
+                        ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
+                        : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white shadow-md"
                     }`}
                   >
                     {downloadingXlsx ? (
@@ -359,8 +359,8 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     disabled={downloadingPdf}
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successPdf
-                        ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300"
-                        : "bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/30 text-emerald-200 hover:text-white"
+                        ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
+                        : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white shadow-md"
                     }`}
                   >
                     {downloadingPdf ? (
@@ -398,8 +398,8 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     disabled={downloadingPptx}
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successPptx
-                        ? "bg-purple-500/20 border-purple-500/50 text-purple-300"
-                        : "bg-purple-500/15 hover:bg-purple-500/25 border-purple-500/30 text-purple-200 hover:text-white"
+                        ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
+                        : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white shadow-md"
                     }`}
                   >
                     {downloadingPptx ? (
@@ -438,7 +438,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successDocx
                         ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                        : "bg-blue-500/15 hover:bg-blue-500/25 border-blue-500/30 text-blue-200 hover:text-white"
+                        : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white shadow-md"
                     }`}
                   >
                     {downloadingDocx ? (
@@ -494,7 +494,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-white transition-all border border-slate-700"
+            className="px-5 py-2 rounded-xl font-bold text-xs bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white transition-all shadow-md"
           >
             Selesai & Tutup
           </button>

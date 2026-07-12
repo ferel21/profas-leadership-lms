@@ -54,7 +54,7 @@ export function ExportDeckButton({
       className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-sm border ${
         success
           ? "bg-purple-500/15 border-purple-500/40 text-purple-300 shadow-purple-500/10"
-          : "bg-gradient-to-r from-teal-900/80 to-slate-900/80 hover:from-teal-800/90 hover:to-slate-800/90 border-teal-500/30 text-teal-200 hover:text-white hover:shadow-teal-500/10 hover:-translate-y-0.5"
+          : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-blue-100 hover:text-white hover:shadow-blue-500/10 hover:-translate-y-0.5"
       } backdrop-blur-md ${className}`}
       title="Unduh Executive Slide Deck & Presentation Outline dengan rasio layar lebar 16:9"
     >

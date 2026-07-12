@@ -148,7 +148,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition shrink-0 hover-lift"
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-sm shadow-md hover:shadow-lg transition shrink-0 hover-lift"
           >
             <UserPlus size={16} className="shrink-0" />
             <span>Tambah Akun Baru</span>
@@ -220,7 +220,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                 </button>
                 <button
                   type="submit" disabled={creating}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50"
                 >
                   {creating && <Loader2 size={14} className="animate-spin" />}
                   <span>{creating ? "Menyimpan..." : "Simpan Akun"}</span>

@@ -93,7 +93,7 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
           <button
             onClick={handleExport}
             disabled={exporting || filtered.length === 0}
-            className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-teal-600/30 hover:border-teal-600 bg-teal-50/50 hover:bg-teal-600 text-teal-700 hover:text-white font-semibold text-sm transition disabled:opacity-50"
+            className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#2a6ba7]/30 hover:border-[#2a6ba7] bg-[#eff6ff] hover:bg-[#2a6ba7] text-[#1e5a8f] hover:text-white font-semibold text-sm transition disabled:opacity-50"
           >
             <FileSpreadsheet size={18} className="shrink-0" />
             <span>{exporting ? "Mengekspor..." : "Ekspor Excel (.xlsx)"}</span>

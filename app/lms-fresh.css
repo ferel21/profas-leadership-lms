@@ -171,7 +171,7 @@ html body .dashboard-fresh .pro-streak-flame {
 }
 
 html body .dashboard-fresh .pro-live-pulse-dot { width: 8px !important; height: 8px !important; margin: 0 !important; background: #22c55e !important; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important; animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important; }
-html body .dashboard-fresh .pro-streak-flame { color: #d97706; background: #fef3c7; border-color: #fde68a !important; }
+html body .dashboard-fresh .pro-streak-flame { color: #1e5a8f !important; background: #eff6ff !important; border-color: #bfdbfe !important; animation: none !important; box-shadow: none !important; }
 
 html body .dashboard-fresh .dash-actions { gap: 8px !important; }
 html body .dashboard-fresh .dashboard-tool-btn,
@@ -655,3 +655,83 @@ html body .demo-box { border-color: var(--ws-line) !important; border-radius: 14
   html body .player-layout *::before,
   html body .player-layout *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ==========================================================================
+   ULTRA-SHARP FONT CLARITY & DASHBOARD BUTTON STANDARDIZATION
+   ========================================================================== */
+
+html body .dashboard-fresh *,
+html body .player-layout * {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* Eliminate any blurry or washed out fonts across dashboards */
+html body .dashboard-fresh .dash-welcome,
+html body .dashboard-fresh .card-kicker,
+html body .dashboard-fresh .eyebrow,
+html body .dashboard-fresh .eyebrow-teal,
+html body .dashboard-fresh .dash-brand-lockup b,
+html body .dashboard-fresh .leaderboard-heading > div > p,
+html body .dashboard-fresh .stat-card-label {
+  color: #1e5a8f !important;
+  opacity: 1 !important;
+  filter: none !important;
+  font-weight: 800 !important;
+}
+
+html body .dashboard-fresh p,
+html body .dashboard-fresh span,
+html body .dashboard-fresh small,
+html body .dashboard-fresh li,
+html body .dashboard-fresh a,
+html body .dashboard-fresh h1,
+html body .dashboard-fresh h2,
+html body .dashboard-fresh h3,
+html body .dashboard-fresh h4 {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html body .dashboard-fresh .dash-title p,
+html body .dashboard-fresh .leaderboard-heading small,
+html body .dashboard-fresh .section-title-clean p,
+html body .dashboard-fresh .stat-card-desc,
+html body .dashboard-fresh .dash-hero-momentum-label {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+}
+
+/* Ensure ALL primary action buttons in dashboards & player are crisp Royal Blue */
+html body .dashboard-fresh button.bg-teal-500,
+html body .dashboard-fresh button.bg-teal-600,
+html body .dashboard-fresh button.bg-emerald-500,
+html body .dashboard-fresh button.bg-emerald-600,
+html body .dashboard-fresh .btn-primary,
+html body .dashboard-fresh .lms-btn-primary,
+html body .player-layout .complete-btn,
+html body .player-layout .btn-primary {
+  background: linear-gradient(135deg, #1e5a8f, #2a6ba7) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 750 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow: 0 8px 20px rgba(42, 107, 167, 0.3) !important;
+}
+
+html body .dashboard-fresh button.bg-teal-500:hover,
+html body .dashboard-fresh button.bg-teal-600:hover,
+html body .dashboard-fresh button.bg-emerald-500:hover,
+html body .dashboard-fresh button.bg-emerald-600:hover,
+html body .dashboard-fresh .btn-primary:hover,
+html body .dashboard-fresh .lms-btn-primary:hover,
+html body .player-layout .complete-btn:hover,
+html body .player-layout .btn-primary:hover {
+  background: linear-gradient(135deg, #2a6ba7, #38bdf8) !important;
+  box-shadow: 0 12px 28px rgba(42, 107, 167, 0.42) !important;
+  transform: translateY(-2px) !important;
+}
+

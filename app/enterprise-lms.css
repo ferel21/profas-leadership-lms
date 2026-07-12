@@ -2141,3 +2141,69 @@ body:not(.light-mode) .dashboard-sidebar nav a.active {
   background-color: #f8fcfb !important;
   border-color: #e2f0ee !important;
 }
+
+/* ==========================================================================
+   ULTRA-SHARP FONT CLARITY & LEGACY BUTTON STANDARDIZATION
+   ========================================================================== */
+
+* {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* Eliminate any blurry, cloudy, or dim fonts */
+.dash-welcome,
+.card-kicker,
+.eyebrow,
+.eyebrow-teal,
+.lms-preview-top small,
+.sidebar-user b,
+.rank-user strong,
+.xp-pill i {
+  color: #1e5a8f !important;
+  opacity: 1 !important;
+  filter: none !important;
+  font-weight: 800 !important;
+}
+
+/* Make body/subheading text crisp and clear */
+.dash-title p,
+.role-heading p,
+.leaderboard-heading small,
+.continue-info p,
+.dash-section-title small,
+.rank-user p small,
+.mentor-detail p {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+}
+
+/* Ensure ALL legacy primary buttons in enterprise-lms are crisp Royal Blue */
+.btn-primary,
+.lms-btn-primary,
+button.bg-teal-500,
+button.bg-teal-600,
+button.bg-emerald-500,
+button.bg-emerald-600 {
+  background: linear-gradient(135deg, #1e5a8f, #2a6ba7) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 750 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow: 0 8px 20px rgba(42, 107, 167, 0.3) !important;
+}
+
+.btn-primary:hover,
+.lms-btn-primary:hover,
+button.bg-teal-500:hover,
+button.bg-teal-600:hover,
+button.bg-emerald-500:hover,
+button.bg-emerald-600:hover {
+  background: linear-gradient(135deg, #2a6ba7, #38bdf8) !important;
+  box-shadow: 0 12px 28px rgba(42, 107, 167, 0.42) !important;
+  transform: translateY(-2px) !important;
+}
+

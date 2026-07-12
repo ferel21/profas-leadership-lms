@@ -2,7 +2,7 @@
 
 ## Direction
 
-A calm, asymmetric learning interface inspired by a well-lit architecture studio: warm off-white surfaces, charcoal ink, one measured teal accent, precise borders, and motion that feels tactile rather than theatrical.
+A calm, asymmetric learning interface inspired by a well-lit architecture studio: bright neutral surfaces, charcoal ink, one measured royal blue accent, precise borders, and motion that feels tactile rather than theatrical.
 
 - Variance: 8 — split layouts and asymmetric grids keep the product from feeling templated.
 - Density: 4 — enough space for executive reading and enough structure for daily LMS work.
@@ -17,12 +17,12 @@ A calm, asymmetric learning interface inspired by a well-lit architecture studio
 | Ink | `#1C2825` |
 | Body | `#586761` |
 | Line | `#DBE5DF` |
-| Accent | `#0F766E` |
-| Deep surface | `#173C37` |
+| Accent | `#2A6BA7` |
+| Deep surface | `#173F73` |
 
 ## Rules
 
-- Use the teal accent for actions, active navigation, progress, and focus only.
+- Use the royal blue accent for actions, active navigation, progress, and focus only.
 - Prefer border-top or divider grouping in dense dashboard areas; use cards only when elevation clarifies hierarchy.
 - Keep landing page heroes left-aligned and split-screen, with one clear primary CTA.
 - Keep all touch targets at least 44px and preserve keyboard focus styles.

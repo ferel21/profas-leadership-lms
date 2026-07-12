@@ -16,6 +16,7 @@ export async function Header() {
           <Link href="/program" prefetch={true}>Program</Link>
           <Link href="/#mentor">Mentor</Link>
           <Link href="/#insight">Insight</Link>
+          <Link href="/#faq">FAQ</Link>
         </nav>
         <div className="nav-actions">
           {user ? (

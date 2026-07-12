@@ -11,6 +11,7 @@ import "./enterprise-lms.css";
 import "./taste.css";
 import "./lms-fresh.css";
 import './akseslegal-theme.css';
+import './home-landing.css';
 
 const plusJakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-display', weight: ['400', '500', '600', '700', '800'] });
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-heading', weight: ['400', '500', '600', '700', '800', '900'] });

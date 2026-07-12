@@ -38,43 +38,50 @@ export const getSession = cache(async () => {
 export const getCurrentUser = cache(async () => {
   const session = await getSession();
   if (!session) return null;
-  
-  let user = await prisma.user.findUnique({
-    where: { id: session.userId }
-  });
-  
-  if (!user && session.email) {
-    user = await prisma.user.findUnique({
-      where: { email: session.email.toLowerCase() }
+
+  try {
+    let user = await prisma.user.findUnique({
+      where: { id: session.userId }
     });
-  }
-  
-  // Auto-sync / self-heal di lingkungan serverless Vercel (/tmp/dev.db sementara)
-  if (!user && session.email) {
-    try {
-      const validRole = session.role === "MENTOR" ? "MENTOR" : session.role === "SUPER_ADMIN" ? "SUPER_ADMIN" : "STUDENT";
-      user = await prisma.user.upsert({
-        where: { email: session.email.toLowerCase() },
-        update: {
-          name: session.name || "Peserta PROFAS",
-          avatar: session.avatar,
-          role: validRole,
-          authProvider: session.authProvider || "GOOGLE",
-        },
-        create: {
-          id: session.userId,
-          email: session.email.toLowerCase(),
-          name: session.name || "Peserta PROFAS",
-          avatar: session.avatar,
-          role: validRole,
-          authProvider: session.authProvider || "GOOGLE",
-          passwordHash: "",
-        }
+
+    if (!user && session.email) {
+      user = await prisma.user.findUnique({
+        where: { email: session.email.toLowerCase() }
       });
-    } catch (e) {
-      console.error("Auto-sync user in serverless failed:", e);
     }
+
+    // Auto-sync / self-heal di lingkungan serverless Vercel (/tmp/dev.db sementara)
+    if (!user && session.email) {
+      try {
+        const validRole = session.role === "MENTOR" ? "MENTOR" : session.role === "SUPER_ADMIN" ? "SUPER_ADMIN" : "STUDENT";
+        user = await prisma.user.upsert({
+          where: { email: session.email.toLowerCase() },
+          update: {
+            name: session.name || "Peserta PROFAS",
+            avatar: session.avatar,
+            role: validRole,
+            authProvider: session.authProvider || "GOOGLE",
+          },
+          create: {
+            id: session.userId,
+            email: session.email.toLowerCase(),
+            name: session.name || "Peserta PROFAS",
+            avatar: session.avatar,
+            role: validRole,
+            authProvider: session.authProvider || "GOOGLE",
+            passwordHash: "",
+          }
+        });
+      } catch (error) {
+        console.error("[AUTH_USER_SYNC_FAILED]", error instanceof Error ? error.message : "unknown error");
+      }
+    }
+
+    return user;
+  } catch (error) {
+    // Public routes must remain renderable when the session database is briefly
+    // unavailable. Treat the request as a guest instead of failing the tree.
+    console.error("[AUTH_USER_LOOKUP_FAILED]", error instanceof Error ? error.message : "unknown error");
+    return null;
   }
-  
-  return user;
 });

@@ -3,13 +3,24 @@
 import React, { useState } from "react";
 import {
   PieChart as PieChartIcon, BarChart3, TrendingUp, Users, ShieldCheck,
-  Download, RefreshCw, CheckCircle2, AlertCircle, Sparkles, Database,
+  Download, RefreshCw, CheckCircle2, Sparkles, Database,
   Cpu, Server, FileSpreadsheet, Megaphone, ArrowUpRight, Check, Eye
 } from "lucide-react";
 
 export type RoleCountItem = {
   role: string;
   total: number;
+};
+
+type CertificateVerificationResult = {
+  valid: boolean;
+  message: string;
+  certificate?: {
+    uniqueNumber: string;
+    issuedAt: string;
+    user: { name: string };
+    course: { title: string };
+  };
 };
 
 interface SuperAdminAnalyticsPanelProps {
@@ -26,19 +37,16 @@ interface SuperAdminAnalyticsPanelProps {
 export function SuperAdminAnalyticsPanel({
   roleCounts,
   userCount,
-  courseCount,
   certificateCount,
   activeStudentsCount,
-  avgProgress,
-  graduationRate,
-  enrollmentCount
 }: SuperAdminAnalyticsPanelProps) {
   const [activeTab, setActiveTab] = useState<"charts" | "features" | "audit" | "export">("charts");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [systemOptimizing, setSystemOptimizing] = useState(false);
   const [optimizedSuccess, setOptimizedSuccess] = useState(false);
   const [certInput, setCertInput] = useState("");
-  const [certResult, setCertResult] = useState<string | null>(null);
+  const [certLoading, setCertLoading] = useState(false);
+  const [certResult, setCertResult] = useState<CertificateVerificationResult | null>(null);
 
   // Normalize role counts
   const studentCount = roleCounts.find(r => r.role === "STUDENT")?.total ?? Math.max(0, userCount - 2);
@@ -78,13 +86,32 @@ export function SuperAdminAnalyticsPanel({
     }, 1500);
   };
 
-  const handleVerifyCert = (e: React.FormEvent) => {
+  const handleVerifyCert = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!certInput.trim()) return;
-    if (certInput.toUpperCase().startsWith("CERT-") || certInput.length > 5) {
-      setCertResult(`Sertifikat "${certInput}" SAH & TERVERIFIKASI (Diterbitkan oleh PROFAS Leadership Institute).`);
-    } else {
-      setCertResult(`Sertifikat dengan ID "${certInput}" tidak ditemukan dalam basis data.`);
+    const number = certInput.trim();
+    if (!number) return;
+
+    setCertLoading(true);
+    setCertResult(null);
+    try {
+      const response = await fetch(`/api/certificates/verify?number=${encodeURIComponent(number)}`);
+      const data = await response.json() as CertificateVerificationResult;
+      if (!response.ok) {
+        setCertResult({ valid: false, message: data.message || "Nomor sertifikat belum dapat diperiksa." });
+      } else if (data.valid && data.certificate) {
+        const issuedDate = new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(new Date(data.certificate.issuedAt));
+        setCertResult({
+          valid: true,
+          message: `${data.certificate.user.name} menyelesaikan ${data.certificate.course.title} pada ${issuedDate}.`,
+          certificate: data.certificate,
+        });
+      } else {
+        setCertResult({ valid: false, message: "Sertifikat tidak ditemukan dalam basis data PROFAS." });
+      }
+    } catch {
+      setCertResult({ valid: false, message: "Pemeriksaan gagal terhubung. Coba lagi sebentar lagi." });
+    } finally {
+      setCertLoading(false);
     }
   };
 
@@ -366,7 +393,7 @@ export function SuperAdminAnalyticsPanel({
 
               {/* Bar Columns */}
               <div className="grid grid-cols-7 gap-2.5 items-end h-36 pt-4 px-1 border-b border-slate-200 pb-2">
-                {monthlyData.map((d, idx) => {
+                {monthlyData.map(d => {
                   const hPct = Math.max(12, Math.round((d.users / maxMonthly) * 100));
                   const activePct = Math.max(10, Math.round((d.active / maxMonthly) * 100));
                   return (
@@ -470,21 +497,21 @@ export function SuperAdminAnalyticsPanel({
                     onChange={(e) => setCertInput(e.target.value)}
                     className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#2a6ba7]"
                   />
-                  <button type="submit" className="al-btn-primary px-4 py-2 h-9 rounded-xl text-xs font-bold">
-                    Verifikasi
+                  <button type="submit" disabled={certLoading || !certInput.trim()} className="al-btn-primary px-4 py-2 h-9 rounded-xl text-xs font-bold disabled:opacity-50">
+                    {certLoading ? "Memeriksa..." : "Verifikasi"}
                   </button>
                 </form>
 
                 {certResult && (
-                  <div className="p-2.5 rounded-xl bg-blue-50/80 border border-blue-200 text-xs font-medium text-slate-700 mt-2">
-                    {certResult}
+                  <div className={`p-2.5 rounded-xl border text-xs font-medium mt-2 ${certResult.valid ? "bg-emerald-50/80 border-emerald-200 text-emerald-800" : "bg-rose-50/80 border-rose-200 text-rose-800"}`} role="status" aria-live="polite">
+                    {certResult.valid ? "Sertifikat sah. " : "Belum terverifikasi. "}{certResult.message}
                   </div>
                 )}
               </div>
 
               <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-[11px] text-slate-400 mt-3">
                 <span>Database Terverifikasi: {certificateCount} sertifikat</span>
-                <a href="/verify" target="_blank" className="text-[#2a6ba7] font-bold hover:underline flex items-center gap-1">
+                <a href="/verifikasi" target="_blank" rel="noreferrer" className="text-[#2a6ba7] font-bold hover:underline flex items-center gap-1">
                   Buka Portal Publik <Eye size={12} />
                 </a>
               </div>

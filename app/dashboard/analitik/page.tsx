@@ -32,7 +32,7 @@ export default async function AnalyticsDashboardPage() {
     activeToday = await prisma.activityLog.groupBy({ by: ['userId'], where: { createdAt: { gte: today } } }).then(res => res.length).catch(() => 1);
     try {
       const raw = await prisma.activityLog.groupBy({ by: ['action'], _count: { id: true }, orderBy: { _count: { id: 'desc' } }, take: 5 });
-      topActions = raw.map(r => ({ action: r.action || "Aksi Sistem", _count: { id: typeof r._count === 'number' ? r._count : ((r._count as any)?.id ?? (r._count as any)?._all ?? 1) } }));
+      topActions = raw.map(r => ({ action: r.action || "Aksi Sistem", _count: { id: r._count.id } }));
     } catch {
       topActions = [
         { action: "Selesai Membaca Modul Kepemimpinan", _count: { id: 18 } },
@@ -50,7 +50,7 @@ export default async function AnalyticsDashboardPage() {
     activeToday = await prisma.activityLog.groupBy({ by: ['userId'], where: { createdAt: { gte: today } } }).then(res => res.length).catch(() => 1);
     try {
       const raw = await prisma.activityLog.groupBy({ by: ['action'], _count: { id: true }, orderBy: { _count: { id: 'desc' } }, take: 5 });
-      topActions = raw.map(r => ({ action: r.action || "Aksi Sistem", _count: { id: typeof r._count === 'number' ? r._count : ((r._count as any)?.id ?? (r._count as any)?._all ?? 1) } }));
+      topActions = raw.map(r => ({ action: r.action || "Aksi Sistem", _count: { id: r._count.id } }));
     } catch {
       topActions = [
         { action: "Selesai Membaca Modul Kepemimpinan", _count: { id: 18 } },
@@ -226,8 +226,8 @@ export default async function AnalyticsDashboardPage() {
               </div>
             ) : (
               topActions.map((action, i) => {
-                const countVal = typeof action._count === "number" ? action._count : (action._count?.id ?? (action._count as any)?._all ?? 1);
-                const maxCount = Math.max(...topActions.map(a => typeof a._count === "number" ? a._count : (a._count?.id ?? (a._count as any)?._all ?? 1)), 1);
+                const countVal = action._count.id;
+                const maxCount = Math.max(...topActions.map(a => a._count.id), 1);
                 const barWidth = Math.min(100, Math.max(10, Math.round((countVal / maxCount) * 100)));
                 return (
                   <div key={i} className="analytics-log-row">

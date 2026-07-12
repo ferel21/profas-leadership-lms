@@ -142,6 +142,7 @@ async function main() {
     await waitUntilReady(base, child);
     await expectStatus(base, "/", 200);
     await expectStatus(base, "/program", 200);
+    await expectStatus(base, "/verifikasi", 200);
     await expectStatus(base, "/privasi", 200);
     await expectStatus(base, "/syarat", 200);
     await expectStatus(base, "/dashboard", 307);

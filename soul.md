@@ -20,7 +20,7 @@ Alur inti yang wajib selalu utuh:
 - Dahulukan kejelasan tindakan: pengguna selalu tahu apa yang terjadi dan langkah berikutnya.
 - Responsif dan aksesibel adalah fitur inti: label, fokus, status, navigasi keyboard, dan tampilan seluler harus tetap berfungsi.
 - Hindari data atau kemampuan palsu. Konten demo boleh representatif, tetapi interaksi tidak boleh berpura-pura berhasil.
-- Pertahankan identitas visual PROFAS: teal, ruang putih, tipografi tegas, dan nuansa manusiawi.
+- Pertahankan identitas visual PROFAS: royal blue (`#2A6BA7` dengan deep blue `#1E5A8F`), ruang putih, tipografi tegas, dan nuansa manusiawi.
 
 ## Prinsip teknis
 

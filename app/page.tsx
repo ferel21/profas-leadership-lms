@@ -69,6 +69,14 @@ const capabilities = [
   ["Production Flow", "Loading, empty, error, success state, dan akses mobile dirancang untuk pemakaian nyata."],
 ] as const;
 
+const faqItems = [
+  ["Siapa yang paling cocok mengikuti PROFAS?", "PROFAS cocok untuk calon pemimpin, pemimpin yang sedang bertumbuh, pemilik usaha, dan organisasi yang ingin membangun kebiasaan kepemimpinan yang lebih konsisten."],
+  ["Bagaimana format belajar di dalam platform?", "Setiap program memadukan materi singkat, video atau bacaan, studi kasus, refleksi, kuis, tugas, dan percakapan agar insight langsung terhubung dengan situasi kerja."],
+  ["Apakah saya bisa belajar lewat smartphone?", "Bisa. Course player, progres, diskusi, dan dashboard dirancang responsif sehingga Anda dapat belajar dari desktop maupun smartphone."],
+  ["Apa yang saya dapatkan setelah menyelesaikan program?", "Peserta mendapatkan rekam progres pembelajaran dan sertifikat PROFAS setelah seluruh persyaratan program, materi, dan evaluasi terpenuhi."],
+  ["Apakah tersedia program untuk organisasi atau tim?", "Tersedia. Tim dapat menggunakan jalur pembelajaran yang lebih terarah untuk menyamakan bahasa kepemimpinan, praktik kerja, dan ukuran capaian."],
+] as const;
+
 const learningMethod = [
   {
     icon: Compass,
@@ -297,6 +305,30 @@ export default async function Home() {
         </section>
 
         <section className="al-section al-section--white al-outcomes" aria-labelledby="outcomes-title"><div className="container al-outcomes-grid"><div><span className="al-eyebrow">Yang dibawa pulang</span><h2 id="outcomes-title">Setiap pembelajaran meninggalkan jejak.</h2><p>Progress terlihat bukan hanya dari persentase, tetapi dari cara peserta mengambil keputusan dan menggerakkan tim setelah kelas selesai.</p></div><div className="al-outcome-list"><div><span>01</span><p><b>Clarity</b><small>Melihat masalah, peran, dan prioritas dengan lebih jernih.</small></p></div><div><span>02</span><p><b>Capability</b><small>Mengubah insight menjadi percakapan dan keputusan yang lebih baik.</small></p></div><div><span>03</span><p><b>Continuity</b><small>Menjaga ritme refleksi agar perubahan bertahan di luar ruang kelas.</small></p></div></div></div></section>
+
+        <section className="al-section al-section--gray al-faq" id="faq" aria-labelledby="faq-title">
+          <div className="container al-faq-grid">
+            <div className="al-faq-intro">
+              <span className="al-eyebrow">Pertanyaan umum</span>
+              <h2 id="faq-title">Sebelum mulai, pastikan jalurnya terasa tepat.</h2>
+              <p>Jawaban singkat untuk membantu Anda memilih langkah pertama di PROFAS dengan lebih percaya diri.</p>
+              <div className="al-faq-aside">
+                <div className="al-faq-aside-icon"><Users2 size={20} /></div>
+                <div>
+                  <b>Untuk kebutuhan tim</b>
+                  <span>Bangun satu bahasa kepemimpinan di organisasi Anda.</span>
+                  <a href="mailto:halo@profas.id?subject=Program%20Kepemimpinan%20Organisasi">Diskusikan kebutuhan tim <ArrowRight size={16} /></a>
+                </div>
+              </div>
+            </div>
+            <div className="al-faq-list">
+              {faqItems.map(([question, answer]) => <details key={question}>
+                <summary><span>{question}</span><span className="al-faq-chevron" aria-hidden="true"><ChevronRight size={18} /></span></summary>
+                <p>{answer}</p>
+              </details>)}
+            </div>
+          </div>
+        </section>
 
         <section className="al-section al-final-cta"><div className="container"><div className="al-final-box"><span className="al-eyebrow">Mulai dari sini</span><h2>Bangun kapasitas kepemimpinan dengan sistem belajar yang jelas.</h2><p>Masuk ke katalog, pilih program, lanjutkan materi, tuntaskan evaluasi, lalu dapatkan sertifikat PROFAS.</p><div><Link href="/daftar" className="al-btn-primary">Daftar Sekarang<ArrowRight size={18} /></Link><Link href="/masuk" className="al-btn-secondary">Masuk Dashboard</Link></div></div></div></section>
       </main>

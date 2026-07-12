@@ -5,8 +5,8 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import {
   BookOpen, UsersRound, Award, ChevronRight, Activity, TrendingUp,
-  BarChart3, Target, Zap, Clock, Star, ArrowUpRight, ArrowRight, GraduationCap, Users,
-  Megaphone, ShieldCheck, BookMarked, PieChart
+  Target, Zap, Clock, Star, ArrowUpRight, ArrowRight, GraduationCap,
+  BookMarked, PieChart
 } from "lucide-react";
 import Image from "next/image";
 import { AdminReportTable, ReportRow } from "@/components/AdminReportTable";
@@ -490,7 +490,7 @@ export default async function DashboardPage() {
       <SuperAdminAnalyticsPanel
         roleCounts={roleCounts.map(item => ({
           role: item.role,
-          total: typeof item._count === "number" ? item._count : ((item._count as any)?._all ?? (item._count as any)?.id ?? 0)
+          total: typeof item._count === "object" ? item._count._all ?? 0 : 0
         }))}
         userCount={userCount}
         courseCount={courseCount}

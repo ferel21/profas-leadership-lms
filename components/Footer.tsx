@@ -27,6 +27,8 @@ export function Footer() {
         <div>
           <h4>Dukungan</h4>
           <a href="mailto:halo@profas.id?subject=Bantuan%20PROFAS">Pusat Bantuan</a>
+          <Link href="/#faq">FAQ</Link>
+          <Link href="/verifikasi">Verifikasi Sertifikat</Link>
           <Link href="/privasi">Kebijakan Privasi</Link>
           <Link href="/syarat">Syarat &amp; Ketentuan</Link>
         </div>

@@ -141,6 +141,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
             <input
               type="text"
               placeholder="Cari nama, email, atau role..."
+              aria-label="Cari nama, email, atau role pengguna"
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white transition"
@@ -157,14 +158,20 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-add-user-title"
+          onKeyDown={(e) => { if (e.key === "Escape") setShowAddModal(false); }}
+        >
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <h3 id="modal-add-user-title" className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <UserPlus size={20} className="text-teal-600" />
                 <span>Tambah / Sinkron Akun</span>
               </h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 transition">
+              <button onClick={() => setShowAddModal(false)} aria-label="Tutup modal" className="text-slate-400 hover:text-slate-600 transition">
                 <X size={20} />
               </button>
             </div>
@@ -243,7 +250,8 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       )}
 
       <div className="overflow-x-auto rounded-xl border border-slate-200/80">
-        <table className="w-full border-collapse text-left text-sm">
+        <table className="w-full border-collapse text-left text-sm" aria-label="Tabel Manajemen Pengguna dan Hak Akses">
+          <caption className="sr-only">Manajemen Pengguna dan Hak Akses</caption>
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase text-xs tracking-wider">
               <th className="py-3.5 px-4">Nama Pengguna</th>

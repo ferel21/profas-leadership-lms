@@ -71,6 +71,10 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
         e.preventDefault();
         setIsCommandOpen(prev => !prev);
       }
+      if (e.key === "Escape") {
+        setOpen(false);
+        setShowNotifs(false);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -104,7 +108,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
       <div className="sidebar-top">
         {!collapsed && <Logo/>}
         {collapsed && <Logo compact />}
-        <button onClick={()=>setOpen(false)} aria-label="Tutup menu" className="mobile-close-btn"><X/></button>
+        <button onClick={()=>setOpen(false)} aria-label="Tutup menu navigasi" className="mobile-close-btn"><X/></button>
       </div>
       <div className="sidebar-user">
         <span className={`sidebar-user-avatar ${user.avatar ? "has-avatar" : ""}`} style={!user.avatar ? {
@@ -148,14 +152,14 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
         })}
       </nav>
       <div className="sidebar-bottom">
-        <button onClick={()=>setCollapsed(!collapsed)} className="desktop-toggle-btn" title="Toggle Sidebar" aria-label={collapsed ? "Perbesar menu" : "Kecilkan menu"} aria-expanded={!collapsed}><Menu/>{!collapsed && "Kecilkan Menu"}</button>
-        <button onClick={logout} title="Keluar"><LogOut/>{!collapsed && "Keluar"}</button>
+        <button onClick={()=>setCollapsed(!collapsed)} className="desktop-toggle-btn" title="Toggle Sidebar" aria-label={collapsed ? "Perbesar menu navigasi" : "Kecilkan menu navigasi"} aria-expanded={!collapsed}><Menu/>{!collapsed && "Kecilkan Menu"}</button>
+        <button onClick={logout} title="Keluar" aria-label="Keluar dari sistem"><LogOut/>{!collapsed && "Keluar"}</button>
       </div>
     </aside>
     {open && <button className="dashboard-backdrop" onClick={()=>setOpen(false)} aria-label="Tutup navigasi" />}
     <div className="dashboard-canvas">
       <header className="dashboard-header">
-        <button className="dash-menu" onClick={()=>setOpen(true)} aria-label="Buka menu"><Menu/></button>
+        <button className="dash-menu" onClick={()=>setOpen(true)} aria-label="Buka menu navigasi"><Menu/></button>
         <div className="dash-welcome flex items-center gap-4">
           <span className="dash-brand-lockup"><b>PROFAS</b><span>LEADERSHIP WORKSPACE</span></span>
           <div className="flex items-center gap-2 hide-on-mobile">
@@ -173,6 +177,8 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
             onClick={() => setIsExportHubOpen(true)}
             className="dashboard-tool-btn dashboard-export-btn"
             title="Pusat Ekspor & Pelaporan (31 Antigravity Skills: Excel, PDF, PPTX, DOCX)"
+            aria-label="Pusat laporan dan ekspor data"
+            aria-haspopup="dialog"
           >
             <PieChart size={15} />
             <span className="hide-on-mobile">Pusat laporan</span>
@@ -181,6 +187,8 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
             onClick={() => setIsCommandOpen(true)}
             className="command-palette-btn dashboard-search-btn hide-on-mobile"
             title="Cari Cepat (Ctrl+K)"
+            aria-label="Cari Cepat di sistem (Ctrl+K)"
+            aria-haspopup="dialog"
           >
             <div>
               <Search size={15} />
@@ -188,7 +196,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
             </div>
             <kbd>Ctrl K</kbd>
           </button>
-          <button onClick={()=>setShowNotifs(v=>!v)} aria-label="Tampilkan notifikasi" aria-expanded={showNotifs} className="notif-btn">
+          <button onClick={()=>setShowNotifs(v=>!v)} aria-label="Tampilkan notifikasi" aria-expanded={showNotifs} aria-haspopup="dialog" className="notif-btn">
             <Bell/>{unreadCount > 0 && <i className="notification-badge">{unreadCount}</i>}
           </button>
           {showNotifs&&<div className="notification-popover" role="dialog" aria-label="Notifikasi">

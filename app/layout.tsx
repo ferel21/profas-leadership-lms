@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
 import { RouteProgressBar } from "@/components/RouteProgressBar";
+import { GlobalLeafStagger } from "@/components/GlobalLeafStagger";
 import "./typography.css";
 import "./design-system.css";
 import "./master.css";
@@ -12,6 +13,7 @@ import "./taste.css";
 import "./lms-fresh.css";
 import './akseslegal-theme.css';
 import './home-landing.css';
+import './leaf-stagger.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";
@@ -45,6 +47,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className={`${inter.variable} font-sans`} style={{ fontFamily: 'var(--font-inter, "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif)' }}>
         <RouteProgressBar />
+        <GlobalLeafStagger />
         {children}
       </body>
     </html>

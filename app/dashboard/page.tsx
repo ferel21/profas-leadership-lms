@@ -1,4 +1,5 @@
 import { DashboardChrome } from "@/components/DashboardChrome";
+import nextDynamic from "next/dynamic";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -9,11 +10,13 @@ import {
   BookMarked, PieChart
 } from "lucide-react";
 import Image from "next/image";
-import { AdminReportTable, ReportRow } from "@/components/AdminReportTable";
-import { MentorCourseActions } from "@/components/MentorCourseActions";
-import { AdminUserManagement } from "@/components/AdminUserManagement";
-import { BroadcastManager } from "@/components/BroadcastManager";
-import { SuperAdminAnalyticsPanel } from "@/components/SuperAdminAnalyticsPanel";
+import type { ReportRow } from "@/components/AdminReportTable";
+
+const AdminReportTable = nextDynamic(() => import("@/components/AdminReportTable").then(module => module.AdminReportTable));
+const MentorCourseActions = nextDynamic(() => import("@/components/MentorCourseActions").then(module => module.MentorCourseActions));
+const AdminUserManagement = nextDynamic(() => import("@/components/AdminUserManagement").then(module => module.AdminUserManagement));
+const BroadcastManager = nextDynamic(() => import("@/components/BroadcastManager").then(module => module.BroadcastManager));
+const SuperAdminAnalyticsPanel = nextDynamic(() => import("@/components/SuperAdminAnalyticsPanel").then(module => module.SuperAdminAnalyticsPanel));
 
 export const dynamic = "force-dynamic";
 

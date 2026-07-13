@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       description,
       price = 0,
       durationHours = 10,
-      image = "/images/profas-leadership-hero.png"
+      image = "/images/profas-leadership-hero.webp"
     } = body;
 
     if (!title || !shortDescription) {
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         description: description || shortDescription,
         price: Number(price) || 0,
         durationHours: Number(durationHours) || 10,
-        image: image || "/images/profas-leadership-hero.png",
+        image: image || "/images/profas-leadership-hero.webp",
         outcomes: "Memahami kepemimpinan strategis\nMampu mengambil keputusan berbasis data\nMeningkatkan efektivitas tim",
         published: false,
         mentorId: user.id

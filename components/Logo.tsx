@@ -6,7 +6,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
     <Link href="/" className={`logo ${compact ? "logo-compact" : ""}`} aria-label="PROFAS Leadership">
       <Image
         className="logo-image"
-        src="/images/profas-logo.png"
+        src="/images/profas-logo.webp"
         alt="PROFAS Leadership"
         width={2453}
         height={673}

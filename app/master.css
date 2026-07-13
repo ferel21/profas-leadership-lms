@@ -2502,3 +2502,5 @@ input[type="text"]:focus, input[type="email"]:focus {
   .avatar-upload-row { margin: 1.25rem; align-items: flex-start; flex-direction: column; }
   .profile-actions { padding: 1rem 1.25rem; }
 }
+/* Course card titles use h2 to keep the catalog heading hierarchy valid. */
+.course-body h2{font-weight:750;font-size:var(--text-xl);font-family:var(--font-display);line-height:1.35;margin:7px 0}

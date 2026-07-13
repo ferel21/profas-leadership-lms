@@ -1,7 +1,7 @@
 /*
   PROFAS SCROLL REVEAL
-  Framer Motion drives a restrained fade + vertical slide. The custom
-  translate property intentionally leaves existing hover transforms alone.
+  The browser Web Animations API drives a restrained fade + vertical slide.
+  The custom translate property intentionally leaves existing hover transforms alone.
 */
 
 .leaf-stagger > :not([aria-hidden="true"]):not([data-leaf-ignore="true"]),

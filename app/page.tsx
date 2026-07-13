@@ -196,7 +196,7 @@ export default async function Home() {
             <div className="al-hero-visual">
               <div className="al-hero-img-wrap">
                 <Image
-                  src="/images/profas-leadership-hero.png"
+                  src="/images/profas-leadership-hero.webp"
                   alt="Mentor dan peserta PROFAS berdiskusi dalam sesi pembelajaran kepemimpinan"
                   width={1100}
                   height={1250}

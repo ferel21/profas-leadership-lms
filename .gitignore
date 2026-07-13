@@ -10,6 +10,8 @@ node_modules
 .vercel
 .env*.local
 .data/
+test-results/
+playwright-report/
 
 # Local Netlify folder
 .netlify

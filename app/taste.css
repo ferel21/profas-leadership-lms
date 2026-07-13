@@ -126,7 +126,7 @@ html body .lms-hero {
   border: none;
   background:
     linear-gradient(90deg, var(--taste-canvas) 0%, rgba(244, 246, 241, 0.82) 24%, rgba(244, 246, 241, 0.08) 70%),
-    url("/images/profas-leadership-hero.png") 70% center / cover no-repeat;
+    url("/images/profas-leadership-hero.webp") 70% center / cover no-repeat;
 }
 
 .lms-hero-grid {
@@ -179,7 +179,7 @@ html body .lms-hero {
   vertical-align: -0.06em;
   border: 5px solid var(--taste-surface);
   border-radius: 14px;
-  background: url("/images/profas-leadership-hero.png") center / cover no-repeat;
+  background: url("/images/profas-leadership-hero.webp") center / cover no-repeat;
   box-shadow: 0 10px 24px -16px rgba(23, 60, 55, 0.6);
 }
 
@@ -475,7 +475,7 @@ html body .lms-hero {
 .lms-video-placeholder {
   background:
     linear-gradient(135deg, rgba(23, 60, 55, 0.18), rgba(15, 118, 110, 0.56)),
-    url("/images/profas-leadership-hero.png") center / cover no-repeat;
+    url("/images/profas-leadership-hero.webp") center / cover no-repeat;
 }
 
 .lms-insight {
@@ -1995,4 +1995,3 @@ html body .lms-hero-copy > p {
   margin: 40px auto 0;
   z-index: 10;
 }
-

@@ -11,7 +11,7 @@ html body .auth-page {
   --ws-surface-soft: #f8fafc;
   --ws-ink: #101519;
   --ws-body: #4b5563;
-  --ws-muted: #6b7280;
+  --ws-muted: #52616d;
   --ws-line: #e5e7eb;
   --ws-accent: #2a6ba7;
   --ws-accent-dark: #1e5a8f;
@@ -572,6 +572,7 @@ html body .module-list summary { min-height: 42px; padding: 9px 10px !important;
 html body .module-list button { min-height: 50px; margin: 2px 0 !important; padding: 9px 10px !important; border-radius: 11px !important; color: var(--ws-body) !important; }
 html body .module-list button:hover { color: var(--ws-accent) !important; background: var(--ws-surface-soft) !important; }
 html body .module-list button.active { color: var(--ws-accent-dark) !important; background: var(--ws-mint) !important; box-shadow: none !important; }
+html body .module-list button.active small { color: #52616d !important; }
 html body .module-list button > svg { color: var(--ws-accent) !important; }
 
 html body .player-main { margin-left: 300px !important; background: var(--ws-canvas) !important; }

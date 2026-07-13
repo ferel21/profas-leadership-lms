@@ -156,7 +156,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
                   </button>
                 )}
               </div>
-              <div style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "4px", textAlign: m.role === "user" ? "right" : "left" }}>
+              <div style={{ fontSize: "0.7rem", color: "#52616d", marginTop: "4px", textAlign: m.role === "user" ? "right" : "left" }}>
                 {m.time}
               </div>
             </div>
@@ -226,6 +226,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
         />
         <button
           type="submit"
+          aria-label={loading ? "Asisten AI sedang memproses" : "Kirim pertanyaan ke Asisten AI"}
           disabled={loading || !input.trim()}
           style={{
             background: "#2a6ba7",
@@ -241,7 +242,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
           }}
           className="hover-lift"
         >
-          {loading ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
+          {loading ? <Loader2 size={18} className="spin" aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}
         </button>
       </form>
     </div>

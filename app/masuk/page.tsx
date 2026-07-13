@@ -9,7 +9,7 @@ export default async function LoginPage({searchParams}:{searchParams:Promise<{ne
   return (
     <main className="auth-page">
       <section className="auth-visual">
-        <Image src="/images/profas-leadership-hero.png" alt="Kelas PROFAS" fill priority />
+        <Image src="/images/profas-leadership-hero.webp" alt="Kelas PROFAS" fill priority />
         <div>
           <Logo />
           <blockquote>“Perubahan besar selalu dimulai dari keberanian untuk belajar.”</blockquote>

@@ -245,7 +245,7 @@ iframe {
   padding: clamp(56px, 7vw, 96px) 0 clamp(48px, 6vw, 76px) !important;
   background:
     linear-gradient(120deg, rgba(255,255,255,0.92) 0%, rgba(238,252,249,0.88) 52%, rgba(239,247,255,0.94) 100%),
-    url("/images/profas-leadership-hero.png") center/cover no-repeat !important;
+    url("/images/profas-leadership-hero.webp") center/cover no-repeat !important;
 }
 
 .hero-clean::before {
@@ -409,6 +409,7 @@ iframe {
   flex-direction: column;
 }
 
+.course-body h2,
 .course-body h3 {
   color: var(--enterprise-ink);
   letter-spacing: -0.01em !important;
@@ -430,7 +431,7 @@ iframe {
   overflow: hidden;
   background:
     linear-gradient(135deg, rgba(238,252,249,0.96), rgba(239,247,255,0.9)),
-    url("/images/profas-leadership-hero.png") center/cover no-repeat !important;
+    url("/images/profas-leadership-hero.webp") center/cover no-repeat !important;
 }
 
 .catalog-hero::after,
@@ -1232,7 +1233,7 @@ textarea {
   padding: clamp(64px, 8vw, 112px) 0 clamp(46px, 6vw, 80px);
   background:
     linear-gradient(90deg, rgba(7, 20, 34, 0.82) 0%, rgba(7, 20, 34, 0.55) 43%, rgba(7, 20, 34, 0.14) 100%),
-    url("/images/profas-leadership-hero.png") center / cover no-repeat;
+    url("/images/profas-leadership-hero.webp") center / cover no-repeat;
 }
 
 .lms-hero::after {
@@ -1786,7 +1787,7 @@ textarea {
   color: #fff;
   background:
     linear-gradient(135deg, rgba(14, 147, 132, 0.72), rgba(37, 99, 235, 0.66)),
-    url("/images/profas-leadership-hero.png") center / cover no-repeat;
+    url("/images/profas-leadership-hero.webp") center / cover no-repeat;
 }
 
 .lms-video-placeholder svg {
@@ -1846,7 +1847,7 @@ textarea {
   color: #fff;
   background:
     linear-gradient(135deg, rgba(10, 22, 36, 0.96), rgba(13, 68, 76, 0.92)),
-    url("/images/profas-leadership-hero.png") center / cover no-repeat;
+    url("/images/profas-leadership-hero.webp") center / cover no-repeat;
 }
 
 .lms-insight-grid {
@@ -2206,4 +2207,3 @@ button.bg-emerald-600:hover {
   box-shadow: 0 12px 28px rgba(42, 107, 167, 0.42) !important;
   transform: translateY(-2px) !important;
 }
-

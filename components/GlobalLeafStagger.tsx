@@ -1,6 +1,5 @@
 "use client";
 
-import { animate } from "framer-motion";
 import { Suspense, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
@@ -169,7 +168,7 @@ function GlobalLeafStaggerInner() {
       return;
     }
 
-    const activeAnimations = new Set<ReturnType<typeof animate>>();
+    const activeAnimations = new Set<Animation>();
     const revealTimers = new Set<number>();
     let visibleCheckFrame = 0;
     const observer = new IntersectionObserver(
@@ -201,7 +200,7 @@ function GlobalLeafStaggerInner() {
       element.setAttribute(REVEAL_STATE, "running");
       element.style.setProperty("--reveal-offset", REVEAL_OFFSET);
 
-      let controls: ReturnType<typeof animate> | null = null;
+      let controls: Animation | null = null;
       let fallbackTimer = 0;
       const completeReveal = (forceStop = false) => {
         if (fallbackTimer) {
@@ -209,7 +208,7 @@ function GlobalLeafStaggerInner() {
           revealTimers.delete(fallbackTimer);
           fallbackTimer = 0;
         }
-        if (forceStop && controls) controls.stop();
+        if (forceStop && controls) controls.cancel();
         if (controls) activeAnimations.delete(controls);
         element.setAttribute(REVEAL_STATE, "done");
         element.style.opacity = "1";
@@ -217,16 +216,16 @@ function GlobalLeafStaggerInner() {
       };
 
       try {
-        controls = animate(
-          element,
+        controls = element.animate(
+          [
+            { opacity: 0, translate: `0 ${REVEAL_OFFSET}` },
+            { opacity: 1, translate: "0 0" },
+          ],
           {
-            opacity: [0, 1],
-            "--reveal-offset": [REVEAL_OFFSET, "0px"],
-          } as never,
-          {
-            delay: delayMs / 1000,
-            duration: ANIMATION_DURATION_MS / 1000,
-            ease: [0.22, 1, 0.36, 1],
+            delay: delayMs,
+            duration: ANIMATION_DURATION_MS,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+            fill: "both",
           },
         );
 
@@ -384,7 +383,7 @@ function GlobalLeafStaggerInner() {
       window.removeEventListener("resize", scheduleVisibleReveal);
       mutationObserver.disconnect();
       observer.disconnect();
-      activeAnimations.forEach((controls) => controls.stop());
+      activeAnimations.forEach((controls) => controls.cancel());
     };
   }, [pathname, queryString]);
 

@@ -28,7 +28,7 @@ export function CourseCard({ course }: CourseCardProps) {
             <span className="course-quality-badge"><Sparkles size={12} /> Pilihan Eksekutif</span>
           ) : null}
         </div>
-        <h3><Link href={`/program/${course.slug}`} prefetch={true}>{course.title}</Link></h3>
+        <h2><Link href={`/program/${course.slug}`} prefetch={true}>{course.title}</Link></h2>
         <p>{course.shortDescription}</p>
         {course.mentor && (
           <div className="course-mentor-chip">

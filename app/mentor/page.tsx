@@ -77,7 +77,7 @@ export default async function MentorDashboardPage() {
             {courses.map(course => (
               <div key={course.id} className="py-4 flex gap-4 items-center flex-wrap sm:flex-nowrap">
                 <div className="program-thumb w-[85px] h-[60px] relative rounded-lg overflow-hidden shrink-0 bg-slate-100">
-                  <Image src={course.image || "/images/profas-leadership-hero.png"} fill alt={course.title} className="object-cover" />
+                  <Image src={course.image || "/images/profas-leadership-hero.webp"} fill alt={course.title} className="object-cover" />
                 </div>
                 <div className="flex-1 min-w-[200px]">
                   <span className="text-[10px] text-primary font-bold uppercase tracking-wider block">{course.category}</span>

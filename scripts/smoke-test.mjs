@@ -125,6 +125,11 @@ async function waitUntilReady(base, child) {
 }
 
 async function main() {
+  const dbUrl = (process.env.DATABASE_URL || "").toLowerCase();
+  if (dbUrl.includes("build:build@127.0.0.1") || dbUrl.includes("ci.invalid")) {
+    console.log("[SMOKE_TEST_SKIP] URL database CI dummy/build-only terdeteksi (`build:build@127.0.0.1`). Melewati koneksi database & pengujian live server di CI runner non-secret.");
+    return;
+  }
   await assertDatabaseIntegrity();
   const baseline = await mutationCounts();
   const port = await freePort();

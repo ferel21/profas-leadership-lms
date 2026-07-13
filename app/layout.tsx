@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
 import { RouteProgressBar } from "@/components/RouteProgressBar";
 import { GlobalLeafStagger } from "@/components/GlobalLeafStagger";
+import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 import "./typography.css";
 import "./design-system.css";
 import "./master.css";
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${inter.variable} font-sans`} style={{ fontFamily: 'var(--font-inter, "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif)' }}>
         <RouteProgressBar />
         <GlobalLeafStagger />
+        <WebVitalsReporter />
         {children}
       </body>
     </html>

@@ -4,11 +4,22 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createToken } from "@/lib/auth";
 
+import { rateLimit } from "@/lib/rate-limit";
+
 const schema = z.object({ email: z.string().trim().toLowerCase().email().max(120), password: z.string().min(6).max(128), remember: z.boolean().optional() });
+const loginLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
 export async function POST(request: Request) {
+  const ipCheck = loginLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak percobaan dari IP Anda. Silakan tunggu 1 menit." }, { status: 429 });
+  }
   try {
     const input = schema.parse(await request.json());
+    const emailCheck = loginLimiter.check(request, input.email);
+    if (!emailCheck.success) {
+      return NextResponse.json({ message: "Terlalu banyak percobaan masuk untuk akun ini. Silakan tunggu 1 menit." }, { status: 429 });
+    }
     const user = await prisma.user.findUnique({ where: { email: input.email.toLowerCase() } });
     if (!user) return NextResponse.json({ message: "Email atau kata sandi tidak sesuai." }, { status: 401 });
     if (!user.passwordHash) return NextResponse.json({ message: "Akun ini menggunakan Google. Silakan klik 'Masuk dengan Google'." }, { status: 401 });

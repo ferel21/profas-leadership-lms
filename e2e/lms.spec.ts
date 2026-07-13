@@ -44,12 +44,24 @@ test.describe("public performance and accessibility", () => {
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   });
+
+  test("login page has accessible auth form controls and no WCAG violations", async ({ page }) => {
+    await page.goto("/masuk");
+    await waitForApp(page);
+    await expect(page.locator("form.auth-form")).toBeVisible();
+
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations).toEqual([]);
+  });
 });
 
 test.describe("learner journey", () => {
   test("learner can reach dashboard and course player with accessible controls", async ({ page }) => {
     await loginAsLearner(page);
     await expect(page.locator(".hero-banner-student")).toBeVisible({ timeout: 20_000 });
+
+    const dashboardResults = await new AxeBuilder({ page }).analyze();
+    expect(dashboardResults.violations).toEqual([]);
 
     await page.goto(coursePath);
     await waitForApp(page);

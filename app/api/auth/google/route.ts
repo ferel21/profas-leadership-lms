@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
+import { rateLimit } from "@/lib/rate-limit";
+
+const googleLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
 export async function GET(request: Request) {
+  const ipCheck = googleLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan OAuth dari IP Anda. Silakan tunggu 1 menit." }, { status: 429 });
+  }
   const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || "").trim().replace(/^["']|["']$/g, "");
 
   const urlObj = new URL(request.url);

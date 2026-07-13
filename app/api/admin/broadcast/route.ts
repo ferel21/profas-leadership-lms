@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
+
+const broadcastLimiter = rateLimit({ limit: 5, windowMs: 60 * 1000 });
 
 const broadcastSchema = z.object({
   title: z.string().trim().min(1).max(120),
@@ -12,6 +15,10 @@ const broadcastSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ipCheck = broadcastLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak pengiriman pengumuman dalam hitungan menit. Silakan tunggu sebentar." }, { status: 429 });
+  }
   try {
     const user = await getCurrentUser();
     if (!user || (user.role !== "SUPER_ADMIN" && user.role !== "MENTOR")) {

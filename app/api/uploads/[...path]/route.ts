@@ -5,6 +5,9 @@ import { extname } from "node:path";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getReadableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
+import { rateLimit } from "@/lib/rate-limit";
+
+const uploadsLimiter = rateLimit({ limit: 120, windowMs: 60 * 1000 });
 
 const MIME_TYPES: Record<string, string> = {
   ".pdf": "application/pdf",
@@ -23,6 +26,10 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 export async function GET(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
+  const ipCheck = uploadsLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan akses berkas. Silakan tunggu 1 menit." }, { status: 429 });
+  }
   try {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Silakan masuk untuk mengakses berkas." }, { status: 401 });

@@ -12,9 +12,9 @@ let pendingSnapshot: Promise<HealthSnapshot> | null = null;
 async function checkDatabase(): Promise<HealthSnapshot> {
   const started = Date.now();
   try {
-    // One lightweight query keeps readiness checks compatible with a
-    // serverless/pooler connection_limit=1 deployment.
-    await prisma.user.findFirst({ select: { id: true } });
+    // One lightweight query (SELECT 1) keeps readiness checks compatible with a
+    // serverless/pooler connection_limit=1 deployment without locking user tables.
+    await prisma.$queryRaw`SELECT 1`;
     return { status: "HEALTHY", latencyMs: Date.now() - started, checkedAt: Date.now() };
   } catch (error) {
     console.error("[HEALTH_CHECK_DB_ERROR]", error);
@@ -44,15 +44,13 @@ export async function GET(request: Request) {
   let userCount = 0;
   let courseCount = 0;
 
+  // Public readiness check returns minimal status only.
   const report: Record<string, unknown> = {
     status: dbStatus === "HEALTHY" ? "OK" : "DEGRADED",
     timestamp: new Date().toISOString(),
-    database: { status: dbStatus, latencyMs: dbLatencyMs },
-    performance: { checkDurationMs: Date.now() - startTime },
   };
 
-  // The public health endpoint intentionally exposes only liveness/readiness.
-  // Monitoring systems may request operational detail with a server-only token.
+  // Monitoring systems request operational detail with server-only token.
   const healthToken = process.env.HEALTHCHECK_TOKEN?.trim();
   const suppliedToken = request.headers.get("x-health-token");
   if (healthToken && suppliedToken === healthToken && dbStatus === "HEALTHY") {
@@ -66,6 +64,7 @@ export async function GET(request: Request) {
       latencyMs: dbLatencyMs,
       metrics: { totalUsers: userCount, totalCourses: courseCount },
     };
+    report.performance = { checkDurationMs: Date.now() - startTime };
     report.system = {
       uptimeSeconds: Math.round(process.uptime()),
       memoryUsageMB: {

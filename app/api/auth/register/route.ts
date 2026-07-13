@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Persona, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createToken } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   name: z.string().trim().min(3).max(80),
@@ -13,7 +14,13 @@ const schema = z.object({
   persona: z.nativeEnum(Persona),
 });
 
+const registerLimiter = rateLimit({ limit: 8, windowMs: 60 * 1000 });
+
 export async function POST(request: Request) {
+  const ipCheck = registerLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan pendaftaran dari IP Anda. Silakan tunggu 1 menit." }, { status: 429 });
+  }
   try {
     const input = schema.parse(await request.json());
     const duplicate = await prisma.user.findFirst({ where: { OR: [{ email: input.email }, { username: input.username }] }, select: { email: true, username: true } });

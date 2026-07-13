@@ -3,8 +3,15 @@ import { cookies } from "next/headers";
 import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { createToken } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
+
+const callbackLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
 export async function GET(request: Request) {
+  const ipCheck = callbackLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan otorisasi Google dari IP Anda. Silakan coba beberapa saat lagi." }, { status: 429 });
+  }
   const urlObj = new URL(request.url);
   const code = urlObj.searchParams.get("code");
   const error = urlObj.searchParams.get("error");

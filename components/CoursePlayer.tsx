@@ -566,10 +566,10 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           <AILeadershipTutor lessonTitle={current.title} />
         </section>
         <footer className="player-footer" aria-label="Navigasi materi">
-          <button type="button" disabled={index === 0 || busy} onClick={goPrevious} aria-label="Materi sebelumnya"><ChevronLeft aria-hidden="true" /> <span>Sebelumnya</span></button>
+          <button type="button" disabled={index === 0 || busy} aria-disabled={index === 0 || busy} onClick={goPrevious} aria-label="Materi sebelumnya"><ChevronLeft aria-hidden="true" /> <span>Sebelumnya</span></button>
           <span aria-label={`Durasi ${current.durationMin} menit`}><Clock3 aria-hidden="true" /> {current.durationMin} menit</span>
-          <button type="button" className="player-next-btn" disabled={index === flatLessons.length - 1 || busy} onClick={goNext} aria-label="Materi berikutnya">Berikutnya <ChevronRight aria-hidden="true" /></button>
-          <button type="button" className="complete-btn" onClick={complete} disabled={busy}>{busy ? <LoaderCircle className="spin" aria-label="Menyimpan progres" /> : done.has(current.id) ? <><Check aria-hidden="true" /> {index < flatLessons.length - 1 ? "Materi berikutnya" : "Sudah selesai"}</> : <>Tandai selesai <ChevronRight aria-hidden="true" /></>}</button>
+          <button type="button" className="player-next-btn" disabled={index === flatLessons.length - 1 || busy} aria-disabled={index === flatLessons.length - 1 || busy} onClick={goNext} aria-label="Materi berikutnya">Berikutnya <ChevronRight aria-hidden="true" /></button>
+          <button type="button" className="complete-btn" onClick={complete} disabled={busy} aria-busy={busy} aria-pressed={done.has(current.id)}>{busy ? <><LoaderCircle className="spin" aria-hidden="true" /> <span>Menyimpan...</span></> : done.has(current.id) ? <><Check aria-hidden="true" /> {index < flatLessons.length - 1 ? "Lanjut Materi Berikutnya" : "Sudah selesai"}</> : <>Tandai Selesai <ChevronRight aria-hidden="true" /></>}</button>
         </footer>
       </main>
     </div>

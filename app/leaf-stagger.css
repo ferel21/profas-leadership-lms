@@ -1,93 +1,101 @@
 /*
-  ==========================================================================
-  PROFAS LEAF STAGGER REVEAL ENGINE (Inspired by GitHub UI Animation Libs)
-  ==========================================================================
-  Animasi seperti daun jatuh untuk teks, gambar, button, dan komponen UI,
-  sehingga muncul satu per satu (staggered reveal) secara mulus saat digulir.
+  PROFAS LEAF STAGGER
+  A soft, organic reveal for landing and LMS surfaces. The animation uses
+  individual CSS transform properties so existing hover transforms keep
+  working after an element has finished falling into place.
 */
 
-@keyframes leaf-drop {
+@keyframes leaf-drop-left {
   0% {
     opacity: 0;
-    transform: translateY(-28px) rotate(-3.8deg) scale(0.94);
+    translate: 0 -26px;
+    rotate: -4.5deg;
+    scale: 0.955;
     filter: blur(4px);
   }
-  65% {
-    opacity: 0.88;
-    transform: translateY(3px) rotate(0.8deg) scale(1.008);
-    filter: blur(0px);
+  62% {
+    opacity: 0.92;
+    translate: 0 4px;
+    rotate: 1.1deg;
+    scale: 1.008;
+    filter: blur(0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-    filter: blur(0px);
+    translate: 0 0;
+    rotate: 0deg;
+    scale: 1;
+    filter: blur(0);
   }
 }
 
-@keyframes leaf-drop-alt {
+@keyframes leaf-drop-right {
   0% {
     opacity: 0;
-    transform: translateY(-26px) rotate(3.8deg) scale(0.94);
+    translate: 0 -24px;
+    rotate: 4.5deg;
+    scale: 0.955;
     filter: blur(4px);
   }
-  65% {
-    opacity: 0.88;
-    transform: translateY(2px) rotate(-0.8deg) scale(1.008);
-    filter: blur(0px);
+  62% {
+    opacity: 0.92;
+    translate: 0 3px;
+    rotate: -1.1deg;
+    scale: 1.008;
+    filter: blur(0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-    filter: blur(0px);
+    translate: 0 0;
+    rotate: 0deg;
+    scale: 1;
+    filter: blur(0);
   }
 }
 
-/* Base hidden state before IntersectionObserver triggers */
+/* The engine adds these classes after hydration, keeping SSR content visible
+   and preventing a blank page if JavaScript is unavailable. */
 .leaf-stagger > *,
 .leaf-item {
   opacity: 0;
-  will-change: transform, opacity, filter;
+  will-change: opacity, translate, rotate, scale, filter;
 }
 
-/* Active state when entering viewport */
-.leaf-stagger.leaf-active > *:nth-child(odd),
-.leaf-item.leaf-active:nth-child(odd),
-.leaf-item.leaf-active.leaf-odd {
-  animation: leaf-drop 0.74s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.leaf-stagger.leaf-active > *,
+.leaf-item.leaf-active {
+  animation-duration: 0.78s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+  animation-delay: var(--leaf-delay, 42ms);
+  animation-name: leaf-drop-left;
 }
 
 .leaf-stagger.leaf-active > *:nth-child(even),
-.leaf-item.leaf-active:nth-child(even),
-.leaf-item.leaf-active.leaf-even {
-  animation: leaf-drop-alt 0.74s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.leaf-item.leaf-active.leaf-odd {
+  animation-name: leaf-drop-right;
 }
 
-/* Staggered transition delays so items fall one by one */
-.leaf-stagger.leaf-active > *:nth-child(1), .leaf-item.leaf-active[data-leaf-index="0"]  { animation-delay: 0.05s; }
-.leaf-stagger.leaf-active > *:nth-child(2), .leaf-item.leaf-active[data-leaf-index="1"]  { animation-delay: 0.12s; }
-.leaf-stagger.leaf-active > *:nth-child(3), .leaf-item.leaf-active[data-leaf-index="2"]  { animation-delay: 0.19s; }
-.leaf-stagger.leaf-active > *:nth-child(4), .leaf-item.leaf-active[data-leaf-index="3"]  { animation-delay: 0.26s; }
-.leaf-stagger.leaf-active > *:nth-child(5), .leaf-item.leaf-active[data-leaf-index="4"]  { animation-delay: 0.33s; }
-.leaf-stagger.leaf-active > *:nth-child(6), .leaf-item.leaf-active[data-leaf-index="5"]  { animation-delay: 0.40s; }
-.leaf-stagger.leaf-active > *:nth-child(7), .leaf-item.leaf-active[data-leaf-index="6"]  { animation-delay: 0.47s; }
-.leaf-stagger.leaf-active > *:nth-child(8), .leaf-item.leaf-active[data-leaf-index="7"]  { animation-delay: 0.54s; }
-.leaf-stagger.leaf-active > *:nth-child(9), .leaf-item.leaf-active[data-leaf-index="8"]  { animation-delay: 0.61s; }
-.leaf-stagger.leaf-active > *:nth-child(10), .leaf-item.leaf-active[data-leaf-index="9"] { animation-delay: 0.68s; }
-.leaf-stagger.leaf-active > *:nth-child(11), .leaf-item.leaf-active[data-leaf-index="10"] { animation-delay: 0.75s; }
-.leaf-stagger.leaf-active > *:nth-child(12), .leaf-item.leaf-active[data-leaf-index="11"] { animation-delay: 0.82s; }
-.leaf-stagger.leaf-active > *:nth-child(13), .leaf-item.leaf-active[data-leaf-index="12"] { animation-delay: 0.89s; }
-.leaf-stagger.leaf-active > *:nth-child(14), .leaf-item.leaf-active[data-leaf-index="13"] { animation-delay: 0.96s; }
-.leaf-stagger.leaf-active > *:nth-child(15), .leaf-item.leaf-active[data-leaf-index="14"] { animation-delay: 1.03s; }
-.leaf-stagger.leaf-active > *:nth-child(n+16), .leaf-item.leaf-active[data-leaf-index="15"] { animation-delay: 1.10s; }
+/* A focused control should never be left visually hidden while tabbing. */
+.leaf-stagger > *:focus-within,
+.leaf-item:focus-visible {
+  opacity: 1;
+  translate: 0 0;
+  rotate: 0deg;
+  scale: 1;
+  filter: none;
+  animation: none;
+}
 
-/* Ensure immediate reveal if user prefers reduced motion or prints */
 @media (prefers-reduced-motion: reduce), print {
   .leaf-stagger > *,
   .leaf-item {
     opacity: 1 !important;
-    transform: none !important;
+    translate: none !important;
+    rotate: none !important;
+    scale: none !important;
     filter: none !important;
     animation: none !important;
     transition: none !important;
+    will-change: auto !important;
   }
 }

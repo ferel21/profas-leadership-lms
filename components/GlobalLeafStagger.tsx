@@ -1,12 +1,13 @@
 "use client";
 
+import { animate } from "framer-motion";
 import { Suspense, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 /**
- * Groups are intentionally made from the real PROFAS layout primitives. A
- * group reveals its direct children in sequence, while nested groups let a
- * hero, card grid, or dashboard section reveal at a second level.
+ * The reveal engine is intentionally selector-driven so existing landing and
+ * dashboard markup does not need layout-changing wrapper divs. Every scene is
+ * revealed recursively, with each level sorted by its real viewport position.
  */
 const GROUP_SELECTORS = [
   // Public landing pages
@@ -112,16 +113,34 @@ const ITEM_SELECTORS = [
 ] as const;
 
 const LEAF_GROUP_CLASS = "leaf-stagger";
-const LEAF_ACTIVE_CLASS = "leaf-active";
 const LEAF_ITEM_CLASS = "leaf-item";
+const REVEAL_STATE = "data-leaf-state";
+const REVEAL_GROUP_STATE = "data-leaf-group-state";
+const STAGGER_DELAY_MS = 110;
+const ANIMATION_DURATION_MS = 580;
+const REVEAL_OFFSET = "-18px";
 
-function setChildDelays(group: HTMLElement) {
-  Array.from(group.children).forEach((child, index) => {
-    const element = child as HTMLElement;
-    const delay = Math.min(index, 15) * 68 + 42;
-    element.style.setProperty("--leaf-delay", `${delay}ms`);
-    element.style.setProperty("--leaf-index", String(Math.min(index, 15)));
+function isRevealable(element: HTMLElement) {
+  return element.dataset.leafIgnore !== "true" && element.getAttribute("aria-hidden") !== "true";
+}
+
+function sortTopToBottom(elements: HTMLElement[]) {
+  return [...elements].sort((a, b) => {
+    const aRect = a.getBoundingClientRect();
+    const bRect = b.getBoundingClientRect();
+    const topDifference = aRect.top - bRect.top;
+
+    if (Math.abs(topDifference) > 2) return topDifference;
+    return aRect.left - bRect.left;
   });
+}
+
+function directRevealChildren(group: HTMLElement) {
+  return sortTopToBottom(
+    Array.from(group.children).filter(
+      (child): child is HTMLElement => child instanceof HTMLElement && isRevealable(child),
+    ),
+  );
 }
 
 function GlobalLeafStaggerInner() {
@@ -135,64 +154,135 @@ function GlobalLeafStaggerInner() {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (motionQuery.matches || typeof IntersectionObserver === "undefined") return;
 
+    const activeAnimations = new Set<ReturnType<typeof animate>>();
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-
-          const target = entry.target as HTMLElement;
-          target.classList.add(LEAF_ACTIVE_CLASS);
-          target.dataset.leafAnimated = "true";
+        sortTopToBottom(
+          entries
+            .filter((entry) => entry.isIntersecting)
+            .map((entry) => entry.target as HTMLElement),
+        ).forEach((target) => {
           observer.unobserve(target);
+          if (target.classList.contains(LEAF_GROUP_CLASS)) {
+            revealGroup(target, 0);
+          } else {
+            revealElement(target, 0);
+          }
         });
       },
       {
-        // Start a little before the block reaches the viewport so the motion
-        // feels continuous on long dashboard pages.
-        rootMargin: "0px 0px -8% 0px",
+        rootMargin: "0px 0px -10% 0px",
         threshold: 0.04,
       },
     );
 
-    const observedGroups = new WeakSet<HTMLElement>();
-    const observedItems = new WeakSet<HTMLElement>();
-
-    const registerGroup = (element: HTMLElement) => {
-      element.classList.add(LEAF_GROUP_CLASS);
-      setChildDelays(element);
-
-      if (element.dataset.leafAnimated === "true" || observedGroups.has(element)) return;
-      observedGroups.add(element);
-      observer.observe(element);
-    };
-
-    const registerItem = (element: HTMLElement, index: number) => {
-      // A parent group owns its direct children. Skipping descendants here
-      // avoids two observers fighting over the same animation timeline.
-      if (element.closest(`.${LEAF_GROUP_CLASS}`)) return;
-      if (element.dataset.leafAnimated === "true" || observedItems.has(element)) return;
+    const revealElement = (element: HTMLElement, delayMs: number) => {
+      const state = element.getAttribute(REVEAL_STATE);
+      if (state === "done" || state === "running") return;
 
       element.classList.add(LEAF_ITEM_CLASS);
-      element.classList.add(index % 2 === 1 ? "leaf-odd" : "leaf-even");
-      element.dataset.leafIndex = String(Math.min(index, 15));
-      element.style.setProperty("--leaf-delay", `${Math.min(index, 15) * 68 + 42}ms`);
-      element.style.setProperty("--leaf-index", String(Math.min(index, 15)));
-      observedItems.add(element);
-      observer.observe(element);
+      element.setAttribute(REVEAL_STATE, "running");
+      element.style.setProperty("--reveal-offset", REVEAL_OFFSET);
+
+      try {
+        const controls = animate(
+          element,
+          {
+            opacity: [0, 1],
+            "--reveal-offset": [REVEAL_OFFSET, "0px"],
+          } as never,
+          {
+            delay: delayMs / 1000,
+            duration: ANIMATION_DURATION_MS / 1000,
+            ease: [0.22, 1, 0.36, 1],
+          },
+        );
+
+        activeAnimations.add(controls);
+        controls.finished
+          .then(() => {
+            element.setAttribute(REVEAL_STATE, "done");
+            element.style.opacity = "1";
+            element.style.setProperty("--reveal-offset", "0px");
+            activeAnimations.delete(controls);
+          })
+          .catch(() => {
+            element.setAttribute(REVEAL_STATE, "done");
+            element.style.opacity = "1";
+            element.style.setProperty("--reveal-offset", "0px");
+            activeAnimations.delete(controls);
+          });
+      } catch {
+        // Older browsers still get the content, just without the motion layer.
+        element.setAttribute(REVEAL_STATE, "done");
+        element.style.opacity = "1";
+        element.style.setProperty("--reveal-offset", "0px");
+      }
+    };
+
+    const revealGroup = (group: HTMLElement, baseDelayMs: number) => {
+      group.setAttribute(REVEAL_GROUP_STATE, "done");
+
+      directRevealChildren(group).forEach((child, index) => {
+        const delayMs = baseDelayMs + index * STAGGER_DELAY_MS;
+        revealElement(child, delayMs);
+
+        // Nested groups begin after their parent has mostly settled. This
+        // keeps the whole section top-to-bottom instead of racing in parallel.
+        if (child.classList.contains(LEAF_GROUP_CLASS)) {
+          revealGroup(child, delayMs + ANIMATION_DURATION_MS * 0.55);
+        }
+      });
+    };
+
+    const prepareGroup = (group: HTMLElement) => {
+      group.classList.add(LEAF_GROUP_CLASS);
+      directRevealChildren(group).forEach((child) => {
+        child.classList.add(LEAF_ITEM_CLASS);
+        if (child.getAttribute(REVEAL_STATE) === "done") {
+          child.style.opacity = "1";
+          child.style.setProperty("--reveal-offset", "0px");
+        } else {
+          child.style.setProperty("--reveal-offset", REVEAL_OFFSET);
+        }
+      });
+    };
+
+    const prepareItem = (item: HTMLElement) => {
+      if (item.closest(`.${LEAF_GROUP_CLASS}`)) return;
+      if (item.getAttribute(REVEAL_STATE) === "done") return;
+
+      item.classList.add(LEAF_ITEM_CLASS);
+      item.style.setProperty("--reveal-offset", REVEAL_OFFSET);
+      observer.observe(item);
+    };
+
+    const observeTopLevelGroups = () => {
+      document.querySelectorAll<HTMLElement>(`.${LEAF_GROUP_CLASS}`).forEach((group) => {
+        const parentGroup = group.parentElement?.closest(`.${LEAF_GROUP_CLASS}`);
+        if (parentGroup) return;
+
+        if (group.getAttribute(REVEAL_GROUP_STATE) === "done") {
+          revealGroup(group, 0);
+          return;
+        }
+
+        observer.observe(group);
+      });
     };
 
     const scan = () => {
-      // Add every group first so item registration can correctly detect the
-      // nearest owner, including groups inserted by client-side components.
+      // Group classes are added before item classes so every child knows its
+      // nearest owner and nested groups can be sequenced recursively.
       GROUP_SELECTORS.forEach((selector) => {
-        document.querySelectorAll<HTMLElement>(selector).forEach(registerGroup);
+        document.querySelectorAll<HTMLElement>(selector).forEach(prepareGroup);
       });
 
       ITEM_SELECTORS.forEach((selector) => {
-        document.querySelectorAll<HTMLElement>(selector).forEach((element, index) => {
-          registerItem(element, index);
-        });
+        document.querySelectorAll<HTMLElement>(selector).forEach(prepareItem);
       });
+
+      observeTopLevelGroups();
     };
 
     let scanFrame = 0;
@@ -206,8 +296,6 @@ function GlobalLeafStaggerInner() {
 
     scan();
 
-    // Dashboard widgets and notification panels can arrive after the first
-    // paint. Keep the engine live without repeatedly rebuilding the observer.
     const mutationObserver = new MutationObserver(scheduleScan);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -215,6 +303,7 @@ function GlobalLeafStaggerInner() {
       if (scanFrame) window.cancelAnimationFrame(scanFrame);
       mutationObserver.disconnect();
       observer.disconnect();
+      activeAnimations.forEach((controls) => controls.stop());
     };
   }, [pathname, queryString]);
 

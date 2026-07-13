@@ -152,9 +152,26 @@ function GlobalLeafStaggerInner() {
     if (typeof window === "undefined") return;
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (motionQuery.matches || typeof IntersectionObserver === "undefined") return;
+    if (motionQuery.matches) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      // The CSS layer is intentionally defensive, so browsers without
+      // IntersectionObserver must explicitly release any already-marked
+      // elements instead of inheriting opacity: 0 forever.
+      document
+        .querySelectorAll<HTMLElement>(`.${LEAF_GROUP_CLASS} > *, .${LEAF_ITEM_CLASS}`)
+        .forEach((element) => {
+          if (!isRevealable(element)) return;
+          element.setAttribute(REVEAL_STATE, "done");
+          element.style.opacity = "1";
+          element.style.setProperty("--reveal-offset", "0px");
+        });
+      return;
+    }
 
     const activeAnimations = new Set<ReturnType<typeof animate>>();
+    const revealTimers = new Set<number>();
+    let visibleCheckFrame = 0;
     const observer = new IntersectionObserver(
       (entries) => {
         sortTopToBottom(
@@ -184,8 +201,23 @@ function GlobalLeafStaggerInner() {
       element.setAttribute(REVEAL_STATE, "running");
       element.style.setProperty("--reveal-offset", REVEAL_OFFSET);
 
+      let controls: ReturnType<typeof animate> | null = null;
+      let fallbackTimer = 0;
+      const completeReveal = (forceStop = false) => {
+        if (fallbackTimer) {
+          window.clearTimeout(fallbackTimer);
+          revealTimers.delete(fallbackTimer);
+          fallbackTimer = 0;
+        }
+        if (forceStop && controls) controls.stop();
+        if (controls) activeAnimations.delete(controls);
+        element.setAttribute(REVEAL_STATE, "done");
+        element.style.opacity = "1";
+        element.style.setProperty("--reveal-offset", "0px");
+      };
+
       try {
-        const controls = animate(
+        controls = animate(
           element,
           {
             opacity: [0, 1],
@@ -199,28 +231,27 @@ function GlobalLeafStaggerInner() {
         );
 
         activeAnimations.add(controls);
+        fallbackTimer = window.setTimeout(
+          () => completeReveal(true),
+          delayMs + ANIMATION_DURATION_MS + 180,
+        );
+        revealTimers.add(fallbackTimer);
         controls.finished
-          .then(() => {
-            element.setAttribute(REVEAL_STATE, "done");
-            element.style.opacity = "1";
-            element.style.setProperty("--reveal-offset", "0px");
-            activeAnimations.delete(controls);
-          })
-          .catch(() => {
-            element.setAttribute(REVEAL_STATE, "done");
-            element.style.opacity = "1";
-            element.style.setProperty("--reveal-offset", "0px");
-            activeAnimations.delete(controls);
-          });
+          .then(() => completeReveal())
+          .catch(() => completeReveal());
       } catch {
         // Older browsers still get the content, just without the motion layer.
-        element.setAttribute(REVEAL_STATE, "done");
-        element.style.opacity = "1";
-        element.style.setProperty("--reveal-offset", "0px");
+        completeReveal();
       }
     };
 
     const revealGroup = (group: HTMLElement, baseDelayMs: number) => {
+      // A group can itself be a reveal item when it is nested below a
+      // non-group layout wrapper. Reveal that wrapper too; otherwise its
+      // children can be marked done while the wrapper remains opacity: 0.
+      if (group.classList.contains(LEAF_ITEM_CLASS)) {
+        revealElement(group, baseDelayMs);
+      }
       group.setAttribute(REVEAL_GROUP_STATE, "done");
 
       directRevealChildren(group).forEach((child, index) => {
@@ -258,9 +289,7 @@ function GlobalLeafStaggerInner() {
     };
 
     const observeTopLevelGroups = () => {
-      document.querySelectorAll<HTMLElement>(`.${LEAF_GROUP_CLASS}`).forEach((group) => {
-        const parentGroup = group.parentElement?.closest(`.${LEAF_GROUP_CLASS}`);
-        if (parentGroup) return;
+      topLevelGroups().forEach((group) => {
 
         if (group.getAttribute(REVEAL_GROUP_STATE) === "done") {
           revealGroup(group, 0);
@@ -269,6 +298,48 @@ function GlobalLeafStaggerInner() {
 
         observer.observe(group);
       });
+    };
+
+    const topLevelGroups = () => Array.from(
+      document.querySelectorAll<HTMLElement>(`.${LEAF_GROUP_CLASS}`),
+    ).filter((group) => !group.parentElement?.closest(`.${LEAF_GROUP_CLASS}`));
+
+    const isInViewport = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      return rect.height > 0 && rect.bottom > 0 && rect.top < viewportHeight;
+    };
+
+    const revealVisibleElements = () => {
+      visibleCheckFrame = 0;
+
+      // IntersectionObserver is the primary trigger. This synchronous
+      // viewport check is a safety net for hydration, prerendered Chromium,
+      // and browsers that delay their first observer callback.
+      sortTopToBottom(topLevelGroups().filter(isInViewport)).forEach((group, index) => {
+        if (group.getAttribute(REVEAL_GROUP_STATE) === "done") return;
+        observer.unobserve(group);
+        revealGroup(group, index * STAGGER_DELAY_MS);
+      });
+
+      document.querySelectorAll<HTMLElement>(`.${LEAF_ITEM_CLASS}`).forEach((item) => {
+        // Some existing dashboard blocks contain a revealable item several
+        // levels below its group wrapper. If an observer callback misses that
+        // nested relationship, the visible-item safety net must still finish
+        // it rather than leaving the child at opacity: 0 forever.
+        if (!isInViewport(item)) return;
+        observer.unobserve(item);
+        if (item.classList.contains(LEAF_GROUP_CLASS)) {
+          revealGroup(item, 0);
+        } else {
+          revealElement(item, 0);
+        }
+      });
+    };
+
+    const scheduleVisibleReveal = () => {
+      if (visibleCheckFrame) return;
+      visibleCheckFrame = window.requestAnimationFrame(revealVisibleElements);
     };
 
     const scan = () => {
@@ -283,6 +354,7 @@ function GlobalLeafStaggerInner() {
       });
 
       observeTopLevelGroups();
+      scheduleVisibleReveal();
     };
 
     let scanFrame = 0;
@@ -296,11 +368,20 @@ function GlobalLeafStaggerInner() {
 
     scan();
 
+    window.addEventListener("scroll", scheduleVisibleReveal, { passive: true });
+    window.addEventListener("resize", scheduleVisibleReveal);
+    const initialRevealFallback = window.setTimeout(revealVisibleElements, 180);
+
     const mutationObserver = new MutationObserver(scheduleScan);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       if (scanFrame) window.cancelAnimationFrame(scanFrame);
+      if (visibleCheckFrame) window.cancelAnimationFrame(visibleCheckFrame);
+      window.clearTimeout(initialRevealFallback);
+      revealTimers.forEach((timer) => window.clearTimeout(timer));
+      window.removeEventListener("scroll", scheduleVisibleReveal);
+      window.removeEventListener("resize", scheduleVisibleReveal);
       mutationObserver.disconnect();
       observer.disconnect();
       activeAnimations.forEach((controls) => controls.stop());

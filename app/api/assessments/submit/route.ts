@@ -190,6 +190,13 @@ export async function POST(request: Request) {
     const normalizedScore = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
     const passed = !needsManualGrading && (assessment.type === "PRETEST" || normalizedScore >= assessment.passingScore);
     const status = needsManualGrading ? "PENDING_GRADE" : "GRADED"; // assuming non-manual are graded instantly
+    const feedback = needsManualGrading
+      ? "Tugas berhasil dikirim dan menunggu penilaian mentor."
+      : (normalizedScore >= 90
+        ? "Luar biasa! Pemahaman Anda sangat kuat."
+        : passed
+          ? "Bagus! Anda siap melanjutkan ke tahap berikutnya."
+          : "Tinjau kembali materi inti, lalu coba sekali lagi.");
 
     const attempt = await prisma.assessmentAttempt.create({
       data: {
@@ -198,6 +205,7 @@ export async function POST(request: Request) {
         score: needsManualGrading ? 0 : normalizedScore, // wait for grading if needed
         passed: passed,
         status: status,
+        feedback,
         answers: {
           create: attemptAnswers
         }
@@ -244,7 +252,7 @@ export async function POST(request: Request) {
       total: assessment.questions.length,
       passingScore: assessment.passingScore,
       certificateNumber: completion?.certificateNumber ?? null,
-      feedback: needsManualGrading ? "Tugas berhasil dikirim dan menunggu penilaian mentor." : (normalizedScore >= 90 ? "Luar biasa! Pemahaman Anda sangat kuat." : passed ? "Bagus! Anda siap melanjutkan ke tahap berikutnya." : "Tinjau kembali materi inti, lalu coba sekali lagi."),
+      feedback,
       questions: reviewQuestions
     });
   } catch (error) {

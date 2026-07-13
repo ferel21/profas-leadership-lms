@@ -180,13 +180,20 @@ async function main() {
     await expectStatus(base, "/dashboard", 200, { headers: authHeaders });
     await expectStatus(base, "/peringkat", 200, { headers: authHeaders });
     const classroom = await expectStatus(base, "/belajar/fondasi-kepemimpinan-berdampak", 200, { headers: authHeaders });
-    assert.ok((await classroom.text()).includes("Pretest Kepemimpinan"), "Course player tidak menampilkan pretest tingkat program");
+    const classroomHtml = await classroom.text();
+    assert.ok(classroomHtml.includes("Pretest Kepemimpinan"), "Course player tidak menampilkan pretest tingkat program");
+    assert.ok(classroomHtml.includes("RINGKASAN BELAJAR"), "Course player tidak menampilkan ringkasan lanjutkan belajar");
+    assert.ok(classroomHtml.includes('role="tablist"'), "Course player tidak merender navigasi tab aksesibel");
     await expectStatus(base, "/belajar/strategic-leadership-masterclass", 200, { headers: authHeaders });
 
     const user = await prisma.user.findUniqueOrThrow({ where: { email: "peserta@profas.id" }, select: { id: true } });
     const lesson = await prisma.courseNode.findFirstOrThrow({ where: { courseId: "course-leadership-foundation", type: { not: "FOLDER" } }, select: { id: true } });
     const assessment = await prisma.assessment.findFirstOrThrow({ where: { courseId: "course-leadership-foundation", type: { not: "PRETEST" } }, select: { id: true } });
     assert.ok(user.id, "Akun demo peserta tidak tersedia");
+
+    const assessmentResult = await expectStatus(base, `/api/assessments/${assessment.id}/result`, 200, { headers: authHeaders });
+    const assessmentResultBody = await assessmentResult.json();
+    assert.ok(assessmentResultBody.result === null || typeof assessmentResultBody.result === "object", "Endpoint feedback assessment mengembalikan format tidak valid");
 
     await expectStatus(base, `/api/discussions?lessonId=${lesson.id}&nodeId=${lesson.id}`, 200, { headers: authHeaders });
     await expectStatus(base, "/api/progress", 400, {

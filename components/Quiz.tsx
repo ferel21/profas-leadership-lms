@@ -137,21 +137,23 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
     <main style={{ maxWidth: '800px', margin: '3rem auto', padding: '0 20px' }}>
       <div className="quiz-top" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
         <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 'bold' }}>Soal {current + 1} dari {assessment.questions.length}</span>
-        <div style={{ display: 'flex', gap: '6px' }}>{assessment.questions.map((item, index) => <i key={item.id} style={{ width: '32px', height: '6px', borderRadius: '4px', background: answers[item.id] !== undefined ? 'var(--teal)' : index === current ? 'var(--teal-light)' : '#e2e8f0', transition: 'all 0.3s ease' }} />)}</div>
+        <div role="progressbar" aria-label="Progres pengisian evaluasi" aria-valuenow={Object.keys(answers).length} aria-valuemin={0} aria-valuemax={assessment.questions.length} style={{ display: 'flex', gap: '6px' }}>{assessment.questions.map((item, index) => <i aria-hidden="true" key={item.id} style={{ width: '32px', height: '6px', borderRadius: '4px', background: answers[item.id] !== undefined ? 'var(--teal)' : index === current ? 'var(--teal-light)' : '#e2e8f0', transition: 'all 0.3s ease' }} />)}</div>
       </div>
       <article className="question-card glass hover-lift" style={{ padding: '3rem', borderRadius: '24px', background: 'rgba(255,255,255,0.8)' }}>
         <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--teal)', letterSpacing: '1px' }}>PERTANYAAN {current + 1} ({question.type})</span>
         <h1 style={{ fontSize: '24px', lineHeight: 1.5, margin: '1rem 0 2rem' }}>{question.prompt}</h1>
         
         {isMultiple && (
-          <div className="options" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {options.map((option, index) => <button key={option} onClick={() => setAnswers(previous => ({ ...previous, [question.id]: index }))} className={`hover-lift ${answers[question.id] === index ? "selected" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '16px', border: answers[question.id] === index ? '2px solid var(--teal)' : '1px solid var(--line)', background: answers[question.id] === index ? 'var(--teal-light)' : 'white', textAlign: 'left', transition: 'all 0.2s ease', cursor: 'pointer' }}><i style={{ width: '32px', height: '32px', display: 'grid', placeItems: 'center', borderRadius: '8px', background: answers[question.id] === index ? 'var(--teal)' : '#f1f5f9', color: answers[question.id] === index ? 'white' : 'var(--muted)', fontStyle: 'normal', fontWeight: 'bold' }}>{String.fromCharCode(65 + index)}</i><span style={{ flex: 1, fontSize: '15px', color: answers[question.id] === index ? 'var(--teal-dark)' : 'inherit' }}>{option}</span>{answers[question.id] === index && <CheckCircle2 style={{ color: 'var(--teal)' }} />}</button>)}
+          <div className="options" role="radiogroup" aria-label={`Pilihan jawaban untuk soal ${current + 1}`} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {options.map((option, index) => <button type="button" role="radio" aria-checked={answers[question.id] === index} key={option} onClick={() => setAnswers(previous => ({ ...previous, [question.id]: index }))} className={`hover-lift ${answers[question.id] === index ? "selected" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '16px', border: answers[question.id] === index ? '2px solid var(--teal)' : '1px solid var(--line)', background: answers[question.id] === index ? 'var(--teal-light)' : 'white', textAlign: 'left', transition: 'all 0.2s ease', cursor: 'pointer' }}><i aria-hidden="true" style={{ width: '32px', height: '32px', display: 'grid', placeItems: 'center', borderRadius: '8px', background: answers[question.id] === index ? 'var(--teal)' : '#f1f5f9', color: answers[question.id] === index ? 'white' : 'var(--muted)', fontStyle: 'normal', fontWeight: 'bold' }}>{String.fromCharCode(65 + index)}</i><span style={{ flex: 1, fontSize: '15px', color: answers[question.id] === index ? 'var(--teal-dark)' : 'inherit' }}>{option}</span>{answers[question.id] === index && <CheckCircle2 aria-hidden="true" style={{ color: 'var(--teal)' }} />}</button>)}
           </div>
         )}
 
         {(question.type === 'SHORT_ANSWER' || question.type === 'ESSAY') && (
           <div>
-            <textarea 
+            <label htmlFor={`answer-${question.id}`} className="sr-only">Jawaban soal {current + 1}</label>
+            <textarea
+              id={`answer-${question.id}`}
               value={answers[question.id] || ""} 
               onChange={e => setAnswers(prev => ({ ...prev, [question.id]: e.target.value }))}
               placeholder="Ketik jawaban Anda di sini..." 
@@ -164,7 +166,8 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
           <div style={{ padding: '2rem', border: '2px dashed var(--line)', borderRadius: '12px', textAlign: 'center', background: '#f8fbfc' }}>
             <UploadCloud size={32} style={{ color: 'var(--teal)', marginBottom: '1rem' }} />
             <p style={{ marginBottom: '1rem', color: 'var(--muted)' }}>Pilih file untuk diunggah (PDF, DOCX, ZIP)</p>
-            <input type="file" onChange={(e) => handleFileChange(e, question.id)} />
+            <label htmlFor={`file-${question.id}`} className="sr-only">Berkas jawaban soal {current + 1}</label>
+            <input id={`file-${question.id}`} type="file" onChange={(e) => handleFileChange(e, question.id)} />
             {files[question.id] && <p style={{ marginTop: '1rem', color: 'var(--teal-dark)', fontWeight: 'bold' }}>File terpilih: {files[question.id].name}</p>}
           </div>
         )}
@@ -172,9 +175,9 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
       </article>
       {error && <p className="quiz-error" role="alert" style={{ marginTop: '2rem', padding: '1rem', background: '#fee2e2', color: '#dc2626', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{error} <button type="button" onClick={() => void submit()} style={{ padding: '6px 12px', background: 'white', border: 'none', borderRadius: '6px', color: '#dc2626', fontWeight: 'bold', cursor: 'pointer' }}>Kirim ulang</button></p>}
       <footer className="glass" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', borderRadius: '20px', marginTop: '2rem', background: 'rgba(255,255,255,0.6)' }}>
-        <button className="btn btn-outline hover-lift" disabled={current === 0 || loading} onClick={() => setCurrent(current - 1)} style={{ background: 'white' }}><ArrowLeft /> Sebelumnya</button>
+        <button type="button" className="btn btn-outline hover-lift" disabled={current === 0 || loading} onClick={() => setCurrent(current - 1)} style={{ background: 'white' }}><ArrowLeft /> Sebelumnya</button>
         <small style={{ color: 'var(--muted)', fontWeight: 'bold' }}>{Object.keys(answers).length} dari {assessment.questions.length} terjawab</small>
-        {current < assessment.questions.length - 1 ? <button className="btn btn-primary hover-lift" disabled={loading} onClick={() => setCurrent(current + 1)}>Berikutnya <ArrowRight /></button> : <button className="btn btn-primary hover-lift" disabled={Object.keys(answers).length < assessment.questions.length || loading} onClick={() => void submit()}>{loading ? <LoaderCircle className="spin" /> : <>Kirim Jawaban <ArrowRight /></>}</button>}
+        {current < assessment.questions.length - 1 ? <button type="button" className="btn btn-primary hover-lift" disabled={loading} onClick={() => setCurrent(current + 1)}>Berikutnya <ArrowRight /></button> : <button type="button" className="btn btn-primary hover-lift" disabled={Object.keys(answers).length < assessment.questions.length || loading} onClick={() => void submit()}>{loading ? <LoaderCircle className="spin" aria-label="Mengirim jawaban" /> : <>Kirim Jawaban <ArrowRight /></>}</button>}
       </footer>
     </main>
   </div>

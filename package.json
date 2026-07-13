@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "security:baseline": "node scripts/security-baseline.mjs",
     "autopilot:start": "bash scripts/autopilot-control.sh start 24",
     "autopilot:status": "bash scripts/autopilot-control.sh status",
     "autopilot:stop": "bash scripts/autopilot-control.sh stop",

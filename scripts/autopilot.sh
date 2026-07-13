@@ -145,13 +145,14 @@ health_cycle() {
   if [[ $CYCLE -eq 1 || $((CYCLE % BUILD_EVERY)) -eq 0 ]]; then
     run_check "production build" npm run build || failed=1
     run_check "runtime smoke test" npm run smoke || failed=1
+    run_check "security baseline" npm run security:baseline || failed=1
   fi
 
   if [[ $failed -ne 0 ]]; then
     mechanical_repair
-    if ! run_check "verifikasi setelah perbaikan mekanis" npm run typecheck || ! run_check "lint setelah perbaikan mekanis" npm run lint || ! run_check "build setelah perbaikan mekanis" npm run build || ! run_check "smoke test setelah perbaikan mekanis" npm run smoke; then
+    if ! run_check "verifikasi setelah perbaikan mekanis" npm run typecheck || ! run_check "lint setelah perbaikan mekanis" npm run lint || ! run_check "build setelah perbaikan mekanis" npm run build || ! run_check "smoke test setelah perbaikan mekanis" npm run smoke || ! run_check "security baseline setelah perbaikan mekanis" npm run security:baseline; then
       run_codex "repair" "Health-check gagal dan perbaikan mekanis belum memulihkan proyek" || true
-      if run_check "verifikasi akhir" npm run typecheck && run_check "lint akhir" npm run lint && run_check "build akhir" npm run build && run_check "smoke test akhir" npm run smoke; then
+      if run_check "verifikasi akhir" npm run typecheck && run_check "lint akhir" npm run lint && run_check "build akhir" npm run build && run_check "smoke test akhir" npm run smoke && run_check "security baseline akhir" npm run security:baseline; then
         LAST_MESSAGE="Siklus $CYCLE pulih setelah perbaikan AI"
         write_state "healthy" "$LAST_MESSAGE"
         return 0
@@ -167,7 +168,7 @@ health_cycle() {
 
   if [[ $((CYCLE % IMPROVE_EVERY)) -eq 0 ]]; then
     run_codex "improve" "Pemeriksaan bersih; cari tepat satu bug, fitur belum lengkap, atau optimasi berisiko rendah" || true
-    if ! run_check "typecheck pasca-audit" npm run typecheck || ! run_check "lint pasca-audit" npm run lint || ! run_check "build pasca-audit" npm run build || ! run_check "smoke test pasca-audit" npm run smoke; then
+    if ! run_check "typecheck pasca-audit" npm run typecheck || ! run_check "lint pasca-audit" npm run lint || ! run_check "build pasca-audit" npm run build || ! run_check "smoke test pasca-audit" npm run smoke || ! run_check "security baseline pasca-audit" npm run security:baseline; then
       LAST_MESSAGE="Audit proaktif menghasilkan kegagalan; snapshot tersedia"
       write_state "degraded" "$LAST_MESSAGE"
       return 1

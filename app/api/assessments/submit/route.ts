@@ -6,6 +6,7 @@ import { finalizeCourseCompletion } from "@/lib/completion";
 import fs from 'fs';
 import { randomUUID } from "node:crypto";
 import { getWritableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
+import { validateFileMagicBytes } from "@/lib/file-security";
 
 const MAX_SUBMISSION_FILE_SIZE = 20 * 1024 * 1024;
 const SUBMISSION_FILE_TYPES: Record<string, string> = {
@@ -115,6 +116,10 @@ export async function POST(request: Request) {
     for (const pending of pendingFiles) {
       const fileName = `${randomUUID()}${SUBMISSION_FILE_TYPES[pending.file.type]}`;
       const buffer = Buffer.from(await pending.file.arrayBuffer());
+
+      if (!validateFileMagicBytes(buffer, pending.file.type)) {
+        return NextResponse.json({ message: "Format isi berkas evaluasi tidak sesuai dengan jenis MIME (Magic Byte Validation failed)." }, { status: 400 });
+      }
 
       let stored = false;
       for (const root of getWritableUploadRoots()) {

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { getWritableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
+import { validateFileMagicBytes } from "@/lib/file-security";
 
 const ALLOWED_TYPES = new Map([
   ["application/pdf", "PDF"],
@@ -99,6 +100,10 @@ export async function POST(request: Request) {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120) || "material";
   const fileName = `${timestamp}-${safeName}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (!validateFileMagicBytes(buffer, file.type)) {
+    return NextResponse.json({ message: "Format isi berkas tidak sesuai dengan jenis MIME (Magic Byte Validation failed)." }, { status: 400 });
+  }
 
   let stored = false;
   for (const root of getWritableUploadRoots()) {

@@ -4,9 +4,11 @@
   ========================================
 */
 :root {
-  /* Font Family (Injected via Next.js Font) */
-  --font-display: var(--font-nunito), "Nunito", "Quicksand", system-ui, sans-serif;
-  --font-body: var(--font-nunito), "Nunito", "Open Sans", system-ui, sans-serif;
+  /* Font Family (Injected via Next.js Font & MacBook System Font Stack) */
+  --font-inter: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: var(--font-inter);
+  --font-body: var(--font-inter);
+  --font-heading: var(--font-inter);
   
   /* Font Sizes - Standardized Scale */
   --text-2xs: 0.75rem;    /* 12px (previously 6-8px) */

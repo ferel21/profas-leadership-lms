@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Outfit } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { RouteProgressBar } from "@/components/RouteProgressBar";
 import "./typography.css";
 import "./design-system.css";
@@ -13,8 +13,7 @@ import "./lms-fresh.css";
 import './akseslegal-theme.css';
 import './home-landing.css';
 
-const plusJakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-display', weight: ['400', '500', '600', '700', '800'] });
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-heading', weight: ['400', '500', '600', '700', '800', '900'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";
 
 export const metadata: Metadata = {
@@ -44,10 +43,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="preconnect" href="https://aws-1-ap-southeast-2.pooler.supabase.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://aws-1-ap-southeast-2.pooler.supabase.com" />
       </head>
-      <body className={`${plusJakarta.variable} ${outfit.variable} font-sans`} style={{ fontFamily: 'var(--font-display), sans-serif' }}>
+      <body className={`${inter.variable} font-sans`} style={{ fontFamily: 'var(--font-inter, "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif)' }}>
         <RouteProgressBar />
         {children}
       </body>
     </html>
   );
 }
+

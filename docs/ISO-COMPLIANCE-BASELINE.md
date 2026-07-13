@@ -44,6 +44,8 @@ npm run lint
 npm audit --omit=dev
 npm run build
 npm run smoke
+npm run security:baseline
+BASE_URL=http://127.0.0.1:3000 npm run load:test
 ```
 
 Untuk accessibility route utama, jalankan audit axe live setelah server development aktif. Acceptance minimum: tidak ada violation `serious` atau `critical`, keyboard focus tidak terperangkap, dan konten tetap tampil ketika `prefers-reduced-motion` aktif atau `IntersectionObserver` tidak tersedia.
@@ -58,6 +60,19 @@ Untuk accessibility route utama, jalankan audit axe live setelah server developm
 6. Lengkapi privacy inventory/ROPA, legal basis/consent, retention and deletion workflow, DSAR, processor/subprocessor register, dan konfigurasi encryption-at-rest database/object storage.
 7. Bentuk data dictionary pembelajaran yang memuat minimal language, keywords, learning objectives, audience, duration, version, license, accessibility, dan resource type sesuai kebutuhan LMS.
 8. Lakukan usability test dengan learner/mentor nyata, screen reader test, keyboard-only test, mobile test, load test, serta performance budget berbasis Core Web Vitals.
+
+## Governance pack
+
+Artefak operasional yang menyertai baseline ini:
+
+- [Risk register](./governance/RISK-REGISTER.md): owner, likelihood/impact, treatment, dan release rule.
+- [ROPA/privacy record](./governance/ROPA-PRIVACY-RECORD.md): processing activities, data minimization, retention, processor, dan rights workflow.
+- [Incident response runbook](./governance/INCIDENT-RESPONSE-RUNBOOK.md): severity, containment, evidence, recovery, dan post-incident review.
+- [Manual screen-reader audit](./governance/MANUAL-SCREEN-READER-AUDIT.md): NVDA/VoiceOver/TalkBack, keyboard, zoom, reduced motion, dan evidence record.
+- `scripts/security-baseline.mjs`: penetration-style negative checks yang aman untuk local/staging dan menolak target eksternal tanpa explicit confirmation.
+- `scripts/load-test.mjs`: synthetic read-only load test dengan concurrency, p95, error-rate threshold, dan guard terhadap production target.
+
+Endpoint `/api/health` sekarang hanya mengembalikan readiness minimal secara publik. Detail jumlah user/course, uptime, dan memory hanya tersedia untuk monitoring dengan header `x-health-token` yang cocok dengan `HEALTHCHECK_TOKEN` server-only.
 
 ## Referensi resmi
 

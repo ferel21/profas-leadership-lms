@@ -8,6 +8,8 @@
     "build:local": "prisma generate && prisma db push --accept-data-loss && prisma db seed && next build && mkdir -p .next/standalone/.next && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/",
     "start": "mkdir -p .next/standalone/.next && cp -r public .next/standalone/ 2>/dev/null || true && cp -r .next/static .next/standalone/.next/ 2>/dev/null || true && (PORT=${PORT:-3000} node .next/standalone/server.js || next start -p ${PORT:-3000})",
     "smoke": "node scripts/smoke-test.mjs",
+    "security:baseline": "node scripts/security-baseline.mjs",
+    "load:test": "node scripts/load-test.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "autopilot:start": "bash scripts/autopilot-control.sh start 24",

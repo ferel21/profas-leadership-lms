@@ -4,124 +4,79 @@ import { prisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+type HealthSnapshot = { status: "HEALTHY" | "UNHEALTHY"; latencyMs: number; checkedAt: number };
+
+let cachedSnapshot: HealthSnapshot | null = null;
+let pendingSnapshot: Promise<HealthSnapshot> | null = null;
+
+async function checkDatabase(): Promise<HealthSnapshot> {
+  const started = Date.now();
+  try {
+    // One lightweight query keeps readiness checks compatible with a
+    // serverless/pooler connection_limit=1 deployment.
+    await prisma.user.findFirst({ select: { id: true } });
+    return { status: "HEALTHY", latencyMs: Date.now() - started, checkedAt: Date.now() };
+  } catch (error) {
+    console.error("[HEALTH_CHECK_DB_ERROR]", error);
+    return { status: "UNHEALTHY", latencyMs: Date.now() - started, checkedAt: Date.now() };
+  }
+}
+
+async function getHealthSnapshot() {
+  const ttlMs = Math.max(1000, Number(process.env.HEALTHCHECK_CACHE_MS || 5000));
+  if (cachedSnapshot && Date.now() - cachedSnapshot.checkedAt < ttlMs) return cachedSnapshot;
+  if (!pendingSnapshot) {
+    pendingSnapshot = checkDatabase().then(snapshot => {
+      cachedSnapshot = snapshot;
+      return snapshot;
+    }).finally(() => {
+      pendingSnapshot = null;
+    });
+  }
+  return pendingSnapshot;
+}
+
+export async function GET(request: Request) {
   const startTime = Date.now();
-  let dbStatus = "HEALTHY";
-  let dbLatencyMs = 0;
+  const snapshot = await getHealthSnapshot();
+  const dbStatus = snapshot.status;
+  const dbLatencyMs = snapshot.latencyMs;
   let userCount = 0;
   let courseCount = 0;
 
-  try {
-    const dbStart = Date.now();
-    // Test DB connection and get basic stats for 24/7 audit
-    const [users, courses] = await Promise.all([
-      prisma.user.count(),
-      prisma.course.count(),
-    ]);
-    dbLatencyMs = Date.now() - dbStart;
-    userCount = users;
-    courseCount = courses;
-  } catch (error) {
-    console.error("[HEALTH_CHECK_DB_ERROR]", error);
-    dbStatus = "UNHEALTHY";
-  }
-
-  const memoryUsage = process.memoryUsage();
-  const uptimeSeconds = process.uptime();
-  const totalLatencyMs = Date.now() - startTime;
-
-  const healthReport = {
+  const report: Record<string, unknown> = {
     status: dbStatus === "HEALTHY" ? "OK" : "DEGRADED",
     timestamp: new Date().toISOString(),
-    environment: process.env.VERCEL
-      ? "Vercel Serverless Production"
-      : process.env.NETLIFY
-      ? "Netlify Serverless Production"
-      : "Local / Dedicated Server",
-    database: {
+    database: { status: dbStatus, latencyMs: dbLatencyMs },
+    performance: { checkDurationMs: Date.now() - startTime },
+  };
+
+  // The public health endpoint intentionally exposes only liveness/readiness.
+  // Monitoring systems may request operational detail with a server-only token.
+  const healthToken = process.env.HEALTHCHECK_TOKEN?.trim();
+  const suppliedToken = request.headers.get("x-health-token");
+  if (healthToken && suppliedToken === healthToken && dbStatus === "HEALTHY") {
+    const memoryUsage = process.memoryUsage();
+    [userCount, courseCount] = [
+      await prisma.user.count(),
+      await prisma.course.count(),
+    ];
+    report.database = {
       status: dbStatus,
       latencyMs: dbLatencyMs,
-      metrics: {
-        totalUsers: userCount,
-        totalCourses: courseCount,
-      },
-    },
-    system: {
-      uptimeSeconds: Math.round(uptimeSeconds),
+      metrics: { totalUsers: userCount, totalCourses: courseCount },
+    };
+    report.system = {
+      uptimeSeconds: Math.round(process.uptime()),
       memoryUsageMB: {
         rss: Math.round(memoryUsage.rss / 1024 / 1024),
         heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
         heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
       },
-      zeroMemoryLeakProtected: true,
-    },
-    performance: {
-      checkDurationMs: totalLatencyMs,
-    },
-    proLmsFeatures: {
-      base64AvatarStorage: "ACTIVE",
-      universalUploadTmpFallback: "ACTIVE",
-      quizCompletionSync100: "ACTIVE",
-      pureCssConfetti: "ACTIVE",
-      glassmorphismUI: "ACTIVE",
-      smartResolveQuizSync: "ACTIVE",
-      supabasePostgresReady: "ACTIVE",
-      executiveDarkMode: "ACTIVE",
-      autoBackupBrowserMemory: "ACTIVE",
-      auroraMeshBackground: "ACTIVE",
-      glassmorphismTooltips: "ACTIVE",
-      liveLearningPulseUI: "ACTIVE",
-      securityRLSHardened: "ACTIVE",
-      executiveProgressRingsUI: "ACTIVE",
-      floatingCommandBarUI: "ACTIVE",
-      studyStreakFlameUI: "ACTIVE",
-      podiumMedalsUI: "ACTIVE",
-      holographicCertificateSealUI: "ACTIVE",
-      glassBookmarkCardsUI: "ACTIVE",
-      interactiveVideoScrubberUI: "ACTIVE",
-      shimmeringXpBadgesUI: "ACTIVE",
-      learningRoadmapNodesUI: "ACTIVE",
-      shimmeringTrophiesUI: "ACTIVE",
-      certificateQrVerificationUI: "ACTIVE",
-      interactiveConfettiButtonsUI: "ACTIVE",
-      executiveStudentIdCardUI: "ACTIVE",
-      mentorVerifiedPillUI: "ACTIVE",
-      executiveCommandPaletteUI: "ACTIVE",
-      aiTutorVoiceTTS: "ACTIVE",
-      aiTutorCaseSimulation: "ACTIVE",
-      executiveRoadmapDashboardUI: "ACTIVE",
-      liveCloudDbPulseHeader: "ACTIVE",
-      studyStreakHeaderBadge: "ACTIVE",
-      executiveForumCardUI: "ACTIVE",
-      verifiedExpertBadgeUI: "ACTIVE",
-      executiveAudioWaveformUI: "ACTIVE",
-      shimmeringPodcastBadgeUI: "ACTIVE",
-      executiveLiveWebinarUI: "ACTIVE",
-      interactiveBookmarkRibbonUI: "ACTIVE",
-      aiReflectionSparkleUI: "ACTIVE",
-      executiveMasterclassBadgeUI: "ACTIVE",
-      certificateVerifySealUI: "ACTIVE",
-      executiveMentorBioCardUI: "ACTIVE",
-      executivePeerScorecardUI: "ACTIVE",
-      interactiveSyllabusAccordionUI: "ACTIVE",
-      executiveMentorCalendarUI: "ACTIVE",
-      vipPrioritySupportPillUI: "ACTIVE",
-      aiVoiceEqualizerPulseUI: "ACTIVE",
-      featuredCourseRibbonUI: "ACTIVE",
-      executiveNftSealUI: "ACTIVE",
-      mentorAvailabilityStatusUI: "ACTIVE",
-      courseCatalogMasterclassBadges: "ACTIVE",
-      forumVerifiedExpertBadges: "ACTIVE",
-      leaderboardNftChampionSeals: "ACTIVE",
-      vercelEnvVarsInjected: "100% SUKSES",
-      errorLoadingBoundaries: "ACTIVE",
-      securityHeadersMiddleware: "ACTIVE",
-      allSkillsIntegrated: "ACTIVE",
-      autonomousIteration: "23 (All Skills & 24/7 Autopilot Enabled)",
-    },
-  };
+    };
+  }
 
-  return NextResponse.json(healthReport, {
+  return NextResponse.json(report, {
     status: dbStatus === "HEALTHY" ? 200 : 503,
     headers: {
       "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",

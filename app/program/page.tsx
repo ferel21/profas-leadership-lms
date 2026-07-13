@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProgramCatalog } from "@/components/ProgramCatalog";
-import { prisma } from "@/lib/prisma";
+import { cachedQuery, prisma } from "@/lib/prisma";
 
 export const revalidate = 3600;
 
@@ -20,25 +20,31 @@ type CatalogCourse = {
   mentor: { name: string };
 };
 
+const getCachedCourses = cachedQuery(
+  () => prisma.course.findMany({
+    where: { published: true },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      shortDescription: true,
+      category: true,
+      level: true,
+      price: true,
+      durationHours: true,
+      rating: true,
+      studentsCount: true,
+      image: true,
+      mentor: { select: { name: true } },
+    },
+  }),
+  ["program-catalog"],
+  3600,
+);
+
 async function getCourses(): Promise<CatalogCourse[]> {
   try {
-    const courses = await prisma.course.findMany({
-      where: { published: true },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        shortDescription: true,
-        category: true,
-        level: true,
-        price: true,
-        durationHours: true,
-        rating: true,
-        studentsCount: true,
-        image: true,
-        mentor: { select: { name: true } },
-      },
-    });
+    const courses = await getCachedCourses();
     return courses.map(course => ({
       ...course,
       mentor: { name: course.mentor?.name ?? "Mentor PROFAS" },

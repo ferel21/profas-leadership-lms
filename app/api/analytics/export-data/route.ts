@@ -2,12 +2,20 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
+
+const exportLimiter = rateLimit({ limit: 20, windowMs: 60 * 1000 });
 
 /**
  * API untuk Ekspor Data Komprehensif (Excel .xlsx, Word .docx, PDF Transkrip, PPTX Slide Deck).
  * Dilengkapi pengamanan Role Access Control (RAC) serta seleksi field aman sesuai prinsip `auth-oauth-security` & `database-supabase-prisma`.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const ipCheck = exportLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan ekspor data. Silakan tunggu 1 menit." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ message: "Sesi tidak valid. Silakan login terlebih dahulu." }, { status: 401 });
@@ -15,9 +23,14 @@ export async function GET() {
 
   try {
     if (user.role === "SUPER_ADMIN" || user.role === "MENTOR") {
+      const studentWhere = user.role === "MENTOR"
+        ? { role: "STUDENT" as const, enrollments: { some: { course: { mentorId: user.id } } } }
+        : { role: "STUDENT" as const };
+
       // Ambil data murid, absensi, XP log untuk laporan Excel Multi-sheet
       const studentUsers = await prisma.user.findMany({
-        where: { role: "STUDENT" },
+        where: studentWhere,
+        take: 300,
         select: {
           id: true,
           name: true,
@@ -27,6 +40,8 @@ export async function GET() {
           organization: true,
           createdAt: true,
           enrollments: {
+            where: user.role === "MENTOR" ? { course: { mentorId: user.id } } : undefined,
+            take: 20,
             select: {
               progressPercent: true,
               status: true,
@@ -34,7 +49,11 @@ export async function GET() {
               course: { select: { title: true } }
             }
           },
-          xpLogs: { select: { points: true, source: true, createdAt: true } }
+          xpLogs: {
+            take: 50,
+            orderBy: { createdAt: "desc" },
+            select: { points: true, source: true, createdAt: true }
+          }
         },
         orderBy: { name: "asc" }
       });
@@ -59,6 +78,7 @@ export async function GET() {
 
       // Data Absensi
       const attendanceRecords = await prisma.attendanceRecord.findMany({
+        where: user.role === "MENTOR" ? { event: { course: { mentorId: user.id } } } : undefined,
         select: {
           id: true,
           status: true,

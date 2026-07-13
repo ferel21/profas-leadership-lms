@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
+
+const analyticsLimiter = rateLimit({ limit: 120, windowMs: 60 * 1000 });
 
 const activitySchema = z.object({
   action: z.string().trim().min(1).max(80).regex(/^[\p{L}\p{N} _:-]+$/u),
@@ -9,6 +12,11 @@ const activitySchema = z.object({
 }).refine(value => !value.metadata || JSON.stringify(value.metadata).length <= 2000, "Metadata terlalu besar.");
 
 export async function POST(request: Request) {
+  const ipCheck = analyticsLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -31,7 +39,12 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const ipCheck = analyticsLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user || (user.role !== "MENTOR" && user.role !== "SUPER_ADMIN")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -45,11 +58,14 @@ export async function GET() {
       by: ['action'],
       _count: { id: true },
       where: {
-        createdAt: { gte: last30Days }
+        createdAt: { gte: last30Days },
+        ...(user.role === "MENTOR" ? { user: { enrollments: { some: { course: { mentorId: user.id } } } } } : {})
       }
     });
 
-    return NextResponse.json(logs);
+    return NextResponse.json(logs, {
+      headers: { "Cache-Control": "private, max-age=60, s-maxage=60" }
+    });
   } catch {
     return NextResponse.json({ error: "Failed to fetch analytics" }, { status: 500 });
   }

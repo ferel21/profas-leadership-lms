@@ -100,7 +100,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
   async function logout(){try{await fetch("/api/auth/logout",{method:"POST"})}finally{router.push("/");router.refresh()}}
 
   return <div className={`dashboard-layout dashboard-fresh ${roleClass} ${collapsed ? "sidebar-collapsed" : ""}`}>
-    <aside className={`dashboard-sidebar ${open?"open":""}`}>
+    <aside className={`dashboard-sidebar ${open?"open":""}`} aria-label="Navigasi dashboard">
       <div className="sidebar-top">
         {!collapsed && <Logo/>}
         {collapsed && <Logo compact />}
@@ -116,7 +116,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
         } : {}}>{user.avatar ? <Image src={user.avatar} alt="" width={38} height={38} /> : initials(user.name)}</span>
         {!collapsed && <div><b>{user.username ? `@${user.username}` : user.name}</b><small>{user.name} · {user.role==="STUDENT"?"Peserta":user.role==="MENTOR"?"Mentor":"Super Admin"}</small></div>}
       </div>
-      <nav>
+      <nav aria-label="Menu dashboard">
         {nav.map(([label, Icon, href], index) => {
           const isActive = pathname === href || (index === 0 && pathname === "/dashboard");
           return (
@@ -148,7 +148,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
         })}
       </nav>
       <div className="sidebar-bottom">
-        <button onClick={()=>setCollapsed(!collapsed)} className="desktop-toggle-btn" title="Toggle Sidebar"><Menu/>{!collapsed && "Kecilkan Menu"}</button>
+        <button onClick={()=>setCollapsed(!collapsed)} className="desktop-toggle-btn" title="Toggle Sidebar" aria-label={collapsed ? "Perbesar menu" : "Kecilkan menu"} aria-expanded={!collapsed}><Menu/>{!collapsed && "Kecilkan Menu"}</button>
         <button onClick={logout} title="Keluar"><LogOut/>{!collapsed && "Keluar"}</button>
       </div>
     </aside>
@@ -191,7 +191,7 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
           <button onClick={()=>setShowNotifs(v=>!v)} aria-label="Tampilkan notifikasi" aria-expanded={showNotifs} className="notif-btn">
             <Bell/>{unreadCount > 0 && <i className="notification-badge">{unreadCount}</i>}
           </button>
-          {showNotifs&&<div className="notification-popover">
+          {showNotifs&&<div className="notification-popover" role="dialog" aria-label="Notifikasi">
             <div className="notification-popover-header">
               <b>Notifikasi</b>
               {unreadCount > 0 && <button onClick={markReadAll} className="text-link"><Check className="icon-xs"/> Tandai semua dibaca</button>}
@@ -201,12 +201,12 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
                 <p className="notification-empty">Belum ada notifikasi baru.</p>
               ) : (
                 notifs.map(n => (
-                  <div key={n.id} className={`notification-item ${n.read ? "" : "unread"}`} onClick={() => markRead(n.id, n.link)}>
+                  <button type="button" key={n.id} className={`notification-item ${n.read ? "" : "unread"}`} onClick={() => markRead(n.id, n.link)} aria-label={`${n.read ? "Buka" : "Baca"} notifikasi: ${n.title}`}>
                     <div className="notif-content">
                       <b>{n.title}</b>
                       <p>{n.message}</p>
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>

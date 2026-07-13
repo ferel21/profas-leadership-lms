@@ -69,16 +69,6 @@ export async function POST(request: Request) {
       }
     });
 
-    // Auto-enroll ke semua program kepemimpinan jika role adalah STUDENT
-    if (newUser.role === "STUDENT") {
-      const publishedCourses = await prisma.course.findMany({ where: { published: true } });
-      for (const course of publishedCourses) {
-        await prisma.enrollment.create({
-          data: { userId: newUser.id, courseId: course.id, status: "ACTIVE", progressPercent: 0 }
-        });
-      }
-    }
-
     const userRow = {
       id: newUser.id,
       name: newUser.name,
@@ -87,7 +77,7 @@ export async function POST(request: Request) {
       authProvider: newUser.authProvider,
       createdAt: newUser.createdAt.toISOString(),
       _count: {
-        enrollments: newUser.role === "STUDENT" ? 3 : 0,
+        enrollments: 0,
         certificates: 0,
         mentoredCourses: 0
       }
@@ -124,10 +114,21 @@ export async function PATCH(request: Request) {
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { role: newRole as Role }
+      data: { role: newRole as Role },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        authProvider: true,
+        createdAt: true,
+      },
     });
 
-    return NextResponse.json({ success: true, user: updatedUser });
+    return NextResponse.json({
+      success: true,
+      user: { ...updatedUser, createdAt: updatedUser.createdAt.toISOString() },
+    });
   } catch (err: any) {
     console.error("Update User Role Error:", err);
     return NextResponse.json({ message: "Gagal memperbarui role pengguna." }, { status: 500 });

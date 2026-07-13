@@ -264,6 +264,7 @@ input:focus, select:focus, textarea:focus, input:focus-visible {
 .desktop-nav { font-size: var(--text-lg) !important; }
 .nav-login { font-size: var(--text-lg) !important; }
 .footer h4 { font-size: var(--text-lg) !important; margin-bottom: 16px !important; }
+.footer h3 { font-size: var(--text-lg) !important; margin-bottom: 16px !important; }
 .footer a, .footer p { font-size: var(--text-lg) !important; }
 .footer-bottom { font-size: var(--text-lg) !important; }
 
@@ -679,4 +680,3 @@ html, body {
     gap: 8px !important;
   }
 }
-

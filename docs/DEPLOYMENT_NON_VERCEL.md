@@ -30,7 +30,8 @@ Platform seperti **Railway.app**, **Render.com**, dan **Coolify** menjalankan ap
    ```
 5. **Tambahkan Persistent Volume** (Khusus untuk menyimpan video & PDF selamanya):
    - Di pengaturan Railway / Render / Coolify, tambahkan **Volume / Persistent Storage** dan arahkan *mount path* ke:
-     `/app/public/uploads`
+     `/app/.data/uploads`
+   - Set `PRIVATE_UPLOAD_DIR=/app/.data/uploads`. Berkas tidak boleh ditempatkan di `/app/public/uploads`, karena folder `public` dapat dilayani langsung tanpa pemeriksaan hak akses.
 6. Klik **Deploy**! Aplikasi LMS Anda kini berjalan 100% permanen dan super cepat tanpa batas Vercel!
 
 ---
@@ -92,7 +93,7 @@ Saya juga telah menyiapkan **`Dockerfile`** dan **`docker-compose.yml`** dengan 
    ```bash
    docker compose up -d --build
    ```
-   *Selesai! Seluruh berkas video MP4, PDF, dan foto yang diunggah mentor akan tersimpan aman selamanya di dalam volume Docker (`lms-uploads`), kebal dari restart server!*
+   *Selesai! Seluruh berkas video MP4, PDF, dan foto yang diunggah mentor akan tersimpan di volume Docker private (`lms-uploads`) dan hanya dilayani melalui endpoint berotorisasi.*
 
 ---
 

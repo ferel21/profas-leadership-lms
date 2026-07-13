@@ -482,7 +482,7 @@
 .al-float-card strong em {
   font-style: normal;
   font-size: 0.78rem;
-  color: #10b981;
+  color: #047857;
   background: #d1fae5;
   padding: 2px 8px;
   border-radius: 99px;
@@ -1299,6 +1299,13 @@
   margin-bottom: 24px !important;
 }
 
+.al-page .footer h3 {
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  margin-bottom: 24px !important;
+}
+
 .al-page .footer a {
   display: block;
   font-weight: 600 !important;
@@ -1586,6 +1593,11 @@
   font-weight: 750 !important;
 }
 
+.al-page .al-metrics b,
+.al-page .al-metrics span {
+  color: #1e5a8f !important;
+}
+
 .al-page p,
 .al-page span,
 .al-page small,
@@ -1627,4 +1639,3 @@
   box-shadow: 0 14px 30px -5px rgba(42, 107, 167, 0.45) !important;
   transform: translateY(-2px) !important;
 }
-

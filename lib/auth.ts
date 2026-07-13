@@ -3,7 +3,13 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 import { prisma } from "./prisma";
 
-const secretString = (process.env.JWT_SECRET ?? "profas-development-secret").trim().replace(/^["']|["']$/g, "");
+const configuredSecret = (process.env.JWT_SECRET ?? "").trim().replace(/^["']|["']$/g, "");
+const secretString = configuredSecret || (process.env.NODE_ENV === "production" ? "" : "profas-development-only-secret-change-me");
+
+if (secretString.length < 32) {
+  throw new Error("JWT_SECRET wajib disetel dan minimal 32 karakter sebelum server dijalankan.");
+}
+
 const secret = new TextEncoder().encode(secretString);
 
 export type SessionPayload = {
@@ -40,43 +46,14 @@ export const getCurrentUser = cache(async () => {
   if (!session) return null;
 
   try {
-    let user = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: session.userId }
     });
 
-    if (!user && session.email) {
-      user = await prisma.user.findUnique({
-        where: { email: session.email.toLowerCase() }
-      });
-    }
-
-    // Auto-sync / self-heal di lingkungan serverless Vercel (/tmp/dev.db sementara)
-    if (!user && session.email) {
-      try {
-        const validRole = session.role === "MENTOR" ? "MENTOR" : session.role === "SUPER_ADMIN" ? "SUPER_ADMIN" : "STUDENT";
-        user = await prisma.user.upsert({
-          where: { email: session.email.toLowerCase() },
-          update: {
-            name: session.name || "Peserta PROFAS",
-            avatar: session.avatar,
-            role: validRole,
-            authProvider: session.authProvider || "GOOGLE",
-          },
-          create: {
-            id: session.userId,
-            email: session.email.toLowerCase(),
-            name: session.name || "Peserta PROFAS",
-            avatar: session.avatar,
-            role: validRole,
-            authProvider: session.authProvider || "GOOGLE",
-            passwordHash: "",
-          }
-        });
-      } catch (error) {
-        console.error("[AUTH_USER_SYNC_FAILED]", error instanceof Error ? error.message : "unknown error");
-      }
-    }
-
+    // User yang sudah dihapus/nonaktif tidak boleh dibuat kembali hanya karena
+    // token lama masih valid. Identitas juga harus tetap cocok berdasarkan ID
+    // penerbitan token, bukan email yang mungkin dipakai akun baru.
+    // Role selalu diambil dari database, bukan JWT.
     return user;
   } catch (error) {
     // Public routes must remain renderable when the session database is briefly

@@ -43,7 +43,7 @@ export function AuthForm({
 
   return <form onSubmit={submit} className="auth-form">
     {(errorParam || error) && (
-      <div className="auth-alert-box">
+      <div className="auth-alert-box" role="alert" aria-live="assertive">
         <div className="auth-alert-header">
           <span>Gagal Masuk / Otorisasi Google</span>
         </div>
@@ -76,11 +76,11 @@ export function AuthForm({
       <div className="auth-divider-line"></div>
     </div>
 
-    {mode === "register" && <><label>Nama lengkap<input name="name" placeholder="Nama Anda" required minLength={3} maxLength={80}/></label><label>Nama akun<input name="username" placeholder="contoh: nadia.pratama" required minLength={3} maxLength={30} pattern="[a-z0-9][a-z0-9._-]*[a-z0-9]" title="Gunakan huruf kecil, angka, titik, garis bawah, atau tanda hubung." autoCapitalize="none"/></label><div className="persona-select"><span>Saya adalah</span><div>{[["STUDENT_ENTREPRENEUR","Pengusaha / Pelajar"],["ACADEMIC","Akademisi"],["ORGANIZATION","Organisasi"],["COOPERATIVE","Koperasi"]].map(([value,label])=><button type="button" key={value} onClick={()=>setPersona(value)} className={persona===value?"active":""}>{label}</button>)}</div></div></>}
-    <label>Email<input name="email" type="email" placeholder="nama@email.com" required/></label>
-    <label>Kata sandi<div className="password-input"><input name="password" type={show?"text":"password"} placeholder={mode==="login"?"Masukkan kata sandi":"Minimal 8 karakter"} required minLength={mode==="login"?6:8}/><button type="button" onClick={()=>setShow(!show)}>{show?<EyeOff/>:<Eye/>}</button></div></label>
+    {mode === "register" && <><label>Nama lengkap<input name="name" autoComplete="name" placeholder="Nama Anda" required minLength={3} maxLength={80}/></label><label>Nama akun<input name="username" autoComplete="username" placeholder="contoh: nadia.pratama" required minLength={3} maxLength={30} pattern="[a-z0-9][a-z0-9._-]*[a-z0-9]" title="Gunakan huruf kecil, angka, titik, garis bawah, atau tanda hubung." autoCapitalize="none"/></label><div className="persona-select" role="group" aria-labelledby="persona-label"><span id="persona-label">Saya adalah</span><div>{[["STUDENT_ENTREPRENEUR","Pengusaha / Pelajar"],["ACADEMIC","Akademisi"],["ORGANIZATION","Organisasi"],["COOPERATIVE","Koperasi"]].map(([value,label])=><button type="button" key={value} onClick={()=>setPersona(value)} className={persona===value?"active":""} aria-pressed={persona===value}>{label}</button>)}</div></div></>}
+    <label>Email<input name="email" type="email" autoComplete="email" placeholder="nama@email.com" required/></label>
+    <label>Kata sandi<div className="password-input"><input name="password" autoComplete={mode === "login" ? "current-password" : "new-password"} type={show?"text":"password"} placeholder={mode==="login"?"Masukkan kata sandi":"Minimal 8 karakter"} required minLength={mode==="login"?6:8} maxLength={128}/><button type="button" onClick={()=>setShow(!show)} aria-label={show ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"} aria-pressed={show}>{show?<EyeOff/>:<Eye/>}</button></div></label>
     {mode === "login" && <div className="form-row"><label className="remember"><input name="remember" type="checkbox"/> Ingat saya</label><Link href="mailto:halo@profas.id?subject=Bantuan%20kata%20sandi%20PROFAS">Lupa kata sandi?</Link></div>}
-    <button className="btn btn-primary auth-submit auth-submit-mt hover-lift" disabled={loading}>{loading?<LoaderCircle className="spin"/>:<>{mode==="login"?"Masuk ke Dashboard":"Buat Akun Gratis"}<ArrowRight/></>}</button>
+    <button className="btn btn-primary auth-submit auth-submit-mt hover-lift" disabled={loading} aria-busy={loading}>{loading?<LoaderCircle className="spin" aria-hidden="true"/>:<>{mode==="login"?"Masuk ke Dashboard":"Buat Akun Gratis"}<ArrowRight aria-hidden="true"/></>}</button>
     {mode === "login" && <div className="demo-box auth-demo-mt"><b>Akun demo</b><div><button type="button" onClick={()=>demo("peserta@profas.id")}>Peserta</button><button type="button" onClick={()=>demo("mentor@profas.id")}>Mentor</button><button type="button" onClick={()=>demo("admin@profas.id")}>Admin</button></div><small>Kata sandi semua akun: profas123</small></div>}
   </form>;
 }

@@ -3,8 +3,8 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "node:fs/promises";
-import { join } from "node:path";
 import { existsSync } from "node:fs";
+import { getWritableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
 
 const ALLOWED_TYPES = new Map([
   ["application/pdf", "PDF"],
@@ -56,7 +56,10 @@ export async function POST(request: Request) {
 
   // Handle link type upload (no file needed)
   if (linkUrl && !file) {
-    try { new URL(linkUrl); } catch { return NextResponse.json({ message: "URL tidak valid." }, { status: 400 }); }
+    try {
+      const parsedUrl = new URL(linkUrl);
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) throw new Error("Unsupported protocol");
+    } catch { return NextResponse.json({ message: "URL hanya boleh menggunakan http atau https." }, { status: 400 }); }
     
     if (existingLesson && existingLesson.type !== "FOLDER") {
       await prisma.courseNode.update({
@@ -87,24 +90,29 @@ export async function POST(request: Request) {
   if (!file) return NextResponse.json({ message: "File atau URL diperlukan." }, { status: 400 });
   if (file.size > MAX_FILE_SIZE) return NextResponse.json({ message: "Ukuran file maksimal 50MB." }, { status: 400 });
 
-  const fileType = ALLOWED_TYPES.get(file.type) || "FILE";
+  const fileType = ALLOWED_TYPES.get(file.type);
+  if (!fileType) return NextResponse.json({ message: "Jenis file tidak didukung." }, { status: 400 });
 
-  // Save file dengan Fallback ke /tmp untuk Vercel Serverless
+  // Save outside /public so the static file server cannot bypass the
+  // authorization check in /api/uploads. /tmp remains the serverless fallback.
   const timestamp = Date.now();
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120) || "material";
   const fileName = `${timestamp}-${safeName}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  try {
-    const uploadDir = join(process.cwd(), "public", "uploads", courseId);
-    if (!existsSync(uploadDir)) await mkdir(uploadDir, { recursive: true });
-    await writeFile(join(uploadDir, fileName), buffer);
-  } catch {
-    // MASTER SKILL: Fallback ke /tmp jika public/uploads bersifad read-only (Vercel Serverless)
-    const tmpDir = join("/tmp", "uploads", courseId);
-    if (!existsSync(tmpDir)) await mkdir(tmpDir, { recursive: true });
-    await writeFile(join(tmpDir, fileName), buffer);
+  let stored = false;
+  for (const root of getWritableUploadRoots()) {
+    try {
+      const uploadDir = resolveUploadPath(root, [courseId]);
+      if (!existsSync(uploadDir)) await mkdir(uploadDir, { recursive: true });
+      await writeFile(resolveUploadPath(root, [courseId, fileName]), buffer);
+      stored = true;
+      break;
+    } catch {
+      // Try the next configured root, normally /tmp on serverless runtimes.
+    }
   }
+  if (!stored) return NextResponse.json({ message: "Penyimpanan materi sedang tidak tersedia." }, { status: 503 });
 
   const fileUrl = `/api/uploads/${courseId}/${fileName}`;
 

@@ -3,8 +3,8 @@ import type { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { unlink } from "node:fs/promises";
-import { join } from "node:path";
 import { existsSync } from "node:fs";
+import { getReadableUploadRoots, resolveUploadPath, uploadSegmentsFromUrl } from "@/lib/upload-storage";
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -65,9 +65,18 @@ export async function DELETE(request: Request) {
   const material = await prisma.courseNode.findFirst({ where: { id, course: { mentorId: user.id } } });
   if (!material) return NextResponse.json({ message: "Materi tidak ditemukan." }, { status: 404 });
 
-  if (material.type !== "LINK" && material.fileUrl?.startsWith("/uploads/")) {
-    const filePath = join(process.cwd(), "public", material.fileUrl);
-    if (existsSync(filePath)) await unlink(filePath).catch(() => {});
+  if (material.type !== "LINK" && material.fileUrl) {
+    const segments = uploadSegmentsFromUrl(material.fileUrl);
+    if (segments) {
+      for (const root of getReadableUploadRoots()) {
+        try {
+          const filePath = resolveUploadPath(root, segments);
+          if (existsSync(filePath)) await unlink(filePath).catch(() => {});
+        } catch {
+          // Ignore stale files in an unavailable storage root.
+        }
+      }
+    }
   }
 
   await prisma.courseNode.delete({ where: { id } });

@@ -140,7 +140,7 @@ export default async function DashboardPage() {
             <div className="dash-hero-momentum">
               <div className="dash-hero-momentum-label"><span>Momentum belajar</span><span>LIVE</span></div>
               <strong>{avgProgress}%</strong>
-              <div className="dash-hero-meter" aria-label={`${avgProgress}% progres rata-rata`}><i style={{ width: `${avgProgress}%` }} /></div>
+              <div className="dash-hero-meter" role="progressbar" aria-label="Progres rata-rata" aria-valuenow={avgProgress} aria-valuemin={0} aria-valuemax={100}><i style={{ width: `${avgProgress}%` }} /></div>
               <Link href={nextCourseSlug ? `/belajar/${nextCourseSlug}` : "/program"}>
                 {nextCourseSlug ? "Lanjutkan program" : "Pilih program"} <ArrowRight size={15} />
               </Link>
@@ -183,21 +183,21 @@ export default async function DashboardPage() {
             <div className="dash-roadmap-node active hover-lift">
               <div>
                 <span className="dash-node-badge active">TAHAP 1 • AKTIF</span>
-                <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Fondasi & Self-Leadership</h4>
+                <h3 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Fondasi & Self-Leadership</h3>
                 <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.8 }}>Memimpin diri, integritas, dan kecerdasan emosional.</p>
               </div>
             </div>
             <div className="dash-roadmap-node next hover-lift">
               <div>
                 <span className="dash-node-badge next">TAHAP 2 • BERIKUTNYA</span>
-                <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Manajemen Tim & Kolaborasi</h4>
+                <h3 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Manajemen Tim & Kolaborasi</h3>
                 <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.7 }}>Resolusi konflik, delegasi efektif, dan budaya agile.</p>
               </div>
             </div>
             <div className="dash-roadmap-node locked hover-lift">
               <div>
                 <span className="dash-node-badge locked">TAHAP 3 • EKSKLUSIF</span>
-                <h4 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Kepemimpinan Strategis</h4>
+                <h3 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Kepemimpinan Strategis</h3>
                 <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.6 }}>Visi organisasi, manajemen perubahan, dan eksekusi.</p>
               </div>
             </div>
@@ -208,7 +208,7 @@ export default async function DashboardPage() {
                 <Award size={24} color="#fff" />
               </div>
               <div>
-                <h5 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>Target Kelulusan Eksekutif Anda: Certified Leadership Executive (CLE)</h5>
+                <h3 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>Target Kelulusan Eksekutif Anda: Certified Leadership Executive (CLE)</h3>
                 <p style={{ margin: "2px 0 0", fontSize: "0.78rem", color: "#334155", fontWeight: 600 }}>Selesaikan seluruh modul di atas untuk mendapatkan lencana holografik dan gelar profesional kepemimpinan.</p>
               </div>
             </div>

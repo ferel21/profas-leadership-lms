@@ -276,12 +276,14 @@ html body .dashboard-fresh .dash-hero-momentum {
 }
 html body .dashboard-fresh.role-mentor .dash-hero-momentum { background: var(--ws-deep) !important; }
 html body .dashboard-fresh.role-super-admin .dash-hero-momentum { background: var(--ws-deep) !important; }
-html body .dashboard-fresh .dash-hero-momentum-label { color: rgba(255, 255, 255, 0.72) !important; }
+html body .dashboard-fresh .dash-hero-momentum-label { color: #e2e8f0 !important; }
 html body .dashboard-fresh .dash-hero-momentum-label span:last-child { color: #fef3c7 !important; font-weight: 800; }
 html body .dashboard-fresh .dash-hero-momentum strong { color: #fff !important; }
 html body .dashboard-fresh .dash-hero-meter { background: rgba(255, 255, 255, 0.18) !important; }
 html body .dashboard-fresh .dash-hero-meter i { background: #f3b444 !important; }
 html body .dashboard-fresh .dash-hero-momentum a { color: #fff !important; }
+html body .dashboard-fresh .dash-focus-snapshot span,
+html body .dashboard-fresh .dash-focus-note { color: #52645d !important; }
 
 /* Metrics and common cards */
 
@@ -370,7 +372,24 @@ html body .dashboard-fresh .dash-quick-admin-item {
   box-shadow: none !important;
 }
 html body .dashboard-fresh .dash-roadmap-node.active { background: var(--ws-mint) !important; border-color: var(--ws-mint-strong) !important; }
-html body .dashboard-fresh .dash-roadmap-node.locked { opacity: 0.66; }
+html body .dashboard-fresh .dash-roadmap-node.next,
+html body .dashboard-fresh .dash-roadmap-node.locked {
+  opacity: 1 !important;
+  color: #334155 !important;
+}
+html body .dashboard-fresh .dash-roadmap-node.next .dash-node-badge {
+  background: #dceaf3 !important;
+  color: #1e5a8f !important;
+}
+html body .dashboard-fresh .dash-roadmap-node.locked .dash-node-badge {
+  background: #e3ebef !important;
+  color: #334155 !important;
+}
+html body .dashboard-fresh .dash-roadmap-node.locked h3,
+html body .dashboard-fresh .dash-roadmap-node.locked p {
+  color: #334155 !important;
+  opacity: 1 !important;
+}
 html body .dashboard-fresh .dash-roadmap-banner { margin-top: 14px !important; padding: 16px !important; border: 1px solid var(--ws-line) !important; border-radius: 16px !important; background: #fffaf5 !important; }
 
 html body .dashboard-fresh .responsive-main-grid { gap: 16px !important; }
@@ -712,8 +731,7 @@ html body .dashboard-fresh h4 {
 html body .dashboard-fresh .dash-title p,
 html body .dashboard-fresh .leaderboard-heading small,
 html body .dashboard-fresh .section-title-clean p,
-html body .dashboard-fresh .stat-card-desc,
-html body .dashboard-fresh .dash-hero-momentum-label {
+html body .dashboard-fresh .stat-card-desc {
   color: #374151 !important;
   font-weight: 600 !important;
   opacity: 1 !important;
@@ -749,4 +767,3 @@ html body .player-layout .btn-primary:hover {
   box-shadow: 0 12px 28px rgba(42, 107, 167, 0.42) !important;
   transform: translateY(-2px) !important;
 }
-

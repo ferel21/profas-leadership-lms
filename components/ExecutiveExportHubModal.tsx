@@ -70,12 +70,12 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
   if (!isOpen) return null;
 
   // 1. Handle Excel Export (.xlsx)
-  const handleExportXlsx = () => {
+  const handleExportXlsx = async () => {
     if (!data) return;
     setDownloadingXlsx(true);
     setSuccessXlsx(false);
     try {
-      generateExcelReport({
+      await generateExcelReport({
         fileName: `PROFAS-Executive-Analytics-${new Date().toISOString().split("T")[0]}.xlsx`,
         students: data.students || [],
         attendances: data.attendances || [],

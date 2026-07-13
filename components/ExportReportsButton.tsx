@@ -22,12 +22,12 @@ export function ExportReportsButton({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setLoading(true);
     setSuccess(false);
 
     try {
-      generateExcelReport({
+      await generateExcelReport({
         fileName: `PROFAS-LMS-Analytics-${new Date().toISOString().split("T")[0]}.xlsx`,
         students,
         attendances,

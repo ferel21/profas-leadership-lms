@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createToken } from "@/lib/auth";
 
-const schema = z.object({ email: z.string().email(), password: z.string().min(6), remember: z.boolean().optional() });
+const schema = z.object({ email: z.string().trim().toLowerCase().email().max(120), password: z.string().min(6).max(128), remember: z.boolean().optional() });
 
 export async function POST(request: Request) {
   try {
@@ -16,9 +15,6 @@ export async function POST(request: Request) {
     if (!(await bcrypt.compare(input.password, user.passwordHash!))) return NextResponse.json({ message: "Email atau kata sandi tidak sesuai." }, { status: 401 });
     const token = await createToken({ userId: user.id, role: user.role, email: user.email, name: user.name, avatar: user.avatar || undefined, authProvider: user.authProvider });
     
-    const cookieStore = await cookies();
-    cookieStore.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: input.remember ? 60 * 60 * 24 * 7 : undefined, path: "/" });
-
     const response = NextResponse.json({ user: { id: user.id, name: user.name, role: user.role } });
     response.cookies.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: input.remember ? 60 * 60 * 24 * 7 : undefined, path: "/" });
     return response;

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { extname, resolve, relative, sep } from "node:path";
+import { extname } from "node:path";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getReadableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
 
 const MIME_TYPES: Record<string, string> = {
   ".pdf": "application/pdf",
@@ -32,15 +33,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     }
 
     const relativePath = path.join("/");
-    const publicUploadsRoot = resolve(process.cwd(), "public", "uploads");
-    const tmpUploadsRoot = resolve("/tmp", "uploads");
-    const isInside = (root: string, candidate: string) => {
-      const childPath = relative(root, candidate);
-      return childPath === "" || (!childPath.startsWith("..") && childPath !== ".." && !childPath.includes(`${sep}..${sep}`));
-    };
-    const publicCandidate = resolve(publicUploadsRoot, ...path);
-    const tmpCandidate = resolve(tmpUploadsRoot, ...path);
-    if (!isInside(publicUploadsRoot, publicCandidate) || !isInside(tmpUploadsRoot, tmpCandidate)) {
+    const candidates = getReadableUploadRoots().map(root => {
+      try { return resolveUploadPath(root, path); } catch { return null; }
+    });
+    if (candidates.some(candidate => candidate === null)) {
       return NextResponse.json({ error: "Path berkas tidak valid." }, { status: 400 });
     }
 
@@ -83,14 +79,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
       }
     }
 
-    let filePath = publicCandidate;
-
-    // MASTER SKILL: Fallback ke /tmp/uploads untuk Vercel Serverless Read-Only Filesystem!
-    if (!existsSync(filePath)) {
-      filePath = tmpCandidate;
-    }
-
-    if (!existsSync(filePath)) {
+    const filePath = candidates.find((candidate): candidate is string => Boolean(candidate && existsSync(candidate)));
+    if (!filePath) {
       return NextResponse.json({ error: "Berkas tidak ditemukan." }, { status: 404 });
     }
 
@@ -102,7 +92,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Disposition": `inline; filename="resource${ext}"`,
+        "Cache-Control": "private, no-store, max-age=0, must-revalidate",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (error) {

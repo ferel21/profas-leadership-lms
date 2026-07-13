@@ -54,7 +54,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== 'MENTOR') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id: assessmentId } = await params;
+    const assessment = await prisma.assessment.findUnique({
+      where: { id: assessmentId },
+      select: { course: { select: { mentorId: true } } },
+    });
+    if (!assessment || assessment.course.mentorId !== user.id) {
+      return NextResponse.json({ error: 'Assessment not found or unauthorized' }, { status: 404 });
+    }
 
     const questions = await prisma.assessmentQuestion.findMany({
       where: { assessmentId },

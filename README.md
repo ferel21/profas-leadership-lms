@@ -105,6 +105,7 @@ Proyek ini telah dikonfigurasi 100% kompatibel dengan arsitektur serverless **Ve
    - `DATABASE_URL`: Gunakan koneksi database PostgreSQL / Supabase produksi (contoh: `postgresql://...`). *Catatan: Jangan gunakan SQLite lokal (`file:./dev.db`) di Vercel karena filesystem serverless bersifat ephemeral/sementara.*
    - `JWT_SECRET` & `NEXTAUTH_SECRET`: Isi dengan string rahasia acak minimal 32 karakter.
    - `NEXTAUTH_URL` & `NEXT_PUBLIC_APP_URL`: Isi dengan domain produksi Anda (contoh: `https://profas-leadership-lms.vercel.app`).
+   - `PRIVATE_UPLOAD_DIR`: Untuk deployment dengan persistent volume, gunakan direktori private seperti `/app/.data/uploads`; jangan mount upload baru ke `/app/public/uploads`.
    - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: Kredensial OAuth 2.0 dari Google Cloud Console.
    - `ANTHROPIC_API_KEY`: Opsional untuk mengaktifkan tutor Claude di course player. Key ini hanya dipakai di server dan tidak boleh diawali `NEXT_PUBLIC_`.
 3. Klik **Deploy**.

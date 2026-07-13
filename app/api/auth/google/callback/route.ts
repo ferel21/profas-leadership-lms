@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { createToken } from "@/lib/auth";
 
@@ -7,51 +8,45 @@ export async function GET(request: Request) {
   const urlObj = new URL(request.url);
   const code = urlObj.searchParams.get("code");
   const error = urlObj.searchParams.get("error");
+  const state = urlObj.searchParams.get("state");
 
   const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || urlObj.host;
   const protocol = host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https";
-  const origin = process.env.NEXT_PUBLIC_APP_URL ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "") : `${protocol}://${host}`;
+  const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, "");
+  if (process.env.NODE_ENV === "production" && !configuredOrigin) {
+    return NextResponse.json({ error: "OAuth belum dikonfigurasi." }, { status: 503 });
+  }
+  const origin = configuredOrigin || `${protocol}://${host}`;
   const redirectUri = `${origin}/api/auth/callback/google`;
-  console.log("=== GOOGLE AUTH CALLBACK ===", { origin, redirectUri, code: !!code, error });
+
+  const fail = (reason: string) => {
+    const response = NextResponse.redirect(`${origin}/masuk?error=${encodeURIComponent(reason)}`);
+    response.cookies.set("profas_oauth_state", "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 0, path: "/api/auth/callback/google" });
+    return response;
+  };
+
+  const cookieStore = await cookies();
+  const expectedState = cookieStore.get("profas_oauth_state")?.value || "";
+  const stateMatches = state && expectedState && state.length === expectedState.length
+    ? timingSafeEqual(Buffer.from(state), Buffer.from(expectedState))
+    : false;
+
+  if (!stateMatches) return fail("oauth_state_invalid");
 
   if (error) {
-    return NextResponse.redirect(`${origin}/masuk?error=google_auth_failed&reason=${encodeURIComponent(error)}`);
+    return fail("google_auth_failed");
   }
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/masuk?error=missing_code&reason=${encodeURIComponent("Kode otorisasi dari Google tidak ditemukan.")}`);
+    return fail("missing_code");
   }
 
-  const GOOGLE_CLIENT_ID = (
-    process.env.GOOGLE_CLIENT_ID || 
-    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 
-    process.env.GOOGLE_ID || 
-    process.env.GOOGLE_CLIENTID || 
-    process.env.GOOGLE_OAUTH_CLIENT_ID || 
-    process.env.CLIENT_ID || ""
-  ).trim().replace(/^["']|["']$/g, "");
+  const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || "").trim().replace(/^["']|["']$/g, "");
 
-  const GOOGLE_CLIENT_SECRET = (
-    process.env.GOOGLE_CLIENT_SECRET || 
-    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET || 
-    process.env.GOOGLE_SECRET || 
-    process.env.GOOGLE_CLIENTSECRET || 
-    process.env.GOOGLE_OAUTH_CLIENT_SECRET || 
-    process.env.CLIENT_SECRET || ""
-  ).trim().replace(/^["']|["']$/g, "");
+  const GOOGLE_CLIENT_SECRET = (process.env.GOOGLE_CLIENT_SECRET || "").trim().replace(/^["']|["']$/g, "");
 
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    const foundRelatedKeys = Object.keys(process.env).filter(k => /google|client|oauth|auth|secret|id/i.test(k));
-    return NextResponse.json({ 
-      error: "Google OAuth credentials missing in Vercel Server Memory",
-      message: "Server Vercel mendeteksi bahwa variabel lingkungan untuk Google OAuth masih kosong/tidak lengkap.",
-      missing: {
-        clientId: !GOOGLE_CLIENT_ID,
-        clientSecret: !GOOGLE_CLIENT_SECRET
-      },
-      foundRelatedKeysInVercel: foundRelatedKeys,
-      hint: "PENTING: Membuat Client ID di Google Cloud Console TIDAK otomatis mengirimkannya ke Vercel. Anda WAJIB menyalin Client ID & Secret dan menambahkannya di Dasbor Vercel -> Project profas-leadership-lms -> Settings -> Environment Variables -> Nama: GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET, lalu klik Save dan Redeploy."
-    }, { status: 500 });
+    return fail("google_not_configured");
   }
 
   try {
@@ -70,9 +65,11 @@ export async function GET(request: Request) {
 
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok) {
-      console.error("Token exchange failed:", tokenData);
-      const errDetail = tokenData.error_description || tokenData.error || "Gagal menukar token dengan server Google.";
-      return NextResponse.redirect(`${origin}/masuk?error=token_exchange_failed&reason=${encodeURIComponent(errDetail)}`);
+      console.error("[GOOGLE_TOKEN_EXCHANGE_FAILED]", tokenRes.status);
+      return fail("token_exchange_failed");
+    }
+    if (typeof tokenData.access_token !== "string" || tokenData.access_token.length < 20) {
+      return fail("token_exchange_failed");
     }
 
     // Get user info
@@ -82,11 +79,12 @@ export async function GET(request: Request) {
 
     const userData = await userRes.json();
     if (!userRes.ok) {
-      console.error("Failed to fetch user info:", userData);
-      return NextResponse.redirect(`${origin}/masuk?error=fetch_user_failed&reason=${encodeURIComponent("Gagal mengambil profil akun Google Anda.")}`);
+      console.error("[GOOGLE_USERINFO_FAILED]", userRes.status);
+      return fail("fetch_user_failed");
     }
 
-    const { email, name, picture } = userData;
+    const { email, name, picture, verified_email: verifiedEmail } = userData;
+    if (typeof email !== "string" || verifiedEmail !== true) return fail("google_email_unverified");
 
     // Check if user exists
     let user = await prisma.user.findUnique({
@@ -112,23 +110,7 @@ export async function GET(request: Request) {
       });
     }
 
-    // Auto-enrollment & Continuous Sync: Pastikan peserta yang login via Google langsung tersinkronisasi 100% dengan seluruh kelas yang diterbitkan mentor
-    if (user.role === "STUDENT") {
-      const enrCount = await prisma.enrollment.count({ where: { userId: user.id } });
-      const publishedCoursesCount = await prisma.course.count({ where: { published: true } });
-      if (enrCount < publishedCoursesCount) {
-        const publishedCourses = await prisma.course.findMany({ where: { published: true } });
-        for (const course of publishedCourses) {
-          await prisma.enrollment.upsert({
-            where: { userId_courseId: { userId: user.id, courseId: course.id } },
-            update: {},
-            create: { userId: user.id, courseId: course.id, status: "ACTIVE", progressPercent: 0 }
-          });
-        }
-      }
-    }
-
-    // Generate JWT token with full info for self-healing in serverless Vercel
+    // Generate JWT token only after the Google identity and database record are valid.
     const token = await createToken({ 
       userId: user.id, 
       role: user.role, 
@@ -136,16 +118,6 @@ export async function GET(request: Request) {
       name: user.name, 
       avatar: user.avatar || undefined, 
       authProvider: "GOOGLE" 
-    });
-
-    // Set cookie on server store AND redirect response for 100% Next.js 15 App Router compatibility
-    const cookieStore = await cookies();
-    cookieStore.set("profas_session", token, { 
-      httpOnly: true, 
-      sameSite: "lax", 
-      secure: process.env.NODE_ENV === "production", 
-      maxAge: 60 * 60 * 24 * 7, // 7 days 
-      path: "/" 
     });
 
     const response = NextResponse.redirect(`${origin}/dashboard`);
@@ -156,11 +128,11 @@ export async function GET(request: Request) {
       maxAge: 60 * 60 * 24 * 7, // 7 days 
       path: "/" 
     });
+    response.cookies.set("profas_oauth_state", "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 0, path: "/api/auth/callback/google" });
 
     return response;
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("Google Auth Error:", err);
-    return NextResponse.redirect(`${origin}/masuk?error=server_error&reason=${encodeURIComponent(message || "Terjadi gangguan sistem internal.")}`);
+    console.error("[GOOGLE_AUTH_ERROR]", err instanceof Error ? err.message : "unknown error");
+    return fail("server_error");
   }
 }

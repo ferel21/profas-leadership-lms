@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Search, Filter, FileSpreadsheet } from "lucide-react";
+import ExcelJS from "exceljs";
 import { formatDate } from "@/lib/utils";
+import { downloadExcelWorkbook } from "@/lib/xlsxExport";
 import { ExportReportsButton } from "@/components/ExportReportsButton";
 
 export type ReportRow = {
@@ -36,8 +38,6 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
   const handleExport = async () => {
     try {
       setExporting(true);
-      const XLSX = await import("xlsx");
-
       const detailData = filtered.map((r, idx) => ({
         "No": idx + 1,
         "Nama Lengkap": r.name || "Tanpa Nama",
@@ -62,19 +62,22 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
         { "Indikator Kinerja Utama (KPI)": "Tanggal Ekspor Laporan", "Nilai": new Date().toLocaleDateString("id-ID") }
       ];
 
-      const wb = XLSX.utils.book_new();
-      const wsDetail = XLSX.utils.json_to_sheet(detailData);
-      const wsKpi = XLSX.utils.json_to_sheet(kpiData);
-
-      wsDetail["!cols"] = [
-        { wch: 6 }, { wch: 28 }, { wch: 28 }, { wch: 32 }, { wch: 14 }, { wch: 16 }, { wch: 18 }, { wch: 20 }
-      ];
-      wsKpi["!cols"] = [{ wch: 35 }, { wch: 25 }];
-
-      XLSX.utils.book_append_sheet(wb, wsDetail, "Data Detail Peserta");
-      XLSX.utils.book_append_sheet(wb, wsKpi, "Ringkasan KPI");
-
-      XLSX.writeFile(wb, `Laporan_LMS_PROFAS_${new Date().toISOString().split("T")[0]}.xlsx`);
+      const workbook = new ExcelJS.Workbook();
+      const detailSheet = workbook.addWorksheet("Data Detail Peserta");
+      detailSheet.columns = Object.keys(detailData[0] ?? {
+        "No": 0, "Nama Lengkap": "", "Email": "", "Program Kepemimpinan": "",
+        "Progres (%)": 0, "Nilai Rata-rata": "", "Status Kelulusan": "", "Tanggal Daftar": "",
+      }).map((header, index) => ({ header, key: header, width: [6, 28, 28, 32, 14, 16, 18, 20][index] ?? 18 }));
+      detailSheet.addRows(detailData);
+      const kpiSheet = workbook.addWorksheet("Ringkasan KPI");
+      kpiSheet.columns = [{ header: "Indikator Kinerja Utama (KPI)", key: "indicator", width: 35 }, { header: "Nilai", key: "value", width: 25 }];
+      kpiSheet.addRows(kpiData.map(row => ({ indicator: row["Indikator Kinerja Utama (KPI)"], value: row.Nilai })));
+      for (const sheet of [detailSheet, kpiSheet]) {
+        sheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
+        sheet.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1E5A8F" } };
+        sheet.views = [{ state: "frozen", ySplit: 1 }];
+      }
+      await downloadExcelWorkbook(workbook, `Laporan_LMS_PROFAS_${new Date().toISOString().split("T")[0]}.xlsx`);
     } catch (err) {
       console.error("Gagal mengekspor file:", err);
     } finally {

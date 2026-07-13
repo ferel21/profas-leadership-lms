@@ -4,8 +4,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { finalizeCourseCompletion } from "@/lib/completion";
 import fs from 'fs';
-import path from 'path';
 import { randomUUID } from "node:crypto";
+import { getWritableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
 
 const MAX_SUBMISSION_FILE_SIZE = 20 * 1024 * 1024;
 const SUBMISSION_FILE_TYPES: Record<string, string> = {
@@ -116,15 +116,19 @@ export async function POST(request: Request) {
       const fileName = `${randomUUID()}${SUBMISSION_FILE_TYPES[pending.file.type]}`;
       const buffer = Buffer.from(await pending.file.arrayBuffer());
 
-      try {
-        const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'assignments');
-        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-        fs.writeFileSync(path.join(uploadsDir, fileName), buffer);
-      } catch {
-        const tmpDir = path.join('/tmp', 'uploads', 'assignments');
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
-        fs.writeFileSync(path.join(tmpDir, fileName), buffer);
+      let stored = false;
+      for (const root of getWritableUploadRoots()) {
+        try {
+          const uploadsDir = resolveUploadPath(root, ["assignments"]);
+          if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+          fs.writeFileSync(resolveUploadPath(root, ["assignments", fileName]), buffer);
+          stored = true;
+          break;
+        } catch {
+          // Try the next configured root, normally /tmp on serverless runtimes.
+        }
       }
+      if (!stored) return NextResponse.json({ message: "Penyimpanan berkas evaluasi sedang tidak tersedia." }, { status: 503 });
 
       const existingAnswer = answers[pending.questionId];
       const answerObject = existingAnswer && typeof existingAnswer === "object" && !Array.isArray(existingAnswer)

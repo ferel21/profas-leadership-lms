@@ -19,13 +19,13 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <h4>Program</h4>
+          <h3>Program</h3>
           <Link href="/program">Katalog Program</Link>
           <Link href="/#mentor">Mentor</Link>
           <Link href="/#tentang">Tentang LMS</Link>
         </div>
         <div>
-          <h4>Dukungan</h4>
+          <h3>Dukungan</h3>
           <a href="mailto:halo@profas.id?subject=Bantuan%20PROFAS">Pusat Bantuan</a>
           <Link href="/#faq">FAQ</Link>
           <Link href="/verifikasi">Verifikasi Sertifikat</Link>
@@ -33,7 +33,7 @@ export function Footer() {
           <Link href="/syarat">Syarat &amp; Ketentuan</Link>
         </div>
         <div>
-          <h4>Hubungi Kami</h4>
+          <h3>Hubungi Kami</h3>
           <p className="footer-contact"><Mail size={17} /> halo@profas.id</p>
           <p className="footer-contact"><Phone size={17} /> +62 812-3456-7890</p>
           <p className="footer-contact"><MapPin size={17} /> Makassar, Indonesia</p>

@@ -1,17 +1,23 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+
+const activitySchema = z.object({
+  action: z.string().trim().min(1).max(80).regex(/^[\p{L}\p{N} _:-]+$/u),
+  metadata: z.record(z.string(), z.union([z.string().max(300), z.number(), z.boolean(), z.null()])).optional(),
+}).refine(value => !value.metadata || JSON.stringify(value.metadata).length <= 2000, "Metadata terlalu besar.");
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const { action, metadata } = await request.json();
-    
-    if (!action) return NextResponse.json({ error: "Action is required" }, { status: 400 });
+    const parsed = activitySchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Data aktivitas tidak valid." }, { status: 400 });
+    const { action, metadata } = parsed.data;
 
-    const log = await prisma.activityLog.create({
+    await prisma.activityLog.create({
       data: {
         userId: user.id,
         action,
@@ -19,7 +25,7 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json(log);
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to log activity" }, { status: 500 });
   }

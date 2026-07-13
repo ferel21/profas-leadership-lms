@@ -2,6 +2,14 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+
+const broadcastSchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  message: z.string().trim().min(1).max(2000),
+  targetCourseId: z.string().trim().min(1).optional(),
+  link: z.string().trim().refine(value => value === "" || (value.startsWith("/") && !value.startsWith("//")), "Tautan pengumuman harus berupa path internal.").optional(),
+});
 
 export async function POST(request: Request) {
   try {
@@ -10,16 +18,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Akses ditolak. Hanya Admin atau Mentor yang dapat mengirim pengumuman." }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { title, message, targetCourseId, link } = body;
+    const parsed = broadcastSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ message: "Format pengumuman tidak valid." }, { status: 400 });
+    const { title, message, targetCourseId, link } = parsed.data;
 
-    if (!title || !message) {
-      return NextResponse.json({ message: "Judul dan pesan pengumuman wajib diisi." }, { status: 400 });
+    if (user.role === "MENTOR" && (!targetCourseId || targetCourseId === "ALL")) {
+      return NextResponse.json({ message: "Mentor hanya dapat mengirim pengumuman ke program miliknya." }, { status: 403 });
     }
 
     let targetUserIds: string[] = [];
 
     if (targetCourseId && targetCourseId !== "ALL") {
+      const course = await prisma.course.findFirst({
+        where: { id: targetCourseId, ...(user.role === "MENTOR" ? { mentorId: user.id } : {}) },
+        select: { id: true },
+      });
+      if (!course) return NextResponse.json({ message: "Program target tidak ditemukan atau tidak dapat diakses." }, { status: 404 });
+
       // Broadcast ke peserta program tertentu
       const enrollments = await prisma.enrollment.findMany({
         where: { courseId: targetCourseId, status: "ACTIVE" },

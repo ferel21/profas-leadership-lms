@@ -29,8 +29,10 @@ ENV HOSTNAME "0.0.0.0"
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Set up permanent upload directory with correct permissions
-RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public
+# Set up private permanent upload directory with correct permissions.
+# Files must not live under /public because Next.js can serve that directory
+# without passing through the authorization checks in /api/uploads.
+RUN mkdir -p /app/.data/uploads && chown -R nextjs:nodejs /app/.data
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

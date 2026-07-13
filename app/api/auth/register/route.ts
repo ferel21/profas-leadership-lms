@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { Persona, Prisma } from "@prisma/client";
@@ -10,7 +9,7 @@ const schema = z.object({
   name: z.string().trim().min(3).max(80),
   username: z.string().trim().toLowerCase().min(3).max(30).regex(/^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/),
   email: z.string().trim().toLowerCase().email().max(120),
-  password: z.string().min(8),
+  password: z.string().min(8).max(128),
   persona: z.nativeEnum(Persona),
 });
 
@@ -23,9 +22,6 @@ export async function POST(request: Request) {
     
     const token = await createToken({ userId: user.id, role: user.role, email: user.email, name: user.name, avatar: user.avatar || undefined, authProvider: "LOCAL" });
     
-    const cookieStore = await cookies();
-    cookieStore.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 604800, path: "/" });
-
     const response = NextResponse.json({ user: { id: user.id, name: user.name, role: user.role } }, { status: 201 });
     response.cookies.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 604800, path: "/" });
     return response;

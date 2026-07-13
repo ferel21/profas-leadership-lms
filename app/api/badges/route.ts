@@ -9,10 +9,17 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId") || user.id;
+    if (userId !== user.id && user.role !== "MENTOR" && user.role !== "SUPER_ADMIN") {
+      return NextResponse.json({ error: "Anda hanya dapat melihat badge milik sendiri." }, { status: 403 });
+    }
 
     const userBadges = await prisma.userBadge.findMany({
       where: { userId },
-      include: { badge: true },
+      select: {
+        id: true,
+        awardedAt: true,
+        badge: { select: { id: true, name: true, description: true, imageUrl: true } },
+      },
       orderBy: { awardedAt: "desc" }
     });
 

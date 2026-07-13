@@ -2,56 +2,96 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
+import { finalizeCourseCompletion } from '@/lib/completion';
+
+const gradeLimiter = rateLimit({ limit: 60, windowMs: 60 * 1000 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ attemptId: string }> }) {
+  const ipCheck = gradeLimiter.check(req);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: 'Terlalu banyak permintaan penilaian. Silakan tunggu 1 menit.' }, { status: 429 });
+  }
+
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'MENTOR') {
+    if (!user || (user.role !== 'MENTOR' && user.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { attemptId } = await params;
-    const body = await req.json();
-    const { score, feedback, passed, answersScores } = body;
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Data penilaian tidak valid.' }, { status: 400 });
+    }
+
+    const { score: inputScore, feedback, answersScores } = body;
 
     const attempt = await prisma.assessmentAttempt.findUnique({
       where: { id: attemptId },
       include: {
-        assessment: { include: { course: true } }
+        assessment: { include: { course: true, questions: true } },
+        answers: true
       }
     });
 
-    if (!attempt || attempt.assessment.course.mentorId !== user.id) {
+    if (!attempt || (user.role !== 'SUPER_ADMIN' && attempt.assessment.course.mentorId !== user.id)) {
       return NextResponse.json({ error: 'Attempt not found or unauthorized' }, { status: 404 });
     }
 
-    // Update individual answer scores if provided
+    const questionMap = new Map(attempt.assessment.questions.map(q => [q.id, q]));
+    const maxPossibleScore = attempt.assessment.questions.reduce((acc, q) => acc + q.points, 0);
+
+    // Update individual answer scores if provided with server clamping
     if (answersScores && Array.isArray(answersScores)) {
       for (const ans of answersScores) {
+        if (!ans || typeof ans !== 'object' || !ans.questionId) continue;
+        const q = questionMap.get(String(ans.questionId));
+        const maxPoints = q ? q.points : 100;
+        const clampedAnsScore = Math.max(0, Math.min(maxPoints, Math.round(Number(ans.score) || 0)));
+        const cleanFeedback = typeof ans.feedback === 'string' ? ans.feedback.trim().slice(0, 1000) : null;
+
         await prisma.attemptAnswer.updateMany({
-          where: { attemptId, questionId: ans.questionId },
+          where: { attemptId, questionId: String(ans.questionId) },
           data: {
-            score: ans.score,
-            feedback: ans.feedback
+            score: clampedAnsScore,
+            feedback: cleanFeedback
           }
         });
       }
     }
 
+    // Recalculate total score from updated or existing answers
+    const updatedAnswers = await prisma.attemptAnswer.findMany({
+      where: { attemptId }
+    });
+
+    let finalScore = 0;
+    if (updatedAnswers.length > 0 && maxPossibleScore > 0) {
+      const totalEarned = updatedAnswers.reduce((acc, a) => acc + (typeof a.score === 'number' ? a.score : 0), 0);
+      finalScore = Math.round((totalEarned / maxPossibleScore) * 100);
+    } else {
+      finalScore = Math.round(Number(inputScore) || 0);
+    }
+    finalScore = Math.max(0, Math.min(100, finalScore));
+
+    const serverPassed = (attempt.assessment.type === 'PRETEST' || finalScore >= attempt.assessment.passingScore);
+    const cleanFeedback = typeof feedback === 'string' ? feedback.trim().slice(0, 2000) : (serverPassed ? "Selamat, tugas Anda telah dinilai dan dinyatakan lulus!" : "Silakan perbaiki tugas Anda sesuai catatan evaluasi.");
+
     // Update attempt
     const updatedAttempt = await prisma.assessmentAttempt.update({
       where: { id: attemptId },
       data: {
-        score: score,
-        passed: passed,
-        feedback: feedback,
+        score: finalScore,
+        passed: serverPassed,
+        feedback: cleanFeedback,
         status: 'GRADED',
         gradedAt: new Date()
       }
     });
 
-    // If passed, we might need to award XP and mark completion
-    if (passed && !attempt.passed) {
+    // If passed, award XP and mark completion
+    if (serverPassed && !attempt.passed) {
       await prisma.xPLog.upsert({
         where: {
           userId_source_sourceId: {
@@ -67,11 +107,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
           sourceId: attempt.assessmentId
         },
         update: {}
-      });
+      }).catch(() => {});
 
       // Find node that has this assessment
       const node = await prisma.courseNode.findFirst({
-        where: { assessmentId: attempt.assessmentId }
+        where: { OR: [{ id: attempt.assessmentId }, { assessmentId: attempt.assessmentId }], courseId: attempt.assessment.course.id }
       });
 
       if (node) {
@@ -84,16 +124,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
           },
           create: {
             userId: attempt.userId,
-            nodeId: node.id
+            nodeId: node.id,
+            completedAt: new Date()
           },
-          update: {}
-        });
+          update: { completedAt: new Date() }
+        }).catch(() => {});
+      }
+
+      if (attempt.assessment.type !== 'PRETEST') {
+        await finalizeCourseCompletion(attempt.userId, attempt.assessment.course.id).catch(() => null);
       }
     }
 
     return NextResponse.json(updatedAttempt);
   } catch (error: any) {
     console.error('Error grading attempt:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Gagal memproses penilaian" }, { status: 500 });
   }
 }

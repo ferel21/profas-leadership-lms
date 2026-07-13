@@ -7,6 +7,9 @@ import fs from 'fs';
 import { randomUUID } from "node:crypto";
 import { getWritableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
 import { validateFileMagicBytes } from "@/lib/file-security";
+import { rateLimit } from "@/lib/rate-limit";
+
+const submitLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
 const MAX_SUBMISSION_FILE_SIZE = 20 * 1024 * 1024;
 const SUBMISSION_FILE_TYPES: Record<string, string> = {
@@ -22,6 +25,11 @@ const SUBMISSION_FILE_TYPES: Record<string, string> = {
 };
 
 export async function POST(request: Request) {
+  const ipCheck = submitLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak pengumpulan tugas/kuis. Silakan tunggu 1 menit." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ message: "Silakan masuk." }, { status: 401 });
 
@@ -160,28 +168,31 @@ export async function POST(request: Request) {
       let questionScore = 0;
 
       if (q.type === 'MULTIPLE_CHOICE' || q.type === 'TRUE_FALSE') {
-        // userAns is expected to be index or text
-        const isCorrect = String(userAns) === String(q.correctAnswer);
+        const userAnsStr = userAns == null ? "" : String(userAns).trim();
+        const correctAnsStr = q.correctAnswer == null ? "" : String(q.correctAnswer).trim();
+        const isCorrect = userAnsStr !== "" && userAnsStr === correctAnsStr;
         if (isCorrect) {
           correct++;
           questionScore = q.points;
           totalScore += q.points;
         }
-        answerText = String(userAns);
+        answerText = userAnsStr;
       } else if (q.type === 'SHORT_ANSWER') {
-        const isCorrect = String(userAns).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase();
+        const userAnsStr = userAns == null ? "" : String(userAns).trim().toLowerCase();
+        const correctAnsStr = q.correctAnswer == null ? "" : String(q.correctAnswer).trim().toLowerCase();
+        const isCorrect = userAnsStr !== "" && userAnsStr === correctAnsStr;
         if (isCorrect) {
           correct++;
           questionScore = q.points;
           totalScore += q.points;
         }
-        answerText = String(userAns);
+        answerText = userAns == null ? "" : String(userAns).trim();
       } else if (q.type === 'ESSAY') {
         needsManualGrading = true;
-        answerText = typeof userAns === 'object' ? userAns.text : String(userAns);
+        answerText = typeof userAns === 'object' && userAns !== null ? String(userAns.text || "") : (userAns == null ? "" : String(userAns));
       } else if (q.type === 'FILE_UPLOAD') {
         needsManualGrading = true;
-        fileUrl = typeof userAns === 'object' ? userAns.fileUrl : null;
+        fileUrl = typeof userAns === 'object' && userAns !== null ? String(userAns.fileUrl || "") : null;
       }
 
       attemptAnswers.push({

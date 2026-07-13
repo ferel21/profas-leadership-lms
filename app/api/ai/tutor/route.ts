@@ -2,8 +2,11 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
+
+const tutorLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
 // Basis pengetahuan kepemimpinan PROFAS untuk panduan kontekstual
 const LEADERSHIP_KNOWLEDGE_BASE: Record<string, string> = {
@@ -68,6 +71,11 @@ function getTextReply(response: Anthropic.Message) {
 }
 
 export async function POST(request: Request) {
+  const ipCheck = tutorLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan ke Asisten AI. Silakan tunggu beberapa saat lagi." }, { status: 429 });
+  }
+
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -86,8 +94,9 @@ export async function POST(request: Request) {
     if (apiKey) {
       try {
         const client = new Anthropic({ apiKey, maxRetries: 2 });
+        const modelId = process.env.ANTHROPIC_MODEL || "claude-3-7-sonnet-20250219";
         const response = await client.messages.create({
-          model: "claude-opus-4-8",
+          model: modelId,
           max_tokens: 700,
           system: "Anda adalah Asisten AI Pedagogis untuk PROFAS Leadership LMS. Jawablah dalam Bahasa Indonesia yang profesional, hangat, konseptual, dan aplikatif. Kaitkan jawaban dengan konteks modul bila tersedia. Berikan langkah praktis yang dapat dicoba peserta, jangan mengarang data pribadi, dan arahkan pertanyaan berisiko tinggi kepada mentor manusia.",
           messages: [
@@ -98,7 +107,7 @@ export async function POST(request: Request) {
         });
         const reply = getTextReply(response);
         if (reply) {
-          return NextResponse.json({ reply, source: "claude-api", model: "claude-opus-4-8" });
+          return NextResponse.json({ reply, source: "claude-api", model: modelId });
         }
       } catch (error) {
         if (error instanceof Anthropic.AuthenticationError) {

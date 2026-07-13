@@ -22,18 +22,18 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, loading]);
 
-  function speakText(text: string) {
+  function speakText(text: string, idx: number) {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    if (isSpeaking) {
+    if (speakingIdx === idx) {
       window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+      setSpeakingIdx(null);
       return;
     }
     window.speechSynthesis.cancel();
@@ -41,9 +41,9 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = "id-ID";
     utterance.rate = 1.0;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    setIsSpeaking(true);
+    utterance.onend = () => setSpeakingIdx(null);
+    utterance.onerror = () => setSpeakingIdx(null);
+    setSpeakingIdx(idx);
     window.speechSynthesis.speak(utterance);
   }
 
@@ -133,7 +133,7 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
                 {m.text}
                 {m.role === "ai" && (
                   <button
-                    onClick={() => speakText(m.text)}
+                    onClick={() => speakText(m.text, idx)}
                     style={{
                       marginTop: "10px",
                       display: "flex",
@@ -151,8 +151,8 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
                     }}
                     title="Dengarkan pembacaan suara AI"
                   >
-                    {isSpeaking ? <VolumeX size={14} color="#ef4444" /> : <Volume2 size={14} />}
-                    {isSpeaking ? "Hentikan Suara" : "Dengarkan Suara AI"}
+                    {speakingIdx === idx ? <VolumeX size={14} color="#ef4444" /> : <Volume2 size={14} />}
+                    {speakingIdx === idx ? "Hentikan Suara" : "Dengarkan Suara AI"}
                   </button>
                 )}
               </div>

@@ -20,20 +20,38 @@ export async function finalizeCourseCompletion(userId: string, courseId: string)
     });
     let certificateNumber:string|null=null;
     if(eligible){
-      const candidate=`PROFAS-LDR-${new Date().getFullYear()}-${randomUUID().slice(0,8).toUpperCase()}`;
-      const certificate=await tx.certificate.upsert({where:{userId_courseId:{userId,courseId}},update:{},create:{userId,courseId,uniqueNumber:candidate},select:{uniqueNumber:true}});
-      certificateNumber=certificate.uniqueNumber;
-
-      const course = await tx.course.findUnique({ where: { id: courseId }, select: { title: true } });
-      await tx.notification.create({
-        data: {
-          userId,
-          title: "Selamat! Sertifikat Diterbitkan 🎉",
-          message: `Anda telah berhasil menyelesaikan program ${course?.title ?? ""}.`,
-          type: "COURSE_COMPLETED",
-          link: `/sertifikat/${certificateNumber}`
-        }
+      const existingCert = await tx.certificate.findUnique({
+        where: { userId_courseId: { userId, courseId } },
+        select: { uniqueNumber: true }
       });
+      if (existingCert) {
+        certificateNumber = existingCert.uniqueNumber;
+      } else {
+        const candidate=`PROFAS-LDR-${new Date().getFullYear()}-${randomUUID().slice(0,8).toUpperCase()}`;
+        try {
+          const certificate=await tx.certificate.upsert({where:{userId_courseId:{userId,courseId}},update:{},create:{userId,courseId,uniqueNumber:candidate},select:{uniqueNumber:true}});
+          certificateNumber=certificate.uniqueNumber;
+        } catch {
+          const fallbackCert = await tx.certificate.findUnique({
+            where: { userId_courseId: { userId, courseId } },
+            select: { uniqueNumber: true }
+          });
+          certificateNumber = fallbackCert?.uniqueNumber ?? candidate;
+        }
+
+        if (certificateNumber === candidate) {
+          const course = await tx.course.findUnique({ where: { id: courseId }, select: { title: true } });
+          await tx.notification.create({
+            data: {
+              userId,
+              title: "Selamat! Sertifikat Diterbitkan 🎉",
+              message: `Anda telah berhasil menyelesaikan program ${course?.title ?? ""}.`,
+              type: "COURSE_COMPLETED",
+              link: `/sertifikat/${certificateNumber}`
+            }
+          });
+        }
+      }
     }
     return {progressPercent,completedLessons,totalLessons,passedAssessments,requiredAssessments,eligible,certificateNumber};
   });

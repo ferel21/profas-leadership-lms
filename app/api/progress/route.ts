@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { finalizeCourseCompletion } from "@/lib/completion";
@@ -18,6 +19,13 @@ export async function POST(request: Request) {
   if (!course) return NextResponse.json({ message: "Program tidak ditemukan." }, { status: 404 });
 
   if (action === "enroll") {
+    const existing = await prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId: user.id, courseId } }
+    });
+    if (existing) {
+      return NextResponse.json(existing);
+    }
+
     if (course.price > 0) {
       const paidPayment = await prisma.payment.findFirst({
         where: { userId: user.id, courseId: course.id, status: "PAID" },
@@ -27,8 +35,25 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: "Program ini membutuhkan pembayaran yang terverifikasi sebelum akses diberikan." }, { status: 402 });
       }
     }
-    const enrollment = await prisma.enrollment.upsert({ where: { userId_courseId: { userId: user.id, courseId } }, update: {}, create: { userId: user.id, courseId } });
-    return NextResponse.json(enrollment);
+
+    try {
+      const enrollment = await prisma.enrollment.upsert({
+        where: { userId_courseId: { userId: user.id, courseId } },
+        update: {},
+        create: { userId: user.id, courseId }
+      });
+      return NextResponse.json(enrollment);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        const concurrentEnrollment = await prisma.enrollment.findUnique({
+          where: { userId_courseId: { userId: user.id, courseId } }
+        });
+        if (concurrentEnrollment) {
+          return NextResponse.json(concurrentEnrollment);
+        }
+      }
+      throw error;
+    }
   }
 
   const { lessonId } = parsed.data;

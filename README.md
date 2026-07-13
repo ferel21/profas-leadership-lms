@@ -95,7 +95,20 @@ npm start
 
 ---
 
-## ☁️ 6. Cara Deploy ke Vercel (Production Deployment)
+## 🖥️ 6. Deployment VPS Tanpa Memindahkan Database
+
+Gunakan [`docs/VPS-DEPLOYMENT-RUNBOOK.md`](docs/VPS-DEPLOYMENT-RUNBOOK.md) sebagai prosedur resmi untuk Docker, Nginx/HTTPS, environment validation, health check, CI/CD, dan rollback. `docker-compose.yml` hanya menjalankan aplikasi dan volume upload; database tetap menggunakan `DATABASE_URL`/`DIRECT_URL` yang sudah ada.
+
+```bash
+npm run validate:env -- --production
+./deploy/vps/deploy.sh
+```
+
+Jangan menjalankan `prisma db push`, `prisma migrate`, atau `npm run db:seed` sebagai bagian dari deploy aplikasi ini.
+
+---
+
+## ☁️ 7. Cara Deploy ke Vercel (Production Deployment)
 
 Proyek ini telah dikonfigurasi 100% kompatibel dengan arsitektur serverless **Vercel**.
 
@@ -114,7 +127,7 @@ Proyek ini telah dikonfigurasi 100% kompatibel dengan arsitektur serverless **Ve
 
 ---
 
-## 🧪 7. Cara Testing Manual (QA Checklist)
+## 🧪 8. Cara Testing Manual (QA Checklist)
 
 Untuk memastikan sistem berjalan sempurna di lingkungan baru, lakukan pengujian alur berikut:
 1. **Test Login & Role Access**:
@@ -131,7 +144,7 @@ Untuk memastikan sistem berjalan sempurna di lingkungan baru, lakukan pengujian 
 
 ---
 
-## 📝 8. Catatan Perubahan (Changelog)
+## 📝 9. Catatan Perubahan (Changelog)
 
 - **`v2.0.0` (Production Readiness & Master Skills Overhaul)**:
   - ✨ *Feat*: Penambahan fitur pembuatan program baru oleh Mentor dan Admin secara langsung dari dasbor (`app/api/mentor/courses`).
@@ -144,7 +157,7 @@ Untuk memastikan sistem berjalan sempurna di lingkungan baru, lakukan pengujian 
 
 ---
 
-## 🤖 9. Autopilot & Engineering Agent Guidelines
+## 🤖 10. Autopilot & Engineering Agent Guidelines
 
 Proyek ini dipelihara di bawah pengawasan sistem **Antigravity Autonomous Engineering Agent**.
 Setiap kontribusi atau pengubahan kode wajib mematuhi pedoman di [`soul.md`](./soul.md) dan mengaktifkan pola kerja dari **12 Master Skills**:

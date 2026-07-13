@@ -1,4 +1,6 @@
-# 🚀 Panduan Deployment PROFAS Leadership LMS Tanpa Vercel (100% Permanen & Stabil)
+# 🚀 Panduan Deployment PROFAS Leadership LMS Tanpa Vercel
+
+> Runbook VPS yang menjadi acuan terbaru tersedia di [`VPS-DEPLOYMENT-RUNBOOK.md`](./VPS-DEPLOYMENT-RUNBOOK.md). Persiapan ini tidak memindahkan database dan tidak menjalankan migrasi schema.
 
 Memahami kekesalan Anda terhadap arsitektur **Serverless Vercel**! Arsitektur serverless memang memiliki kelemahan besar untuk aplikasi LMS yang intensif berkas seperti PROFAS Leadership LMS, antara lain:
 1. **Sistem File Read-Only & Ephemeral**: Kontainer Vercel mereset direktori lokal setiap beberapa menit. Akibatnya, berkas video MP4, PDF materi, atau foto profil yang diunggah secara lokal bisa hilang saat kontainer direstart (*cold start*).

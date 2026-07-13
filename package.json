@@ -11,6 +11,7 @@
     "security:baseline": "node scripts/security-baseline.mjs",
     "load:test": "node scripts/load-test.mjs",
     "perf:budget": "node scripts/performance-budget.mjs",
+    "validate:env": "node scripts/validate-env.mjs",
     "test:e2e": "playwright test",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

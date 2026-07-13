@@ -10,6 +10,7 @@ node_modules
 .vercel
 .env*.local
 .data/
+.deploy-state/
 test-results/
 playwright-report/
 

@@ -1,0 +1,89 @@
+name: VPS production deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: profas-vps-production
+  cancel-in-progress: false
+
+jobs:
+  quality:
+    name: Quality gates
+    runs-on: ubuntu-latest
+    env:
+      # Build-time values only; production secrets never enter the CI build.
+      NODE_ENV: production
+      DATABASE_URL: postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1
+      DIRECT_URL: postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1
+      JWT_SECRET: ci-only-jwt-secret-012345678901234567890123456789
+      NEXTAUTH_SECRET: ci-only-nextauth-secret-012345678901234567890
+      NEXTAUTH_URL: https://ci.invalid
+      NEXT_PUBLIC_APP_URL: https://ci.invalid
+      PRIVATE_UPLOAD_DIR: /app/.data/uploads
+      HEALTHCHECK_TOKEN: ci-only-health-token-012345678901234567890
+      REQUIRE_HEALTHCHECK_TOKEN: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Validate build environment
+        run: npm run validate:env -- --production
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Production build
+        run: npm run build
+      - name: Performance budget
+        run: npm run perf:budget
+
+  deploy:
+    name: Deploy to VPS
+    needs: quality
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate deployment secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+        run: |
+          test -n "$VPS_HOST"
+          test -n "$VPS_USER"
+          test -n "$VPS_SSH_PRIVATE_KEY"
+          test -n "$VPS_KNOWN_HOSTS"
+          test -n "$VPS_APP_DIR"
+      - name: Deploy release over SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT || '22' }}
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_PRIVATE_KEY" > "$HOME/.ssh/profas_vps"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/profas_vps" "$HOME/.ssh/known_hosts"
+          ssh -i "$HOME/.ssh/profas_vps" -p "$VPS_SSH_PORT" \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "cd '$VPS_APP_DIR' && DEPLOY_RELEASE_SHA='$RELEASE_SHA' VPS_APP_DIR='$VPS_APP_DIR' ./deploy/vps/deploy.sh"

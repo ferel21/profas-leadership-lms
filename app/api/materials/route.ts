@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { unlink } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { getReadableUploadRoots, resolveUploadPath, uploadSegmentsFromUrl } from "@/lib/upload-storage";
+import { rateLimit } from "@/lib/rate-limit";
+
+const deleteLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -55,14 +58,23 @@ export async function GET(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const ipCheck = deleteLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan penghapusan. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR") return NextResponse.json({ message: "Akses ditolak." }, { status: 403 });
+  if (!user || (user.role !== "MENTOR" && user.role !== "SUPER_ADMIN")) {
+    return NextResponse.json({ message: "Akses ditolak." }, { status: 403 });
+  }
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ message: "ID materi diperlukan." }, { status: 400 });
 
-  const material = await prisma.courseNode.findFirst({ where: { id, course: { mentorId: user.id } } });
+  const material = await prisma.courseNode.findFirst({
+    where: { id, ...(user.role === "MENTOR" ? { course: { mentorId: user.id } } : {}) }
+  });
   if (!material) return NextResponse.json({ message: "Materi tidak ditemukan." }, { status: 404 });
 
   if (material.type !== "LINK" && material.fileUrl) {

@@ -6,6 +6,9 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { getWritableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
 import { validateFileMagicBytes } from "@/lib/file-security";
+import { rateLimit } from "@/lib/rate-limit";
+
+const uploadLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
 const ALLOWED_TYPES = new Map([
   ["application/pdf", "PDF"],
@@ -18,24 +21,32 @@ const ALLOWED_TYPES = new Map([
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export async function POST(request: Request) {
+  const ipCheck = uploadLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan unggahan. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR") {
-    return NextResponse.json({ message: "Hanya mentor yang dapat mengunggah materi." }, { status: 403 });
+  if (!user || (user.role !== "MENTOR" && user.role !== "SUPER_ADMIN")) {
+    return NextResponse.json({ message: "Hanya mentor atau admin yang dapat mengunggah materi." }, { status: 403 });
   }
 
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
   const lessonId = formData.get("lessonId") as string | null;
   const courseIdParam = formData.get("courseId") as string | null;
-  const description = (formData.get("description") as string || "").trim();
-  const linkUrl = (formData.get("linkUrl") as string || "").trim();
+  const rawDesc = (formData.get("description") as string || "").trim();
+  const rawLink = (formData.get("linkUrl") as string || "").trim();
+
+  const description = rawDesc.replace(/<[^>]*>?/gm, "").slice(0, 1000);
+  const linkUrl = rawLink.replace(/<[^>]*>?/gm, "").slice(0, 500);
 
   let courseId = courseIdParam;
   let existingLesson = null;
 
   if (lessonId && lessonId !== "new_node" && !lessonId.startsWith("tmp_")) {
     existingLesson = await prisma.courseNode.findFirst({
-      where: { id: lessonId, course: { mentorId: user.id } },
+      where: { id: lessonId, ...(user.role === "MENTOR" ? { course: { mentorId: user.id } } : {}) },
       select: { id: true, type: true, course: { select: { id: true, title: true } } }
     });
     if (existingLesson) {
@@ -48,7 +59,7 @@ export async function POST(request: Request) {
   }
 
   const course = await prisma.course.findFirst({
-    where: { id: courseId, mentorId: user.id },
+    where: { id: courseId, ...(user.role === "MENTOR" ? { mentorId: user.id } : {}) },
     select: { id: true, title: true, slug: true }
   });
   if (!course) {
@@ -139,18 +150,21 @@ export async function POST(request: Request) {
     });
   }
 
-  // Notify enrolled students jika materi baru diunggah
+  // Notify enrolled students jika materi baru diunggah in chunked batches
   const enrollments = await prisma.enrollment.findMany({ where: { courseId, status: "ACTIVE" }, select: { userId: true } });
   if (enrollments.length > 0) {
-    await prisma.notification.createMany({
-      data: enrollments.map(e => ({
-        userId: e.userId,
-        title: "Materi Baru Tersedia",
-        message: `Mentor menambahkan materi baru: ${file.name}`,
-        type: "MATERIAL_ADDED",
-        link: `/belajar/${courseId}`
-      }))
-    });
+    for (let i = 0; i < enrollments.length; i += 500) {
+      const batch = enrollments.slice(i, i + 500);
+      await prisma.notification.createMany({
+        data: batch.map(e => ({
+          userId: e.userId,
+          title: "Materi Baru Tersedia",
+          message: `Mentor menambahkan materi baru: ${file.name}`,
+          type: "MATERIAL_ADDED",
+          link: `/belajar/${courseId}`
+        }))
+      });
+    }
   }
 
   revalidatePath(`/belajar/${course.slug}`);

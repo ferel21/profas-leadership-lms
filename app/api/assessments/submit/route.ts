@@ -176,7 +176,7 @@ export async function POST(request: Request) {
           questionScore = q.points;
           totalScore += q.points;
         }
-        answerText = userAnsStr;
+        answerText = userAnsStr.replace(/<[^>]*>?/gm, "").slice(0, 2000);
       } else if (q.type === 'SHORT_ANSWER') {
         const userAnsStr = userAns == null ? "" : String(userAns).trim().toLowerCase();
         const correctAnsStr = q.correctAnswer == null ? "" : String(q.correctAnswer).trim().toLowerCase();
@@ -186,13 +186,15 @@ export async function POST(request: Request) {
           questionScore = q.points;
           totalScore += q.points;
         }
-        answerText = userAns == null ? "" : String(userAns).trim();
+        answerText = (userAns == null ? "" : String(userAns).trim()).replace(/<[^>]*>?/gm, "").slice(0, 5000);
       } else if (q.type === 'ESSAY') {
         needsManualGrading = true;
-        answerText = typeof userAns === 'object' && userAns !== null ? String(userAns.text || "") : (userAns == null ? "" : String(userAns));
+        const rawEssay = typeof userAns === 'object' && userAns !== null ? String(userAns.text || "") : (userAns == null ? "" : String(userAns));
+        answerText = rawEssay.replace(/<[^>]*>?/gm, "").slice(0, 20000);
       } else if (q.type === 'FILE_UPLOAD') {
         needsManualGrading = true;
-        fileUrl = typeof userAns === 'object' && userAns !== null ? String(userAns.fileUrl || "") : null;
+        const rawUrl = typeof userAns === 'object' && userAns !== null ? String(userAns.fileUrl || "") : "";
+        fileUrl = rawUrl && (rawUrl.startsWith('/api/uploads/assignments/') || rawUrl.startsWith('https://')) ? rawUrl.slice(0, 500) : null;
       }
 
       attemptAnswers.push({

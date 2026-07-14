@@ -1,10 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
+import { rateLimit } from "@/lib/rate-limit";
 
-export async function GET() {
+const userLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
+
+export async function GET(request: Request) {
+  const ipCheck = userLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan data pengguna. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") {
     return NextResponse.json({ message: "Akses ditolak. Hanya Super Admin yang berhak." }, { status: 403 });
@@ -31,27 +38,43 @@ export async function GET() {
     });
 
     return NextResponse.json(users);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Get Users Error:", err);
     return NextResponse.json({ message: "Gagal mengambil daftar pengguna." }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
+  const ipCheck = userLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan pembuatan pengguna. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") {
     return NextResponse.json({ message: "Akses ditolak. Hanya Super Admin yang berhak." }, { status: 403 });
   }
 
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ message: "Data pengguna tidak valid." }, { status: 400 });
+    }
+
     const { name, email, role = "STUDENT", authProvider = "GOOGLE" } = body;
 
-    if (!name || !email) {
+    if (!name || typeof name !== "string" || !email || typeof email !== "string") {
       return NextResponse.json({ message: "Nama dan email wajib diisi." }, { status: 400 });
     }
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.replace(/<[^>]*>?/gm, "").trim().slice(0, 100);
+    const cleanEmail = email.trim().toLowerCase().slice(0, 150);
+    if (!cleanName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return NextResponse.json({ message: "Format nama atau email tidak valid." }, { status: 400 });
+    }
+
+    const validRole = Object.values(Role).includes(role as Role) ? (role as Role) : Role.STUDENT;
+
     const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
 
     if (existingUser) {
@@ -60,12 +83,12 @@ export async function POST(request: Request) {
 
     const newUser = await prisma.user.create({
       data: {
-        name: name.trim(),
+        name: cleanName,
         email: cleanEmail,
-        role: role as Role,
-        authProvider: authProvider,
+        role: validRole,
+        authProvider: typeof authProvider === "string" ? authProvider.slice(0, 50) : "GOOGLE",
         passwordHash: "",
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2a6ba7&color=fff`
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=2a6ba7&color=fff`
       }
     });
 
@@ -84,27 +107,36 @@ export async function POST(request: Request) {
     };
 
     return NextResponse.json({ success: true, user: userRow }, { status: 201 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Create User Error:", err);
     return NextResponse.json({ message: "Gagal membuat atau menyinkronkan pengguna baru." }, { status: 500 });
   }
 }
 
 export async function PATCH(request: Request) {
+  const ipCheck = userLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan pembaruan pengguna. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") {
     return NextResponse.json({ message: "Akses ditolak. Hanya Super Admin yang berhak." }, { status: 403 });
   }
 
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ message: "Data pengguna tidak valid." }, { status: 400 });
+    }
+
     const { userId, newRole } = body;
 
-    if (!userId || !newRole) {
+    if (!userId || typeof userId !== "string" || !newRole || typeof newRole !== "string") {
       return NextResponse.json({ message: "ID Pengguna dan Role baru dibutuhkan." }, { status: 400 });
     }
 
-    if (!["STUDENT", "MENTOR", "SUPER_ADMIN"].includes(newRole)) {
+    if (!Object.values(Role).includes(newRole as Role)) {
       return NextResponse.json({ message: "Role tidak valid." }, { status: 400 });
     }
 
@@ -129,13 +161,18 @@ export async function PATCH(request: Request) {
       success: true,
       user: { ...updatedUser, createdAt: updatedUser.createdAt.toISOString() },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Update User Role Error:", err);
     return NextResponse.json({ message: "Gagal memperbarui role pengguna." }, { status: 500 });
   }
 }
 
 export async function DELETE(request: Request) {
+  const ipCheck = userLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan penghapusan pengguna. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") {
     return NextResponse.json({ message: "Akses ditolak. Hanya Super Admin yang berhak." }, { status: 403 });
@@ -155,7 +192,7 @@ export async function DELETE(request: Request) {
   try {
     await prisma.user.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Delete User Error:", err);
     return NextResponse.json({ message: "Gagal menghapus pengguna." }, { status: 500 });
   }

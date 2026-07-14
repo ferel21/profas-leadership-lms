@@ -42,105 +42,115 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
       .map((n: unknown) => (n && typeof n === "object" && "id" in n && typeof (n as { id?: unknown }).id === "string") ? (n as { id: string }).id : undefined)
       .filter((id: unknown): id is string => typeof id === "string" && !id.startsWith("tmp_") && id !== "new_node");
 
-    await prisma.courseNode.deleteMany({
-      where: {
-        courseId,
-        id: { notIn: activeIds }
-      }
-    });
-
-    // 2. MASTER SKILL: Total Order Wipeout & Bypass SQLite Unique Constraint (courseId, parentId, order)
-    // Geser seluruh node yang ada di database untuk course ini ke urutan negatif yang aman
-    // Ini menjamin 100% ruang urutan (0, 1, 2...) kosong dan tidak akan pernah tabrakan!
-    const allExistingNodes = await prisma.courseNode.findMany({
-      where: { courseId },
-      select: { id: true }
-    });
-    for (let i = 0; i < allExistingNodes.length; i++) {
-      await prisma.courseNode.updateMany({
-        where: { id: allExistingNodes[i].id, courseId },
-        data: { order: -(100000 + i) }
+    await prisma.$transaction(async (tx) => {
+      await tx.courseNode.deleteMany({
+        where: {
+          courseId,
+          id: { notIn: activeIds }
+        }
       });
-    }
 
-    // 3. MASTER SKILL: Update/Create nodes menggunakan 100% Idempotent UPSERT
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      if (!node || typeof node !== "object" || typeof node.id !== "string" || !node.id || typeof node.title !== "string") continue;
-      
-      const cleanTitle = node.title.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) || "Bab Materi";
-      const cleanDesc = typeof node.description === "string" ? node.description.replace(/<[^>]*>?/gm, "").trim().slice(0, 500) : "";
-      const safeParentId = (typeof node.parentId === "string" && node.parentId && node.parentId !== node.id) ? node.parentId : null;
-
-      let assessmentId = node.assessmentId || null;
-      if (!assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
-        const existingNode = await prisma.courseNode.findFirst({
-          where: { id: node.id },
-          select: { assessmentId: true }
+      // 2. MASTER SKILL: Total Order Wipeout & Bypass SQLite Unique Constraint (courseId, parentId, order)
+      // Geser seluruh node yang ada di database untuk course ini ke urutan negatif yang aman
+      // Ini menjamin 100% ruang urutan (0, 1, 2...) kosong dan tidak akan pernah tabrakan!
+      const allExistingNodes = await tx.courseNode.findMany({
+        where: { courseId },
+        select: { id: true }
+      });
+      for (let i = 0; i < allExistingNodes.length; i++) {
+        await tx.courseNode.updateMany({
+          where: { id: allExistingNodes[i].id, courseId },
+          data: { order: -(100000 + i) }
         });
-        if (existingNode?.assessmentId) {
-          assessmentId = existingNode.assessmentId;
-        } else {
-          const assessment = await prisma.assessment.create({
-            data: {
-              id: node.id,
+      }
+
+      // 3. MASTER SKILL: Update/Create nodes menggunakan 100% Idempotent UPSERT
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (!node || typeof node !== "object" || typeof node.id !== "string" || !node.id || typeof node.title !== "string") continue;
+        
+        const cleanTitle = node.title.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) || "Bab Materi";
+        const cleanDesc = typeof node.description === "string" ? node.description.replace(/<[^>]*>?/gm, "").trim().slice(0, 500) : "";
+        const safeParentId = (typeof node.parentId === "string" && node.parentId && node.parentId !== node.id) ? node.parentId : null;
+
+        let assessmentId = node.assessmentId || null;
+        if (!assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
+          const existingNode = await tx.courseNode.findFirst({
+            where: { id: node.id },
+            select: { assessmentId: true }
+          });
+          if (existingNode?.assessmentId) {
+            assessmentId = existingNode.assessmentId;
+          } else {
+            const assessment = await tx.assessment.create({
+              data: {
+                id: node.id,
+                courseId,
+                title: cleanTitle,
+                type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
+                isAssignment: node.type === 'ASSIGNMENT'
+              }
+            }).catch(async () => {
+              return await tx.assessment.findFirst({ where: { courseId, title: cleanTitle } }) || 
+                     await tx.assessment.create({ data: { courseId, title: cleanTitle, type: 'MODULE', isAssignment: false } });
+            });
+            assessmentId = assessment.id;
+          }
+        } else if (assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
+          await tx.assessment.upsert({
+            where: { id: assessmentId },
+            update: { title: cleanTitle },
+            create: {
+              id: assessmentId,
               courseId,
               title: cleanTitle,
               type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
               isAssignment: node.type === 'ASSIGNMENT'
             }
-          }).catch(async () => {
-            return await prisma.assessment.findFirst({ where: { courseId, title: cleanTitle } }) || 
-                   await prisma.assessment.create({ data: { courseId, title: cleanTitle, type: 'MODULE', isAssignment: false } });
-          });
-          assessmentId = assessment.id;
+          }).catch(() => {});
         }
-      } else if (assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
-        await prisma.assessment.upsert({
-          where: { id: assessmentId },
-          update: { title: cleanTitle },
-          create: {
-            id: assessmentId,
-            courseId,
+
+        await tx.courseNode.upsert({
+          where: { id: node.id },
+          update: {
+            parentId: safeParentId,
             title: cleanTitle,
-            type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
-            isAssignment: node.type === 'ASSIGNMENT'
+            type: node.type || "TEXT",
+            order: node.order, // Dijamin unik dan sekuensial dari frontend & Phase 2!
+            description: cleanDesc,
+            content: node.content || null,
+            fileUrl: node.fileUrl || null,
+            fileName: node.fileName || null,
+            fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
+            durationMin: node.durationMin || 0,
+            ...(assessmentId ? { assessmentId } : {})
+          },
+          create: {
+            id: node.id,
+            courseId,
+            parentId: safeParentId,
+            title: cleanTitle,
+            type: node.type || "TEXT",
+            order: node.order, // Dijamin unik dan sekuensial!
+            description: cleanDesc,
+            content: node.content || null,
+            fileUrl: node.fileUrl || null,
+            fileName: node.fileName || null,
+            fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
+            durationMin: node.durationMin || 0,
+            assessmentId
           }
-        }).catch(() => {});
+        });
       }
 
-      await prisma.courseNode.upsert({
-        where: { id: node.id },
-        update: {
-          parentId: safeParentId,
-          title: cleanTitle,
-          type: node.type || "TEXT",
-          order: node.order, // Dijamin unik dan sekuensial dari frontend & Phase 2!
-          description: cleanDesc,
-          content: node.content || null,
-          fileUrl: node.fileUrl || null,
-          fileName: node.fileName || null,
-          fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
-          durationMin: node.durationMin || 0,
-          ...(assessmentId ? { assessmentId } : {})
-        },
-        create: {
-          id: node.id,
-          courseId,
-          parentId: safeParentId,
-          title: cleanTitle,
-          type: node.type || "TEXT",
-          order: node.order, // Dijamin unik dan sekuensial!
-          description: cleanDesc,
-          content: node.content || null,
-          fileUrl: node.fileUrl || null,
-          fileName: node.fileName || null,
-          fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
-          durationMin: node.durationMin || 0,
-          assessmentId
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "UPDATE_COURSE_CURRICULUM",
+          metadata: JSON.stringify({ courseId, nodeCount: nodes.length })
         }
       });
-    }
+    }, { timeout: 25000 });
 
     revalidatePath(`/belajar/${course.slug}`);
     revalidatePath(`/belajar/${courseId}`);

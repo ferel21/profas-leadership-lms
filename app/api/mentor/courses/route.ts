@@ -89,32 +89,44 @@ export async function POST(request: Request) {
     const existing = await prisma.course.findUnique({ where: { slug: baseSlug } });
     const slug = existing ? `${baseSlug}-${Math.random().toString(36).substring(2, 7)}` : baseSlug;
 
-    const course = await prisma.course.create({
-      data: {
-        title: cleanTitle,
-        slug,
-        category: cleanCategory,
-        level: validLevel,
-        shortDescription: cleanShortDesc,
-        description: cleanDesc || cleanShortDesc,
-        price: safePrice,
-        durationHours: safeDuration,
-        image: typeof image === "string" ? image.slice(0, 300) : "/images/profas-leadership-hero.webp",
-        outcomes: "Memahami kepemimpinan strategis\nMampu mengambil keputusan berbasis data\nMeningkatkan efektivitas tim",
-        published: false,
-        mentorId: user.id
-      }
-    });
+    const course = await prisma.$transaction(async (tx) => {
+      const createdCourse = await tx.course.create({
+        data: {
+          title: cleanTitle,
+          slug,
+          category: cleanCategory,
+          level: validLevel,
+          shortDescription: cleanShortDesc,
+          description: cleanDesc || cleanShortDesc,
+          price: safePrice,
+          durationHours: safeDuration,
+          image: typeof image === "string" ? image.slice(0, 300) : "/images/profas-leadership-hero.webp",
+          outcomes: "Memahami kepemimpinan strategis\nMampu mengambil keputusan berbasis data\nMeningkatkan efektivitas tim",
+          published: false,
+          mentorId: user.id
+        }
+      });
 
-    // Otomatis buatkan modul pertama (FOLDER) agar langsung siap di Course Builder
-    await prisma.courseNode.create({
-      data: {
-        courseId: course.id,
-        title: "Modul 1: Pengantar & Landasan Program",
-        type: "FOLDER",
-        order: 0,
-        description: "Modul pendahuluan untuk materi pembelajaran"
-      }
+      // Otomatis buatkan modul pertama (FOLDER) agar langsung siap di Course Builder
+      await tx.courseNode.create({
+        data: {
+          courseId: createdCourse.id,
+          title: "Modul 1: Pengantar & Landasan Program",
+          type: "FOLDER",
+          order: 0,
+          description: "Modul pendahuluan untuk materi pembelajaran"
+        }
+      });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "CREATE_COURSE",
+          metadata: JSON.stringify({ courseId: createdCourse.id, title: cleanTitle })
+        }
+      });
+
+      return createdCourse;
     });
 
     return NextResponse.json({ success: true, course }, { status: 201 });
@@ -161,20 +173,32 @@ export async function PATCH(request: Request) {
     const cleanImage = typeof image === "string" ? image.trim().slice(0, 300) : undefined;
     const validLevel = typeof level === "string" && Object.values(CourseLevel).includes(level as CourseLevel) ? (level as CourseLevel) : undefined;
 
-    const updated = await prisma.course.update({
-      where: { id },
-      data: {
-        ...(typeof published === "boolean" ? { published } : {}),
-        ...(cleanTitle ? { title: cleanTitle } : {}),
-        ...(cleanShortDesc ? { shortDescription: cleanShortDesc } : {}),
-        ...(cleanDesc ? { description: cleanDesc } : {}),
-        ...(cleanCategory ? { category: cleanCategory } : {}),
-        ...(validLevel ? { level: validLevel } : {}),
-        ...(typeof price === "number" && !isNaN(price) ? { price: Math.min(1000000000, Math.max(0, price)) } : {}),
-        ...(typeof durationHours === "number" && !isNaN(durationHours) ? { durationHours: Math.min(1000, Math.max(1, durationHours)) } : {}),
-        ...(cleanImage ? { image: cleanImage } : {}),
-        ...(cleanOutcomes ? { outcomes: cleanOutcomes } : {})
-      }
+    const updated = await prisma.$transaction(async (tx) => {
+      const updatedCourse = await tx.course.update({
+        where: { id },
+        data: {
+          ...(typeof published === "boolean" ? { published } : {}),
+          ...(cleanTitle ? { title: cleanTitle } : {}),
+          ...(cleanShortDesc ? { shortDescription: cleanShortDesc } : {}),
+          ...(cleanDesc ? { description: cleanDesc } : {}),
+          ...(cleanCategory ? { category: cleanCategory } : {}),
+          ...(validLevel ? { level: validLevel } : {}),
+          ...(typeof price === "number" && !isNaN(price) ? { price: Math.min(1000000000, Math.max(0, price)) } : {}),
+          ...(typeof durationHours === "number" && !isNaN(durationHours) ? { durationHours: Math.min(1000, Math.max(1, durationHours)) } : {}),
+          ...(cleanImage ? { image: cleanImage } : {}),
+          ...(cleanOutcomes ? { outcomes: cleanOutcomes } : {})
+        }
+      });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "UPDATE_COURSE",
+          metadata: JSON.stringify({ courseId: id, title: updatedCourse.title, published: updatedCourse.published })
+        }
+      });
+
+      return updatedCourse;
     });
 
     return NextResponse.json({ success: true, course: updated });
@@ -208,7 +232,17 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ message: "Program tidak ditemukan atau Anda tidak memiliki hak hapus." }, { status: 404 });
     }
 
-    await prisma.course.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      await tx.course.delete({ where: { id } });
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "DELETE_COURSE",
+          metadata: JSON.stringify({ courseId: id, title: course.title })
+        }
+      });
+    });
+
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("Delete Course Error:", err);

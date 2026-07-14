@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 
-const certificatesLimiter = rateLimit({ limit: 60, windowMs: 60 * 1000 });
+const certificatesLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
 export async function GET(request: Request) {
   const ipCheck = certificatesLimiter.check(request);
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ valid: false, message: "Nomor sertifikat wajib diisi atau terlalu panjang." }, { status: 400 });
   }
 
-  const cleanNumber = rawNumber.replace(/<[^>]*>?/gm, "").replace(/[\x00-\x1F\x7F]/g, "").trim();
+  const cleanNumber = rawNumber.replace(/<[^>]*>?/gm, "").replace(/[\x00-\x1F\x7F]/g, "").trim().toUpperCase();
   if (!cleanNumber) {
     return NextResponse.json({ valid: false, message: "Format nomor sertifikat tidak valid." }, { status: 400 });
   }

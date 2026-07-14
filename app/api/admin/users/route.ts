@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Role } from "@prisma/client";
+import { Role, Persona } from "@prisma/client";
 import { rateLimit } from "@/lib/rate-limit";
 
 const userLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
@@ -24,6 +24,7 @@ export async function GET(request: Request) {
         name: true,
         email: true,
         role: true,
+        persona: true,
         authProvider: true,
         createdAt: true,
         _count: {
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Data pengguna tidak valid." }, { status: 400 });
     }
 
-    const { name, email, role = "STUDENT", authProvider = "GOOGLE" } = body;
+    const { name, email, role = "STUDENT", persona = null, authProvider = "GOOGLE" } = body;
 
     if (!name || typeof name !== "string" || !email || typeof email !== "string") {
       return NextResponse.json({ message: "Nama dan email wajib diisi." }, { status: 400 });
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
     }
 
     const validRole = Object.values(Role).includes(role as Role) ? (role as Role) : Role.STUDENT;
+    const validPersona = typeof persona === "string" && Object.values(Persona).includes(persona as Persona) ? (persona as Persona) : null;
 
     const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
 
@@ -86,6 +88,7 @@ export async function POST(request: Request) {
         name: cleanName,
         email: cleanEmail,
         role: validRole,
+        persona: validPersona,
         authProvider: typeof authProvider === "string" ? authProvider.slice(0, 50) : "GOOGLE",
         passwordHash: "",
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=2a6ba7&color=fff`
@@ -97,6 +100,7 @@ export async function POST(request: Request) {
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
+      persona: newUser.persona,
       authProvider: newUser.authProvider,
       createdAt: newUser.createdAt.toISOString(),
       _count: {
@@ -130,28 +134,52 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ message: "Data pengguna tidak valid." }, { status: 400 });
     }
 
-    const { userId, newRole } = body;
+    const { userId, newRole, newPersona } = body;
 
-    if (!userId || typeof userId !== "string" || !newRole || typeof newRole !== "string") {
-      return NextResponse.json({ message: "ID Pengguna dan Role baru dibutuhkan." }, { status: 400 });
+    if (!userId || typeof userId !== "string") {
+      return NextResponse.json({ message: "ID Pengguna dibutuhkan." }, { status: 400 });
     }
 
-    if (!Object.values(Role).includes(newRole as Role)) {
-      return NextResponse.json({ message: "Role tidak valid." }, { status: 400 });
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (!targetUser) {
+      return NextResponse.json({ message: "Pengguna tidak ditemukan." }, { status: 404 });
     }
 
-    if (userId === user.id && newRole !== "SUPER_ADMIN") {
-      return NextResponse.json({ message: "Anda tidak dapat menurunkan role akun Anda sendiri." }, { status: 400 });
+    const updateData: { role?: Role; persona?: Persona } = {};
+
+    if (newRole !== undefined && typeof newRole === "string") {
+      if (!Object.values(Role).includes(newRole as Role)) {
+        return NextResponse.json({ message: "Role tidak valid." }, { status: 400 });
+      }
+      if (userId === user.id && newRole !== "SUPER_ADMIN") {
+        return NextResponse.json({ message: "Anda tidak dapat menurunkan role akun Anda sendiri." }, { status: 400 });
+      }
+      if (targetUser.role === "SUPER_ADMIN" && userId !== user.id && newRole !== "SUPER_ADMIN") {
+        return NextResponse.json({ message: "Anda tidak berhak mengubah atau menurunkan Super Admin lain." }, { status: 403 });
+      }
+      updateData.role = newRole as Role;
+    }
+
+    if (newPersona !== undefined && typeof newPersona === "string") {
+      if (!Object.values(Persona).includes(newPersona as Persona)) {
+        return NextResponse.json({ message: "Persona tidak valid." }, { status: 400 });
+      }
+      updateData.persona = newPersona as Persona;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ message: "Tidak ada pembaruan yang dikirim." }, { status: 400 });
     }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { role: newRole as Role },
+      data: updateData,
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
+        persona: true,
         authProvider: true,
         createdAt: true,
       },
@@ -163,7 +191,7 @@ export async function PATCH(request: Request) {
     });
   } catch (err: unknown) {
     console.error("Update User Role Error:", err);
-    return NextResponse.json({ message: "Gagal memperbarui role pengguna." }, { status: 500 });
+    return NextResponse.json({ message: "Gagal memperbarui role atau persona pengguna." }, { status: 500 });
   }
 }
 
@@ -181,16 +209,25 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  if (!id) {
+  if (!id || typeof id !== "string") {
     return NextResponse.json({ message: "ID pengguna diperlukan." }, { status: 400 });
   }
 
-  if (id === user.id) {
+  const cleanId = id.trim();
+  if (cleanId === user.id) {
     return NextResponse.json({ message: "Anda tidak dapat menghapus akun Anda sendiri." }, { status: 400 });
   }
 
   try {
-    await prisma.user.delete({ where: { id } });
+    const targetUser = await prisma.user.findUnique({ where: { id: cleanId } });
+    if (!targetUser) {
+      return NextResponse.json({ message: "Pengguna tidak ditemukan." }, { status: 404 });
+    }
+    if (targetUser.role === "SUPER_ADMIN") {
+      return NextResponse.json({ message: "Anda tidak dapat menghapus akun Super Admin lain secara langsung." }, { status: 403 });
+    }
+
+    await prisma.user.delete({ where: { id: cleanId } });
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("Delete User Error:", err);

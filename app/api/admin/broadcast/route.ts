@@ -20,6 +20,57 @@ const broadcastSchema = z.object({
   link: z.string().trim().refine(value => value === "" || (value.startsWith("/") && !value.startsWith("//")), "Tautan pengumuman harus berupa path internal.").optional(),
 });
 
+export async function GET(request: Request) {
+  const ipCheck = broadcastLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan riwayat pengumuman. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "SUPER_ADMIN" && user.role !== "MENTOR")) {
+    return NextResponse.json({ message: "Akses ditolak. Hanya Admin atau Mentor yang dapat melihat riwayat pengumuman." }, { status: 403 });
+  }
+
+  try {
+    const logs = await prisma.activityLog.findMany({
+      where: {
+        action: "CREATE_ANNOUNCEMENT_BROADCAST",
+        ...(user.role === "MENTOR" ? { userId: user.id } : {})
+      },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: {
+        id: true,
+        action: true,
+        metadata: true,
+        createdAt: true,
+        user: { select: { name: true, role: true } }
+      }
+    });
+
+    const broadcasts = logs.map(l => {
+      let meta: { title?: string; count?: number; targetCourseId?: string } = {};
+      try {
+        meta = l.metadata ? JSON.parse(l.metadata) : {};
+      } catch {}
+      return {
+        id: l.id,
+        senderName: l.user.name,
+        senderRole: l.user.role,
+        title: meta.title || "Pengumuman",
+        recipientCount: meta.count || 0,
+        targetCourseId: meta.targetCourseId || "ALL",
+        sentAt: l.createdAt.toISOString()
+      };
+    });
+
+    return NextResponse.json(broadcasts);
+  } catch (error: unknown) {
+    console.error("Get Broadcast History Error:", error);
+    return NextResponse.json({ message: "Gagal mengambil riwayat pengumuman." }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   const ipCheck = broadcastLimiter.check(request);
   if (!ipCheck.success) {
@@ -88,6 +139,18 @@ export async function POST(request: Request) {
         }))
       });
     }
+
+    await prisma.activityLog.create({
+      data: {
+        userId: user.id,
+        action: "CREATE_ANNOUNCEMENT_BROADCAST",
+        metadata: JSON.stringify({
+          title: cleanTitle,
+          count: targetUserIds.length,
+          targetCourseId: targetCourseId || "ALL"
+        })
+      }
+    });
 
     return NextResponse.json({
       message: `Pengumuman berhasil dikirim ke ${targetUserIds.length} peserta.`,

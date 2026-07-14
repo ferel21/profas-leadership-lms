@@ -81,11 +81,39 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Konten diskusi tidak valid setelah pembersihan karakter berbahaya." }, { status: 400 });
   }
 
-  const post = await prisma.discussionPost.create({
-    data: { userId: user.id, nodeId: targetId, content: cleanContent },
-    select: { id: true, content: true, createdAt: true, user: { select: { id: true, name: true } } },
-  });
-  return NextResponse.json(post, { status: 201 });
+  try {
+    const post = await prisma.$transaction(async (tx) => {
+      const createdPost = await tx.discussionPost.create({
+        data: { userId: user.id, nodeId: targetId, content: cleanContent },
+        select: { id: true, content: true, createdAt: true, user: { select: { id: true, name: true } } },
+      });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "CREATE_DISCUSSION_POST",
+          metadata: JSON.stringify({ postId: createdPost.id, nodeId: targetId })
+        }
+      });
+
+      if (user.role === "STUDENT") {
+        await tx.xPLog.create({
+          data: {
+            userId: user.id,
+            points: 5,
+            source: "PARTICIPATE_DISCUSSION"
+          }
+        });
+      }
+
+      return createdPost;
+    });
+
+    return NextResponse.json(post, { status: 201 });
+  } catch (error) {
+    console.error("[DISCUSSION_POST_ERROR]", error);
+    return NextResponse.json({ message: "Gagal memproses dan menyimpan diskusi." }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -113,10 +141,11 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ message: "Anda tidak memiliki hak akses untuk menghapus diskusi ini." }, { status: 403 });
     }
 
-    await prisma.discussionPost.delete({ where: { id } });
-
-    await prisma.activityLog.create({
-      data: { userId: user.id, action: "DELETE_DISCUSSION_POST", metadata: JSON.stringify({ postId: id, nodeId: post.nodeId }) }
+    await prisma.$transaction(async (tx) => {
+      await tx.discussionPost.delete({ where: { id } });
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "DELETE_DISCUSSION_POST", metadata: JSON.stringify({ postId: id, nodeId: post.nodeId }) }
+      });
     });
 
     return NextResponse.json({ success: true, message: "Komentar diskusi berhasil dihapus." });

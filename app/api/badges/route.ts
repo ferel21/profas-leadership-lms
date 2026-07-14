@@ -66,15 +66,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const existing = await prisma.userBadge.findFirst({
-      where: { userId, badgeId }
-    });
-    if (existing) {
-      return NextResponse.json(existing);
-    }
+    const userBadge = await prisma.$transaction(async (tx) => {
+      const existing = await tx.userBadge.findFirst({
+        where: { userId, badgeId }
+      });
+      if (existing) {
+        return existing;
+      }
 
-    const userBadge = await prisma.userBadge.create({
-      data: { userId, badgeId }
+      const created = await tx.userBadge.create({
+        data: { userId, badgeId }
+      });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "AWARD_BADGE",
+          metadata: JSON.stringify({ recipientUserId: userId, badgeId })
+        }
+      });
+
+      return created;
     });
 
     return NextResponse.json(userBadge, { status: 201 });
@@ -101,10 +113,28 @@ export async function DELETE(request: Request) {
     const badgeId = searchParams.get("badgeId");
 
     if (id) {
-      await prisma.userBadge.delete({ where: { id: id.trim() } });
+      await prisma.$transaction(async (tx) => {
+        await tx.userBadge.delete({ where: { id: id.trim() } });
+        await tx.activityLog.create({
+          data: {
+            userId: user.id,
+            action: "REVOKE_BADGE",
+            metadata: JSON.stringify({ revokedUserBadgeId: id.trim() })
+          }
+        });
+      });
     } else if (userId && badgeId) {
-      await prisma.userBadge.deleteMany({
-        where: { userId: userId.trim(), badgeId: badgeId.trim() }
+      await prisma.$transaction(async (tx) => {
+        await tx.userBadge.deleteMany({
+          where: { userId: userId.trim(), badgeId: badgeId.trim() }
+        });
+        await tx.activityLog.create({
+          data: {
+            userId: user.id,
+            action: "REVOKE_BADGE",
+            metadata: JSON.stringify({ revokedUserId: userId.trim(), badgeId: badgeId.trim() })
+          }
+        });
       });
     } else {
       return NextResponse.json({ error: "id atau userId + badgeId diperlukan." }, { status: 400 });

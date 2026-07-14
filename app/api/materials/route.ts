@@ -77,6 +77,17 @@ export async function DELETE(request: Request) {
   });
   if (!material) return NextResponse.json({ message: "Materi tidak ditemukan." }, { status: 404 });
 
+  await prisma.$transaction(async (tx) => {
+    await tx.courseNode.delete({ where: { id } });
+    await tx.activityLog.create({
+      data: {
+        userId: user.id,
+        action: "DELETE_MATERIAL",
+        metadata: JSON.stringify({ materialId: id, fileName: material.fileName, type: material.type, courseId: material.courseId })
+      }
+    });
+  });
+
   if (material.type !== "LINK" && material.fileUrl) {
     const segments = uploadSegmentsFromUrl(material.fileUrl);
     if (segments) {
@@ -91,6 +102,5 @@ export async function DELETE(request: Request) {
     }
   }
 
-  await prisma.courseNode.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }

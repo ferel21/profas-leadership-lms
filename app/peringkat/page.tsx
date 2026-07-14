@@ -6,7 +6,7 @@ import { prisma, cachedQuery } from "@/lib/prisma";
 import { initials, personaLabel } from "@/lib/utils";
 
 const getLeaderboardStudents = cachedQuery(
-  async () => prisma.user.findMany({where:{role:"STUDENT"},select:{id:true,name:true,persona:true,xpLogs:{select:{points:true}},userBadges:{include:{badge:true}}}}),
+  async () => prisma.user.findMany({where:{role:"STUDENT"},take: 200,select:{id:true,name:true,persona:true,xpLogs:{select:{points:true}},userBadges:{include:{badge:true}}}}),
   ["leaderboard-students"],
   60
 );
@@ -15,7 +15,7 @@ export default async function LeaderboardPage(){
   const user=await getCurrentUser();
   if(!user)redirect("/masuk?next=/peringkat");
   const students = await getLeaderboardStudents();
-  const ranking=students.map(student=>({...student,xp:student.xpLogs.reduce((sum,log)=>sum+log.points,0)})).sort((a,b)=>b.xp-a.xp);
+  const ranking=students.map(student=>({...student,xp:student.xpLogs.reduce((sum,log)=>sum+log.points,0)})).sort((a,b)=>b.xp-a.xp).slice(0, 100);
   return (
     <DashboardChrome user={user}>
       <div className="leaderboard-heading">

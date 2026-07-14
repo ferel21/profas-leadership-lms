@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
+
+const attendanceLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
 const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("check_in"), eventId: z.string().min(1) }),
@@ -52,6 +55,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const ipCheck = attendanceLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan absensi. Silakan tunggu 1 menit." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Sesi Anda telah berakhir. Silakan masuk kembali." }, { status: 401 });
 
@@ -77,6 +85,13 @@ export async function POST(request: Request) {
     if (user.role !== Role.STUDENT) return NextResponse.json({ error: "Absen mandiri hanya tersedia untuk peserta." }, { status: 403 });
     const enrolled = !event.courseId || event.course?.enrollments.some(item => item.userId === user.id);
     if (!enrolled) return NextResponse.json({ error: "Anda tidak terdaftar pada program ini." }, { status: 403 });
+
+    const existingRecord = await prisma.attendanceRecord.findUnique({
+      where: { eventId_userId: { eventId: event.id, userId: user.id } }
+    });
+    if (existingRecord && (existingRecord.status === AttendanceStatus.PRESENT || existingRecord.status === AttendanceStatus.LATE || existingRecord.status === AttendanceStatus.EXCUSED)) {
+      return NextResponse.json({ record: existingRecord, message: "Anda sudah melakukan absensi sebelumnya." });
+    }
 
     const now = new Date();
     if (!event.attendanceEnabled || !event.attendanceOpenAt || !event.attendanceCloseAt || now < event.attendanceOpenAt || now > event.attendanceCloseAt) {
@@ -154,11 +169,12 @@ export async function POST(request: Request) {
   }
 
   const checkedInAt = input.status === AttendanceStatus.PRESENT || input.status === AttendanceStatus.LATE ? new Date() : null;
+  const cleanNote = typeof input.note === "string" ? input.note.replace(/<[^>]*>?/gm, "").trim() : null;
   const record = await prisma.$transaction(async tx => {
     const attendance = await tx.attendanceRecord.upsert({
       where: { eventId_userId: { eventId: event.id, userId: target.id } },
-      create: { eventId: event.id, userId: target.id, status: input.status, checkedInAt, source: user.role, note: input.note || null },
-      update: { status: input.status, checkedInAt, source: user.role, note: input.note || null },
+      create: { eventId: event.id, userId: target.id, status: input.status, checkedInAt, source: user.role, note: cleanNote },
+      update: { status: input.status, checkedInAt, source: user.role, note: cleanNote },
     });
     await tx.activityLog.create({
       data: { userId: user.id, action: "ATTENDANCE_MARK", metadata: JSON.stringify({ eventId: event.id, targetUserId: target.id, status: input.status }) },

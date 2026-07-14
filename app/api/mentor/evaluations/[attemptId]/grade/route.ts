@@ -110,7 +110,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
             sourceId: attempt.assessmentId
           },
           update: {}
-        }).catch(() => {});
+        });
 
         // Find node that has this assessment
         const node = await tx.courseNode.findFirst({
@@ -131,9 +131,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
               completedAt: new Date()
             },
             update: { completedAt: new Date() }
-          }).catch(() => {});
+          });
         }
       }
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "GRADE_EVALUATION",
+          metadata: JSON.stringify({ attemptId, studentId: attempt.userId, score: finalScore, passed: serverPassed })
+        }
+      });
 
       return savedAttempt;
     });

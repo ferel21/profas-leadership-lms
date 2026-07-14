@@ -18,8 +18,8 @@ export async function finalizeCourseCompletion(userId: string, courseId: string)
       where: { userId_courseId: { userId, courseId } },
       data: { progressPercent, status: eligible?"COMPLETED":"ACTIVE", completedAt: eligible?(enrollment.completedAt??new Date()):null },
     });
-    let certificateNumber:string|null=null;
-    if(eligible){
+    let certificateNumber: string | null = null;
+    if (eligible) {
       const existingCert = await tx.certificate.findUnique({
         where: { userId_courseId: { userId, courseId } },
         select: { uniqueNumber: true }
@@ -27,32 +27,36 @@ export async function finalizeCourseCompletion(userId: string, courseId: string)
       if (existingCert) {
         certificateNumber = existingCert.uniqueNumber;
       } else {
-        const candidate=`PROFAS-LDR-${new Date().getFullYear()}-${randomUUID().slice(0,8).toUpperCase()}`;
-        try {
-          const certificate=await tx.certificate.upsert({where:{userId_courseId:{userId,courseId}},update:{},create:{userId,courseId,uniqueNumber:candidate},select:{uniqueNumber:true}});
-          certificateNumber=certificate.uniqueNumber;
-        } catch {
-          const fallbackCert = await tx.certificate.findUnique({
-            where: { userId_courseId: { userId, courseId } },
-            select: { uniqueNumber: true }
-          });
-          certificateNumber = fallbackCert?.uniqueNumber ?? candidate;
+        let candidate = `PROFAS-LDR-${new Date().getFullYear()}-${randomUUID().slice(0, 8).toUpperCase()}`;
+        while (await tx.certificate.findUnique({ where: { uniqueNumber: candidate }, select: { id: true } })) {
+          candidate = `PROFAS-LDR-${new Date().getFullYear()}-${randomUUID().slice(0, 8).toUpperCase()}`;
         }
+        const certificate = await tx.certificate.create({
+          data: { userId, courseId, uniqueNumber: candidate },
+          select: { uniqueNumber: true }
+        });
+        certificateNumber = certificate.uniqueNumber;
 
-        if (certificateNumber === candidate) {
-          const course = await tx.course.findUnique({ where: { id: courseId }, select: { title: true } });
-          await tx.notification.create({
-            data: {
-              userId,
-              title: "Selamat! Sertifikat Diterbitkan 🎉",
-              message: `Anda telah berhasil menyelesaikan program ${course?.title ?? ""}.`,
-              type: "COURSE_COMPLETED",
-              link: `/sertifikat/${certificateNumber}`
-            }
-          });
-        }
+        const course = await tx.course.findUnique({ where: { id: courseId }, select: { title: true } });
+        await tx.notification.create({
+          data: {
+            userId,
+            title: "Selamat! Sertifikat Diterbitkan 🎉",
+            message: `Anda telah berhasil menyelesaikan program ${course?.title ?? ""}.`,
+            type: "COURSE_COMPLETED",
+            link: `/sertifikat/${certificateNumber}`
+          }
+        });
+
+        await tx.activityLog.create({
+          data: {
+            userId,
+            action: "ISSUE_CERTIFICATE",
+            metadata: JSON.stringify({ certificateNumber, courseId, courseTitle: course?.title ?? "" })
+          }
+        });
       }
     }
-    return {progressPercent,completedLessons,totalLessons,passedAssessments,requiredAssessments,eligible,certificateNumber};
+    return { progressPercent, completedLessons, totalLessons, passedAssessments, requiredAssessments, eligible, certificateNumber };
   });
 }

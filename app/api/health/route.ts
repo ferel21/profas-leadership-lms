@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const healthLimiter = rateLimit({ limit: 120, windowMs: 60 * 1000 });
 
 type HealthSnapshot = { status: "HEALTHY" | "UNHEALTHY"; latencyMs: number; checkedAt: number };
 
@@ -37,6 +40,11 @@ async function getHealthSnapshot() {
 }
 
 export async function GET(request: Request) {
+  const ipCheck = healthLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ status: "DEGRADED", error: "Too many health requests" }, { status: 429 });
+  }
+
   const startTime = Date.now();
   const snapshot = await getHealthSnapshot();
   const dbStatus = snapshot.status;

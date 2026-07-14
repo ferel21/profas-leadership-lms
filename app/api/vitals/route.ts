@@ -20,14 +20,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Malformed metric" }, { status: 400 });
     }
 
+    const cleanName = metric.name.replace(/[^a-zA-Z0-9_\-\.]/g, "").slice(0, 50);
+    const cleanRating = typeof metric.rating === "string" ? metric.rating.replace(/[^a-zA-Z]/g, "").slice(0, 20) : "unknown";
+    const cleanId = typeof metric.id === "string" ? metric.id.replace(/[^a-zA-Z0-9_\-\.]/g, "").slice(0, 50) : "";
+
     // Structured log for monitoring/observability pipelines without touching database
     console.log(
       JSON.stringify({
         type: "WEB_VITALS",
-        metric: metric.name,
+        metric: cleanName,
         value: Math.round(metric.value * 100) / 100,
-        rating: metric.rating || "unknown",
-        id: metric.id || "",
+        rating: cleanRating,
+        id: cleanId,
         timestamp: new Date().toISOString(),
       })
     );

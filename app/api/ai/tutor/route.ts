@@ -6,7 +6,8 @@ import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-const tutorLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
+const ipTutorLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
+const userTutorLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
 // Basis pengetahuan kepemimpinan PROFAS untuk panduan kontekstual
 const LEADERSHIP_KNOWLEDGE_BASE: Record<string, string> = {
@@ -18,13 +19,33 @@ const LEADERSHIP_KNOWLEDGE_BASE: Record<string, string> = {
 };
 
 const tutorRequestSchema = z.object({
-  question: z.string().trim().min(1, "Pertanyaan tidak boleh kosong.").max(2_000, "Pertanyaan terlalu panjang."),
-  lessonTitle: z.string().trim().max(200).optional(),
+  question: z.string().trim().min(1, "Pertanyaan tidak boleh kosong.").max(1_500, "Pertanyaan terlalu panjang (maksimal 1500 karakter)."),
+  lessonTitle: z.string().trim().max(150).optional(),
   history: z.array(z.object({
     role: z.enum(["user", "ai"]),
-    text: z.string().trim().min(1).max(4_000),
-  })).max(12).optional(),
+    text: z.string().trim().min(1).max(1_000),
+  })).max(8).optional(),
 });
+
+function isPromptInjection(text: string): boolean {
+  const lower = text.toLowerCase();
+  const suspiciousPatterns = [
+    "abaikan instruksi",
+    "ignore previous instructions",
+    "ignore all previous",
+    "act as system",
+    "system prompt override",
+    "jailbreak",
+    "berpura-puralah menjadi",
+    "pretend you are not an ai",
+    "bypass restrictions"
+  ];
+  return suspiciousPatterns.some(pattern => lower.includes(pattern));
+}
+
+function sanitizeText(text: string): string {
+  return text.replace(/<[^>]*>?/gm, "").trim();
+}
 
 function getLocalReply(question: string, lessonTitle?: string) {
   const qLower = question.toLowerCase();
@@ -44,10 +65,11 @@ function getLocalReply(question: string, lessonTitle?: string) {
 }
 
 function buildClaudeMessages(question: string, history: z.infer<typeof tutorRequestSchema>["history"]): Anthropic.MessageParam[] {
-  const source = [...(history ?? []), { role: "user" as const, text: question }];
+  const cleanQuestion = sanitizeText(question);
+  const source = [...(history ?? []).map(h => ({ ...h, text: sanitizeText(h.text) })), { role: "user" as const, text: cleanQuestion }];
   const messages: Anthropic.MessageParam[] = [];
 
-  for (const item of source.slice(-10)) {
+  for (const item of source.slice(-8)) {
     const role = item.role === "ai" ? "assistant" : "user";
     if (messages.length === 0 && role !== "user") continue;
 
@@ -71,9 +93,9 @@ function getTextReply(response: Anthropic.Message) {
 }
 
 export async function POST(request: Request) {
-  const ipCheck = tutorLimiter.check(request);
+  const ipCheck = ipTutorLimiter.check(request);
   if (!ipCheck.success) {
-    return NextResponse.json({ message: "Terlalu banyak permintaan ke Asisten AI. Silakan tunggu beberapa saat lagi." }, { status: 429 });
+    return NextResponse.json({ message: "Terlalu banyak permintaan ke Asisten AI dari IP ini. Silakan tunggu sebentar." }, { status: 429 });
   }
 
   try {
@@ -82,13 +104,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Anda harus login untuk menggunakan Asisten AI." }, { status: 401 });
     }
 
+    // Per-user rate limit check (mencegah eksploitasi token LLM dari banyak IP dengan 1 akun)
+    const userCheck = userTutorLimiter.check(request, user.id);
+    if (!userCheck.success) {
+      return NextResponse.json({ message: "Batas penggunaan Asisten AI per akun tercapai. Silakan tunggu 1 menit." }, { status: 429 });
+    }
+
     const parsed = tutorRequestSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) {
       return NextResponse.json({ message: parsed.error.issues[0]?.message ?? "Data pertanyaan tidak valid." }, { status: 400 });
     }
 
     const { question, lessonTitle, history } = parsed.data;
-    const fallbackReply = getLocalReply(question, lessonTitle);
+    const cleanQuestion = sanitizeText(question);
+    const cleanTitle = lessonTitle ? sanitizeText(lessonTitle).slice(0, 150) : undefined;
+
+    // Proteksi Prompt Injection / Jailbreak
+    if (isPromptInjection(cleanQuestion)) {
+      return NextResponse.json({
+        reply: "Maaf, Asisten AI PROFAS hanya dapat berdiskusi mengenai topik kepemimpinan, pengembangan diri, dan materi modul pembelajaran. Silakan ajukan pertanyaan terkait materi program Anda.",
+        source: "profas-local-ai"
+      });
+    }
+
+    const fallbackReply = getLocalReply(cleanQuestion, cleanTitle);
     const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
 
     if (apiKey) {
@@ -100,9 +139,9 @@ export async function POST(request: Request) {
           max_tokens: 700,
           system: "Anda adalah Asisten AI Pedagogis untuk PROFAS Leadership LMS. Jawablah dalam Bahasa Indonesia yang profesional, hangat, konseptual, dan aplikatif. Kaitkan jawaban dengan konteks modul bila tersedia. Berikan langkah praktis yang dapat dicoba peserta, jangan mengarang data pribadi, dan arahkan pertanyaan berisiko tinggi kepada mentor manusia.",
           messages: [
-            { role: "user", content: `Konteks modul: ${lessonTitle || "Kepemimpinan umum"}` },
+            { role: "user", content: `Konteks modul: ${cleanTitle || "Kepemimpinan umum"}` },
             { role: "assistant", content: "Baik, saya akan menjaga jawaban tetap kontekstual, praktis, dan aman untuk pembelajaran kepemimpinan." },
-            ...buildClaudeMessages(question, history),
+            ...buildClaudeMessages(cleanQuestion, history),
           ],
         });
         const reply = getTextReply(response);

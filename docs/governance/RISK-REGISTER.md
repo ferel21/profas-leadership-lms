@@ -47,3 +47,4 @@ Likelihood dan impact dinilai 1–5. Skor = likelihood × impact.
 | Tanggal | Reviewer | Perubahan | Keputusan |
 | --- | --- | --- | --- |
 | 13 Juli 2026 | Engineering baseline | Register awal dibuat setelah security/privacy audit | Open items diterima untuk treatment lanjutan |
+| 14 Juli 2026 | Autonomous Maintainer | Audit log ISO 27001 pada seluruh event autentikasi (`USER_REGISTER`, `USER_LOGIN`, `USER_LOGOUT`) & ekspor data (`EXPORT_DATA`), serta pembersihan risiko `Transaction already aborted` (`findUnique` vs `upsert`) pada kurikulum, asesmen, & penilaian evaluasi | Risiko R-002, R-005, R-006, & R-009 diperkuat dengan jejak audit P0 utuh dan integritas transaksi atomik |

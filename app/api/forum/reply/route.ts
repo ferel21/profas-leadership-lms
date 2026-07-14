@@ -47,25 +47,29 @@ export async function POST(request: Request) {
     if (!thread) return NextResponse.json({ error: "Thread not found" }, { status: 404 });
     if (thread.locked) return NextResponse.json({ error: "Thread is locked" }, { status: 403 });
 
-    const reply = await prisma.forumReply.create({
-      data: {
-        threadId,
-        content,
-        authorId: user.id
-      },
-      include: {
-        author: { select: { id: true, name: true, role: true, avatar: true } }
-      }
-    });
-    
-    // Update thread updatedAt timestamp
-    await prisma.forumThread.update({
-      where: { id: threadId },
-      data: { updatedAt: new Date() }
-    });
+    const reply = await prisma.$transaction(async (tx) => {
+      const created = await tx.forumReply.create({
+        data: {
+          threadId,
+          content,
+          authorId: user.id
+        },
+        include: {
+          author: { select: { id: true, name: true, role: true, avatar: true } }
+        }
+      });
+      
+      // Update thread updatedAt timestamp
+      await tx.forumThread.update({
+        where: { id: threadId },
+        data: { updatedAt: new Date() }
+      });
 
-    await prisma.activityLog.create({
-      data: { userId: user.id, action: "CREATE_FORUM_REPLY", metadata: JSON.stringify({ replyId: reply.id, threadId }) }
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "CREATE_FORUM_REPLY", metadata: JSON.stringify({ replyId: created.id, threadId }) }
+      });
+
+      return created;
     });
 
     return NextResponse.json(reply);
@@ -101,10 +105,11 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Anda tidak memiliki hak akses untuk menghapus komentar ini." }, { status: 403 });
     }
 
-    await prisma.forumReply.delete({ where: { id } });
-
-    await prisma.activityLog.create({
-      data: { userId: user.id, action: "DELETE_FORUM_REPLY", metadata: JSON.stringify({ replyId: id, threadId: reply.threadId }) }
+    await prisma.$transaction(async (tx) => {
+      await tx.forumReply.delete({ where: { id } });
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "DELETE_FORUM_REPLY", metadata: JSON.stringify({ replyId: id, threadId: reply.threadId }) }
+      });
     });
 
     return NextResponse.json({ success: true, message: "Komentar berhasil dihapus." });

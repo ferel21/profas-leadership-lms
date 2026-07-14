@@ -72,22 +72,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Judul atau konten tidak valid setelah pembersihan karakter berbahaya." }, { status: 400 });
     }
 
-    const thread = await prisma.forumThread.create({
-      data: {
-        title,
-        content,
-        categoryId,
-        authorId: user.id
-      },
-      include: {
-        author: { select: { id: true, name: true, role: true, avatar: true } },
-        category: { select: { id: true, name: true } },
-        _count: { select: { replies: true } }
-      }
-    });
+    const thread = await prisma.$transaction(async (tx) => {
+      const created = await tx.forumThread.create({
+        data: {
+          title,
+          content,
+          categoryId,
+          authorId: user.id
+        },
+        include: {
+          author: { select: { id: true, name: true, role: true, avatar: true } },
+          category: { select: { id: true, name: true } },
+          _count: { select: { replies: true } }
+        }
+      });
 
-    await prisma.activityLog.create({
-      data: { userId: user.id, action: "CREATE_FORUM_THREAD", metadata: JSON.stringify({ threadId: thread.id }) }
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "CREATE_FORUM_THREAD", metadata: JSON.stringify({ threadId: created.id }) }
+      });
+
+      return created;
     });
 
     return NextResponse.json(thread);
@@ -123,10 +127,11 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Anda tidak memiliki hak akses untuk menghapus utas ini." }, { status: 403 });
     }
 
-    await prisma.forumThread.delete({ where: { id } });
-
-    await prisma.activityLog.create({
-      data: { userId: user.id, action: "DELETE_FORUM_THREAD", metadata: JSON.stringify({ threadId: id }) }
+    await prisma.$transaction(async (tx) => {
+      await tx.forumThread.delete({ where: { id } });
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "DELETE_FORUM_THREAD", metadata: JSON.stringify({ threadId: id }) }
+      });
     });
 
     return NextResponse.json({ success: true, message: "Utas berhasil dihapus." });

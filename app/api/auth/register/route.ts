@@ -25,7 +25,17 @@ export async function POST(request: Request) {
     const input = schema.parse(await request.json());
     const duplicate = await prisma.user.findFirst({ where: { OR: [{ email: input.email }, { username: input.username }] }, select: { email: true, username: true } });
     if (duplicate) return NextResponse.json({ message: duplicate.email === input.email ? "Email sudah terdaftar." : "Nama akun sudah digunakan." }, { status: 409 });
-    const user = await prisma.user.create({ data: { name: input.name, username: input.username, email: input.email, passwordHash: await bcrypt.hash(input.password, 10), persona: input.persona, role: "STUDENT" } });
+    const user = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({ data: { name: input.name, username: input.username, email: input.email, passwordHash: await bcrypt.hash(input.password, 10), persona: input.persona, role: "STUDENT" } });
+      await tx.activityLog.create({
+        data: {
+          userId: createdUser.id,
+          action: "USER_REGISTER",
+          metadata: JSON.stringify({ method: "LOCAL", email: input.email, username: input.username })
+        }
+      });
+      return createdUser;
+    });
     
     const token = await createToken({ userId: user.id, role: user.role, email: user.email, name: user.name, avatar: user.avatar || undefined, authProvider: "LOCAL" });
     

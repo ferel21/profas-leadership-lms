@@ -45,10 +45,23 @@ export async function POST(request: Request) {
     }
 
     try {
-      const enrollment = await prisma.enrollment.upsert({
-        where: { userId_courseId: { userId: user.id, courseId } },
-        update: {},
-        create: { userId: user.id, courseId }
+      const enrollment = await prisma.$transaction(async (tx) => {
+        let existingEnrollment = await tx.enrollment.findUnique({
+          where: { userId_courseId: { userId: user.id, courseId } }
+        });
+        if (!existingEnrollment) {
+          existingEnrollment = await tx.enrollment.create({
+            data: { userId: user.id, courseId }
+          });
+          await tx.activityLog.create({
+            data: {
+              userId: user.id,
+              action: "ENROLL_COURSE",
+              metadata: JSON.stringify({ courseId, courseSlug: course.slug })
+            }
+          });
+        }
+        return existingEnrollment;
       });
       return NextResponse.json(enrollment);
     } catch (error) {
@@ -79,8 +92,23 @@ export async function POST(request: Request) {
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.nodeProgress.upsert({ where: { userId_nodeId: { userId: user.id, nodeId: lessonId } }, update: {}, create: { userId: user.id, nodeId: lessonId } });
-    await tx.xPLog.upsert({ where: { userId_source_sourceId: { userId: user.id, source: "LESSON_COMPLETED", sourceId: lessonId } }, update: {}, create: { userId: user.id, points: 5, source: "LESSON_COMPLETED", sourceId: lessonId } });
+    const existingProgress = await tx.nodeProgress.findUnique({
+      where: { userId_nodeId: { userId: user.id, nodeId: lessonId } }
+    });
+    if (!existingProgress) {
+      await tx.nodeProgress.create({
+        data: { userId: user.id, nodeId: lessonId }
+      });
+    }
+
+    const existingXp = await tx.xPLog.findUnique({
+      where: { userId_source_sourceId: { userId: user.id, source: "LESSON_COMPLETED", sourceId: lessonId } }
+    });
+    if (!existingXp) {
+      await tx.xPLog.create({
+        data: { userId: user.id, points: 5, source: "LESSON_COMPLETED", sourceId: lessonId }
+      });
+    }
   });
   const result = await finalizeCourseCompletion(user.id, courseId);
   return NextResponse.json(result);

@@ -24,6 +24,7 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ message: "Email atau kata sandi tidak sesuai." }, { status: 401 });
     if (!user.passwordHash) return NextResponse.json({ message: "Akun ini menggunakan Google. Silakan klik 'Masuk dengan Google'." }, { status: 401 });
     if (!(await bcrypt.compare(input.password, user.passwordHash!))) return NextResponse.json({ message: "Email atau kata sandi tidak sesuai." }, { status: 401 });
+    await prisma.activityLog.create({ data: { userId: user.id, action: "USER_LOGIN", metadata: JSON.stringify({ method: "LOCAL" }) } }).catch(() => {});
     const token = await createToken({ userId: user.id, role: user.role, email: user.email, name: user.name, avatar: user.avatar || undefined, authProvider: user.authProvider });
     
     const response = NextResponse.json({ user: { id: user.id, name: user.name, role: user.role } });

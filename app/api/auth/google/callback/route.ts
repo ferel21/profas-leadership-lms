@@ -93,29 +93,38 @@ export async function GET(request: Request) {
     const { email, name, picture, verified_email: verifiedEmail } = userData;
     if (typeof email !== "string" || verifiedEmail !== true) return fail("google_email_unverified");
 
-    // Check if user exists
-    let user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-    });
-
-    if (user) {
-      if (user.authProvider !== "GOOGLE") {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: { authProvider: "GOOGLE", avatar: user.avatar || picture },
+    // Sync user profile & record authentication audit log atomically
+    const user = await prisma.$transaction(async (tx) => {
+      let existing = await tx.user.findUnique({ where: { email: email.toLowerCase() } });
+      let actionName = "USER_LOGIN";
+      if (existing) {
+        if (existing.authProvider !== "GOOGLE") {
+          existing = await tx.user.update({
+            where: { id: existing.id },
+            data: { authProvider: "GOOGLE", avatar: existing.avatar || picture },
+          });
+        }
+      } else {
+        existing = await tx.user.create({
+          data: {
+            email: email.toLowerCase(),
+            name: name || "Peserta PROFAS",
+            avatar: picture,
+            authProvider: "GOOGLE",
+            role: "STUDENT",
+          },
         });
+        actionName = "USER_REGISTER";
       }
-    } else {
-      user = await prisma.user.create({
+      await tx.activityLog.create({
         data: {
-          email: email.toLowerCase(),
-          name: name || "Peserta PROFAS",
-          avatar: picture,
-          authProvider: "GOOGLE",
-          role: "STUDENT",
-        },
+          userId: existing.id,
+          action: actionName,
+          metadata: JSON.stringify({ method: "GOOGLE", email: existing.email })
+        }
       });
-    }
+      return existing;
+    });
 
     // Generate JWT token only after the Google identity and database record are valid.
     const token = await createToken({ 

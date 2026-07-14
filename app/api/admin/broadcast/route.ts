@@ -126,31 +126,33 @@ export async function POST(request: Request) {
     }
 
     const chunkSize = 500;
-    for (let i = 0; i < targetUserIds.length; i += chunkSize) {
-      const batch = targetUserIds.slice(i, i + chunkSize);
-      await prisma.notification.createMany({
-        data: batch.map(userId => ({
-          userId,
-          title: `[Pengumuman] ${cleanTitle}`,
-          message: cleanMessage,
-          type: "ANNOUNCEMENT",
-          link: link || "/dashboard",
-          read: false
-        }))
-      });
-    }
-
-    await prisma.activityLog.create({
-      data: {
-        userId: user.id,
-        action: "CREATE_ANNOUNCEMENT_BROADCAST",
-        metadata: JSON.stringify({
-          title: cleanTitle,
-          count: targetUserIds.length,
-          targetCourseId: targetCourseId || "ALL"
-        })
+    await prisma.$transaction(async (tx) => {
+      for (let i = 0; i < targetUserIds.length; i += chunkSize) {
+        const batch = targetUserIds.slice(i, i + chunkSize);
+        await tx.notification.createMany({
+          data: batch.map(userId => ({
+            userId,
+            title: `[Pengumuman] ${cleanTitle}`,
+            message: cleanMessage,
+            type: "ANNOUNCEMENT",
+            link: link || "/dashboard",
+            read: false
+          }))
+        });
       }
-    });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "CREATE_ANNOUNCEMENT_BROADCAST",
+          metadata: JSON.stringify({
+            title: cleanTitle,
+            count: targetUserIds.length,
+            targetCourseId: targetCourseId || "ALL"
+          })
+        }
+      });
+    }, { timeout: 30000 });
 
     return NextResponse.json({
       message: `Pengumuman berhasil dikirim ke ${targetUserIds.length} peserta.`,

@@ -83,16 +83,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Email pengguna sudah terdaftar di sistem." }, { status: 409 });
     }
 
-    const newUser = await prisma.user.create({
-      data: {
-        name: cleanName,
-        email: cleanEmail,
-        role: validRole,
-        persona: validPersona,
-        authProvider: typeof authProvider === "string" ? authProvider.slice(0, 50) : "GOOGLE",
-        passwordHash: "",
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=2a6ba7&color=fff`
-      }
+    const newUser = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
+          name: cleanName,
+          email: cleanEmail,
+          role: validRole,
+          persona: validPersona,
+          authProvider: typeof authProvider === "string" ? authProvider.slice(0, 50) : "GOOGLE",
+          passwordHash: "",
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=2a6ba7&color=fff`
+        }
+      });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "CREATE_USER",
+          metadata: JSON.stringify({ createdUserId: createdUser.id, email: createdUser.email, role: createdUser.role })
+        }
+      });
+
+      return createdUser;
     });
 
     const userRow = {
@@ -171,18 +183,30 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ message: "Tidak ada pembaruan yang dikirim." }, { status: 400 });
     }
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        persona: true,
-        authProvider: true,
-        createdAt: true,
-      },
+    const updatedUser = await prisma.$transaction(async (tx) => {
+      const res = await tx.user.update({
+        where: { id: userId },
+        data: updateData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          persona: true,
+          authProvider: true,
+          createdAt: true,
+        },
+      });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "UPDATE_USER_ROLE_PERSONA",
+          metadata: JSON.stringify({ targetUserId: userId, newRole: res.role, newPersona: res.persona })
+        }
+      });
+
+      return res;
     });
 
     return NextResponse.json({
@@ -227,7 +251,16 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ message: "Anda tidak dapat menghapus akun Super Admin lain secara langsung." }, { status: 403 });
     }
 
-    await prisma.user.delete({ where: { id: cleanId } });
+    await prisma.$transaction(async (tx) => {
+      await tx.user.delete({ where: { id: cleanId } });
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "DELETE_USER",
+          metadata: JSON.stringify({ deletedUserId: cleanId, deletedUserEmail: targetUser.email, deletedUserRole: targetUser.role })
+        }
+      });
+    });
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("Delete User Error:", err);

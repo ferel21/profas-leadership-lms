@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 
-const exportLimiter = rateLimit({ limit: 20, windowMs: 60 * 1000 });
+const exportLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
 /**
  * API untuk Ekspor Data Komprehensif (Excel .xlsx, Word .docx, PDF Transkrip, PPTX Slide Deck).
@@ -242,7 +241,7 @@ export async function GET(request: Request) {
         }]
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Export Data API Error:", error);
     return NextResponse.json({ message: "Gagal memproses data ekspor dari database." }, { status: 500 });
   }

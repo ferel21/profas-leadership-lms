@@ -7,7 +7,7 @@ import { z } from "zod";
 const analyticsLimiter = rateLimit({ limit: 120, windowMs: 60 * 1000 });
 
 const activitySchema = z.object({
-  action: z.string().trim().min(1).max(80).regex(/^[\p{L}\p{N} _:-]+$/u),
+  action: z.string().trim().min(1).max(80).regex(/^[\p{L}\p{N} _:-]+$/u).transform(val => val.replace(/<[^>]*>?/gm, "").trim()),
   metadata: z.record(z.string(), z.union([z.string().max(300), z.number(), z.boolean(), z.null()])).optional(),
 }).refine(value => !value.metadata || JSON.stringify(value.metadata).length <= 2000, "Metadata terlalu besar.");
 
@@ -25,11 +25,24 @@ export async function POST(request: Request) {
     if (!parsed.success) return NextResponse.json({ error: "Data aktivitas tidak valid." }, { status: 400 });
     const { action, metadata } = parsed.data;
 
+    let cleanMetadata: Record<string, string | number | boolean | null> | null = null;
+    if (metadata) {
+      cleanMetadata = {};
+      for (const [key, val] of Object.entries(metadata)) {
+        const cleanKey = key.replace(/<[^>]*>?/gm, "").trim().slice(0, 60);
+        if (typeof val === "string") {
+          cleanMetadata[cleanKey] = val.replace(/<[^>]*>?/gm, "").trim().slice(0, 300);
+        } else {
+          cleanMetadata[cleanKey] = val;
+        }
+      }
+    }
+
     await prisma.activityLog.create({
       data: {
         userId: user.id,
         action,
-        metadata: metadata ? JSON.stringify(metadata) : null
+        metadata: cleanMetadata ? JSON.stringify(cleanMetadata) : null
       }
     });
 

@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
-export async function GET() {
+const reportsLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
+
+export async function GET(request: Request) {
+  const ipCheck = reportsLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan data laporan. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") {
     return NextResponse.json({ message: "Akses ditolak" }, { status: 403 });
@@ -10,6 +18,8 @@ export async function GET() {
 
   try {
     const enrollments = await prisma.enrollment.findMany({
+      take: 1000,
+      orderBy: { enrolledAt: "desc" },
       include: {
         user: { select: { name: true, email: true } },
         course: { select: { title: true } }

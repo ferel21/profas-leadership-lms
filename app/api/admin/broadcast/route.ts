@@ -10,8 +10,6 @@ function sanitizeBroadcastText(text: string): string {
   if (typeof text !== "string") return "";
   return text
     .replace(/<[^>]*>?/gm, "") // strip HTML tags to prevent stored XSS / HTML injection
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
     .trim();
 }
 

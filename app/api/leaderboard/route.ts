@@ -36,14 +36,29 @@ export async function GET(request: Request) {
   const users = await prisma.user.findMany({
     where: { role: "STUDENT", ...(parsed.data ? { persona: parsed.data } : {}) },
     take: 200,
-    select: { id: true, name: true, persona: true, xpLogs: { where: xpLogsWhere, select: { points: true } } }
+    select: {
+      id: true,
+      name: true,
+      persona: true,
+      avatar: true,
+      xpLogs: { where: xpLogsWhere, select: { points: true } },
+      userBadges: {
+        include: {
+          badge: {
+            select: { id: true, name: true, description: true, imageUrl: true }
+          }
+        }
+      }
+    }
   });
 
   const ranking = users.map(u => ({
     id: u.id,
     name: u.name,
     persona: u.persona,
-    xp: u.xpLogs.reduce((a, x) => a + x.points, 0)
+    avatar: u.avatar,
+    xp: u.xpLogs.reduce((a, x) => a + x.points, 0),
+    badges: u.userBadges.map(ub => ub.badge)
   })).sort((a, b) => b.xp - a.xp).slice(0, 100);
 
   return NextResponse.json(ranking, {

@@ -6,7 +6,12 @@ import { rateLimit } from "@/lib/rate-limit";
 
 const notifLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
-export async function GET() {
+export async function GET(request: Request) {
+  const ipCheck = notifLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan notifikasi." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ message: "Silakan masuk." }, { status: 401 });
 

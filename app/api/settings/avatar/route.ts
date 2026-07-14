@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const avatarLimiter = rateLimit({ limit: 10, windowMs: 60 * 1000 });
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES: Record<string, { extension: string; signatures: number[][] }> = {
   "image/jpeg": { extension: ".jpg", signatures: [[0xff, 0xd8, 0xff]] },
   "image/png": { extension: ".png", signatures: [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]] },
@@ -19,6 +20,11 @@ function hasValidSignature(buffer: Buffer, type: string) {
 }
 
 export async function POST(request: Request) {
+  const ipCheck = avatarLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan unggah foto. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -30,7 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "File avatar diperlukan." }, { status: 400 });
     }
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: "Ukuran file maksimal 5MB." }, { status: 400 });
+      return NextResponse.json({ error: "Ukuran file maksimal 2MB." }, { status: 400 });
     }
     if (!ALLOWED_TYPES[file.type]) {
       return NextResponse.json({ error: "Format foto harus JPG, PNG, atau WebP." }, { status: 400 });

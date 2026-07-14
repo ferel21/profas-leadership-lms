@@ -35,8 +35,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     if (!user) return NextResponse.json({ error: "Silakan masuk untuk mengakses berkas." }, { status: 401 });
 
     const { path } = await params;
-    if (!path || path.length === 0) {
-      return NextResponse.json({ error: "Path tidak ditemukan." }, { status: 404 });
+    if (!path || path.length === 0 || path.some(segment => segment === ".." || segment === "." || segment.includes("/") || segment.includes("\\") || segment.includes("\0"))) {
+      return NextResponse.json({ error: "Path tidak valid." }, { status: 400 });
     }
 
     const relativePath = path.join("/");

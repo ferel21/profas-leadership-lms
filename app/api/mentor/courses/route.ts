@@ -17,6 +17,31 @@ function slugify(text: string) {
     .replace(/\-\-+/g, "-");
 }
 
+export async function GET(request: Request) {
+  const ipCheck = courseLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan program." }, { status: 429 });
+  }
+
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "MENTOR" && user.role !== "SUPER_ADMIN")) {
+    return NextResponse.json({ message: "Akses ditolak." }, { status: 403 });
+  }
+
+  try {
+    const where: Prisma.CourseWhereInput = user.role === "SUPER_ADMIN" ? {} : { mentorId: user.id };
+    const courses = await prisma.course.findMany({
+      where,
+      take: 100,
+      orderBy: { createdAt: "desc" }
+    });
+    return NextResponse.json(courses);
+  } catch (err: unknown) {
+    console.error("Get Courses Error:", err);
+    return NextResponse.json({ message: "Gagal memuat daftar program." }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   const ipCheck = courseLimiter.check(request);
   if (!ipCheck.success) {
@@ -54,6 +79,8 @@ export async function POST(request: Request) {
     const cleanDesc = typeof description === "string" ? description.replace(/<[^>]*>?/gm, "").trim().slice(0, 5000) : cleanShortDesc;
     const cleanCategory = typeof category === "string" ? category.replace(/<[^>]*>?/gm, "").trim().slice(0, 50) : "Kepemimpinan";
     const validLevel = Object.values(CourseLevel).includes(level as CourseLevel) ? (level as CourseLevel) : CourseLevel.BASIC;
+    const safePrice = Math.min(1000000000, Math.max(0, Number(price) || 0));
+    const safeDuration = Math.min(1000, Math.max(1, Number(durationHours) || 10));
 
     let baseSlug = slugify(cleanTitle);
     if (!baseSlug) baseSlug = "program-" + Date.now();
@@ -70,8 +97,8 @@ export async function POST(request: Request) {
         level: validLevel,
         shortDescription: cleanShortDesc,
         description: cleanDesc || cleanShortDesc,
-        price: Math.max(0, Number(price) || 0),
-        durationHours: Math.max(1, Number(durationHours) || 10),
+        price: safePrice,
+        durationHours: safeDuration,
         image: typeof image === "string" ? image.slice(0, 300) : "/images/profas-leadership-hero.webp",
         outcomes: "Memahami kepemimpinan strategis\nMampu mengambil keputusan berbasis data\nMeningkatkan efektivitas tim",
         published: false,
@@ -90,7 +117,7 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json({ success: true, course });
+    return NextResponse.json({ success: true, course }, { status: 201 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Gagal membuat program.";
     console.error("Create Course Error:", err);
@@ -115,7 +142,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ message: "Data program tidak valid." }, { status: 400 });
     }
 
-    const { id, published, title, shortDescription, category, level, price } = body;
+    const { id, published, title, shortDescription, description, category, level, price, durationHours, image, outcomes } = body;
     if (!id || typeof id !== "string") return NextResponse.json({ message: "ID program diperlukan." }, { status: 400 });
 
     const where: Prisma.CourseWhereInput = { id };
@@ -128,7 +155,10 @@ export async function PATCH(request: Request) {
 
     const cleanTitle = typeof title === "string" ? title.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) : undefined;
     const cleanShortDesc = typeof shortDescription === "string" ? shortDescription.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) : undefined;
+    const cleanDesc = typeof description === "string" ? description.replace(/<[^>]*>?/gm, "").trim().slice(0, 5000) : undefined;
     const cleanCategory = typeof category === "string" ? category.replace(/<[^>]*>?/gm, "").trim().slice(0, 50) : undefined;
+    const cleanOutcomes = typeof outcomes === "string" ? outcomes.replace(/<[^>]*>?/gm, "").trim().slice(0, 2000) : undefined;
+    const cleanImage = typeof image === "string" ? image.trim().slice(0, 300) : undefined;
     const validLevel = typeof level === "string" && Object.values(CourseLevel).includes(level as CourseLevel) ? (level as CourseLevel) : undefined;
 
     const updated = await prisma.course.update({
@@ -137,9 +167,13 @@ export async function PATCH(request: Request) {
         ...(typeof published === "boolean" ? { published } : {}),
         ...(cleanTitle ? { title: cleanTitle } : {}),
         ...(cleanShortDesc ? { shortDescription: cleanShortDesc } : {}),
+        ...(cleanDesc ? { description: cleanDesc } : {}),
         ...(cleanCategory ? { category: cleanCategory } : {}),
         ...(validLevel ? { level: validLevel } : {}),
-        ...(typeof price === "number" ? { price: Math.max(0, price) } : {})
+        ...(typeof price === "number" && !isNaN(price) ? { price: Math.min(1000000000, Math.max(0, price)) } : {}),
+        ...(typeof durationHours === "number" && !isNaN(durationHours) ? { durationHours: Math.min(1000, Math.max(1, durationHours)) } : {}),
+        ...(cleanImage ? { image: cleanImage } : {}),
+        ...(cleanOutcomes ? { outcomes: cleanOutcomes } : {})
       }
     });
 

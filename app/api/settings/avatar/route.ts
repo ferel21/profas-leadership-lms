@@ -66,3 +66,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Gagal mengunggah avatar" }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  const ipCheck = avatarLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan penghapusan foto. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    await prisma.$transaction([
+      prisma.user.update({ where: { id: user.id }, data: { avatar: null } }),
+      prisma.activityLog.create({ data: { userId: user.id, action: "UPDATE_AVATAR", metadata: JSON.stringify({ action: "DELETE_AVATAR" }) } }),
+    ]);
+
+    return NextResponse.json({ message: "Foto profil berhasil dihapus." });
+  } catch (error) {
+    console.error("[AVATAR_DELETE_ERROR]", error);
+    return NextResponse.json({ error: "Gagal menghapus foto profil" }, { status: 500 });
+  }
+}

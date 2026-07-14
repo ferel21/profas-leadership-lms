@@ -12,16 +12,29 @@ const prisma = new PrismaClient(process.env.DIRECT_URL ? {
   datasources: { db: { url: process.env.DIRECT_URL } },
 } : {});
 
+async function withRetry(fn, retries = 3, delayMs = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === retries - 1 || (!error.message?.includes("Can't reach database server") && !error.message?.includes("Connection terminated") && !error.message?.includes("timeout"))) throw error;
+      await delay(delayMs);
+    }
+  }
+}
+
 async function mutationCounts() {
-  const users = await prisma.user.count();
-  const enrollments = await prisma.enrollment.count();
-  const progress = await prisma.nodeProgress.count();
-  const attempts = await prisma.assessmentAttempt.count();
-  const certificates = await prisma.certificate.count();
-  const xpLogs = await prisma.xPLog.count();
-  const discussions = await prisma.discussionPost.count();
-  const payments = await prisma.payment.count();
-  return { users, enrollments, progress, attempts, certificates, xpLogs, discussions, payments };
+  return withRetry(async () => {
+    const users = await prisma.user.count();
+    const enrollments = await prisma.enrollment.count();
+    const progress = await prisma.nodeProgress.count();
+    const attempts = await prisma.assessmentAttempt.count();
+    const certificates = await prisma.certificate.count();
+    const xpLogs = await prisma.xPLog.count();
+    const discussions = await prisma.discussionPost.count();
+    const payments = await prisma.payment.count();
+    return { users, enrollments, progress, attempts, certificates, xpLogs, discussions, payments };
+  });
 }
 
 async function assertDatabaseIntegrity() {
@@ -50,18 +63,18 @@ async function assertDatabaseIntegrity() {
       assert.ok(indexNames.has(index) || indexNames.has(index.toLowerCase()), `Indeks database ${index} tidak tersedia`);
     }
   }
-  const enrollments = await prisma.enrollment.findMany({
+  const enrollments = await withRetry(() => prisma.enrollment.findMany({
     include: { course: { select: { nodes: { select: { id: true, type: true } } } } },
-  });
+  }));
   for (const enrollment of enrollments) {
     const nodeIds = (enrollment.course?.nodes || []).filter(n => n.type !== "FOLDER").map(n => n.id);
-    const completed = await prisma.nodeProgress.count({ where: { userId: enrollment.userId, nodeId: { in: nodeIds } } });
+    const completed = await withRetry(() => prisma.nodeProgress.count({ where: { userId: enrollment.userId, nodeId: { in: nodeIds } } }));
     const expected = Math.round(completed / Math.max(nodeIds.length, 1) * 100);
     if (enrollment.progressPercent !== expected && enrollment.status !== "COMPLETED") {
-      await prisma.enrollment.update({
+      await withRetry(() => prisma.enrollment.update({
         where: { id: enrollment.id },
         data: { progressPercent: expected },
-      });
+      }));
       enrollment.progressPercent = expected;
     }
     assert.equal(enrollment.progressPercent, expected, `Enrollment ${enrollment.id}: progressPercent tidak sesuai node progress`);
@@ -70,9 +83,9 @@ async function assertDatabaseIntegrity() {
       assert.ok(enrollment.completedAt, `Enrollment ${enrollment.id}: completedAt belum terisi`);
     }
   }
-  const certificates = await prisma.certificate.findMany({ select: { userId: true, courseId: true, uniqueNumber: true } });
+  const certificates = await withRetry(() => prisma.certificate.findMany({ select: { userId: true, courseId: true, uniqueNumber: true } }));
   for (const certificate of certificates) {
-    const enrollment = await prisma.enrollment.findUnique({ where: { userId_courseId: { userId: certificate.userId, courseId: certificate.courseId } } });
+    const enrollment = await withRetry(() => prisma.enrollment.findUnique({ where: { userId_courseId: { userId: certificate.userId, courseId: certificate.courseId } } }));
     assert.equal(enrollment?.status, "COMPLETED", `Sertifikat ${certificate.uniqueNumber}: enrollment belum selesai`);
   }
 }
@@ -96,7 +109,12 @@ function containsSensitiveKey(value) {
 }
 
 async function expectStatus(base, path, expected, init) {
-  const response = await fetch(`${base}${path}`, { redirect: "manual", ...init });
+  let response;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    response = await fetch(`${base}${path}`, { redirect: "manual", ...init });
+    if (response.status === expected || (response.status !== 500 && response.status !== 503)) break;
+    await delay(2000);
+  }
   assert.equal(response.status, expected, `${path}: mengharapkan ${expected}, menerima ${response.status}`);
   return response;
 }

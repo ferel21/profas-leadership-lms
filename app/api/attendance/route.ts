@@ -101,11 +101,20 @@ export async function POST(request: Request) {
     const lateAfter = new Date(event.startTime.getTime() + 15 * 60 * 1000);
     const status = now > lateAfter ? AttendanceStatus.LATE : AttendanceStatus.PRESENT;
     const record = await prisma.$transaction(async tx => {
-      const attendance = await tx.attendanceRecord.upsert({
-        where: { eventId_userId: { eventId: event.id, userId: user.id } },
-        create: { eventId: event.id, userId: user.id, status, checkedInAt: now, source: "SELF" },
-        update: { status, checkedInAt: now, source: "SELF", note: null },
+      const existing = await tx.attendanceRecord.findUnique({
+        where: { eventId_userId: { eventId: event.id, userId: user.id } }
       });
+      let attendance;
+      if (existing) {
+        attendance = await tx.attendanceRecord.update({
+          where: { id: existing.id },
+          data: { status, checkedInAt: now, source: "SELF", note: null },
+        });
+      } else {
+        attendance = await tx.attendanceRecord.create({
+          data: { eventId: event.id, userId: user.id, status, checkedInAt: now, source: "SELF" },
+        });
+      }
       await tx.activityLog.create({
         data: { userId: user.id, action: "ATTENDANCE_CHECK_IN", metadata: JSON.stringify({ eventId: event.id, status }) },
       });
@@ -151,11 +160,22 @@ export async function POST(request: Request) {
     await prisma.$transaction(async tx => {
       await tx.calendarEvent.update({ where: { id: event.id }, data: { attendanceCloseAt: now } });
       if (expectedUserIds.length) {
-        await Promise.all(expectedUserIds.map(userId => tx.attendanceRecord.upsert({
-          where: { eventId_userId: { eventId: event.id, userId } },
-          create: { eventId: event.id, userId, status: AttendanceStatus.ABSENT, source: "SYSTEM" },
-          update: {},
-        })));
+        const existing = await tx.attendanceRecord.findMany({
+          where: { eventId: event.id, userId: { in: expectedUserIds } },
+          select: { userId: true }
+        });
+        const existingSet = new Set(existing.map(item => item.userId));
+        const missingUserIds = expectedUserIds.filter(userId => !existingSet.has(userId));
+        if (missingUserIds.length > 0) {
+          await tx.attendanceRecord.createMany({
+            data: missingUserIds.map(userId => ({
+              eventId: event.id,
+              userId,
+              status: AttendanceStatus.ABSENT,
+              source: "SYSTEM"
+            }))
+          });
+        }
       }
       await tx.activityLog.create({ data: { userId: user.id, action: "ATTENDANCE_CLOSE", metadata: JSON.stringify({ eventId: event.id }) } });
     });
@@ -171,11 +191,20 @@ export async function POST(request: Request) {
   const checkedInAt = input.status === AttendanceStatus.PRESENT || input.status === AttendanceStatus.LATE ? new Date() : null;
   const cleanNote = typeof input.note === "string" ? input.note.replace(/<[^>]*>?/gm, "").trim() : null;
   const record = await prisma.$transaction(async tx => {
-    const attendance = await tx.attendanceRecord.upsert({
-      where: { eventId_userId: { eventId: event.id, userId: target.id } },
-      create: { eventId: event.id, userId: target.id, status: input.status, checkedInAt, source: user.role, note: cleanNote },
-      update: { status: input.status, checkedInAt, source: user.role, note: cleanNote },
+    const existing = await tx.attendanceRecord.findUnique({
+      where: { eventId_userId: { eventId: event.id, userId: target.id } }
     });
+    let attendance;
+    if (existing) {
+      attendance = await tx.attendanceRecord.update({
+        where: { id: existing.id },
+        data: { status: input.status, checkedInAt, source: user.role, note: cleanNote },
+      });
+    } else {
+      attendance = await tx.attendanceRecord.create({
+        data: { eventId: event.id, userId: target.id, status: input.status, checkedInAt, source: user.role, note: cleanNote },
+      });
+    }
     await tx.activityLog.create({
       data: { userId: user.id, action: "ATTENDANCE_MARK", metadata: JSON.stringify({ eventId: event.id, targetUserId: target.id, status: input.status }) },
     });

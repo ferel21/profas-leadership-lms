@@ -108,15 +108,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Judul acara tidak valid." }, { status: 400 });
     }
 
-    const event = await prisma.calendarEvent.create({
-      data: {
-        title: cleanTitle,
-        description: cleanDesc || null,
-        startTime: startDt,
-        endTime: endDt,
-        location: cleanLocation || null,
-        courseId: safeCourseId
-      }
+    const event = await prisma.$transaction(async (tx) => {
+      const created = await tx.calendarEvent.create({
+        data: {
+          title: cleanTitle,
+          description: cleanDesc || null,
+          startTime: startDt,
+          endTime: endDt,
+          location: cleanLocation || null,
+          courseId: safeCourseId
+        }
+      });
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "CREATE_CALENDAR_EVENT", metadata: JSON.stringify({ eventId: created.id, title: cleanTitle, courseId: safeCourseId }) }
+      });
+      return created;
     });
 
     return NextResponse.json(event, { status: 201 });
@@ -191,16 +197,22 @@ export async function PATCH(request: Request) {
     const cleanDesc = typeof description === "string" ? description.replace(/<[^>]*>?/gm, "").trim().slice(0, 500) : existing.description;
     const cleanLocation = typeof location === "string" ? location.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) : existing.location;
 
-    const updated = await prisma.calendarEvent.update({
-      where: { id: existing.id },
-      data: {
-        title: cleanTitle || existing.title,
-        description: cleanDesc,
-        startTime: startDt,
-        endTime: endDt,
-        location: cleanLocation,
-        courseId: safeCourseId
-      }
+    const updated = await prisma.$transaction(async (tx) => {
+      const result = await tx.calendarEvent.update({
+        where: { id: existing.id },
+        data: {
+          title: cleanTitle || existing.title,
+          description: cleanDesc,
+          startTime: startDt,
+          endTime: endDt,
+          location: cleanLocation,
+          courseId: safeCourseId
+        }
+      });
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "UPDATE_CALENDAR_EVENT", metadata: JSON.stringify({ eventId: result.id, title: result.title }) }
+      });
+      return result;
     });
 
     return NextResponse.json(updated);
@@ -245,7 +257,12 @@ export async function DELETE(request: Request) {
       }
     }
 
-    await prisma.calendarEvent.delete({ where: { id: existing.id } });
+    await prisma.$transaction(async (tx) => {
+      await tx.calendarEvent.delete({ where: { id: existing.id } });
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "DELETE_CALENDAR_EVENT", metadata: JSON.stringify({ eventId: existing.id, title: existing.title }) }
+      });
+    });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete event" }, { status: 500 });

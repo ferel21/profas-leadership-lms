@@ -67,6 +67,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
       if (!node || typeof node !== "object" || typeof node.id !== "string" || !node.id || typeof node.title !== "string") continue;
+      
+      const cleanTitle = node.title.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) || "Bab Materi";
+      const cleanDesc = typeof node.description === "string" ? node.description.replace(/<[^>]*>?/gm, "").trim().slice(0, 500) : "";
+      const safeParentId = (typeof node.parentId === "string" && node.parentId && node.parentId !== node.id) ? node.parentId : null;
+
       let assessmentId = node.assessmentId || null;
       if (!assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
         const existingNode = await prisma.courseNode.findFirst({
@@ -80,24 +85,24 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
             data: {
               id: node.id,
               courseId,
-              title: node.title,
+              title: cleanTitle,
               type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
               isAssignment: node.type === 'ASSIGNMENT'
             }
           }).catch(async () => {
-            return await prisma.assessment.findFirst({ where: { courseId, title: node.title } }) || 
-                   await prisma.assessment.create({ data: { courseId, title: node.title, type: 'MODULE', isAssignment: false } });
+            return await prisma.assessment.findFirst({ where: { courseId, title: cleanTitle } }) || 
+                   await prisma.assessment.create({ data: { courseId, title: cleanTitle, type: 'MODULE', isAssignment: false } });
           });
           assessmentId = assessment.id;
         }
       } else if (assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
         await prisma.assessment.upsert({
           where: { id: assessmentId },
-          update: { title: node.title },
+          update: { title: cleanTitle },
           create: {
             id: assessmentId,
             courseId,
-            title: node.title,
+            title: cleanTitle,
             type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
             isAssignment: node.type === 'ASSIGNMENT'
           }
@@ -107,11 +112,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
       await prisma.courseNode.upsert({
         where: { id: node.id },
         update: {
-          parentId: node.parentId || null,
-          title: node.title,
+          parentId: safeParentId,
+          title: cleanTitle,
           type: node.type || "TEXT",
           order: node.order, // Dijamin unik dan sekuensial dari frontend & Phase 2!
-          description: node.description || "",
+          description: cleanDesc,
           content: node.content || null,
           fileUrl: node.fileUrl || null,
           fileName: node.fileName || null,
@@ -122,11 +127,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
         create: {
           id: node.id,
           courseId,
-          parentId: node.parentId || null,
-          title: node.title,
+          parentId: safeParentId,
+          title: cleanTitle,
           type: node.type || "TEXT",
           order: node.order, // Dijamin unik dan sekuensial!
-          description: node.description || "",
+          description: cleanDesc,
           content: node.content || null,
           fileUrl: node.fileUrl || null,
           fileName: node.fileName || null,

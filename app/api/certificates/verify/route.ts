@@ -10,13 +10,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ valid: false, message: "Terlalu banyak permintaan verifikasi sertifikat. Silakan tunggu 1 menit." }, { status: 429 });
   }
 
-  const number = new URL(request.url).searchParams.get("number")?.trim();
-  if (!number) {
-    return NextResponse.json({ valid: false, message: "Nomor sertifikat wajib diisi." }, { status: 400 });
+  const rawNumber = new URL(request.url).searchParams.get("number")?.trim();
+  if (!rawNumber || rawNumber.length > 80) {
+    return NextResponse.json({ valid: false, message: "Nomor sertifikat wajib diisi atau terlalu panjang." }, { status: 400 });
+  }
+
+  const cleanNumber = rawNumber.replace(/<[^>]*>?/gm, "").replace(/[\x00-\x1F\x7F]/g, "").trim();
+  if (!cleanNumber) {
+    return NextResponse.json({ valid: false, message: "Format nomor sertifikat tidak valid." }, { status: 400 });
   }
 
   const certificate = await prisma.certificate.findUnique({
-    where: { uniqueNumber: number },
+    where: { uniqueNumber: cleanNumber },
     select: {
       uniqueNumber: true,
       issuedAt: true,

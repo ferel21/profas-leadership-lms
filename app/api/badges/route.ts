@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
+
+const badgesLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
 export async function GET(request: Request) {
+  const ipCheck = badgesLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan lencana." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -31,19 +39,37 @@ export async function GET(request: Request) {
 
 // System API for awarding a badge (called by internal functions)
 export async function POST(request: Request) {
+  const ipCheck = badgesLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan pemberian lencana." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
-    const { userId, badgeId } = await request.json();
-    
-    if (!userId || !badgeId) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+    }
+
+    const { userId, badgeId } = body;
+    if (!userId || typeof userId !== "string" || !badgeId || typeof badgeId !== "string") {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
+
+    const existing = await prisma.userBadge.findFirst({
+      where: { userId, badgeId }
+    });
+    if (existing) {
+      return NextResponse.json(existing);
+    }
 
     const userBadge = await prisma.userBadge.create({
       data: { userId, badgeId }
     });
 
-    return NextResponse.json(userBadge);
+    return NextResponse.json(userBadge, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to award badge" }, { status: 500 });
   }

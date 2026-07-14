@@ -124,6 +124,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
           });
         }
       }
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "UPDATE_ASSESSMENT_QUESTIONS",
+          metadata: JSON.stringify({ assessmentId, questionsCount: questions?.length || 0 })
+        }
+      });
     });
 
     revalidatePath(`/evaluasi/${assessmentId}`);
@@ -204,6 +212,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         data: { assessmentId: null }
       });
       await tx.assessment.delete({ where: { id: assessmentId } });
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "DELETE_ASSESSMENT",
+          metadata: JSON.stringify({ assessmentId, courseId: assessment.course.id })
+        }
+      });
     });
 
     revalidatePath(`/belajar/${assessment.course.slug}`);

@@ -49,16 +49,28 @@ export async function POST(req: Request) {
     const parsedDeadline = deadline ? new Date(deadline) : null;
     const safeDeadline = parsedDeadline && !isNaN(parsedDeadline.getTime()) ? parsedDeadline : null;
 
-    const assessment = await prisma.assessment.create({
-      data: {
-        courseId,
-        title: cleanTitle || "Evaluasi",
-        type: type as AssessmentType,
-        isAssignment: Boolean(isAssignment),
-        passingScore: clampedPassingScore,
-        timeLimitMin: clampedTimeLimitMin,
-        deadline: safeDeadline,
-      }
+    const assessment = await prisma.$transaction(async (tx) => {
+      const createdAssessment = await tx.assessment.create({
+        data: {
+          courseId,
+          title: cleanTitle || "Evaluasi",
+          type: type as AssessmentType,
+          isAssignment: Boolean(isAssignment),
+          passingScore: clampedPassingScore,
+          timeLimitMin: clampedTimeLimitMin,
+          deadline: safeDeadline,
+        }
+      });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "CREATE_ASSESSMENT",
+          metadata: JSON.stringify({ assessmentId: createdAssessment.id, title: cleanTitle || "Evaluasi", courseId })
+        }
+      });
+
+      return createdAssessment;
     });
 
     return NextResponse.json(assessment, { status: 201 });

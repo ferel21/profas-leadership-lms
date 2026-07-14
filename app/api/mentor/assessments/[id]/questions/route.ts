@@ -70,17 +70,29 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     
     const nextOrder = (maxOrderAgg._max.order || 0) + 1;
 
-    const question = await prisma.assessmentQuestion.create({
-      data: {
-        assessmentId,
-        type: qType,
-        prompt: cleanPrompt,
-        options: cleanOptions ? JSON.stringify(cleanOptions) : null,
-        correctAnswer: cleanCorrectAnswer,
-        points: safePoints,
-        explanation: cleanExplanation,
-        order: nextOrder
-      }
+    const question = await prisma.$transaction(async (tx) => {
+      const createdQuestion = await tx.assessmentQuestion.create({
+        data: {
+          assessmentId,
+          type: qType,
+          prompt: cleanPrompt,
+          options: cleanOptions ? JSON.stringify(cleanOptions) : null,
+          correctAnswer: cleanCorrectAnswer,
+          points: safePoints,
+          explanation: cleanExplanation,
+          order: nextOrder
+        }
+      });
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "CREATE_ASSESSMENT_QUESTION",
+          metadata: JSON.stringify({ questionId: createdQuestion.id, assessmentId, prompt: cleanPrompt })
+        }
+      });
+
+      return createdQuestion;
     });
 
     return NextResponse.json(question, { status: 201 });
@@ -159,7 +171,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ error: 'Soal tidak ditemukan.' }, { status: 404 });
     }
 
-    await prisma.assessmentQuestion.delete({ where: { id: questionId } });
+    await prisma.$transaction(async (tx) => {
+      await tx.assessmentQuestion.delete({ where: { id: questionId } });
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: "DELETE_ASSESSMENT_QUESTION",
+          metadata: JSON.stringify({ questionId, assessmentId, prompt: question.prompt })
+        }
+      });
+    });
+
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error('Error deleting question:', error);

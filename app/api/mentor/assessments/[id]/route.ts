@@ -2,17 +2,33 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
+import { QuestionType } from '@prisma/client';
+
+const putLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const ipCheck = putLimiter.check(req);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: 'Terlalu banyak permintaan penyimpanan soal. Silakan tunggu sebentar.' }, { status: 429 });
+  }
+
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'MENTOR') {
+    if (!user || (user.role !== 'MENTOR' && user.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id: assessmentId } = await params;
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Data soal tidak valid.' }, { status: 400 });
+    }
+
     const { questions } = body;
+    if (questions && Array.isArray(questions) && questions.length > 100) {
+      return NextResponse.json({ error: 'Maksimal 100 soal per evaluasi.' }, { status: 400 });
+    }
 
     let assessment = await prisma.assessment.findUnique({
       where: { id: assessmentId },
@@ -22,14 +38,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (!assessment) {
       // MASTER SKILL: Self-Healing Auto-Create Assessment in PUT route to survive ephemeral Vercel container resets!
       const node = await prisma.courseNode.findFirst({ where: { OR: [{ id: assessmentId }, { assessmentId: assessmentId }] } });
-      const courseIdToUse = node ? node.courseId : (await prisma.course.findFirst({ where: { mentorId: user.id } }))?.id;
+      const courseIdToUse = node ? node.courseId : (await prisma.course.findFirst({ where: { ...(user.role === 'MENTOR' ? { mentorId: user.id } : {}) } }))?.id;
 
       if (!courseIdToUse) {
         return NextResponse.json({ error: 'Course not found for mentor' }, { status: 404 });
       }
 
       const course = await prisma.course.findUnique({ where: { id: courseIdToUse } });
-      if (!course || course.mentorId !== user.id) {
+      if (!course || (user.role !== 'SUPER_ADMIN' && course.mentorId !== user.id)) {
         return NextResponse.json({ error: 'Unauthorized course' }, { status: 401 });
       }
 
@@ -51,7 +67,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       }
     }
 
-    if (assessment.course.mentorId !== user.id) {
+    if (user.role !== 'SUPER_ADMIN' && assessment.course.mentorId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized assessment' }, { status: 401 });
     }
 
@@ -60,19 +76,24 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       where: { assessmentId }
     });
 
-    // Create new ones
-    if (questions && questions.length > 0) {
+    // Create new ones with clamping and sanitization
+    if (questions && Array.isArray(questions) && questions.length > 0) {
       for (let i = 0; i < questions.length; i++) {
         const q = questions[i];
+        if (!q || typeof q !== 'object') continue;
+        const cleanPrompt = typeof q.prompt === 'string' ? q.prompt.replace(/<[^>]*>?/gm, "").trim() : "Pertanyaan";
+        const cleanExplanation = typeof q.explanation === 'string' ? q.explanation.replace(/<[^>]*>?/gm, "").trim() : null;
+        const clampedPoints = Math.max(1, Math.min(100, Math.round(Number(q.points) || 10)));
+
         await prisma.assessmentQuestion.create({
           data: {
             assessmentId,
-            type: q.type,
-            prompt: q.prompt,
-            options: q.options,
-            correctAnswer: q.correctAnswer,
-            points: q.points,
-            explanation: q.explanation,
+            type: Object.values(QuestionType).includes(q.type as QuestionType) ? (q.type as QuestionType) : QuestionType.MULTIPLE_CHOICE,
+            prompt: cleanPrompt || "Pertanyaan",
+            options: q.options ? JSON.stringify(q.options) : null,
+            correctAnswer: typeof q.correctAnswer === 'string' ? q.correctAnswer : '',
+            points: clampedPoints,
+            explanation: cleanExplanation,
             order: i
           }
         });

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
@@ -42,17 +41,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
     const questionMap = new Map(attempt.assessment.questions.map(q => [q.id, q]));
     const maxPossibleScore = attempt.assessment.questions.reduce((acc, q) => acc + q.points, 0);
 
-    // Update individual answer scores if provided with server clamping
+    // Update individual answer scores if provided with server clamping and XSS sanitization
     if (answersScores && Array.isArray(answersScores)) {
-      for (const ans of answersScores) {
-        if (!ans || typeof ans !== 'object' || !ans.questionId) continue;
-        const q = questionMap.get(String(ans.questionId));
+      for (const ans of (answersScores as unknown[])) {
+        if (!ans || typeof ans !== 'object' || !('questionId' in ans) || typeof (ans as { questionId?: unknown }).questionId !== 'string') continue;
+        const q = questionMap.get((ans as { questionId: string }).questionId);
         const maxPoints = q ? q.points : 100;
-        const clampedAnsScore = Math.max(0, Math.min(maxPoints, Math.round(Number(ans.score) || 0)));
-        const cleanFeedback = typeof ans.feedback === 'string' ? ans.feedback.trim().slice(0, 1000) : null;
+        const ansObj = ans as { score?: unknown; feedback?: unknown; questionId: string };
+        const clampedAnsScore = Math.max(0, Math.min(maxPoints, Math.round(Number(ansObj.score) || 0)));
+        const cleanFeedback = typeof ansObj.feedback === 'string' ? ansObj.feedback.replace(/<[^>]*>?/gm, "").trim().slice(0, 1000) : null;
 
         await prisma.attemptAnswer.updateMany({
-          where: { attemptId, questionId: String(ans.questionId) },
+          where: { attemptId, questionId: ansObj.questionId },
           data: {
             score: clampedAnsScore,
             feedback: cleanFeedback
@@ -76,7 +76,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
     finalScore = Math.max(0, Math.min(100, finalScore));
 
     const serverPassed = (attempt.assessment.type === 'PRETEST' || finalScore >= attempt.assessment.passingScore);
-    const cleanFeedback = typeof feedback === 'string' ? feedback.trim().slice(0, 2000) : (serverPassed ? "Selamat, tugas Anda telah dinilai dan dinyatakan lulus!" : "Silakan perbaiki tugas Anda sesuai catatan evaluasi.");
+    const cleanFeedback = typeof feedback === 'string'
+      ? feedback.replace(/<[^>]*>?/gm, "").trim().slice(0, 2000)
+      : (serverPassed ? "Selamat, tugas Anda telah dinilai dan dinyatakan lulus!" : "Silakan perbaiki tugas Anda sesuai catatan evaluasi.");
 
     // Update attempt
     const updatedAttempt = await prisma.assessmentAttempt.update({
@@ -137,8 +139,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
     }
 
     return NextResponse.json(updatedAttempt);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Gagal memproses penilaian";
     console.error('Error grading attempt:', error);
-    return NextResponse.json({ error: error.message || "Gagal memproses penilaian" }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

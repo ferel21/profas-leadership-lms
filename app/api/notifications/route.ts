@@ -55,3 +55,29 @@ export async function PATCH(request: Request) {
 
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(request: Request) {
+  const ipCheck = notifLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan penghapusan notifikasi." }, { status: 429 });
+  }
+
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ message: "Silakan masuk." }, { status: 401 });
+
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get("action");
+  const id = searchParams.get("id");
+
+  if (action === "clear_all") {
+    await prisma.notification.deleteMany({ where: { userId: user.id } });
+  } else if (action === "clear_read") {
+    await prisma.notification.deleteMany({ where: { userId: user.id, read: true } });
+  } else if (id && typeof id === "string") {
+    await prisma.notification.deleteMany({ where: { id: id.trim(), userId: user.id } });
+  } else {
+    return NextResponse.json({ message: "Parameter penghapusan tidak valid." }, { status: 400 });
+  }
+
+  return NextResponse.json({ success: true });
+}

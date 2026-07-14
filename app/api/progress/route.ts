@@ -66,16 +66,16 @@ export async function POST(request: Request) {
 
   const { lessonId } = parsed.data;
   const [node, enrollment] = await Promise.all([
-    prisma.courseNode.findFirst({ where: { id: lessonId, courseId }, select: { id: true, type: true } }),
+    prisma.courseNode.findFirst({ where: { id: lessonId, courseId }, select: { id: true, type: true, assessmentId: true } }),
     prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId } }, select: { id: true } }),
   ]);
   if (!node) return NextResponse.json({ message: "Materi tidak termasuk dalam program ini." }, { status: 400 });
   if (!enrollment) return NextResponse.json({ message: "Daftar ke program sebelum menyimpan progres." }, { status: 403 });
 
   // MASTER SKILL: Mencegah manipulasi instan progres (Instant Progress Bypass Tampering)
-  // Kuis, Tugas, dan Folder tidak boleh ditandai selesai secara langsung via tombol lanjut progres
-  if (node.type === "QUIZ" || node.type === "ASSIGNMENT" || node.type === "FOLDER") {
-    return NextResponse.json({ message: "Materi tipe Kuis/Tugas tidak dapat diselesaikan melalui tombol progres biasa. Silakan kerjakan evaluasi terlebih dahulu." }, { status: 400 });
+  // Kuis, Tugas, Folder, dan Materi berasesmen tidak boleh ditandai selesai secara langsung via tombol lanjut progres
+  if (node.type === "QUIZ" || node.type === "ASSIGNMENT" || node.type === "FOLDER" || Boolean(node.assessmentId)) {
+    return NextResponse.json({ message: "Materi tipe Evaluasi/Kuis/Tugas tidak dapat diselesaikan melalui tombol progres biasa. Silakan kerjakan evaluasi terlebih dahulu." }, { status: 400 });
   }
 
   await prisma.$transaction(async (tx) => {

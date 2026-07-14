@@ -237,22 +237,33 @@ export async function POST(request: Request) {
 
       if (passed && assessment.type !== "PRETEST" && !needsManualGrading) {
         const points = assessment.type === "FINAL" ? 50 : 20 + (normalizedScore >= 90 ? 10 : 0);
-        await tx.xPLog.upsert({
-          where: { userId_source_sourceId: { userId: user.id, source: `${assessment.type}_PASSED`, sourceId: assessment.id } },
-          update: {},
-          create: { userId: user.id, points, source: `${assessment.type}_PASSED`, sourceId: assessment.id }
+        const existingXp = await tx.xPLog.findUnique({
+          where: { userId_source_sourceId: { userId: user.id, source: `${assessment.type}_PASSED`, sourceId: assessment.id } }
         });
+        if (!existingXp) {
+          await tx.xPLog.create({
+            data: { userId: user.id, points, source: `${assessment.type}_PASSED`, sourceId: assessment.id }
+          });
+        }
       }
 
       // MASTER SKILL: Tandai modul Kuis / Tugas sebagai selesai di NodeProgress agar progres kelas bisa mencapai 100%!
       if (passed || needsManualGrading) {
         const node = await tx.courseNode.findFirst({ where: { OR: [{ id: assessmentId }, { assessmentId: assessmentId }], courseId: assessment.course.id } });
         if (node) {
-          await tx.nodeProgress.upsert({
-            where: { userId_nodeId: { userId: user.id, nodeId: node.id } },
-            update: { completedAt: new Date() },
-            create: { userId: user.id, nodeId: node.id, completedAt: new Date() }
-          }).catch(() => {});
+          const existingProgress = await tx.nodeProgress.findUnique({
+            where: { userId_nodeId: { userId: user.id, nodeId: node.id } }
+          });
+          if (existingProgress) {
+            await tx.nodeProgress.update({
+              where: { id: existingProgress.id },
+              data: { completedAt: new Date() }
+            });
+          } else {
+            await tx.nodeProgress.create({
+              data: { userId: user.id, nodeId: node.id, completedAt: new Date() }
+            });
+          }
         }
       }
 

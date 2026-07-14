@@ -75,72 +75,92 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
 
         let assessmentId = node.assessmentId || null;
         if (!assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
-          const existingNode = await tx.courseNode.findFirst({
+          const existingNode = await tx.courseNode.findUnique({
             where: { id: node.id },
             select: { assessmentId: true }
           });
           if (existingNode?.assessmentId) {
             assessmentId = existingNode.assessmentId;
           } else {
-            const assessment = await tx.assessment.create({
+            let assessment = await tx.assessment.findUnique({ where: { id: node.id } });
+            if (!assessment) {
+              assessment = await tx.assessment.findFirst({ where: { courseId, title: cleanTitle } });
+            }
+            if (assessment) {
+              await tx.assessment.update({
+                where: { id: assessment.id },
+                data: { title: cleanTitle }
+              });
+            } else {
+              assessment = await tx.assessment.create({
+                data: {
+                  id: node.id,
+                  courseId,
+                  title: cleanTitle,
+                  type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
+                  isAssignment: node.type === 'ASSIGNMENT'
+                }
+              });
+            }
+            assessmentId = assessment.id;
+          }
+        } else if (assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
+          const existingAssessment = await tx.assessment.findUnique({ where: { id: assessmentId } });
+          if (existingAssessment) {
+            await tx.assessment.update({
+              where: { id: assessmentId },
+              data: { title: cleanTitle }
+            });
+          } else {
+            await tx.assessment.create({
               data: {
-                id: node.id,
+                id: assessmentId,
                 courseId,
                 title: cleanTitle,
                 type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
                 isAssignment: node.type === 'ASSIGNMENT'
               }
-            }).catch(async () => {
-              return await tx.assessment.findFirst({ where: { courseId, title: cleanTitle } }) || 
-                     await tx.assessment.create({ data: { courseId, title: cleanTitle, type: 'MODULE', isAssignment: false } });
             });
-            assessmentId = assessment.id;
           }
-        } else if (assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
-          await tx.assessment.upsert({
-            where: { id: assessmentId },
-            update: { title: cleanTitle },
-            create: {
-              id: assessmentId,
-              courseId,
-              title: cleanTitle,
-              type: node.type === 'QUIZ' ? 'MODULE' : 'FINAL',
-              isAssignment: node.type === 'ASSIGNMENT'
-            }
-          }).catch(() => {});
         }
 
-        await tx.courseNode.upsert({
-          where: { id: node.id },
-          update: {
-            parentId: safeParentId,
-            title: cleanTitle,
-            type: node.type || "TEXT",
-            order: node.order, // Dijamin unik dan sekuensial dari frontend & Phase 2!
-            description: cleanDesc,
-            content: node.content || null,
-            fileUrl: node.fileUrl || null,
-            fileName: node.fileName || null,
-            fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
-            durationMin: node.durationMin || 0,
-            ...(assessmentId ? { assessmentId } : {})
-          },
-          create: {
-            id: node.id,
-            courseId,
-            parentId: safeParentId,
-            title: cleanTitle,
-            type: node.type || "TEXT",
-            order: node.order, // Dijamin unik dan sekuensial!
-            description: cleanDesc,
-            content: node.content || null,
-            fileUrl: node.fileUrl || null,
-            fileName: node.fileName || null,
-            fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
-            durationMin: node.durationMin || 0,
-            assessmentId
-          }
-        });
+        const existingCourseNode = await tx.courseNode.findUnique({ where: { id: node.id } });
+        if (existingCourseNode) {
+          await tx.courseNode.update({
+            where: { id: node.id },
+            data: {
+              parentId: safeParentId,
+              title: cleanTitle,
+              type: node.type || "TEXT",
+              order: node.order,
+              description: cleanDesc,
+              content: node.content || null,
+              fileUrl: node.fileUrl || null,
+              fileName: node.fileName || null,
+              fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
+              durationMin: node.durationMin || 0,
+              ...(assessmentId ? { assessmentId } : {})
+            }
+          });
+        } else {
+          await tx.courseNode.create({
+            data: {
+              id: node.id,
+              courseId,
+              parentId: safeParentId,
+              title: cleanTitle,
+              type: node.type || "TEXT",
+              order: node.order,
+              description: cleanDesc,
+              content: node.content || null,
+              fileUrl: node.fileUrl || null,
+              fileName: node.fileName || null,
+              fileSize: typeof node.fileSize === "number" ? node.fileSize : null,
+              durationMin: node.durationMin || 0,
+              assessmentId
+            }
+          });
+        }
       }
 
       await tx.activityLog.create({

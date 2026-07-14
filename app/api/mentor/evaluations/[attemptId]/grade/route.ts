@@ -95,22 +95,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
 
       // If passed, award XP and mark completion
       if (serverPassed && !attempt.passed) {
-        await tx.xPLog.upsert({
+        const existingXp = await tx.xPLog.findUnique({
           where: {
             userId_source_sourceId: {
               userId: attempt.userId,
               source: 'ASSESSMENT',
               sourceId: attempt.assessmentId
             }
-          },
-          create: {
-            userId: attempt.userId,
-            points: 50,
-            source: 'ASSESSMENT',
-            sourceId: attempt.assessmentId
-          },
-          update: {}
+          }
         });
+        if (!existingXp) {
+          await tx.xPLog.create({
+            data: {
+              userId: attempt.userId,
+              points: 50,
+              source: 'ASSESSMENT',
+              sourceId: attempt.assessmentId
+            }
+          });
+        }
 
         // Find node that has this assessment
         const node = await tx.courseNode.findFirst({
@@ -118,20 +121,28 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
         });
 
         if (node) {
-          await tx.nodeProgress.upsert({
+          const existingProgress = await tx.nodeProgress.findUnique({
             where: {
               userId_nodeId: {
                 userId: attempt.userId,
                 nodeId: node.id
               }
-            },
-            create: {
-              userId: attempt.userId,
-              nodeId: node.id,
-              completedAt: new Date()
-            },
-            update: { completedAt: new Date() }
+            }
           });
+          if (existingProgress) {
+            await tx.nodeProgress.update({
+              where: { id: existingProgress.id },
+              data: { completedAt: new Date() }
+            });
+          } else {
+            await tx.nodeProgress.create({
+              data: {
+                userId: attempt.userId,
+                nodeId: node.id,
+                completedAt: new Date()
+              }
+            });
+          }
         }
       }
 

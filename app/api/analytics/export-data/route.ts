@@ -30,6 +30,7 @@ export async function GET(request: Request) {
   }
 
   try {
+    await prisma.activityLog.create({ data: { userId: user.id, action: "EXPORT_DATA", metadata: JSON.stringify({ role: user.role }) } }).catch(() => {});
     if (user.role === "SUPER_ADMIN" || user.role === "MENTOR") {
       const studentWhere = user.role === "MENTOR"
         ? { role: "STUDENT" as const, enrollments: { some: { course: { mentorId: user.id } } } }

@@ -42,6 +42,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       ? options.slice(0, 10).map((opt: unknown) => typeof opt === 'string' ? opt.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) : "").filter(Boolean)
       : null;
 
+    const qType = typeof type === 'string' && Object.values(QuestionType).includes(type as QuestionType) ? (type as QuestionType) : QuestionType.MULTIPLE_CHOICE;
+    if (qType === QuestionType.MULTIPLE_CHOICE) {
+      if (!cleanOptions || cleanOptions.length < 2) {
+        return NextResponse.json({ error: 'Soal pilihan ganda harus memiliki minimal 2 pilihan jawaban yang tidak kosong.' }, { status: 400 });
+      }
+      if (!cleanCorrectAnswer || !cleanOptions.includes(cleanCorrectAnswer)) {
+        return NextResponse.json({ error: 'Jawaban yang benar harus dipilih dan cocok dengan salah satu pilihan jawaban.' }, { status: 400 });
+      }
+    }
+
     // Verify assessment belongs to mentor or user is admin
     const assessment = await prisma.assessment.findUnique({
       where: { id: assessmentId },
@@ -63,7 +73,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const question = await prisma.assessmentQuestion.create({
       data: {
         assessmentId,
-        type: (typeof type === 'string' && Object.values(QuestionType).includes(type as QuestionType) ? (type as QuestionType) : QuestionType.MULTIPLE_CHOICE),
+        type: qType,
         prompt: cleanPrompt,
         options: cleanOptions ? JSON.stringify(cleanOptions) : null,
         correctAnswer: cleanCorrectAnswer,
@@ -111,5 +121,48 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   } catch (error: unknown) {
     console.error('Error fetching questions:', error);
     return NextResponse.json({ error: 'Gagal mengambil soal evaluasi.' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const ipCheck = questionsLimiter.check(req);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: 'Terlalu banyak permintaan penghapusan soal.' }, { status: 429 });
+  }
+
+  try {
+    const user = await getCurrentUser();
+    if (!user || (user.role !== 'MENTOR' && user.role !== 'SUPER_ADMIN')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id: assessmentId } = await params;
+    const { searchParams } = new URL(req.url);
+    const questionId = searchParams.get('questionId');
+
+    if (!questionId) {
+      return NextResponse.json({ error: 'questionId diperlukan.' }, { status: 400 });
+    }
+
+    const assessment = await prisma.assessment.findUnique({
+      where: { id: assessmentId },
+      select: { course: { select: { mentorId: true } } },
+    });
+    if (!assessment || (user.role !== 'SUPER_ADMIN' && assessment.course.mentorId !== user.id)) {
+      return NextResponse.json({ error: 'Assessment not found or unauthorized' }, { status: 404 });
+    }
+
+    const question = await prisma.assessmentQuestion.findFirst({
+      where: { id: questionId, assessmentId }
+    });
+    if (!question) {
+      return NextResponse.json({ error: 'Soal tidak ditemukan.' }, { status: 404 });
+    }
+
+    await prisma.assessmentQuestion.delete({ where: { id: questionId } });
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    console.error('Error deleting question:', error);
+    return NextResponse.json({ error: 'Gagal menghapus soal evaluasi.' }, { status: 500 });
   }
 }

@@ -157,7 +157,7 @@ export async function POST(request: Request) {
     let totalScore = 0;
     let maxPossibleScore = 0;
     let needsManualGrading = false;
-    const attemptAnswers = [];
+    const attemptAnswers: Array<{ questionId: string; answerText: string | null; fileUrl: string | null; score: number }> = [];
 
     for (const q of assessment.questions) {
       maxPossibleScore += q.points;
@@ -216,44 +216,48 @@ export async function POST(request: Request) {
           ? "Bagus! Anda siap melanjutkan ke tahap berikutnya."
           : "Tinjau kembali materi inti, lalu coba sekali lagi.");
 
-    const attempt = await prisma.assessmentAttempt.create({
-      data: {
-        userId: user.id,
-        assessmentId,
-        score: needsManualGrading ? 0 : normalizedScore, // wait for grading if needed
-        passed: passed,
-        status: status,
-        feedback,
-        answers: {
-          create: attemptAnswers
+    const attempt = await prisma.$transaction(async (tx) => {
+      const createdAttempt = await tx.assessmentAttempt.create({
+        data: {
+          userId: user.id,
+          assessmentId,
+          score: needsManualGrading ? 0 : normalizedScore, // wait for grading if needed
+          passed: passed,
+          status: status,
+          feedback,
+          answers: {
+            create: attemptAnswers
+          }
+        }
+      });
+
+      await tx.activityLog.create({
+        data: { userId: user.id, action: "SUBMIT_ASSESSMENT", metadata: JSON.stringify({ assessmentId, score: normalizedScore, passed, needsManualGrading }) }
+      });
+
+      if (passed && assessment.type !== "PRETEST" && !needsManualGrading) {
+        const points = assessment.type === "FINAL" ? 50 : 20 + (normalizedScore >= 90 ? 10 : 0);
+        await tx.xPLog.upsert({
+          where: { userId_source_sourceId: { userId: user.id, source: `${assessment.type}_PASSED`, sourceId: assessment.id } },
+          update: {},
+          create: { userId: user.id, points, source: `${assessment.type}_PASSED`, sourceId: assessment.id }
+        });
+      }
+
+      // MASTER SKILL: Tandai modul Kuis / Tugas sebagai selesai di NodeProgress agar progres kelas bisa mencapai 100%!
+      if (passed || needsManualGrading) {
+        const node = await tx.courseNode.findFirst({ where: { OR: [{ id: assessmentId }, { assessmentId: assessmentId }], courseId: assessment.course.id } });
+        if (node) {
+          await tx.nodeProgress.upsert({
+            where: { userId_nodeId: { userId: user.id, nodeId: node.id } },
+            update: { completedAt: new Date() },
+            create: { userId: user.id, nodeId: node.id, completedAt: new Date() }
+          }).catch(() => {});
         }
       }
+
+      return createdAttempt;
     });
-
-    await prisma.activityLog.create({
-      data: { userId: user.id, action: "SUBMIT_ASSESSMENT", metadata: JSON.stringify({ assessmentId, score: normalizedScore, passed, needsManualGrading }) }
-    });
-
-    if (passed && assessment.type !== "PRETEST" && !needsManualGrading) {
-      const points = assessment.type === "FINAL" ? 50 : 20 + (normalizedScore >= 90 ? 10 : 0);
-      await prisma.xPLog.upsert({
-        where: { userId_source_sourceId: { userId: user.id, source: `${assessment.type}_PASSED`, sourceId: assessment.id } },
-        update: {},
-        create: { userId: user.id, points, source: `${assessment.type}_PASSED`, sourceId: assessment.id }
-      });
-    }
-
-    // MASTER SKILL: Tandai modul Kuis / Tugas sebagai selesai di NodeProgress agar progres kelas bisa mencapai 100%!
-    if (passed || needsManualGrading) {
-      const node = await prisma.courseNode.findFirst({ where: { OR: [{ id: assessmentId }, { assessmentId: assessmentId }], courseId: assessment.course.id } });
-      if (node) {
-        await prisma.nodeProgress.upsert({
-          where: { userId_nodeId: { userId: user.id, nodeId: node.id } },
-          update: { completedAt: new Date() },
-          create: { userId: user.id, nodeId: node.id, completedAt: new Date() }
-        }).catch(() => {});
-      }
-    }
 
     const completion = (passed && assessment.type !== "PRETEST" && !needsManualGrading) ? await finalizeCourseCompletion(user.id, assessment.course.id) : null;
     

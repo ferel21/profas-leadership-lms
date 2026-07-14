@@ -45,6 +45,9 @@ export async function POST(req: Request) {
     const cleanTitle = title.replace(/<[^>]*>?/gm, "").trim().slice(0, 150);
     const clampedPassingScore = Math.max(0, Math.min(100, Math.round(Number(passingScore) || 70)));
     const clampedTimeLimitMin = Math.max(1, Math.min(600, Math.round(Number(timeLimitMin) || 15)));
+    
+    const parsedDeadline = deadline ? new Date(deadline) : null;
+    const safeDeadline = parsedDeadline && !isNaN(parsedDeadline.getTime()) ? parsedDeadline : null;
 
     const assessment = await prisma.assessment.create({
       data: {
@@ -54,11 +57,11 @@ export async function POST(req: Request) {
         isAssignment: Boolean(isAssignment),
         passingScore: clampedPassingScore,
         timeLimitMin: clampedTimeLimitMin,
-        deadline: deadline ? new Date(deadline) : null,
+        deadline: safeDeadline,
       }
     });
 
-    return NextResponse.json(assessment);
+    return NextResponse.json(assessment, { status: 201 });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Error creating assessment";
     console.error('Error creating assessment:', error);
@@ -67,6 +70,11 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
+  const ipCheck = assessmentLimiter.check(req);
+  if (!ipCheck.success) {
+    return NextResponse.json({ error: 'Terlalu banyak permintaan daftar evaluasi. Silakan tunggu sebentar.' }, { status: 429 });
+  }
+
   try {
     const user = await getCurrentUser();
     if (!user || (user.role !== 'MENTOR' && user.role !== 'SUPER_ADMIN')) {
@@ -90,6 +98,7 @@ export async function GET(req: Request) {
           select: { questions: true }
         }
       },
+      take: 100,
       orderBy: { id: 'desc' }
     });
 

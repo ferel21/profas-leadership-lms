@@ -28,10 +28,30 @@ export interface XPReportRow {
 type CellValue = string | number;
 type ReportRow = Record<string, CellValue>;
 
+function sanitizeCell(val: CellValue): CellValue {
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    if (/^[=+\-@\t\r]/.test(trimmed)) {
+      return `'${trimmed}`;
+    }
+    return val;
+  }
+  return val;
+}
+
 function addSheet(workbook: ExcelJS.Workbook, name: string, headers: string[], rows: ReportRow[], widths: number[]) {
   const sheet = workbook.addWorksheet(name);
   sheet.columns = headers.map((header, index) => ({ header, key: header, width: widths[index] ?? 18 }));
-  if (rows.length > 0) sheet.addRows(rows);
+  if (rows.length > 0) {
+    const sanitizedRows = rows.map(row => {
+      const cleanRow: ReportRow = {};
+      for (const [key, val] of Object.entries(row)) {
+        cleanRow[key] = sanitizeCell(val);
+      }
+      return cleanRow;
+    });
+    sheet.addRows(sanitizedRows);
+  }
   sheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
   sheet.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1E5A8F" } };
   sheet.views = [{ state: "frozen", ySplit: 1 }];

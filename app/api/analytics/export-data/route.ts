@@ -5,6 +5,15 @@ import { rateLimit } from "@/lib/rate-limit";
 
 const exportLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
+function sanitizeSpreadsheetText(value: string | null | undefined): string {
+  if (!value || typeof value !== "string") return "";
+  const trimmed = value.replace(/<[^>]*>?/gm, "").trim();
+  if (/^[=+\-@\t\r]/.test(trimmed)) {
+    return `'${trimmed}`;
+  }
+  return trimmed;
+}
+
 /**
  * API untuk Ekspor Data Komprehensif (Excel .xlsx, Word .docx, PDF Transkrip, PPTX Slide Deck).
  * Dilengkapi pengamanan Role Access Control (RAC) serta seleksi field aman sesuai prinsip `auth-oauth-security` & `database-supabase-prisma`.
@@ -62,14 +71,13 @@ export async function GET(request: Request) {
         const firstEnrollment = s.enrollments[0];
 
         return {
-          name: s.name,
-          email: s.email,
-          courseTitle: firstEnrollment?.course.title || "Fondasi Kepemimpinan Berdampak",
+          name: sanitizeSpreadsheetText(s.name),
+          email: sanitizeSpreadsheetText(s.email),
+          courseTitle: sanitizeSpreadsheetText(firstEnrollment?.course.title || "Fondasi Kepemimpinan Berdampak"),
           role: s.role,
           status: firstEnrollment?.status || "ACTIVE",
           score: Math.min(100, Math.round(totalXP / 15) || 85),
           completedAt: firstEnrollment?.completedAt ? firstEnrollment.completedAt.toISOString().split("T")[0] : "-",
-          // Metadata untuk UI preview
           totalXP,
           enrolledCoursesCount: s.enrollments.length
         };
@@ -92,11 +100,11 @@ export async function GET(request: Request) {
       });
 
       const attendances = attendanceRecords.map(a => ({
-        eventName: a.event.title,
-        userName: a.user.name,
+        eventName: sanitizeSpreadsheetText(a.event.title),
+        userName: sanitizeSpreadsheetText(a.user.name),
         status: a.status,
         checkedInAt: (a.checkedInAt || a.createdAt).toISOString().split("T")[0],
-        note: a.note || undefined
+        note: a.note ? sanitizeSpreadsheetText(a.note) : undefined
       }));
 
       // XP Logs grouped by user for XPReportRow
@@ -104,9 +112,9 @@ export async function GET(request: Request) {
         const totalXP = s.xpLogs.reduce((acc, x) => acc + x.points, 0);
         const latestLog = s.xpLogs[0];
         return {
-          userName: s.name,
+          userName: sanitizeSpreadsheetText(s.name),
           totalXP: totalXP || 100,
-          source: latestLog?.source || "Kuis & Modul",
+          source: sanitizeSpreadsheetText(latestLog?.source || "Kuis & Modul"),
           lastActivity: latestLog?.createdAt ? latestLog.createdAt.toISOString().split("T")[0] : s.createdAt.toISOString().split("T")[0]
         };
       });
@@ -217,16 +225,16 @@ export async function GET(request: Request) {
       return NextResponse.json({
         success: true,
         role: user.role,
-        studentName: studentData.name,
-        studentEmail: studentData.email,
-        organization: studentData.organization || "Profesional Mandiri",
+        studentName: sanitizeSpreadsheetText(studentData.name),
+        studentEmail: sanitizeSpreadsheetText(studentData.email),
+        organization: sanitizeSpreadsheetText(studentData.organization || "Profesional Mandiri"),
         totalXP,
         badgesCount: studentData.userBadges.length,
         courses,
         students: [{
-          name: studentData.name,
-          email: studentData.email,
-          courseTitle: courses[0]?.title || "Fondasi Kepemimpinan",
+          name: sanitizeSpreadsheetText(studentData.name),
+          email: sanitizeSpreadsheetText(studentData.email),
+          courseTitle: sanitizeSpreadsheetText(courses[0]?.title || "Fondasi Kepemimpinan"),
           role: studentData.role,
           status: "ACTIVE",
           score: Math.min(100, Math.round(totalXP / 10) || 90),
@@ -234,7 +242,7 @@ export async function GET(request: Request) {
         }],
         attendances: [],
         xpLogs: [{
-          userName: studentData.name,
+          userName: sanitizeSpreadsheetText(studentData.name),
           totalXP: totalXP || 100,
           source: "Kuis & Modul",
           lastActivity: new Date().toISOString().split("T")[0]

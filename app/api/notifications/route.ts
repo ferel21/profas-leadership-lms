@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
+
+const notifLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -28,6 +31,11 @@ const patchSchema = z.object({
 });
 
 export async function PATCH(request: Request) {
+  const ipCheck = notifLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan pembaruan notifikasi." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ message: "Silakan masuk." }, { status: 401 });
 

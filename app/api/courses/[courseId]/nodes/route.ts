@@ -2,26 +2,45 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
+
+const nodesLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
 export async function PUT(request: Request, { params }: { params: Promise<{ courseId: string }> }) {
+  const ipCheck = nodesLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak pembaruan struktur kurikulum. Silakan tunggu 1 menit." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR") {
+  if (!user || (user.role !== "MENTOR" && user.role !== "SUPER_ADMIN")) {
     return NextResponse.json({ message: "Akses ditolak" }, { status: 403 });
   }
 
   const { courseId } = await params;
-  const course = await prisma.course.findFirst({ where: { id: courseId, mentorId: user.id }, select: { id: true, slug: true } });
+  const course = await prisma.course.findFirst({
+    where: user.role === "SUPER_ADMIN" ? { id: courseId } : { id: courseId, mentorId: user.id },
+    select: { id: true, slug: true }
+  });
   if (!course) {
     return NextResponse.json({ message: "Course tidak ditemukan atau bukan milik Anda" }, { status: 404 });
   }
 
-  const { nodes } = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object" || !Array.isArray(body.nodes)) {
+    return NextResponse.json({ message: "Format daftar node tidak valid." }, { status: 400 });
+  }
+
+  const nodes = body.nodes;
+  if (nodes.length > 300) {
+    return NextResponse.json({ message: "Jumlah materi/node dalam satu kurikulum melebihi batas maksimal (300)." }, { status: 400 });
+  }
 
   try {
     // 1. MASTER SKILL: Total Clean Deletion (Hapus node yang dieksplisitkan ATAU yang tidak ada lagi di daftar aktif frontend)
-    const activeIds = (nodes || [])
-      .map((n: { id?: string }) => n.id)
-      .filter((id?: string): id is string => typeof id === "string" && !id.startsWith("tmp_") && id !== "new_node");
+    const activeIds = (nodes as unknown[])
+      .map((n: unknown) => (n && typeof n === "object" && "id" in n && typeof (n as { id?: unknown }).id === "string") ? (n as { id: string }).id : undefined)
+      .filter((id: unknown): id is string => typeof id === "string" && !id.startsWith("tmp_") && id !== "new_node");
 
     await prisma.courseNode.deleteMany({
       where: {
@@ -47,6 +66,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
     // 3. MASTER SKILL: Update/Create nodes menggunakan 100% Idempotent UPSERT
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
+      if (!node || typeof node !== "object" || typeof node.id !== "string" || !node.id || typeof node.title !== "string") continue;
       let assessmentId = node.assessmentId || null;
       if (!assessmentId && (node.type === 'QUIZ' || node.type === 'ASSIGNMENT')) {
         const existingNode = await prisma.courseNode.findFirst({

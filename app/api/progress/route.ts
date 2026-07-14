@@ -4,6 +4,9 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { finalizeCourseCompletion } from "@/lib/completion";
+import { rateLimit } from "@/lib/rate-limit";
+
+const progressLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
 const inputSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("enroll"), courseId: z.string().min(1) }),
@@ -11,6 +14,11 @@ const inputSchema = z.discriminatedUnion("action", [
 ]);
 
 export async function POST(request: Request) {
+  const ipCheck = progressLimiter.check(request);
+  if (!ipCheck.success) {
+    return NextResponse.json({ message: "Terlalu banyak permintaan progres. Silakan tunggu 1 menit." }, { status: 429 });
+  }
+
   const user = await getCurrentUser(); if (!user) return NextResponse.json({ message: "Silakan masuk." }, { status: 401 });
   const parsed = inputSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ message: "Data progres tidak valid." }, { status: 400 });
@@ -58,16 +66,22 @@ export async function POST(request: Request) {
 
   const { lessonId } = parsed.data;
   const [node, enrollment] = await Promise.all([
-    prisma.courseNode.findFirst({ where: { id: lessonId, courseId }, select: { id: true } }),
+    prisma.courseNode.findFirst({ where: { id: lessonId, courseId }, select: { id: true, type: true } }),
     prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId } }, select: { id: true } }),
   ]);
   if (!node) return NextResponse.json({ message: "Materi tidak termasuk dalam program ini." }, { status: 400 });
   if (!enrollment) return NextResponse.json({ message: "Daftar ke program sebelum menyimpan progres." }, { status: 403 });
 
+  // MASTER SKILL: Mencegah manipulasi instan progres (Instant Progress Bypass Tampering)
+  // Kuis, Tugas, dan Folder tidak boleh ditandai selesai secara langsung via tombol lanjut progres
+  if (node.type === "QUIZ" || node.type === "ASSIGNMENT" || node.type === "FOLDER") {
+    return NextResponse.json({ message: "Materi tipe Kuis/Tugas tidak dapat diselesaikan melalui tombol progres biasa. Silakan kerjakan evaluasi terlebih dahulu." }, { status: 400 });
+  }
+
   await prisma.$transaction(async (tx) => {
     await tx.nodeProgress.upsert({ where: { userId_nodeId: { userId: user.id, nodeId: lessonId } }, update: {}, create: { userId: user.id, nodeId: lessonId } });
     await tx.xPLog.upsert({ where: { userId_source_sourceId: { userId: user.id, source: "LESSON_COMPLETED", sourceId: lessonId } }, update: {}, create: { userId: user.id, points: 5, source: "LESSON_COMPLETED", sourceId: lessonId } });
   });
-  const result=await finalizeCourseCompletion(user.id,courseId);
+  const result = await finalizeCourseCompletion(user.id, courseId);
   return NextResponse.json(result);
 }

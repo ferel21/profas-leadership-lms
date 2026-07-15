@@ -1,0 +1,123 @@
+/*
+  Landing motion direction:
+  velocity-led parallax and layered section transitions, scoped to the public
+  homepage so course player and dashboard surfaces remain stable.
+*/
+
+html.al-scroll-ready {
+  scroll-behavior: smooth;
+}
+
+.al-page {
+  --scroll-velocity: 0;
+  --al-layer-shadow: 0 -20px 46px rgba(16, 21, 25, 0.08);
+}
+
+.al-page main {
+  position: relative;
+  isolation: isolate;
+}
+
+.al-page .al-float-card strong em {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.al-page [data-scroll-speed] {
+  --parallax-y: 0px;
+  --velocity-y: 0px;
+  translate: 0 calc(var(--parallax-y) + var(--velocity-y));
+  will-change: translate;
+}
+
+/* The first layer arrives over the hero's metric rail. */
+.al-page .al-activity.al-overlap-section {
+  z-index: 30;
+  margin-top: -72px;
+  padding-top: 124px;
+  border-radius: 44px 44px 0 0;
+  box-shadow: var(--al-layer-shadow);
+}
+
+/* A second, quieter overlap gives the learning method a card-deck rhythm. */
+.al-page .al-method-section.al-overlap-section {
+  z-index: 25;
+  margin-top: -42px;
+  padding-top: 132px;
+  border-radius: 36px 36px 0 0;
+  box-shadow: var(--al-layer-shadow);
+}
+
+.al-page .al-method-grid > .al-method-card {
+  position: relative;
+  z-index: 1;
+}
+
+.al-page .al-method-grid > .al-method-card:nth-child(2) {
+  translate: 0 24px;
+  z-index: 2;
+}
+
+.al-page .al-method-grid > .al-method-card:nth-child(3) {
+  translate: 0 48px;
+  z-index: 3;
+}
+
+/* Product proof becomes a lifted panel before the blue insight section. */
+.al-page .al-player-section.al-overlap-section {
+  z-index: 20;
+  margin-top: -40px;
+  padding-top: 132px;
+  border-radius: 36px 36px 0 0;
+  box-shadow: var(--al-layer-shadow);
+}
+
+.al-page .al-player-section .al-mockup {
+  position: relative;
+  z-index: 2;
+}
+
+.al-page .al-insight.al-overlap-section {
+  z-index: 24;
+  margin-top: -34px;
+  padding-top: 128px;
+  border-radius: 36px 36px 0 0;
+  box-shadow: 0 -20px 52px rgba(12, 61, 107, 0.18);
+}
+
+@media (max-width: 768px) {
+  html.al-scroll-ready {
+    scroll-behavior: auto;
+  }
+
+  .al-page .al-activity.al-overlap-section,
+  .al-page .al-method-section.al-overlap-section,
+  .al-page .al-player-section.al-overlap-section,
+  .al-page .al-insight.al-overlap-section {
+    margin-top: -28px;
+    padding-top: 92px;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .al-page .al-method-grid > .al-method-card:nth-child(2),
+  .al-page .al-method-grid > .al-method-card:nth-child(3) {
+    translate: 0 0;
+  }
+
+  .al-page [data-scroll-speed] {
+    translate: 0 calc(var(--velocity-y) * 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.al-scroll-ready {
+    scroll-behavior: auto;
+  }
+
+  .al-page [data-scroll-speed],
+  .al-page .al-method-grid > .al-method-card:nth-child(2),
+  .al-page .al-method-grid > .al-method-card:nth-child(3) {
+    translate: none;
+    transition: none;
+  }
+}

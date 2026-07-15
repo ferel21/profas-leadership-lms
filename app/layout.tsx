@@ -15,6 +15,7 @@ import "./lms-fresh.css";
 import './akseslegal-theme.css';
 import './home-landing.css';
 import './leaf-stagger.css';
+import './home-scroll.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";
@@ -55,4 +56,3 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
-

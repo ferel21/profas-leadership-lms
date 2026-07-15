@@ -21,6 +21,7 @@ import { prisma } from "@/lib/prisma";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CourseCard } from "@/components/CourseCard";
+import { LandingScrollDirector } from "@/components/LandingScrollDirector";
 
 type FeaturedCourse = {
   id: string;
@@ -129,6 +130,7 @@ export default async function Home() {
   return (
     <div className="al-page">
       <Header />
+      <LandingScrollDirector />
       <main>
         <section className="al-hero" aria-labelledby="home-title">
           {/* Gradient blobs */}
@@ -193,7 +195,7 @@ export default async function Home() {
             </div>
 
             {/* Visual column */}
-            <div className="al-hero-visual">
+            <div className="al-hero-visual" data-scroll-speed="-0.1">
               <div className="al-hero-img-wrap">
                 <Image
                   src="/images/profas-leadership-hero.webp"
@@ -249,7 +251,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="al-section al-section--white al-activity" aria-labelledby="activity-title">
+        <section className="al-section al-section--white al-activity al-overlap-section" aria-labelledby="activity-title">
           <div className="container">
             <div className="al-activity-intro">
               <div>
@@ -258,14 +260,14 @@ export default async function Home() {
               </div>
               <p>Kelas PROFAS mempertemukan refleksi, praktik, dan percakapan yang membuat pembelajaran terasa dekat dengan tantangan kerja sehari-hari.</p>
             </div>
-            <figure className="al-activity-frame">
+            <figure className="al-activity-frame" data-scroll-speed="0.045">
               <Image src="/images/profas-activity-collage.jpeg" alt="Kolase kegiatan pembelajaran dan diskusi peserta PROFAS Leadership" width={1599} height={899} sizes="(max-width: 780px) calc(100vw - 28px), 1160px" />
               <figcaption>Potret proses belajar: berdiskusi, mencoba, dan bertumbuh sebagai satu komunitas.</figcaption>
             </figure>
           </div>
         </section>
 
-        <section className="al-section al-section--gray" aria-labelledby="method-title">
+        <section className="al-section al-section--gray al-method-section al-overlap-section" aria-labelledby="method-title">
           <div className="container">
             <div className="al-method-heading">
               <div><span className="al-eyebrow">Cara kami bekerja</span><h2 id="method-title">Kepemimpinan bukan teori yang disimpan.</h2></div>
@@ -286,10 +288,10 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="al-section al-section--gray">
+        <section className="al-section al-section--gray al-player-section al-overlap-section">
           <div className="container al-split">
             <div><span className="al-eyebrow">Pengalaman belajar</span><h2>Course player yang terasa seperti produk SaaS, bukan folder materi.</h2><p>Materi, diskusi, lampiran, catatan, progres, evaluasi, dan tombol penyelesaian ditempatkan dalam alur yang natural. Peserta tidak perlu menebak harus klik apa setelah masuk kelas.</p><div className="al-feature-list">{capabilities.map(([title, copy]) => <div key={title}><CheckCircle2 size={19} /><p><b>{title}</b><span>{copy}</span></p></div>)}</div></div>
-            <div className="al-mockup"><div className="al-mockup-toolbar"><span /><span /><span /><b>Course Player</b></div><div className="al-mockup-stage"><div className="al-video-placeholder"><Play fill="currentColor" /></div><div className="al-lesson-panel"><b>Materi berikutnya</b><p>Framework delegasi dan komunikasi eksekutif</p><i><em /></i></div></div></div>
+            <div className="al-mockup" data-scroll-speed="-0.055"><div className="al-mockup-toolbar"><span /><span /><span /><b>Course Player</b></div><div className="al-mockup-stage"><div className="al-video-placeholder"><Play fill="currentColor" /></div><div className="al-lesson-panel"><b>Materi berikutnya</b><p>Framework delegasi dan komunikasi eksekutif</p><i><em /></i></div></div></div>
           </div>
         </section>
 
@@ -300,7 +302,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="al-section al-insight" id="insight">
+        <section className="al-section al-insight al-overlap-section" id="insight">
           <div className="container al-insight-grid"><div><span className="al-eyebrow">Standar produksi</span><h2>Rapi di layar besar, tetap nyaman di smartphone.</h2><p>Layout responsif, spacing konsisten, CTA jelas, card stabil, focus state aksesibel, dan micro-interaction ringan membuat LMS terasa matang untuk pengguna nyata.</p></div><div className="al-insight-cards"><article><ShieldCheck /><b>Akses aman</b><span>Role dan session diarahkan sesuai kebutuhan pengguna.</span></article><article><BarChart3 /><b>Data terlihat</b><span>Metrik progres, evaluasi, dan aktivitas mudah dipindai.</span></article><article><Users2 /><b>Multi-role</b><span>Admin, Mentor, dan Peserta punya dashboard berbeda.</span></article></div></div>
         </section>
 

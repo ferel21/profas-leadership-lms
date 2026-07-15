@@ -1,7 +1,8 @@
 /*
-  Landing motion direction:
-  velocity-led parallax and layered section transitions, scoped to the public
-  homepage so course player and dashboard surfaces remain stable.
+  PROFAS landing scroll direction:
+  the homepage reads as a sequence of layered editorial panels. Motion is
+  driven by scroll velocity, while the section overlap remains CSS-first so
+  the page still has a coherent structure without JavaScript.
 */
 
 html.al-scroll-ready {
@@ -9,8 +10,9 @@ html.al-scroll-ready {
 }
 
 .al-page {
+  --scroll-progress: 0;
   --scroll-velocity: 0;
-  --al-layer-shadow: 0 -20px 46px rgba(16, 21, 25, 0.08);
+  --al-layer-shadow: 0 -24px 58px rgba(16, 21, 25, 0.1);
 }
 
 .al-page main {
@@ -18,71 +20,106 @@ html.al-scroll-ready {
   isolation: isolate;
 }
 
+.al-page.has-scroll-motion::before,
+.al-page.has-scroll-motion::after {
+  position: fixed;
+  inset-inline-end: clamp(14px, 2.4vw, 34px);
+  top: 20vh;
+  z-index: 1100;
+  width: 3px;
+  height: 60vh;
+  border-radius: 999px;
+  content: "";
+  pointer-events: none;
+}
+
+.al-page.has-scroll-motion::before {
+  background: rgba(42, 107, 167, 0.16);
+}
+
+.al-page.has-scroll-motion::after {
+  background: linear-gradient(180deg, #f3b444 0%, #2a6ba7 48%, #1e5a8f 100%);
+  transform: scaleY(var(--scroll-progress));
+  transform-origin: top center;
+  box-shadow: 0 0 18px rgba(42, 107, 167, 0.34);
+}
+
 .al-page .al-float-card strong em {
   color: #166534;
   background: #dcfce7;
 }
 
-.al-page [data-scroll-speed] {
+/* Every public section becomes a physical sheet that arrives over the one
+   before it. The hero stays open; the rest of the story uses the overlap. */
+.al-page .al-hero {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 154px;
+}
+
+.al-page main > section:not(.al-hero) {
+  position: relative;
+  margin-top: -76px;
+  padding-top: 154px;
+  border-radius: clamp(30px, 4vw, 58px) clamp(30px, 4vw, 58px) 0 0;
+  box-shadow: var(--al-layer-shadow);
+  overflow: hidden;
+}
+
+/* Later panels sit above earlier panels at each overlap seam. */
+.al-page main > section:nth-child(2) { z-index: 30; }
+.al-page main > section:nth-child(3) { z-index: 28; }
+.al-page main > section:nth-child(4) { z-index: 26; }
+.al-page main > section:nth-child(5) { z-index: 24; }
+.al-page main > section:nth-child(6) { z-index: 22; }
+.al-page main > section:nth-child(7) { z-index: 20; }
+.al-page main > section:nth-child(8) { z-index: 18; }
+.al-page main > section:nth-child(9) { z-index: 16; }
+.al-page main > section:nth-child(10) { z-index: 14; }
+
+/* The old named classes remain useful as intent markers, while this global
+   layer rule makes the overlap behavior consistent across the whole story. */
+.al-page .al-overlap-section {
+  box-shadow: var(--al-layer-shadow);
+}
+
+.al-page .al-motion-target {
   --parallax-y: 0px;
   --velocity-y: 0px;
-  translate: 0 calc(var(--parallax-y) + var(--velocity-y));
+  --stack-y: 0px;
+  translate: 0 calc(var(--stack-y) + var(--parallax-y) + var(--velocity-y));
   will-change: translate;
 }
 
-/* The first layer arrives over the hero's metric rail. */
-.al-page .al-activity.al-overlap-section {
-  z-index: 30;
-  margin-top: -72px;
-  padding-top: 124px;
-  border-radius: 44px 44px 0 0;
-  box-shadow: var(--al-layer-shadow);
+/* Card layers make the scroll direction readable even when the user moves
+   quickly past a section. */
+.al-page .al-method-grid > .al-method-card:nth-child(2),
+.al-page .al-pathway-grid > .al-pathway-card:nth-child(2),
+.al-page .course-grid > :nth-child(2) {
+  --stack-y: 24px;
 }
 
-/* A second, quieter overlap gives the learning method a card-deck rhythm. */
-.al-page .al-method-section.al-overlap-section {
-  z-index: 25;
-  margin-top: -42px;
-  padding-top: 132px;
-  border-radius: 36px 36px 0 0;
-  box-shadow: var(--al-layer-shadow);
+.al-page .al-method-grid > .al-method-card:nth-child(3),
+.al-page .al-pathway-grid > .al-pathway-card:nth-child(3) {
+  --stack-y: 48px;
 }
 
-.al-page .al-method-grid > .al-method-card {
-  position: relative;
-  z-index: 1;
+.al-page .course-grid > :nth-child(3),
+.al-page .al-insight-cards > article:nth-child(3) {
+  --stack-y: -16px;
 }
 
-.al-page .al-method-grid > .al-method-card:nth-child(2) {
-  translate: 0 24px;
-  z-index: 2;
+.al-page .al-insight-cards > article:nth-child(2),
+.al-page .al-outcome-list > div:nth-child(2) {
+  --stack-y: 18px;
 }
 
-.al-page .al-method-grid > .al-method-card:nth-child(3) {
-  translate: 0 48px;
-  z-index: 3;
+.al-page .al-faq-list > details:nth-child(3) {
+  --stack-y: -12px;
 }
 
-/* Product proof becomes a lifted panel before the blue insight section. */
-.al-page .al-player-section.al-overlap-section {
-  z-index: 20;
-  margin-top: -40px;
-  padding-top: 132px;
-  border-radius: 36px 36px 0 0;
-  box-shadow: var(--al-layer-shadow);
-}
-
-.al-page .al-player-section .al-mockup {
-  position: relative;
-  z-index: 2;
-}
-
-.al-page .al-insight.al-overlap-section {
-  z-index: 24;
-  margin-top: -34px;
-  padding-top: 128px;
-  border-radius: 36px 36px 0 0;
-  box-shadow: 0 -20px 52px rgba(12, 61, 107, 0.18);
+.al-page .al-final-box {
+  --stack-y: -38px;
 }
 
 @media (max-width: 768px) {
@@ -90,22 +127,39 @@ html.al-scroll-ready {
     scroll-behavior: auto;
   }
 
-  .al-page .al-activity.al-overlap-section,
-  .al-page .al-method-section.al-overlap-section,
-  .al-page .al-player-section.al-overlap-section,
-  .al-page .al-insight.al-overlap-section {
-    margin-top: -28px;
-    padding-top: 92px;
-    border-radius: 28px 28px 0 0;
+  .al-page.has-scroll-motion::before,
+  .al-page.has-scroll-motion::after {
+    inset-inline-end: 10px;
+    top: 18vh;
+    height: 52vh;
+    width: 2px;
+  }
+
+  .al-page .al-hero {
+    padding-bottom: 112px;
+  }
+
+  .al-page main > section:not(.al-hero) {
+    margin-top: -38px;
+    padding-top: 108px;
+    border-radius: 30px 30px 0 0;
   }
 
   .al-page .al-method-grid > .al-method-card:nth-child(2),
-  .al-page .al-method-grid > .al-method-card:nth-child(3) {
-    translate: 0 0;
+  .al-page .al-method-grid > .al-method-card:nth-child(3),
+  .al-page .al-pathway-grid > .al-pathway-card:nth-child(2),
+  .al-page .al-pathway-grid > .al-pathway-card:nth-child(3),
+  .al-page .course-grid > :nth-child(2),
+  .al-page .course-grid > :nth-child(3),
+  .al-page .al-insight-cards > article:nth-child(2),
+  .al-page .al-insight-cards > article:nth-child(3),
+  .al-page .al-outcome-list > div:nth-child(2),
+  .al-page .al-faq-list > details:nth-child(3) {
+    --stack-y: 0px;
   }
 
-  .al-page [data-scroll-speed] {
-    translate: 0 calc(var(--velocity-y) * 0.5);
+  .al-page .al-final-box {
+    --stack-y: -20px;
   }
 }
 
@@ -114,10 +168,8 @@ html.al-scroll-ready {
     scroll-behavior: auto;
   }
 
-  .al-page [data-scroll-speed],
-  .al-page .al-method-grid > .al-method-card:nth-child(2),
-  .al-page .al-method-grid > .al-method-card:nth-child(3) {
+  .al-page .al-motion-target {
     translate: none;
-    transition: none;
+    will-change: auto;
   }
 }

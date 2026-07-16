@@ -22,7 +22,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CourseCard } from "@/components/CourseCard";
 import { LandingScrollDirector } from "@/components/LandingScrollDirector";
-import { LandingScrollStackSection } from "@/components/LandingScrollStackSection";
+import ScrollStack, { ScrollStackItem } from "@/components/ScrollStack";
 
 type FeaturedCourse = {
   id: string;
@@ -164,10 +164,6 @@ export default async function Home() {
                   <BookOpen size={22} />
                   <span>Lihat Program</span>
                 </Link>
-                <a href="#eksekutif-stack" className="al-btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <Layers3 size={20} />
-                  <span>3D Scroll Stack</span>
-                </a>
               </div>
 
               <div className="al-proof-row">
@@ -256,8 +252,6 @@ export default async function Home() {
           </div>
         </section>
 
-        <LandingScrollStackSection />
-
         <section className="al-section al-section--white al-activity al-overlap-section" aria-labelledby="activity-title">
           <div className="container">
             <div className="al-activity-intro">
@@ -280,18 +274,31 @@ export default async function Home() {
               <div><span className="al-eyebrow">Cara kami bekerja</span><h2 id="method-title">Kepemimpinan bukan teori yang disimpan.</h2></div>
               <p>PROFAS menghubungkan insight dengan tindakan melalui ritme belajar yang singkat, reflektif, dan relevan dengan ruang kerja peserta.</p>
             </div>
-            <div className="al-method-grid">
-              {learningMethod.map(({ icon: Icon, index, title, copy }) => <article key={title} className="al-method-card"><div className="al-method-card-top"><Icon size={22} /><span>{index}</span></div><h3>{title}</h3><p>{copy}</p></article>)}
-            </div>
+            <ScrollStack useWindowScroll={true} itemDistance={60} itemScale={0.04} itemStackDistance={30} stackPosition="20%" scaleEndPosition="10%">
+              {learningMethod.map(({ icon: Icon, index, title, copy }) => (
+                <ScrollStackItem key={title} itemClassName="al-method-card scroll-method-item">
+                  <div className="al-method-card-top"><Icon size={22} /><span>{index}</span></div>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                </ScrollStackItem>
+              ))}
+            </ScrollStack>
           </div>
         </section>
 
         <section className="al-section al-section--white" id="tentang">
           <div className="container">
             <div className="al-section-head"><span className="al-eyebrow">Sistem yang siap dipakai</span><h2>Satu platform untuk seluruh alur LMS profesional.</h2><p>PROFAS dirancang sebagai sistem operasional pembelajaran, bukan halaman promosi kosong. Setiap role punya ruang kerja dan alur yang jelas.</p></div>
-            <div className="al-pathway-grid">
-              {pathways.map(({ icon: Icon, title, copy }) => <article key={title} className="al-pathway-card"><span><Icon size={24} /></span><h3>{title}</h3><p>{copy}</p><Link href={title === "Peserta" ? "/program" : "/masuk"}>Masuk alur {title}<ChevronRight size={16} /></Link></article>)}
-            </div>
+            <ScrollStack useWindowScroll={true} itemDistance={60} itemScale={0.04} itemStackDistance={30} stackPosition="20%" scaleEndPosition="10%">
+              {pathways.map(({ icon: Icon, title, copy }) => (
+                <ScrollStackItem key={title} itemClassName="al-pathway-card scroll-pathway-item">
+                  <span><Icon size={24} /></span>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                  <Link href={title === "Peserta" ? "/program" : "/masuk"}>Masuk alur {title}<ChevronRight size={16} /></Link>
+                </ScrollStackItem>
+              ))}
+            </ScrollStack>
           </div>
         </section>
 

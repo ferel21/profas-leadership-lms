@@ -12,15 +12,15 @@
   will-change: scroll-position;
 }
 
-/* Kritis: Ketika useWindowScroll=true, container scroller TIDAK BOLEH memiliki overflow-y: auto agar bergulir dengan window */
+/* Ketika useWindowScroll=true, scroller bergulir mengikuti window utama */
 .scroll-stack-scroller.scroll-stack-window {
   overflow: visible !important;
   height: auto !important;
 }
 
 .scroll-stack-inner {
-  padding: 8vh 5rem 25rem;
-  min-height: 100vh;
+  padding: 1.5rem 0 10rem;
+  min-height: auto;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -36,19 +36,16 @@
   transform-style: preserve-3d;
   box-shadow: 0 16px 50px rgba(15, 23, 42, 0.12);
   height: auto;
-  min-height: 22rem;
+  min-height: 16rem;
   width: 100%;
-  margin: 30px 0;
-  padding: 3rem;
-  border-radius: 36px;
+  margin: 20px 0;
+  border-radius: 32px;
   box-sizing: border-box;
-  /* Improve mobile performance */
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   position: relative;
-  background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.9);
   transition: box-shadow 0.3s ease;
+  background: #ffffff;
 }
 
 .scroll-stack-card:hover {
@@ -60,132 +57,43 @@
   height: 1px;
 }
 
-/* Internal Card Layout Styles */
-.stack-card-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  gap: 1.5rem;
+/* Penataan Khusus Kartu Nyata (Cara Bekerja & Role Pathway) */
+.scroll-method-item,
+.scroll-pathway-item {
+  width: 100% !important;
+  max-width: 860px !important;
+  margin: 25px auto !important;
+  padding: 3rem !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  background: #ffffff !important;
 }
 
-.stack-card-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.scroll-method-item h3,
+.scroll-pathway-item h3 {
+  font-size: 1.6rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin: 1rem 0 0.8rem !important;
 }
 
-.stack-card-badge {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  flex-shrink: 0;
-}
-
-.stack-step-label {
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: #64748b;
-  text-transform: uppercase;
-}
-
-.stack-card-title {
-  font-size: 1.65rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0;
-  line-height: 1.3;
-}
-
-.stack-card-desc {
-  font-size: 1.05rem;
-  color: #334155;
-  line-height: 1.65;
-  margin: 0;
-}
-
-.stack-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1.2rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid #f1f5f9;
-}
-
-.stack-card-tags {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.stack-card-tags span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #0f172a;
-  background: #f8fafc;
-  padding: 6px 14px;
-  border-radius: 99px;
-  border: 1px solid #e2e8f0;
-}
-
-.stack-card-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #2a6ba7;
-  text-decoration: none;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.stack-card-link:hover {
-  transform: translateX(4px);
-  color: #1e5a8f;
-}
-
-.stack-card-cta {
-  background: #10b981;
-  color: #ffffff !important;
-  padding: 10px 20px;
-  border-radius: 99px;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-}
-
-.stack-card-cta:hover {
-  background: #059669;
-  transform: translateY(-2px);
+.scroll-method-item p,
+.scroll-pathway-item p {
+  font-size: 1.08rem !important;
+  color: #475569 !important;
+  line-height: 1.65 !important;
+  margin-bottom: 1.5rem !important;
 }
 
 @media (max-width: 768px) {
   .scroll-stack-inner {
-    padding: 6vh 1.2rem 20rem;
+    padding: 1rem 0 8rem;
   }
-  .scroll-stack-card {
-    padding: 1.8rem;
-    min-height: 18rem;
-    border-radius: 28px;
-    margin: 20px 0;
-  }
-  .stack-card-title {
-    font-size: 1.3rem;
-  }
-  .stack-card-desc {
-    font-size: 0.95rem;
-  }
-  .stack-card-footer {
-    flex-direction: column;
-    align-items: flex-start;
+  .scroll-stack-card,
+  .scroll-method-item,
+  .scroll-pathway-item {
+    padding: 1.8rem !important;
+    min-height: 14rem;
+    border-radius: 24px;
+    margin: 16px auto !important;
   }
 }

@@ -39,12 +39,12 @@ interface TransformData {
 const ScrollStack: React.FC<ScrollStackProps> = ({
   children,
   className = '',
-  itemDistance = 100,
-  itemScale = 0.03,
-  itemStackDistance = 30,
-  stackPosition = '20%',
+  itemDistance = 80,
+  itemScale = 0.035,
+  itemStackDistance = 28,
+  stackPosition = '18%',
   scaleEndPosition = '10%',
-  baseScale = 0.85,
+  baseScale = 0.88,
   scaleDuration = 0.5,
   rotationAmount = 0,
   blurAmount = 0,
@@ -102,7 +102,7 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
   );
 
   const updateCardTransforms = useCallback(() => {
-    if (!cardsRef.current.length || isUpdatingRef.current) return;
+    if (!cardsRef.current.length || isUpdatingRef.current || !scrollerRef.current) return;
 
     isUpdatingRef.current = true;
 
@@ -110,10 +110,8 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     const stackPositionPx = parsePercentage(stackPosition, containerHeight);
     const scaleEndPositionPx = parsePercentage(scaleEndPosition, containerHeight);
 
-    const endElement = useWindowScroll
-      ? typeof document !== 'undefined' ? document.querySelector('.scroll-stack-end') : null
-      : scrollerRef.current?.querySelector('.scroll-stack-end');
-
+    // Kritis: Selalu ambil scroll-stack-end dari dalam scrollerRef kita sendiri, bukan global document
+    const endElement = scrollerRef.current.querySelector('.scroll-stack-end');
     const endElementTop = endElement ? getElementOffset(endElement as HTMLElement) : 0;
 
     cardsRef.current.forEach((card, i) => {
@@ -201,7 +199,6 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     baseScale,
     rotationAmount,
     blurAmount,
-    useWindowScroll,
     onStackComplete,
     calculateProgress,
     parsePercentage,
@@ -274,13 +271,10 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
-    if (!scroller && !useWindowScroll) return;
+    if (!scroller) return;
 
-    const cards = Array.from(
-      useWindowScroll
-        ? document.querySelectorAll('.scroll-stack-card')
-        : scroller?.querySelectorAll('.scroll-stack-card') || []
-    ) as HTMLElement[];
+    // Kritis: Hanya ambil .scroll-stack-card di dalam scrollerRef kita sendiri
+    const cards = Array.from(scroller.querySelectorAll('.scroll-stack-card')) as HTMLElement[];
 
     cardsRef.current = cards;
     const transformsCache = lastTransformsRef.current;

@@ -12,8 +12,14 @@
   will-change: scroll-position;
 }
 
+/* Kritis: Ketika useWindowScroll=true, container scroller TIDAK BOLEH memiliki overflow-y: auto agar bergulir dengan window */
+.scroll-stack-scroller.scroll-stack-window {
+  overflow: visible !important;
+  height: auto !important;
+}
+
 .scroll-stack-inner {
-  padding: 10vh 5rem 35rem;
+  padding: 8vh 5rem 25rem;
   min-height: 100vh;
   max-width: 1100px;
   margin: 0 auto;
@@ -164,7 +170,7 @@
 
 @media (max-width: 768px) {
   .scroll-stack-inner {
-    padding: 8vh 1.2rem 25rem;
+    padding: 6vh 1.2rem 20rem;
   }
   .scroll-stack-card {
     padding: 1.8rem;

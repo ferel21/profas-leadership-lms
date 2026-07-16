@@ -164,6 +164,10 @@ export default async function Home() {
                   <BookOpen size={22} />
                   <span>Lihat Program</span>
                 </Link>
+                <a href="#eksekutif-stack" className="al-btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <Layers3 size={20} />
+                  <span>3D Scroll Stack</span>
+                </a>
               </div>
 
               <div className="al-proof-row">
@@ -252,6 +256,8 @@ export default async function Home() {
           </div>
         </section>
 
+        <LandingScrollStackSection />
+
         <section className="al-section al-section--white al-activity al-overlap-section" aria-labelledby="activity-title">
           <div className="container">
             <div className="al-activity-intro">
@@ -279,8 +285,6 @@ export default async function Home() {
             </div>
           </div>
         </section>
-
-        <LandingScrollStackSection />
 
         <section className="al-section al-section--white" id="tentang">
           <div className="container">

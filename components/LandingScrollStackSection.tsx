@@ -9,22 +9,27 @@ export const LandingScrollStackSection: React.FC = () => {
   return (
     <section className="al-section al-section--white" id="eksekutif-stack" aria-labelledby="stack-title">
       <div className="container">
-        <div className="al-section-head" style={{ marginBottom: '1rem' }}>
-          <span className="al-eyebrow">Kurikulum 3D Scroll Stack</span>
-          <h2 id="stack-title">4 Tahap Transformasi Kepemimpinan Eksekutif.</h2>
-          <p>
-            Jelajahi alur tumpukan modul bersertifikasi kami dengan menggulir layar ke bawah. Setiap kartu merepresentasikan fondasi kompetensi yang akan Anda kuasai.
+        <div className="al-section-head" style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+          <div className="al-badge-pill" style={{ margin: '0 auto 12px', display: 'inline-flex' }}>
+            <span className="al-badge-dot" style={{ background: '#3b82f6' }} />
+            <span>Fitur Baru • 3D Scroll Stack Interaktif</span>
+          </div>
+          <h2 id="stack-title" style={{ fontSize: '2.4rem', fontWeight: 900, color: '#0f172a' }}>
+            4 Tahap Transformasi Kepemimpinan Eksekutif.
+          </h2>
+          <p style={{ maxWidth: '680px', margin: '0 auto', fontSize: '1.1rem', color: '#475569' }}>
+            Gulir perlahan ke bawah untuk melihat bagaimana setiap modul bertumpuk secara dinamis dan membangun kapasitas kepemimpinan Anda lapis demi lapis.
           </p>
         </div>
       </div>
 
       <ScrollStack
         useWindowScroll={true}
-        itemDistance={60}
-        itemScale={0.035}
-        itemStackDistance={32}
-        stackPosition="18%"
-        scaleEndPosition="10%"
+        itemDistance={50}
+        itemScale={0.04}
+        itemStackDistance={35}
+        stackPosition="15%"
+        scaleEndPosition="8%"
         baseScale={0.88}
         blurAmount={2}
         rotationAmount={0}
@@ -33,7 +38,7 @@ export const LandingScrollStackSection: React.FC = () => {
           <div className="stack-card-content">
             <div className="stack-card-header">
               <div className="stack-card-badge" style={{ background: 'linear-gradient(135deg, #1e5a8f, #2a6ba7)' }}>
-                <Compass size={22} color="#ffffff" />
+                <Compass size={24} color="#ffffff" />
               </div>
               <span className="stack-step-label">TAHAP 01 • ORIENTASI STRATEGIS</span>
             </div>
@@ -57,7 +62,7 @@ export const LandingScrollStackSection: React.FC = () => {
           <div className="stack-card-content">
             <div className="stack-card-header">
               <div className="stack-card-badge" style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)' }}>
-                <Users2 size={22} color="#ffffff" />
+                <Users2 size={24} color="#ffffff" />
               </div>
               <span className="stack-step-label">TAHAP 02 • KOMUNIKASI EKSEKUTIF</span>
             </div>
@@ -81,7 +86,7 @@ export const LandingScrollStackSection: React.FC = () => {
           <div className="stack-card-content">
             <div className="stack-card-header">
               <div className="stack-card-badge" style={{ background: 'linear-gradient(135deg, #4f46e5, #6366f1)' }}>
-                <Target size={22} color="#ffffff" />
+                <Target size={24} color="#ffffff" />
               </div>
               <span className="stack-step-label">TAHAP 03 • DELEGASI & EKSEKUSI</span>
             </div>
@@ -105,7 +110,7 @@ export const LandingScrollStackSection: React.FC = () => {
           <div className="stack-card-content">
             <div className="stack-card-header">
               <div className="stack-card-badge" style={{ background: 'linear-gradient(135deg, #d97706, #f59e0b)' }}>
-                <Award size={22} color="#ffffff" />
+                <Award size={24} color="#ffffff" />
               </div>
               <span className="stack-step-label">TAHAP 04 • SERTIFIKASI & DAMPAK</span>
             </div>

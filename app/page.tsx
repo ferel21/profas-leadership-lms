@@ -22,6 +22,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CourseCard } from "@/components/CourseCard";
 import { LandingScrollDirector } from "@/components/LandingScrollDirector";
+import { LandingScrollStackSection } from "@/components/LandingScrollStackSection";
 
 type FeaturedCourse = {
   id: string;
@@ -278,6 +279,8 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        <LandingScrollStackSection />
 
         <section className="al-section al-section--white" id="tentang">
           <div className="container">

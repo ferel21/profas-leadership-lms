@@ -44,12 +44,14 @@
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   position: relative;
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
   background: #ffffff;
+  border: 1px solid transparent;
 }
 
 .scroll-stack-card:hover {
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(42, 107, 167, 0.1) inset;
+  border-color: rgba(42, 107, 167, 0.15);
 }
 
 .scroll-stack-end {

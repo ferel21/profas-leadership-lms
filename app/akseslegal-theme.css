@@ -382,6 +382,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  animation: subtleFloat 8s ease-in-out infinite;
+}
+
+@keyframes subtleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
 .al-hero-img-wrap {
@@ -392,11 +402,21 @@
   border: 6px solid #ffffff;
   box-shadow: var(--al-shadow-lg), 0 25px 50px -12px rgba(42, 107, 167, 0.18);
   aspect-ratio: 4 / 4.2;
-  transition: transform 0.5s ease;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.al-hero-img-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+  pointer-events: none;
 }
 
 .al-hero-img-wrap:hover {
-  transform: scale(1.015);
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: var(--al-shadow-lg), 0 35px 65px -15px rgba(42, 107, 167, 0.28);
 }
 
 .al-hero-img-wrap img {

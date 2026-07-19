@@ -23,6 +23,7 @@ import { Footer } from "@/components/Footer";
 import { CourseCard } from "@/components/CourseCard";
 import { LandingScrollDirector } from "@/components/LandingScrollDirector";
 import ScrollStack, { ScrollStackItem } from "@/components/ScrollStack";
+import { LiveActivityFeed } from "@/components/LiveActivityFeed";
 
 type FeaturedCourse = {
   id: string;
@@ -348,6 +349,7 @@ export default async function Home() {
 
         <section className="al-section al-final-cta"><div className="container"><div className="al-final-box"><span className="al-eyebrow">Mulai dari sini</span><h2>Bangun kapasitas kepemimpinan dengan sistem belajar yang jelas.</h2><p>Masuk ke katalog, pilih program, lanjutkan materi, tuntaskan evaluasi, lalu dapatkan sertifikat PROFAS.</p><div><Link href="/daftar" className="al-btn-primary">Daftar Sekarang<ArrowRight size={18} /></Link><Link href="/masuk" className="al-btn-secondary">Masuk Dashboard</Link></div></div></div></section>
       </main>
+      <LiveActivityFeed />
       <Footer />
     </div>
   );

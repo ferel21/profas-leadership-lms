@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
@@ -64,32 +64,30 @@ function getLocalReply(question: string, lessonTitle?: string) {
   return `**Panduan Kepemimpinan (Konteks: ${lessonTitle || "PROFAS Leadership"})**\n\n${advice}\n\n*Tips Refleksi:* Bagaimana Anda akan menerapkan konsep ini dalam memimpin tim Anda minggu ini? Tuliskan langkah konkret Anda pada jurnal refleksi modul ini.`;
 }
 
-function buildClaudeMessages(question: string, history: z.infer<typeof tutorRequestSchema>["history"]): Anthropic.MessageParam[] {
+function buildOpenAIMessages(
+  question: string, 
+  history: z.infer<typeof tutorRequestSchema>["history"], 
+  lessonTitle?: string
+): OpenAI.Chat.ChatCompletionMessageParam[] {
   const cleanQuestion = sanitizeText(question);
+  
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    { 
+      role: "system", 
+      content: "Anda adalah Asisten AI Pedagogis untuk PROFAS Leadership LMS. Jawablah dalam Bahasa Indonesia yang profesional, hangat, konseptual, dan aplikatif. Kaitkan jawaban dengan konteks modul bila tersedia. Berikan langkah praktis yang dapat dicoba peserta, jangan mengarang data pribadi, dan arahkan pertanyaan berisiko tinggi kepada mentor manusia." 
+    },
+    { role: "user", content: `Konteks modul: ${lessonTitle || "Kepemimpinan umum"}` },
+    { role: "assistant", content: "Baik, saya akan menjaga jawaban tetap kontekstual, praktis, dan aman untuk pembelajaran kepemimpinan." }
+  ];
+
   const source = [...(history ?? []).map(h => ({ ...h, text: sanitizeText(h.text) })), { role: "user" as const, text: cleanQuestion }];
-  const messages: Anthropic.MessageParam[] = [];
 
   for (const item of source.slice(-8)) {
     const role = item.role === "ai" ? "assistant" : "user";
-    if (messages.length === 0 && role !== "user") continue;
-
-    const previous = messages.at(-1);
-    if (previous?.role === role && typeof previous.content === "string") {
-      previous.content = `${previous.content}\n\n${item.text}`;
-    } else {
-      messages.push({ role, content: item.text });
-    }
+    messages.push({ role, content: item.text });
   }
 
   return messages;
-}
-
-function getTextReply(response: Anthropic.Message) {
-  return response.content
-    .filter((block): block is Anthropic.TextBlock => block.type === "text")
-    .map(block => block.text.trim())
-    .filter(Boolean)
-    .join("\n\n");
 }
 
 export async function POST(request: Request) {
@@ -128,37 +126,46 @@ export async function POST(request: Request) {
     }
 
     const fallbackReply = getLocalReply(cleanQuestion, cleanTitle);
-    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+    
+    // Support standard keys and custom URL for Phi-3 (Ollama/Azure/etc)
+    const apiKey = process.env.PHI3_API_KEY || process.env.OPENAI_API_KEY || "dummy-key-for-local";
+    const baseURL = process.env.PHI3_BASE_URL || process.env.OPENAI_BASE_URL;
 
-    if (apiKey) {
+    if (process.env.PHI3_API_KEY || process.env.OPENAI_API_KEY || baseURL) {
       try {
-        const client = new Anthropic({ apiKey, maxRetries: 2 });
-        const modelId = process.env.ANTHROPIC_MODEL || "claude-3-7-sonnet-20250219";
-        const response = await client.messages.create({
+        const client = new OpenAI({ 
+          apiKey, 
+          baseURL,
+          maxRetries: 2 
+        });
+        
+        // Default to phi-3 mini variants if model isn't specified
+        const modelId = process.env.PHI3_MODEL || process.env.OPENAI_MODEL || "phi-3-mini-4k-instruct";
+        
+        const response = await client.chat.completions.create({
           model: modelId,
           max_tokens: 700,
-          system: "Anda adalah Asisten AI Pedagogis untuk PROFAS Leadership LMS. Jawablah dalam Bahasa Indonesia yang profesional, hangat, konseptual, dan aplikatif. Kaitkan jawaban dengan konteks modul bila tersedia. Berikan langkah praktis yang dapat dicoba peserta, jangan mengarang data pribadi, dan arahkan pertanyaan berisiko tinggi kepada mentor manusia.",
-          messages: [
-            { role: "user", content: `Konteks modul: ${cleanTitle || "Kepemimpinan umum"}` },
-            { role: "assistant", content: "Baik, saya akan menjaga jawaban tetap kontekstual, praktis, dan aman untuk pembelajaran kepemimpinan." },
-            ...buildClaudeMessages(cleanQuestion, history),
-          ],
+          temperature: 0.7,
+          messages: buildOpenAIMessages(cleanQuestion, history, cleanTitle),
         });
-        const reply = getTextReply(response);
+        
+        const reply = response.choices[0]?.message?.content;
+        
         if (reply) {
-          return NextResponse.json({ reply, source: "claude-api", model: modelId });
+          return NextResponse.json({ reply: reply.trim(), source: "phi3-ai", model: modelId });
         }
       } catch (error) {
-        if (error instanceof Anthropic.AuthenticationError) {
-          console.error("Claude authentication failed. Check ANTHROPIC_API_KEY.");
-        } else if (error instanceof Anthropic.RateLimitError) {
-          console.warn("Claude rate limit reached; using local tutor fallback.");
-        } else if (error instanceof Anthropic.APIConnectionError) {
-          console.warn("Claude connection failed; using local tutor fallback.");
-        } else if (error instanceof Anthropic.APIError) {
-          console.error(`Claude API error ${error.status}:`, error.message);
+        if (error instanceof Error && "status" in error) {
+          const status = (error as { status: number }).status;
+          if (status === 401) {
+            console.error("Phi-3/OpenAI authentication failed. Check API Keys.");
+          } else if (status === 429) {
+            console.warn("Phi-3/OpenAI rate limit reached; using local tutor fallback.");
+          } else {
+            console.error("Unexpected Phi-3/OpenAI tutor error:", error);
+          }
         } else {
-          console.error("Unexpected Claude tutor error:", error);
+          console.error("Unexpected Phi-3/OpenAI tutor error:", error);
         }
       }
     }

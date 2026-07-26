@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { Persona, Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
-import { createToken } from "@/lib/auth";
-import { rateLimit } from "@/lib/rate-limit";
+import { prisma } from "@/services/prisma";
+import { createToken } from "@/services/auth";
+import { rateLimit } from "@/services/rate-limit";
 
 const schema = z.object({
   name: z.string().trim().min(3).max(80),

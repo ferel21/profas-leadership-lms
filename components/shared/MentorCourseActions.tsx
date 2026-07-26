@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Plus, Upload, Loader2, X, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ExportReportsButton } from "@/components/ExportReportsButton";
+import { ExportReportsButton } from "@/components/shared/ExportReportsButton";
 
 type CourseOption = {
   id: string;

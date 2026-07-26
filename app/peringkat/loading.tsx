@@ -1,4 +1,4 @@
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 
 export default function PeringkatLoading() {
   return (

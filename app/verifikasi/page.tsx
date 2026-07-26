@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, LockKeyhole } from "lucide-react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { CertificateVerificationForm } from "@/components/CertificateVerificationForm";
+import { Header } from "@/components/ui/Header";
+import { Footer } from "@/components/ui/Footer";
+import { CertificateVerificationForm } from "@/components/shared/CertificateVerificationForm";
 
 export const metadata: Metadata = {
   title: "Verifikasi Sertifikat",

@@ -1,8 +1,8 @@
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import Link from "next/link";
-import { formatDate, initials } from "@/lib/utils";
+import { formatDate, initials } from "@/utils";
 import { ArrowLeft, MessageSquare, Pin, Shield } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 

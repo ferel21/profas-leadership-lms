@@ -14,7 +14,9 @@
     "validate:env": "node scripts/validate-env.mjs",
     "test:e2e": "playwright test",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
+    "dup:check": "jscpd",
     "autopilot:start": "bash scripts/autopilot-control.sh start 24",
     "autopilot:status": "bash scripts/autopilot-control.sh status",
     "autopilot:stop": "bash scripts/autopilot-control.sh stop",
@@ -22,7 +24,8 @@
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:supabase": "node scripts/setup-supabase.js",
-    "setup": "prisma generate && tsx prisma/init.ts && prisma db seed"
+    "setup": "prisma generate && tsx prisma/init.ts && prisma db seed",
+    "prepare": "husky"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
@@ -52,10 +55,16 @@
     "better-sqlite3": "12.11.1",
     "eslint": "9.39.4",
     "eslint-config-next": "15.5.20",
+    "husky": "^9.1.7",
+    "jscpd": "^5.0.12",
+    "lint-staged": "^17.2.0",
     "postcss": "^8.5.16",
     "prisma": "6.19.3",
     "tailwindcss": "^3.4.19",
     "tsx": "4.20.5",
     "typescript": "5.9.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --fix"
   }
 }

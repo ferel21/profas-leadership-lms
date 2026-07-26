@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { timingSafeEqual } from "node:crypto";
-import { prisma } from "@/lib/prisma";
-import { createToken } from "@/lib/auth";
-import { rateLimit } from "@/lib/rate-limit";
+import { prisma } from "@/services/prisma";
+import { createToken } from "@/services/auth";
+import { rateLimit } from "@/services/rate-limit";
 
 const callbackLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 

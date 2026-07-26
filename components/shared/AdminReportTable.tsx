@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Search, Filter, FileSpreadsheet } from "lucide-react";
 import ExcelJS from "exceljs";
-import { formatDate } from "@/lib/utils";
-import { downloadExcelWorkbook } from "@/lib/xlsxExport";
-import { ExportReportsButton } from "@/components/ExportReportsButton";
+import { formatDate } from "@/utils";
+import { downloadExcelWorkbook } from "@/services/export/xlsxExport";
+import { ExportReportsButton } from "@/components/shared/ExportReportsButton";
 
 export type ReportRow = {
   id: string;

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { AuthForm } from "@/components/AuthForm";
-import { Logo } from "@/components/Logo";
+import { AuthForm } from "@/components/shared/AuthForm";
+import { Logo } from "@/components/ui/Logo";
 
 export default async function LoginPage({searchParams}:{searchParams:Promise<{next?:string; error?:string; reason?:string}>}) { 
   const { next, error, reason } = await searchParams;

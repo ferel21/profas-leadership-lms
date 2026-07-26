@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { prisma } from "@/services/prisma";
+import { rateLimit } from "@/services/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

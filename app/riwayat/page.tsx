@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { CheckCircle2, Clock, Play, FileText, Trophy, ArrowRight, Award } from "lucide-react";
 import Link from "next/link";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/utils";
 
 export default async function RiwayatPembelajaran() {
   const user = await getCurrentUser();

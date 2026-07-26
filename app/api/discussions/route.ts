@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { rateLimit } from "@/services/rate-limit";
 
 const discussionLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 

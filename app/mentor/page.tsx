@@ -1,13 +1,13 @@
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, UsersRound, TrendingUp, ChevronRight, Settings } from "lucide-react";
-import { ProgressRing } from "@/components/ProgressRing";
-import { MentorCourseActions } from "@/components/MentorCourseActions";
-import { BroadcastManager } from "@/components/BroadcastManager";
+import { ProgressRing } from "@/components/ui/ProgressRing";
+import { MentorCourseActions } from "@/components/shared/MentorCourseActions";
+import { BroadcastManager } from "@/components/shared/BroadcastManager";
 
 function average(values: number[]) {
   return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;

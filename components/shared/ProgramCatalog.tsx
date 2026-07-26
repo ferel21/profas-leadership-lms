@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { CourseCard } from "./CourseCard";
+import { CourseCard } from "@/components/ui/CourseCard";
 
 type CatalogCourse = {
   id:string;slug:string;title:string;shortDescription:string;category:string;level:string;price:number;durationHours:number;rating:number;studentsCount:number;image:string;mentor:{name:string};

@@ -17,10 +17,10 @@ import {
   BookOpen,
   Users
 } from "lucide-react";
-import { generateExcelReport } from "@/lib/xlsxExport";
-import { generateAcademicTranscriptPDF } from "@/lib/pdfTranscriptGenerator";
-import { generateExecutiveSlideDeck } from "@/lib/pptxGenerator";
-import { generateSyllabusDocx } from "@/lib/docxExport";
+import { generateExcelReport } from "@/services/export/xlsxExport";
+import { generateAcademicTranscriptPDF } from "@/services/export/pdfTranscriptGenerator";
+import { generateExecutiveSlideDeck } from "@/services/export/pptxGenerator";
+import { generateSyllabusDocx } from "@/services/export/docxExport";
 
 interface ExecutiveExportHubModalProps {
   isOpen: boolean;

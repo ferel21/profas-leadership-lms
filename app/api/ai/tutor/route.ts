@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getCurrentUser } from "@/lib/auth";
-import { rateLimit } from "@/lib/rate-limit";
+import { getCurrentUser } from "@/services/auth";
+import { rateLimit } from "@/services/rate-limit";
 
 export const runtime = "nodejs";
 

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { notFound, redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { Quiz } from "@/components/Quiz";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { Quiz } from "@/components/shared/Quiz";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

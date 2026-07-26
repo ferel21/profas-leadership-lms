@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { rateLimit } from "@/services/rate-limit";
 
 const badgesLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 

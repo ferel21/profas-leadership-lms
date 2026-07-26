@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/services/rate-limit";
 
 const vitalsLimiter = rateLimit({ limit: 120, windowMs: 60 * 1000 });
 

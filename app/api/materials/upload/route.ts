@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
 import { writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { getWritableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
-import { validateFileMagicBytes } from "@/lib/file-security";
-import { rateLimit } from "@/lib/rate-limit";
+import { getWritableUploadRoots, resolveUploadPath } from "@/services/upload-storage";
+import { validateFileMagicBytes } from "@/services/file-security";
+import { rateLimit } from "@/services/rate-limit";
 
 const uploadLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { finalizeCourseCompletion } from "@/lib/completion";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { finalizeCourseCompletion } from "@/services/completion";
 import fs from 'fs';
 import { randomUUID } from "node:crypto";
-import { getWritableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
-import { validateFileMagicBytes } from "@/lib/file-security";
-import { rateLimit } from "@/lib/rate-limit";
+import { getWritableUploadRoots, resolveUploadPath } from "@/services/upload-storage";
+import { validateFileMagicBytes } from "@/services/file-security";
+import { rateLimit } from "@/services/rate-limit";
 
 const submitLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 

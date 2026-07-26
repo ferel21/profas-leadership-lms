@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
 import { Persona, Prisma } from "@prisma/client";
 import { z } from "zod";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/services/rate-limit";
 
 const settingsLimiter = rateLimit({ limit: 20, windowMs: 60 * 1000 });
 

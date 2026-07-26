@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
-import { finalizeCourseCompletion } from "@/lib/completion";
-import { rateLimit } from "@/lib/rate-limit";
+import { prisma } from "@/services/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { finalizeCourseCompletion } from "@/services/completion";
+import { rateLimit } from "@/services/rate-limit";
 
 const progressLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 

@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
-import { CoursePlayer, CourseNode } from "@/components/CoursePlayer";
+import { prisma } from "@/services/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { CoursePlayer, CourseNode } from "@/components/shared/CoursePlayer";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

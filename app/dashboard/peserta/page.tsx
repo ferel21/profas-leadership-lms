@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { Search, Trophy, Activity } from "lucide-react";
 import Link from "next/link";
 

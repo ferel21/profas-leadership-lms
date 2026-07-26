@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { redirect, notFound } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 

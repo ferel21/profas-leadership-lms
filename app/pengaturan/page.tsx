@@ -1,6 +1,6 @@
-import { getCurrentUser } from "@/lib/auth";
-import { DashboardChrome } from "@/components/DashboardChrome";
-import { ProfileForm } from "@/components/ProfileForm";
+import { getCurrentUser } from "@/services/auth";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
+import { ProfileForm } from "@/components/shared/ProfileForm";
 import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {

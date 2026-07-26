@@ -6,7 +6,7 @@ import {
   CalendarDays, CheckCircle2, ClipboardCheck, Clock3, LoaderCircle,
   LockKeyhole, Play, RefreshCw, UserCheck, UsersRound, XCircle,
 } from "lucide-react";
-import { initials } from "@/lib/utils";
+import { initials } from "@/utils";
 
 type AttendanceStatus = "PRESENT" | "LATE" | "EXCUSED" | "ABSENT";
 type RecordItem = {

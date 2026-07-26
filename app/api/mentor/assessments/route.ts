@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
-import { rateLimit } from '@/lib/rate-limit';
+import { prisma } from '@/services/prisma';
+import { getCurrentUser } from '@/services/auth';
+import { rateLimit } from '@/services/rate-limit';
 import { AssessmentType } from '@prisma/client';
 
 const assessmentLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });

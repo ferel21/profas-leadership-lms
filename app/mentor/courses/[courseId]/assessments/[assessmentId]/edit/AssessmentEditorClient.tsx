@@ -1,37 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Trash2, Save, HelpCircle, FileText, CheckCircle, Type, UploadCloud } from "lucide-react";
+import { useLocalBackup } from "@/hooks/useLocalBackup";
 
 export function AssessmentEditorClient({ assessment, courseId }: { assessment: any, courseId: string }) {
-  const [questions, setQuestions] = useState<any[]>(assessment.questions || []);
-  const [saving, setSaving] = useState(false);
-  const [backupRestored, setBackupRestored] = useState(false);
-
   // MASTER SKILL: Auto-Backup & Auto-Restore soal kuis ke localStorage
-  useEffect(() => {
-    const backupKey = `profas_quiz_backup_${assessment.id}`;
-    const savedBackup = localStorage.getItem(backupKey);
-    if (savedBackup) {
-      try {
-        const parsed = JSON.parse(savedBackup);
-        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-          setQuestions(parsed);
-          setBackupRestored(true);
-        }
-      } catch (e) {
-        console.error("Failed to restore quiz backup:", e);
-      }
-    }
-  }, [assessment.id]);
-
-  useEffect(() => {
-    if (questions && questions.length > 0) {
-      const backupKey = `profas_quiz_backup_${assessment.id}`;
-      localStorage.setItem(backupKey, JSON.stringify(questions));
-    }
-  }, [questions, assessment.id]);
+  const {
+    items: questions,
+    setItems: setQuestions,
+    restored: backupRestored,
+    clearBackup: clearQuestionsBackup,
+  } = useLocalBackup<any>(`profas_quiz_backup_${assessment.id}`, assessment.questions || [], {
+    persistWhenEmpty: false,
+  });
+  const [saving, setSaving] = useState(false);
 
   const handleAddQuestion = (type: string) => {
     setQuestions([
@@ -108,9 +92,8 @@ export function AssessmentEditorClient({ assessment, courseId }: { assessment: a
             <button 
               onClick={() => {
                 if (confirm("Reset soal ke data server dan hapus cadangan lokal browser?")) {
-                  localStorage.removeItem(`profas_quiz_backup_${assessment.id}`);
+                  clearQuestionsBackup();
                   setQuestions(assessment.questions || []);
-                  setBackupRestored(false);
                 }
               }}
               className="btn btn-outline" 

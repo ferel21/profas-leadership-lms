@@ -30,8 +30,8 @@
 
 .pro-glass-card:hover {
   transform: translateY(-4px) scale(1.008);
-  box-shadow: 0 20px 40px -15px rgba(13, 148, 136, 0.18);
-  border-color: rgba(13, 148, 136, 0.3);
+  box-shadow: 0 20px 40px -15px rgba(42, 107, 167, 0.18);
+  border-color: rgba(42, 107, 167, 0.3);
 }
 
 /* --- 2. INTERACTIVE LAUNCH BUTTONS & NEON GLOW --- */
@@ -69,9 +69,9 @@
 /* --- 3. MICRO-ANIMATIONS & SHIMMERS --- */
 
 @keyframes pulse-ring {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(13, 148, 136, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(42, 107, 167, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(42, 107, 167, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(42, 107, 167, 0); }
 }
 
 .pro-pulse-badge {

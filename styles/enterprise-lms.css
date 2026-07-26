@@ -1479,8 +1479,8 @@ textarea {
 .lms-preview-top small {
   padding: 6px 10px;
   border-radius: 999px;
-  color: #0b6f66;
-  background: #dcfbf3;
+  color: #1e5a8f;
+  background: #eff6ff;
   font-weight: 900;
 }
 
@@ -1934,7 +1934,7 @@ textarea {
   color: #fff;
   background:
     radial-gradient(circle at 85% 20%, rgba(255,255,255,0.22), transparent 250px),
-    linear-gradient(135deg, #0b6f66, #135f90 58%, #101928);
+    linear-gradient(135deg, #1e5a8f, #135f90 58%, #101928);
   box-shadow: 0 34px 80px rgba(16, 25, 40, 0.18);
 }
 

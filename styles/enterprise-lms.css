@@ -77,14 +77,26 @@ textarea {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Cincin fokus tunggal untuk seluruh produk.
+   Sebelumnya blok ini `outline: none !important` lalu menggantinya dengan halo
+   `rgba(42,107,167,.18)` yang hanya berkontras 1,29:1 — di bawah minimum WCAG
+   2.2 untuk indikator non-teks (3:1) — sekaligus mengalahkan dua aturan outline
+   yang sudah ditulis benar di file lain.
+
+   Pola dua cincin: cincin putih 2px mengisi celah offset, lalu outline biru
+   solid di luarnya. Outline biru solid = 5,59:1 di atas putih, dan cincin
+   putihnya menjaga indikator tetap terlihat di atas permukaan gelap/biru
+   (kartu pathway, tombol konversi) tempat outline biru saja akan hilang. */
 a:focus-visible,
 button:focus-visible,
 summary:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  outline: none !important;
-  box-shadow: var(--enterprise-focus) !important;
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--enterprise-teal, #2a6ba7);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #ffffff;
 }
 
 img,

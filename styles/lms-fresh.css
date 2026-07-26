@@ -38,12 +38,15 @@ html body .dashboard-fresh {
 html body .dashboard-fresh.role-mentor { --ws-accent: #2a6ba7; --ws-accent-dark: #1e5a8f; --ws-mint: #eff6ff; --ws-mint-strong: #dbeafe; }
 html body .dashboard-fresh.role-super-admin { --ws-accent: #2a6ba7; --ws-accent-dark: #1e5a8f; --ws-mint: #eff6ff; --ws-mint-strong: #dbeafe; }
 
+/* Selaras dengan cincin fokus global di enterprise-lms.css — sebelumnya
+   memakai aksen 34% (1,64:1), juga di bawah minimum WCAG 3:1. */
 html body .dashboard-fresh a:focus-visible,
 html body .dashboard-fresh button:focus-visible,
 html body .player-layout a:focus-visible,
 html body .player-layout button:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--ws-accent) 34%, transparent);
-  outline-offset: 3px;
+  outline: 2px solid var(--ws-accent, #2a6ba7);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #ffffff;
 }
 
 /* Workspace shell */
@@ -461,9 +464,11 @@ html body .dashboard-fresh textarea {
   color: var(--ws-ink) !important;
   background: var(--ws-surface-soft) !important;
 }
+/* `outline: none !important` dihapus — lihat catatan di premium.css. Cincin
+   fokus keyboard datang dari aturan `:focus-visible` global. */
 html body .dashboard-fresh input:focus,
 html body .dashboard-fresh select:focus,
-html body .dashboard-fresh textarea:focus { outline: none !important; border-color: var(--ws-accent) !important; background: #fff !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--ws-accent) 10%, transparent) !important; }
+html body .dashboard-fresh textarea:focus { border-color: var(--ws-accent) !important; background: #fff !important; }
 
 html body .dashboard-fresh .btn { min-height: 42px; border-radius: 12px !important; box-shadow: 0 4px 12px rgba(42, 107, 167, 0.15) !important; transition: all 0.2s ease !important; }
 html body .dashboard-fresh .btn:hover { transform: translateY(-2px) !important; }

@@ -10,7 +10,12 @@
   --al-accent: #f3b444;
   --al-accent-light: #fef9c3;
   --al-ink: #101519;
-  --al-body: #4b5563;
+  /* Dinaikkan dari #4b5563. Blok "ULTRA-SHARP OVERRIDES" yang baru dihapus
+     ditulis untuk melawan teks yang terasa pudar dengan memaksa semua paragraf
+     ke #1f2937 + weight 600 lewat !important. Menaikkan token dasarnya
+     menyelesaikan keluhan yang sama di sumbernya: 8,9:1 di atas putih, tanpa
+     perlu menebalkan apa pun. */
+  --al-body: #374151;
   --al-muted: #6b7280;
   --al-light: #9ca3af;
   --al-border: #e5e7eb;
@@ -36,6 +41,11 @@
   color: var(--al-body);
   background-color: var(--al-bg-gray);
   line-height: 1.65;
+  /* Satu-satunya maksud sah dari blok ULTRA-SHARP yang dihapus: teks tajam.
+     Cukup sekali di wrapper dan diwariskan, bukan `.al-page * { … !important }`
+     pada setiap elemen. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -302,22 +312,27 @@
   gap: 10px;
   height: 56px;
   padding: 0 28px;
-  background: linear-gradient(135deg, #1e5a8f, #2a6ba7) !important;
-  color: #ffffff !important;
+  /* Ini CTA sekunder hero ("Lihat Program"). Sebelumnya memakai gradient biru
+     yang sama persis dengan `.al-btn-primary`, sehingga kedua tombol hero
+     tampak identik dan tidak ada aksi utama yang jelas — di mobile keduanya
+     jadi dua pil biru penuh yang sama. Sekarang jelas sekunder: permukaan
+     putih, teks dan garis royal blue. Hover `#38bdf8` (biru langit di luar
+     palette) juga dihapus. */
+  background: #ffffff;
+  color: var(--al-primary);
   font-weight: 700;
   font-size: 1rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 25px -5px rgba(42, 107, 167, 0.4);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(42, 107, 167, 0.32);
+  box-shadow: 0 4px 12px -4px rgba(42, 107, 167, 0.18);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .al-btn-green:hover {
-  border-color: #38bdf8;
-  color: #ffffff !important;
-  background: linear-gradient(135deg, #2a6ba7, #38bdf8) !important;
+  background: var(--al-primary-light);
+  border-color: var(--al-primary);
   transform: translateY(-3px);
-  box-shadow: 0 16px 32px -8px rgba(42, 107, 167, 0.5);
+  box-shadow: 0 10px 22px -6px rgba(42, 107, 167, 0.28);
 }
 
 .al-proof-row {
@@ -1666,79 +1681,4 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* ==========================================================================
-   ULTRA-SHARP FONT CLARITY & BUTTON STANDARDIZATION OVERRIDES
-   ========================================================================== */
-
-.al-page * {
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
-  text-rendering: optimizeLegibility !important;
-}
-
-/* Eliminate any blurry or washed out fonts */
-.al-page .al-eyebrow,
-.al-page .al-badge-pill span,
-.al-page .al-hero-title span,
-.al-page .al-method-card-top span,
-.al-page .al-trust-item,
-.al-page .al-marquee-item,
-.al-page .al-metrics span {
-  color: #1e5a8f !important;
-  opacity: 1 !important;
-  filter: none !important;
-  font-weight: 750 !important;
-}
-
-.al-page .al-metrics b,
-.al-page .al-metrics span {
-  color: #1e5a8f !important;
-}
-
-.al-page p,
-.al-page span,
-.al-page small,
-.al-page li,
-.al-page a {
-  opacity: 1 !important;
-}
-
-/* `:not(:first-child)` di sini disengaja: kartu pathway pertama (Peserta)
-   memakai background gradient biru, sehingga teks gelap ini justru membuat
-   kontrasnya gagal. Kartu tersebut mewarisi teks putih dari aturan
-   `.al-pathway-card:first-child p` di atas. */
-.al-page .al-hero-desc,
-.al-page .al-section-head p,
-.al-page .al-method-card p,
-.al-page .al-pathway-card:not(:first-child) p,
-.al-page .al-outcome-list small {
-  color: #1f2937 !important;
-  font-weight: 600 !important;
-  opacity: 1 !important;
-  filter: none !important;
-}
-
-/* Ensure ALL buttons in landing page are crisp Royal Blue */
-.al-page .al-btn-primary,
-.al-page .al-btn-green,
-.al-page .btn,
-.al-page .btn-primary {
-  background: linear-gradient(135deg, #1e5a8f, #2a6ba7) !important;
-  color: #ffffff !important;
-  border: none !important;
-  font-weight: 750 !important;
-  opacity: 1 !important;
-  filter: none !important;
-  box-shadow: 0 10px 25px -5px rgba(42, 107, 167, 0.35) !important;
-}
-
-.al-page .al-btn-primary:hover,
-.al-page .al-btn-green:hover,
-.al-page .btn:hover,
-.al-page .btn-primary:hover {
-  background: linear-gradient(135deg, #2a6ba7, #38bdf8) !important;
-  box-shadow: 0 14px 30px -5px rgba(42, 107, 167, 0.45) !important;
-  transform: translateY(-2px) !important;
 }

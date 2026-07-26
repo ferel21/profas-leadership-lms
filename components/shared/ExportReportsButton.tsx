@@ -2,8 +2,7 @@
 
 import { FileSpreadsheet } from "lucide-react";
 import { ExportActionButton } from "@/components/ui/ExportActionButton";
-import {
-  generateExcelReport,
+import type {
   StudentReportRow,
   AttendanceReportRow,
   XPReportRow,
@@ -33,14 +32,15 @@ export function ExportReportsButton({
       title="Ekspor laporan multi-sheet dalam format Excel (.xlsx)"
       className={className}
       errorMessage="Terjadi kesalahan saat membuat file Excel. Silakan coba lagi."
-      onExport={() =>
-        generateExcelReport({
+      onExport={async () => {
+        const { generateExcelReport } = await import("@/services/export/xlsxExport");
+        return generateExcelReport({
           fileName: `PROFAS-LMS-Analytics-${new Date().toISOString().split("T")[0]}.xlsx`,
           students,
           attendances,
           xpLogs,
-        })
-      }
+        });
+      }}
     />
   );
 }

@@ -2,7 +2,7 @@
 
 import { FileText } from "lucide-react";
 import { ExportActionButton } from "@/components/ui/ExportActionButton";
-import { generateSyllabusDocx, SyllabusDocxOptions } from "@/services/export/docxExport";
+import type { SyllabusDocxOptions } from "@/services/export/docxExport";
 
 interface ExportSyllabusButtonProps extends SyllabusDocxOptions {
   className?: string;
@@ -23,7 +23,10 @@ export function ExportSyllabusButton({
       title="Unduh silabus lengkap dan catatan belajar ke format Microsoft Word (.docx)"
       className={className}
       errorMessage="Terjadi kesalahan saat membuat file Word (.docx)."
-      onExport={() => generateSyllabusDocx(options)}
+      onExport={async () => {
+        const { generateSyllabusDocx } = await import("@/services/export/docxExport");
+        return generateSyllabusDocx(options);
+      }}
     />
   );
 }

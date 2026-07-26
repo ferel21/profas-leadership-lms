@@ -17,10 +17,9 @@ import {
   BookOpen,
   Users
 } from "lucide-react";
-import { generateExcelReport } from "@/services/export/xlsxExport";
-import { generateAcademicTranscriptPDF } from "@/services/export/pdfTranscriptGenerator";
-import { generateExecutiveSlideDeck } from "@/services/export/pptxGenerator";
-import { generateSyllabusDocx } from "@/services/export/docxExport";
+// Generators are imported per-action below, not here: this modal offers four
+// different export formats and a user picks one, so bundling all four would
+// download the whole stack to produce a single file.
 
 interface ExecutiveExportHubModalProps {
   isOpen: boolean;
@@ -75,6 +74,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
     setDownloadingXlsx(true);
     setSuccessXlsx(false);
     try {
+      const { generateExcelReport } = await import("@/services/export/xlsxExport");
       await generateExcelReport({
         fileName: `PROFAS-Executive-Analytics-${new Date().toISOString().split("T")[0]}.xlsx`,
         students: data.students || [],
@@ -92,7 +92,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
   };
 
   // 2. Handle Transcript PDF (.pdf)
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     if (!data) return;
     setDownloadingPdf(true);
     setSuccessPdf(false);
@@ -111,6 +111,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
         status: c.status || "COMPLETED"
       }));
 
+      const { generateAcademicTranscriptPDF } = await import("@/services/export/pdfTranscriptGenerator");
       generateAcademicTranscriptPDF({
         studentName,
         studentEmail,
@@ -131,7 +132,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
   };
 
   // 3. Handle Slide Deck (.pptx / 16:9 PDF)
-  const handleExportPptx = () => {
+  const handleExportPptx = async () => {
     if (!data || !data.courses || data.courses.length === 0) {
       alert("Belum ada data program yang tersedia untuk dibuatkan Slide Deck.");
       return;
@@ -140,6 +141,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
     setSuccessPptx(false);
     try {
       const course = data.courses[selectedCourseIndex] || data.courses[0];
+      const { generateExecutiveSlideDeck } = await import("@/services/export/pptxGenerator");
       generateExecutiveSlideDeck({
         courseTitle: course.title || "Strategic Leadership Architecture",
         category: course.category || "Executive Management",
@@ -174,16 +176,24 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
     setSuccessDocx(false);
     try {
       const course = data.courses[selectedCourseIndex] || data.courses[0];
+      const { generateSyllabusDocx } = await import("@/services/export/docxExport");
       await generateSyllabusDocx({
         courseTitle: course.title || "Executive Leadership Academy",
         category: course.category || "Strategic Leadership",
         level: course.level || "ADVANCED",
         mentorName: course.mentorName || "Dr. H. Hendra Syahputra, M.M.",
         durationHours: course.durationHours || 24,
+        // generateSyllabusDocx expects SyllabusModule ({title, duration,
+        // description, keyTakeaways}). This previously emitted
+        // {title, type, durationMin}, so docxExport crashed on
+        // `mod.keyTakeaways.map` for any course that actually had modules.
+        // TypeScript could not catch it because `course` comes from an
+        // untyped fetch, so `any` propagated through the map.
         modules: (course.modules || []).map((m: any) => ({
-          title: m.title,
-          type: m.type,
-          durationMin: m.durationMin
+          title: m.title ?? "Modul",
+          duration: m.durationMin ? `${m.durationMin} menit` : "—",
+          description: m.description ?? "",
+          keyTakeaways: Array.isArray(m.keyTakeaways) ? m.keyTakeaways : [],
         })),
         userNotes: `Catatan Eksekutif: Kurikulum ini telah disesuaikan untuk implementasi praktis di lingkungan kepemimpinan strategis PROFAS Institute.`
       });

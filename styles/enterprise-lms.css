@@ -47,12 +47,12 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* `overflow-x: hidden` dihapus — lihat catatan di premium.css. */
 body {
   background:
     linear-gradient(180deg, rgba(42, 107, 167, 0.04), transparent 320px),
     var(--enterprise-bg) !important;
   color: var(--enterprise-ink) !important;
-  overflow-x: hidden;
 }
 
 body,

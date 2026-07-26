@@ -337,11 +337,14 @@ h1, h2, h3, h4, h5, h6 { font-family: inherit !important; }
   =================================================================== 
 */
 
-/* Global Safe-Area & Overflow Prevention */
-html, body {
-  max-width: 100vw !important;
-  overflow-x: hidden !important;
-}
+/* `overflow-x: hidden !important` dihapus dari sini: overflow apa pun pada
+   html/body membentuk containing block baru bagi descendant `position: sticky`
+   di dalamnya, sehingga sticky header di seluruh produk (site-header,
+   dashboard-header, player header) tidak pernah benar-benar menempel — di
+   landing page mobile setinggi belasan ribu piksel, hamburger (satu-satunya
+   navigasi di perangkat sentuh) langsung tergulung hilang. Kalau ada elemen
+   yang benar-benar meluber secara horizontal, itu bug tersendiri yang perlu
+   diperbaiki sumbernya, bukan disembunyikan di sini. */
 
 @supports (padding: max(0px)) {
   body {

@@ -28,12 +28,14 @@
    Global & Scope Wrapper (.al-page)
    ========================================================================== */
 
+/* `overflow-x: hidden` dihapus — lihat catatan di premium.css. Ini yang paling
+   berdampak: `.al-page .site-header` di bawah mengandalkan `position: sticky`,
+   dan wrapper ini adalah ancestor langsungnya di setiap halaman publik. */
 .al-page {
   font-family: var(--font-display, var(--font-inter, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif));
   color: var(--al-body);
   background-color: var(--al-bg-gray);
   line-height: 1.65;
-  overflow-x: hidden;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { Search, Filter, FileSpreadsheet } from "lucide-react";
-import ExcelJS from "exceljs";
 import { formatDate } from "@/utils";
-import { downloadExcelWorkbook } from "@/services/export/xlsxExport";
 import { ExportReportsButton } from "@/components/shared/ExportReportsButton";
 
 export type ReportRow = {
@@ -62,6 +60,13 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
         { "Indikator Kinerja Utama (KPI)": "Tanggal Ekspor Laporan", "Nilai": new Date().toLocaleDateString("id-ID") }
       ];
 
+      // exceljs is ~900 KB uncompressed and is only needed once an admin
+      // actually clicks export, so it is fetched here rather than shipped with
+      // the dashboard bundle to every visitor.
+      const [{ default: ExcelJS }, { downloadExcelWorkbook }] = await Promise.all([
+        import("exceljs"),
+        import("@/services/export/xlsxExport"),
+      ]);
       const workbook = new ExcelJS.Workbook();
       const detailSheet = workbook.addWorksheet("Data Detail Peserta");
       detailSheet.columns = Object.keys(detailData[0] ?? {

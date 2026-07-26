@@ -2,7 +2,7 @@
 
 import { FileText } from "lucide-react";
 import { ExportActionButton } from "@/components/ui/ExportActionButton";
-import { generateAcademicTranscriptPDF, TranscriptOptions } from "@/services/export/pdfTranscriptGenerator";
+import type { TranscriptOptions } from "@/services/export/pdfTranscriptGenerator";
 
 interface ExportTranscriptButtonProps extends TranscriptOptions {
   className?: string;
@@ -23,7 +23,10 @@ export function ExportTranscriptButton({
       title="Unduh Transkrip Akademik & Rekapitulasi Portofolio Kepemimpinan dalam format PDF Resmi"
       className={className}
       errorMessage="Terjadi kesalahan saat membuat file Transkrip Akademik PDF."
-      onExport={() => generateAcademicTranscriptPDF(options)}
+      onExport={async () => {
+        const { generateAcademicTranscriptPDF } = await import("@/services/export/pdfTranscriptGenerator");
+        return generateAcademicTranscriptPDF(options);
+      }}
     />
   );
 }

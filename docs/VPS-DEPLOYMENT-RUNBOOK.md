@@ -98,7 +98,7 @@ HTTPS termination berada di Nginx. Header `X-Forwarded-Proto: https` diteruskan 
 
 ## 5. CI/CD GitHub Actions
 
-Template workflow [`vps-deploy.workflow.yml`](../deploy/vps/vps-deploy.workflow.yml) menjalankan `validate:env`, typecheck, lint, build, dan performance budget sebelum SSH deploy. Salin template ini ke `.github/workflows/vps-deploy.yml` setelah GitHub token/repository memiliki permission `workflow`.
+Template workflow [`vps-deploy.workflow.yml`](../deploy/vps/vps-deploy.workflow.yml) menjalankan quality gate (`validate:env`, typecheck, lint, build, performance budget, smoke test) pada setiap PR ke `main` maupun push ke `main`; SSH deploy ke VPS hanya berjalan setelah push ke `main` lulus quality gate. Salin template ini ke `.github/workflows/vps-deploy.yml` setelah GitHub token/repository memiliki permission `workflow`. Ini adalah satu-satunya workflow deploy VPS di repo ini — sebelumnya ada duplikat di `deploy/ci/production.workflow.yml`, yang sudah dihapus karena workflow ini lebih defensif (validasi secret sebelum SSH, `StrictHostKeyChecking` eksplisit, tanpa action SSH pihak ketiga, dan verifikasi release SHA di VPS target).
 
 Buat GitHub Environment bernama `production`, lalu tambahkan secrets:
 

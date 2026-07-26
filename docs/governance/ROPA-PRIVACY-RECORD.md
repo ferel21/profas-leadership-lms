@@ -13,7 +13,7 @@ ROPA ini adalah inventaris awal pemrosesan data pribadi. Legal basis, retention 
 
 | Sistem | Fungsi | Data lokasi | Processor/subprocessor yang perlu dicatat |
 | --- | --- | --- | --- |
-| Next.js LMS | Web UI, API, session, upload authorization | Vercel/Netlify/VPS sesuai deployment | Provider hosting, logging/monitoring |
+| Next.js LMS | Web UI, API, session, upload authorization | Vercel/VPS sesuai deployment | Provider hosting, logging/monitoring |
 | PostgreSQL/Prisma | Akun, enrollment, progress, nilai, certificate | Supabase/PostgreSQL atau server yang ditetapkan | Database provider, backup provider |
 | Google OAuth | Login federated | Google | Google sebagai identity provider |
 | Object/file storage | Materi, submission, avatar | `.data/uploads` atau object storage private | Storage provider, malware scanner bila ditambahkan |

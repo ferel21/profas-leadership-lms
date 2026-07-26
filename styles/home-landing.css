@@ -146,7 +146,7 @@
 }
 
 .al-page .al-faq-intro h2 {
-  font-family: var(--font-fraunces, var(--font-inter, 'Inter', sans-serif)) !important;
+  font-family: var(--font-fraunces, var(--font-inter, 'Inter', sans-serif));
   font-size: clamp(2rem, 3.5vw, 2.75rem);
   font-weight: 600;
   line-height: 1.1;

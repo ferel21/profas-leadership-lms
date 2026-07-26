@@ -270,45 +270,49 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
   const remainingCount = Math.max(flatLessons.length - done.size, 0);
   const nextIncomplete = flatLessons.find(lesson => !done.has(lesson.id));
 
-  function getModuleLessons(nodes: CourseNode[]): CourseNode[] {
-    return nodes.flatMap(node => node.type === "FOLDER" ? getModuleLessons(node.children) : [node]);
-  }
+  const moduleTree = useMemo(() => {
+    function getModuleLessons(nodes: CourseNode[]): CourseNode[] {
+      return nodes.flatMap(node => node.type === "FOLDER" ? getModuleLessons(node.children) : [node]);
+    }
 
-  function moduleSummary(node: CourseNode) {
-    const lessons = getModuleLessons(node.children);
-    const completed = lessons.filter(lesson => done.has(lesson.id)).length;
-    return { completed, total: lessons.length, percent: lessons.length ? Math.round(completed / lessons.length * 100) : 0 };
-  }
+    function moduleSummary(node: CourseNode) {
+      const lessons = getModuleLessons(node.children);
+      const completed = lessons.filter(lesson => done.has(lesson.id)).length;
+      return { completed, total: lessons.length, percent: lessons.length ? Math.round(completed / lessons.length * 100) : 0 };
+    }
 
-  const renderTree = (nodes: CourseNode[]) => {
-    return nodes.map(node => {
-      if (node.type === "FOLDER") {
-        const summary = moduleSummary(node);
-        return (
-          <details key={node.id} open>
-            <summary>
-              <div className="player-tree-folder">
-                <Folder size={16} aria-hidden="true" /> <b>{node.title}</b>
-                <small>{summary.completed}/{summary.total} selesai</small>
-                <i className="player-module-meter" aria-hidden="true"><em style={{ width: `${summary.percent}%` }} /></i>
+    function renderTree(nodes: CourseNode[]) {
+      return nodes.map(node => {
+        if (node.type === "FOLDER") {
+          const summary = moduleSummary(node);
+          return (
+            <details key={node.id} open>
+              <summary>
+                <div className="player-tree-folder">
+                  <Folder size={16} aria-hidden="true" /> <b>{node.title}</b>
+                  <small>{summary.completed}/{summary.total} selesai</small>
+                  <i className="player-module-meter" aria-hidden="true"><em style={{ width: `${summary.percent}%` }} /></i>
+                </div>
+                <ChevronDown aria-hidden="true" className="player-tree-chevron" />
+              </summary>
+              <div className="player-tree-children">
+                {renderTree(node.children)}
               </div>
-              <ChevronDown aria-hidden="true" />
-            </summary>
-            <div className="player-tree-children">
-              {renderTree(node.children)}
-            </div>
-          </details>
+            </details>
+          );
+        }
+        const badgeText = node.type === "QUIZ" ? "Kuis • " : node.type === "ASSIGNMENT" ? "Tugas • " : "";
+        return (
+          <button type="button" key={node.id} onClick={() => selectLesson(node.id)} className={node.id === current?.id ? "active" : ""} aria-current={node.id === current?.id ? "page" : undefined} aria-label={`${node.title}${done.has(node.id) ? ", selesai" : ", belum selesai"}`}>
+            {done.has(node.id) ? <CheckCircle2 aria-hidden="true" /> : typeIcon(node.type)}
+            <span>{node.title} <small>{badgeText}{node.durationMin} menit</small></span>
+          </button>
         );
-      }
-      const badgeText = node.type === "QUIZ" ? "Kuis • " : node.type === "ASSIGNMENT" ? "Tugas • " : "";
-      return (
-        <button type="button" key={node.id} onClick={() => selectLesson(node.id)} className={node.id === current?.id ? "active" : ""} aria-current={node.id === current?.id ? "page" : undefined} aria-label={`${node.title}${done.has(node.id) ? ", selesai" : ", belum selesai"}`}>
-          {done.has(node.id) ? <CheckCircle2 aria-hidden="true" /> : typeIcon(node.type)}
-          <span>{node.title} <small>{badgeText}{node.durationMin} menit</small></span>
-        </button>
-      );
-    });
-  };
+      });
+    }
+
+    return renderTree(course.nodes);
+  }, [course.nodes, done, current?.id]);
 
   if (!current) return (
     <main className="player-empty-state" aria-live="polite">
@@ -335,7 +339,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           <i role="progressbar" aria-label="Progres program" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}><em style={{ width: `${percent}%` }} /></i>
           <small>{done.size} dari {flatLessons.length} materi selesai</small>
         </div>
-        <div className="module-list">{course.nodes.length ? renderTree(course.nodes) : <div className="player-sidebar-empty"><Folder size={22} aria-hidden="true" /><span>Belum ada modul.</span></div>}</div>
+        <div className="module-list">{course.nodes.length ? moduleTree : <div className="player-sidebar-empty"><Folder size={22} aria-hidden="true" /><span>Belum ada modul.</span></div>}</div>
       </aside>
       {sidebar && <button type="button" className="player-backdrop" onClick={() => setSidebar(false)} aria-label="Tutup daftar materi" />}
       <main className="player-main">

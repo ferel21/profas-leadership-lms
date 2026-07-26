@@ -77,7 +77,7 @@ export default async function ForumThreadPage({ params }: { params: Promise<{ th
 
         <div className="flex flex-col gap-4 mb-8">
           {thread.replies.map(reply => (
-            <div key={reply.id} className="forum-thread-card">
+            <div key={reply.id} className="forum-thread-card hover-lift">
               <div className="flex gap-4 mb-4 items-center">
                 <div className="forum-avatar-circle forum-avatar-sm">
                   {initials(reply.author.name)}

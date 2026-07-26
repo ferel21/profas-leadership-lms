@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Download, CheckCircle2, Loader2, Award } from "lucide-react";
-import { generateCertificatePDF, CertificatePDFOptions } from "@/services/export/pdfGenerator";
+import type { CertificatePDFOptions } from "@/services/export/pdfGenerator";
 
 interface CertificatePDFButtonProps extends CertificatePDFOptions {
   className?: string;
@@ -22,11 +22,15 @@ export function CertificatePDFButton({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     setLoading(true);
     setSuccess(false);
 
     try {
+      // jspdf is ~320 KB uncompressed. /sertifikat/[number] is a public,
+      // shareable page, so it is fetched on click rather than shipped to
+      // everyone who merely opens a certificate link.
+      const { generateCertificatePDF } = await import("@/services/export/pdfGenerator");
       generateCertificatePDF({
         recipientName,
         courseTitle,

@@ -22,10 +22,8 @@ playwright-report/
 # so the tracked copy flip-flops on every `npm run dev`.
 next-env.d.ts
 
-# Throwaway diagnostic scripts/screenshots written at the repo root during
-# local investigation (hardcoded sandbox paths and localhost URLs). Underscore
-# prefix is the convention for these; nothing shipped lives at the root with one.
-/_*.mjs
-/_*.cjs
-/_*.js
-/_*.png
+# Throwaway diagnostic scripts, harnesses and screenshots written at the repo
+# root during local investigation (hardcoded sandbox paths and localhost URLs).
+# Underscore prefix is the convention for these, and nothing shipped lives at
+# the repo root with one -- so ignore the prefix rather than chasing extensions.
+/_*

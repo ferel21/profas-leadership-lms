@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Clock3, Crown, Sparkles, Star, Users } from "lucide-react";
@@ -7,7 +8,7 @@ type CourseCardProps = {
   course: { slug: string; title: string; shortDescription: string; category: string; level: string; price: number; durationHours: number; rating: number; studentsCount: number; image: string; mentor?: { name: string } };
 };
 
-export function CourseCard({ course }: CourseCardProps) {
+export const CourseCard = memo(function CourseCard({ course }: CourseCardProps) {
   const levels: Record<string, string> = { BASIC: "Dasar", INTERMEDIATE: "Menengah", ADVANCED: "Lanjutan" };
   const isMasterclass = course.level === "ADVANCED" || course.price > 1000000;
   const isTopRated = course.rating >= 4.8;
@@ -41,4 +42,4 @@ export function CourseCard({ course }: CourseCardProps) {
       </div>
     </article>
   );
-}
+});

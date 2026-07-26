@@ -354,9 +354,9 @@ iframe {
   flex: none;
   padding: 4px 9px;
   border-radius: 999px;
-  background: #eefcf8;
+  background: rgba(42, 107, 167, 0.08);
   color: var(--enterprise-teal-dark);
-  border: 1px solid #ccefe9;
+  border: 1px solid rgba(42, 107, 167, 0.22);
   font-size: 0.68rem;
   font-weight: 900;
   white-space: nowrap;

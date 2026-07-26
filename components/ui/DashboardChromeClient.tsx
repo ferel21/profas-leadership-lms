@@ -19,7 +19,7 @@ const studentNav=[["Ringkasan",LayoutDashboard,"/dashboard"],["Program Saya",Boo
 const mentorNav=[["Ringkasan",Gauge,"/dashboard"],["Manajemen Peserta",Users,"/dashboard/peserta"],["Riwayat Evaluasi",FileCheck2,"/dashboard/evaluasi"],["Materi Pembelajaran",FolderUp,"/dashboard#materi"],["Kalender",Calendar,"/kalender"],["Absensi",ClipboardCheck,"/absensi"],["Analitik",PieChart,"/dashboard/analitik"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
 const adminNav=[["Analitik",PieChart,"/dashboard"],["Absensi",ClipboardCheck,"/absensi"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
 
-export function DashboardChromeClient({user,children}:{user:UserShape;children:React.ReactNode}){
+export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;children:React.ReactNode;streak?:number}){
   const [open,setOpen]=useState(false);
   const [collapsed,setCollapsed]=useState(false);
   const [showNotifs,setShowNotifs]=useState(false);
@@ -167,9 +167,11 @@ export function DashboardChromeClient({user,children}:{user:UserShape;children:R
               <span className="pro-live-pulse-dot"></span>
               <span>Sistem aktif</span>
             </div>
-            <div className="pro-streak-flame" title="7 hari belajar konsisten">
-              <span>7 hari beruntun</span>
-            </div>
+            {streak > 0 && (
+              <div className="pro-streak-flame" title={`${streak} hari belajar konsisten`}>
+                <span>{streak} hari beruntun</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="dash-actions flex items-center gap-2.5">

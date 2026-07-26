@@ -1,8 +1,10 @@
 import { DashboardChromeClient } from "./DashboardChromeClient";
+import { getLoginStreak } from "@/services/streak";
 
-type UserInput = { name:string;username?:string|null;email:string;role:string;avatar?:string|null;headline?:string|null;institution?:{name:string}|null };
+type UserInput = { id?:string;name:string;username?:string|null;email:string;role:string;avatar?:string|null;headline?:string|null;institution?:{name:string}|null };
 
-export function DashboardChrome({user,children}:{user:UserInput;children:React.ReactNode}){
+export async function DashboardChrome({user,children}:{user:UserInput;children:React.ReactNode}){
   const safeUser={name:user.name,username:user.username??null,email:user.email,role:user.role,avatar:user.avatar??null,headline:user.headline??null,institution:user.institution?{name:user.institution.name}:null};
-  return <DashboardChromeClient user={safeUser}>{children}</DashboardChromeClient>;
+  const streak = user.id ? await getLoginStreak(user.id) : 0;
+  return <DashboardChromeClient user={safeUser} streak={streak}>{children}</DashboardChromeClient>;
 }

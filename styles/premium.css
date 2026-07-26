@@ -1,3 +1,4 @@
+@layer legacy {
 /* 
   ========================================
   PROFAS PREMIUM GLOBAL POLISH
@@ -685,4 +686,6 @@ h1, h2, h3, h4, h5, h6 { font-family: inherit !important; }
     align-items: flex-start !important;
     gap: 8px !important;
   }
+}
+
 }

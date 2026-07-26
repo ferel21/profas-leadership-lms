@@ -1,3 +1,4 @@
+@layer legacy {
 /*
   PROFAS landing scroll direction:
   the homepage reads as a sequence of layered editorial panels. Motion is
@@ -172,4 +173,6 @@ html.al-scroll-ready {
     translate: none;
     will-change: auto;
   }
+}
+
 }

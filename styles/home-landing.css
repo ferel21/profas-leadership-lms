@@ -1,3 +1,4 @@
+@layer legacy {
 /*
   Homepage refinement layer
   Keeps the landing page intentionally scoped while the rest of the LMS
@@ -664,4 +665,6 @@
     flex-direction: column;
     gap: 10px;
   }
+}
+
 }

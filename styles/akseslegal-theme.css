@@ -1,3 +1,4 @@
+@layer legacy {
 /* ==========================================================================
    PROFAS Leadership — Akseslegal.id Inspired Redesign Theme
    White, bright, clean, premium design with royal blue and golden yellow accents
@@ -1681,4 +1682,6 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
 }

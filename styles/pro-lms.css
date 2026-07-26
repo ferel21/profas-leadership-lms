@@ -1,3 +1,4 @@
+@layer legacy {
 /* ==========================================================================
    PROFAS LEADERSHIP LMS — ULTRA PREMIUM PRO UI/UX SYSTEM
    State-of-the-art Glassmorphism, Micro-animations, Confetti & Dark Mode
@@ -442,4 +443,6 @@
   .pro-forum-card p {
     font-size: 0.85rem !important;
   }
+}
+
 }

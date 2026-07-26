@@ -211,16 +211,27 @@
 .pro-shimmer-trophy::after {
   content: "";
   position: absolute;
-  top: 0; left: -100%;
+  top: 0; left: 0;
   width: 50%; height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transform: skewX(-20deg);
+  transform: translateX(-200%) skewX(-20deg);
   animation: shimmer-swipe 4s infinite;
+}
+
+/* Drives the sweep with `transform` rather than `left`: the element is 50% of
+   the chip's width, so -200%/400% of its own width spans the same travel the
+   original `left: -100% -> 200%` intended, but on the compositor instead of
+   forcing layout on every frame. Sweeps for the first half, rests for the
+   second. The global prefers-reduced-motion block in master.css already
+   neutralises this for users who ask for it. */
+@keyframes shimmer-swipe {
+  0% { transform: translateX(-200%) skewX(-20deg); }
+  50%, 100% { transform: translateX(400%) skewX(-20deg); }
 }
 
 .pro-shimmer-trophy:hover {
   transform: translateY(-4px) scale(1.05);
-  border-color: #38bdf8;
+  border-color: var(--al-accent, #f3b444);
   box-shadow: 0 15px 35px -5px rgba(42, 107, 167, 0.35);
 }
 

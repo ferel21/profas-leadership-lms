@@ -1,8 +1,29 @@
 'use client';
 
-import React, { useLayoutEffect, useRef, useCallback } from 'react';
+import React, { useLayoutEffect, useRef, useCallback, useState, useEffect } from 'react';
 import Lenis from 'lenis';
 import './ScrollStack.css';
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+// Sinkron dengan preferensi sistem, dan ikut berubah bila user mengubahnya
+// tanpa reload. Ini tidak bisa ditangani oleh blok CSS `prefers-reduced-motion`
+// mana pun: Lenis membajak scroll window lewat JS, dan transform pin-and-scale
+// ditulis sebagai inline style pada tiap frame — keduanya kebal terhadap CSS.
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia(REDUCED_MOTION_QUERY);
+    setReduced(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  return reduced;
+}
 
 export interface ScrollStackItemProps {
   children: React.ReactNode;
@@ -94,6 +115,7 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
   useWindowScroll = false,
   onStackComplete
 }) => {
+  const prefersReducedMotion = useReducedMotion();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const stackCompletedRef = useRef<boolean>(false);
   const animationFrameRef = useRef<number | null>(null);
@@ -255,6 +277,7 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
 
   const setupLenis = useCallback(() => {
     if (typeof window === 'undefined') return;
+    if (prefersReducedMotion) return;
 
     if (useWindowScroll) {
       const lenis = acquireWindowLenis();
@@ -292,7 +315,7 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       lenisRef.current = lenis;
       return lenis;
     }
-  }, [handleScroll, useWindowScroll]);
+  }, [handleScroll, useWindowScroll, prefersReducedMotion]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -303,6 +326,29 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
 
     cardsRef.current = cards;
     const transformsCache = lastTransformsRef.current;
+
+    // Mode hemat gerak: kartu tampil sebagai daftar bertumpuk biasa. Semua
+    // inline style sisa mode animasi dibersihkan agar tidak ada kartu yang
+    // tertinggal dalam keadaan ter-scale, ter-blur, atau tergeser bila user
+    // mengubah preferensinya saat halaman sedang terbuka.
+    if (prefersReducedMotion) {
+      cards.forEach((card, i) => {
+        card.style.marginBottom = i < cards.length - 1 ? `${itemDistance}px` : '';
+        card.style.willChange = '';
+        card.style.transformOrigin = '';
+        card.style.backfaceVisibility = '';
+        card.style.transform = '';
+        card.style.webkitTransform = '';
+        card.style.perspective = '';
+        card.style.webkitPerspective = '';
+        card.style.filter = '';
+      });
+      transformsCache.clear();
+      return () => {
+        cardsRef.current = [];
+        transformsCache.clear();
+      };
+    }
 
     cards.forEach((card, i) => {
       if (i < cards.length - 1) {
@@ -360,7 +406,8 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     onStackComplete,
     setupLenis,
     updateCardTransforms,
-    handleScroll
+    handleScroll,
+    prefersReducedMotion
   ]);
 
   return (

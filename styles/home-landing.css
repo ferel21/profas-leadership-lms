@@ -141,10 +141,11 @@
 }
 
 .al-page .al-faq-intro h2 {
+  font-family: var(--font-fraunces, var(--font-inter, 'Inter', sans-serif)) !important;
   font-size: clamp(2rem, 3.5vw, 2.75rem);
-  font-weight: 900;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .al-page .al-faq-intro > p {
@@ -233,13 +234,29 @@
   padding: 18px 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 20px;
   cursor: pointer;
   list-style: none;
   color: var(--al-ink);
   font-size: 0.98rem;
   font-weight: 800;
+}
+
+.al-page .al-faq-index {
+  flex: 0 0 auto;
+  font-family: var(--font-space, var(--font-inter, 'Inter', sans-serif));
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--al-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.al-page .al-faq-question {
+  flex: 1;
+  font-family: var(--font-fraunces, var(--font-inter, 'Inter', sans-serif));
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
 
 .al-page .al-faq-list summary::-webkit-details-marker {

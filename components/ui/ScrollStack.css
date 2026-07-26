@@ -59,43 +59,18 @@
   height: 1px;
 }
 
-/* Penataan Khusus Kartu Nyata (Cara Bekerja & Role Pathway) */
-.scroll-method-item,
-.scroll-pathway-item {
-  width: 100% !important;
-  max-width: 860px !important;
-  margin: 25px auto !important;
-  padding: 3rem !important;
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  background: #ffffff !important;
-}
-
-.scroll-method-item h3,
-.scroll-pathway-item h3 {
-  font-size: 1.6rem !important;
-  font-weight: 800 !important;
-  color: #0f172a !important;
-  margin: 1rem 0 0.8rem !important;
-}
-
-.scroll-method-item p,
-.scroll-pathway-item p {
-  font-size: 1.08rem !important;
-  color: #475569 !important;
-  line-height: 1.65 !important;
-  margin-bottom: 1.5rem !important;
-}
+/* Catatan arsitektur: file ini HANYA memiliki mekanika scroll (transform,
+   pinning, will-change). Skin visual kartu (background, border, warna, ukuran
+   font, padding) dimiliki oleh layer tema di styles/akseslegal-theme.css.
+   Sebelumnya blok ini memaksakan skin lewat 15 deklarasi !important — yang
+   mengalahkan `.al-pathway-card:first-child` sehingga kartu "Peserta"
+   ter-render putih dengan ikon & link putih di atasnya (CTA tidak terlihat). */
 
 @media (max-width: 768px) {
   .scroll-stack-inner {
     padding: 1rem 0 8rem;
   }
-  .scroll-stack-card,
-  .scroll-method-item,
-  .scroll-pathway-item {
-    padding: 1.8rem !important;
+  .scroll-stack-card {
     min-height: 14rem;
-    border-radius: 24px;
-    margin: 16px auto !important;
   }
 }

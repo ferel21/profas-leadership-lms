@@ -1,8 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Search, BookOpen, Award, MessageSquare, Settings, LayoutDashboard, Trophy, Calendar, Sparkles, ArrowRight, X, Command } from "lucide-react";
+
+/** Visually hidden but exposed to assistive tech — for the required dialog title. */
+const srOnly: React.CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  borderWidth: 0,
+};
 
 type CommandItem = {
   id: string;
@@ -29,6 +43,28 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [courseItems, setCourseItems] = useState<CommandItem[]>([]);
   const router = useRouter();
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  // Remember what had focus before the palette opened, so it can be handed back
+  // on close (WCAG 2.4.3). Radix's modal Content normally restores focus to its
+  // <Dialog.Trigger>, but this palette is opened externally (Ctrl+K, or a button
+  // in the dashboard chrome) and renders no Trigger — so that ref is null and
+  // focus would otherwise be dumped on <body>. Tracked while closed only; once
+  // open, Radix traps focus inside the panel anyway.
+  useEffect(() => {
+    if (isOpen) return;
+    // Driven only by real focusin events — never sampled eagerly on mount.
+    // Sampling would re-run the moment `isOpen` flips back to false, while the
+    // palette's own input is still focused mid-unmount, and clobber the trigger
+    // with a detached node.
+    const remember = (e: FocusEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (!el || el === document.body || el.closest('[role="dialog"]')) return;
+      restoreFocusRef.current = el;
+    };
+    document.addEventListener("focusin", remember);
+    return () => document.removeEventListener("focusin", remember);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen || courseItems.length > 0) return;
@@ -59,27 +95,22 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
     setSelectedIndex(0);
   }, [query]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % (filteredItems.length || 1));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + (filteredItems.length || 1)) % (filteredItems.length || 1));
-      } else if (e.key === "Enter" && filteredItems[selectedIndex]) {
-        e.preventDefault();
-        selectItem(filteredItems[selectedIndex]);
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, filteredItems, selectedIndex]);
+  // Scoped to the dialog rather than `window`: Radix traps focus inside the
+  // panel, so every relevant key event bubbles through here. Escape is
+  // deliberately NOT handled — Radix owns it via onEscapeKeyDown, which also
+  // restores focus to whatever opened the palette.
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev + 1) % (filteredItems.length || 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev - 1 + (filteredItems.length || 1)) % (filteredItems.length || 1));
+    } else if (e.key === "Enter" && filteredItems[selectedIndex]) {
+      e.preventDefault();
+      selectItem(filteredItems[selectedIndex]);
+    }
+  }
 
   function selectItem(item: CommandItem) {
     onClose();
@@ -90,39 +121,55 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
     }
   }
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Command palette"
-      style={{
-      position: "fixed",
-      inset: 0,
-      zIndex: 99999,
-      background: "rgba(15, 23, 42, 0.75)",
-      backdropFilter: "blur(12px)",
-      WebkitBackdropFilter: "blur(12px)",
-      display: "flex",
-      alignItems: "flex-start",
-      justifyContent: "center",
-      paddingTop: "12vh",
-      animation: "scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
-    }} onClick={onClose}>
-      <div style={{
-        background: "rgba(15, 23, 42, 0.95)",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
-        borderRadius: "20px",
-        width: "100%",
-        maxWidth: "620px",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(13, 148, 136, 0.3)",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        color: "#f8fafc"
-      }} onClick={e => e.stopPropagation()}>
-        
+    <Dialog.Root open={isOpen} onOpenChange={open => { if (!open) onClose(); }}>
+      <Dialog.Portal>
+        <Dialog.Overlay style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 99999,
+          background: "rgba(15, 23, 42, 0.75)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          animation: "scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
+        }} />
+        <Dialog.Content
+          aria-describedby={undefined}
+          onKeyDown={handleKeyDown}
+          onCloseAutoFocus={e => {
+            const target = restoreFocusRef.current;
+            if (target?.isConnected) {
+              e.preventDefault();
+              target.focus();
+            }
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100000,
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            paddingTop: "12vh",
+            pointerEvents: "none",
+            animation: "scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
+          }}
+        >
+          <Dialog.Title style={srOnly}>Command palette</Dialog.Title>
+          <div style={{
+            background: "rgba(15, 23, 42, 0.95)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            borderRadius: "20px",
+            width: "100%",
+            maxWidth: "620px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(42, 107, 167, 0.35)",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            color: "#f8fafc",
+            pointerEvents: "auto"
+          }}>
+
         {/* Input Bar */}
         <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", gap: "12px", background: "rgba(255, 255, 255, 0.03)" }}>
           <Search size={20} style={{ color: "#2a6ba7" }} />
@@ -136,7 +183,6 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
             placeholder="Ketik perintah atau cari materi eksekutif (misal: 'Sertifikat', 'Modul')..."
             value={query}
             onChange={e => setQuery(e.target.value)}
-            autoFocus
             style={{
               flex: 1,
               background: "transparent",
@@ -148,9 +194,9 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
             }}
           />
           <span style={{ fontSize: "0.7rem", background: "rgba(255, 255, 255, 0.15)", padding: "4px 8px", borderRadius: "6px", color: "#cbd5e1", fontWeight: 700 }}>ESC</span>
-          <button onClick={onClose} aria-label="Tutup" style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", display: "flex", padding: "8px", margin: "-8px", borderRadius: "8px" }}>
+          <Dialog.Close aria-label="Tutup" style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", display: "flex", padding: "8px", margin: "-8px", borderRadius: "8px" }}>
             <X size={20} />
-          </button>
+          </Dialog.Close>
         </div>
 
         {/* Results List */}
@@ -201,7 +247,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
                         <Icon size={18} />
                       </div>
                       <div>
-                        <div style={{ fontSize: "0.9rem", fontWeight: 700, color: isSelected ? "#38bdf8" : "#f8fafc" }}>
+                        <div style={{ fontSize: "0.9rem", fontWeight: 700, color: isSelected ? "#f3b444" : "#f8fafc" }}>
                           {item.title}
                         </div>
                         <div style={{ fontSize: "0.72rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "2px" }}>
@@ -209,7 +255,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
                         </div>
                       </div>
                     </div>
-                    {isSelected && <ArrowRight size={18} style={{ color: "#38bdf8" }} />}
+                    {isSelected && <ArrowRight size={18} style={{ color: "#f3b444" }} />}
                   </div>
                 );
               })}
@@ -223,9 +269,11 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
             <span><kbd style={{ background: "rgba(255, 255, 255, 0.1)", padding: "2px 6px", borderRadius: "4px", color: "#fff" }}>↑↓</kbd> Navigasi</span>
             <span><kbd style={{ background: "rgba(255, 255, 255, 0.1)", padding: "2px 6px", borderRadius: "4px", color: "#fff" }}>Enter</kbd> Pilih</span>
           </div>
-          <span style={{ color: "#2a6ba7", fontWeight: 700 }}>PROFAS Executive Command V1</span>
+          <span style={{ color: "#f3b444", fontWeight: 700 }}>PROFAS Executive Command V1</span>
         </div>
-      </div>
-    </div>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

@@ -13,27 +13,46 @@ type CommandItem = {
   action?: () => void;
 };
 
+const staticItems: CommandItem[] = [
+  { id: "nav-dash", title: "Ringkasan Dashboard Utama", category: "Navigasi", icon: LayoutDashboard, href: "/dashboard" },
+  { id: "nav-prog", title: "Katalog Program Kepemimpinan", category: "Navigasi", icon: BookOpen, href: "/program" },
+  { id: "nav-cert", title: "Sertifikat & Kelulusan Saya", category: "Navigasi", icon: Award, href: "/dashboard#sertifikat" },
+  { id: "nav-lead", title: "Papan Peringkat Eksekutif (Leaderboard)", category: "Navigasi", icon: Trophy, href: "/peringkat" },
+  { id: "nav-forum", title: "Forum Komunitas & Diskusi", category: "Navigasi", icon: MessageSquare, href: "/forum" },
+  { id: "nav-cal", title: "Kalender Acara & Sesi Mentor", category: "Navigasi", icon: Calendar, href: "/kalender" },
+  { id: "nav-set", title: "Pengaturan Akun & Profil", category: "Navigasi", icon: Settings, href: "/pengaturan" },
+  { id: "act-ai", title: "Tanya Asisten AI Leadership Tutor", category: "Aksi Eksekutif", icon: Sparkles, href: "/dashboard#ai-tutor" },
+];
+
 export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [courseItems, setCourseItems] = useState<CommandItem[]>([]);
   const router = useRouter();
 
-  const items: CommandItem[] = [
-    { id: "nav-dash", title: "Ringkasan Dashboard Utama", category: "Navigasi", icon: LayoutDashboard, href: "/dashboard" },
-    { id: "nav-prog", title: "Katalog Program Kepemimpinan", category: "Navigasi", icon: BookOpen, href: "/program" },
-    { id: "nav-cert", title: "Sertifikat & Kelulusan Saya", category: "Navigasi", icon: Award, href: "/dashboard#sertifikat" },
-    { id: "nav-lead", title: "Papan Peringkat Eksekutif (Leaderboard)", category: "Navigasi", icon: Trophy, href: "/peringkat" },
-    { id: "nav-forum", title: "Forum Komunitas & Diskusi", category: "Navigasi", icon: MessageSquare, href: "/forum" },
-    { id: "nav-cal", title: "Kalender Acara & Sesi Mentor", category: "Navigasi", icon: Calendar, href: "/kalender" },
-    { id: "nav-set", title: "Pengaturan Akun & Profil", category: "Navigasi", icon: Settings, href: "/pengaturan" },
-    { id: "mat-1", title: "Modul: Fondasi Kepemimpinan Berdampak", category: "Materi", icon: BookOpen, href: "/belajar/fondasi-kepemimpinan-berdampak" },
-    { id: "mat-2", title: "Modul: Memimpin Diri & Percakapan Sulit", category: "Materi", icon: BookOpen, href: "/belajar/fondasi-kepemimpinan-berdampak" },
-    { id: "mat-3", title: "Evaluasi & Pretest Kepemimpinan", category: "Materi", icon: Award, href: "/dashboard/evaluasi" },
-    { id: "act-ai", title: "Tanya Asisten AI Leadership Tutor", category: "Aksi Eksekutif", icon: Sparkles, href: "/dashboard#ai-tutor" },
-  ];
+  useEffect(() => {
+    if (!isOpen || courseItems.length > 0) return;
+    let cancelled = false;
+    fetch("/api/courses")
+      .then(r => (r.ok ? r.json() : []))
+      .then((courses: Array<{ id: string; slug: string; title: string }>) => {
+        if (cancelled || !Array.isArray(courses)) return;
+        setCourseItems(courses.map(c => ({
+          id: `course-${c.id}`,
+          title: c.title,
+          category: "Materi" as const,
+          icon: BookOpen,
+          href: `/program/${c.slug}`
+        })));
+      })
+      .catch(() => null);
+    return () => { cancelled = true; };
+  }, [isOpen, courseItems.length]);
 
-  const filteredItems = query.trim() === "" 
-    ? items 
+  const items: CommandItem[] = [...staticItems, ...courseItems];
+
+  const filteredItems = query.trim() === ""
+    ? items
     : items.filter(item => item.title.toLowerCase().includes(query.toLowerCase()) || item.category.toLowerCase().includes(query.toLowerCase()));
 
   useEffect(() => {

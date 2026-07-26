@@ -26,7 +26,7 @@
   --enterprise-shadow-sm: 0 2px 10px rgba(16, 32, 51, 0.05);
   --enterprise-shadow-md: 0 14px 36px rgba(16, 32, 51, 0.09);
   --enterprise-shadow-lg: 0 24px 70px rgba(16, 32, 51, 0.14);
-  --enterprise-focus: 0 0 0 4px rgba(15, 147, 135, 0.18);
+  --enterprise-focus: 0 0 0 4px rgba(42, 107, 167, 0.18);
   --enterprise-ease: 180ms ease;
 }
 
@@ -49,7 +49,7 @@ html {
 
 body {
   background:
-    linear-gradient(180deg, rgba(15, 147, 135, 0.04), transparent 320px),
+    linear-gradient(180deg, rgba(42, 107, 167, 0.04), transparent 320px),
     var(--enterprise-bg) !important;
   color: var(--enterprise-ink) !important;
   overflow-x: hidden;
@@ -64,7 +64,7 @@ textarea {
 }
 
 ::selection {
-  background: rgba(15, 147, 135, 0.18);
+  background: rgba(42, 107, 167, 0.18);
   color: var(--enterprise-ink);
 }
 
@@ -251,7 +251,7 @@ iframe {
 .hero-clean::before {
   background:
     linear-gradient(90deg, rgba(255,255,255,0.84), rgba(255,255,255,0.35)),
-    radial-gradient(rgba(15, 147, 135, 0.13) 1px, transparent 1px) !important;
+    radial-gradient(rgba(42, 107, 167, 0.13) 1px, transparent 1px) !important;
   background-size: auto, 30px 30px !important;
 }
 
@@ -394,7 +394,7 @@ iframe {
 .dash-enroll-item:hover,
 .dash-mentor-course-item:hover,
 .player-mat-card:hover {
-  border-color: rgba(15, 147, 135, 0.34) !important;
+  border-color: rgba(42, 107, 167, 0.34) !important;
   box-shadow: var(--enterprise-shadow-md) !important;
 }
 
@@ -490,7 +490,7 @@ iframe {
 
 .dashboard-layout {
   background:
-    radial-gradient(circle at 8% 4%, rgba(15, 147, 135, 0.08), transparent 320px),
+    radial-gradient(circle at 8% 4%, rgba(42, 107, 167, 0.08), transparent 320px),
     radial-gradient(circle at 92% 0%, rgba(36, 107, 254, 0.08), transparent 320px),
     var(--enterprise-bg) !important;
 }
@@ -639,7 +639,7 @@ iframe {
 
 .hero-banner-student {
   background:
-    linear-gradient(135deg, rgba(15, 147, 135, 0.95), rgba(11, 111, 102, 0.96)),
+    linear-gradient(135deg, rgba(42, 107, 167, 0.95), rgba(30, 90, 143, 0.96)),
     radial-gradient(circle at 82% 20%, rgba(255,255,255,0.28), transparent 220px) !important;
 }
 
@@ -767,7 +767,7 @@ iframe {
 
 .player-layout {
   background:
-    radial-gradient(circle at 78% 0%, rgba(15, 147, 135, 0.07), transparent 360px),
+    radial-gradient(circle at 78% 0%, rgba(42, 107, 167, 0.07), transparent 360px),
     var(--enterprise-bg) !important;
 }
 
@@ -921,7 +921,7 @@ textarea {
 .error-container,
 .not-found-container {
   background:
-    radial-gradient(circle at 50% 0%, rgba(15, 147, 135, 0.12), transparent 300px),
+    radial-gradient(circle at 50% 0%, rgba(42, 107, 167, 0.12), transparent 300px),
     var(--enterprise-bg) !important;
 }
 
@@ -954,7 +954,7 @@ textarea {
   border: 1px solid var(--enterprise-line-soft);
   border-radius: var(--enterprise-radius-xl);
   background:
-    linear-gradient(135deg, rgba(15, 147, 135, 0.11), rgba(36, 107, 254, 0.08)),
+    linear-gradient(135deg, rgba(42, 107, 167, 0.11), rgba(36, 107, 254, 0.08)),
     #fff;
   box-shadow: var(--enterprise-shadow-sm);
 }
@@ -2047,7 +2047,7 @@ html, body, .dashboard-layout, .dashboard-canvas, .player-layout, .player-main {
 .empty-card-clean {
   background: #ffffff !important;
   border: 1px solid #e5f0f1 !important;
-  box-shadow: 0 10px 32px rgba(15, 147, 135, 0.06) !important;
+  box-shadow: 0 10px 32px rgba(42, 107, 167, 0.06) !important;
   color: var(--enterprise-ink) !important;
 }
 
@@ -2057,7 +2057,7 @@ html, body, .dashboard-layout, .dashboard-canvas, .player-layout, .player-main {
   background: #ffffff !important;
   color: #102033 !important;
   border: 1px solid #dcefec !important;
-  box-shadow: 0 10px 32px rgba(15, 147, 135, 0.06) !important;
+  box-shadow: 0 10px 32px rgba(42, 107, 167, 0.06) !important;
 }
 .certificate-mini > span {
   background: #eff6ff !important;

@@ -331,10 +331,15 @@ export default async function DashboardPage() {
   // MENTOR DASHBOARD
   // ═══════════════════════════════════════════════════════════
   if (user.role === "MENTOR") {
-    const courses = await prisma.course.findMany({
-      where: { mentorId: user.id },
-      include: { enrollments: true, nodes: { select: { id: true, type: true, title: true } } }
-    });
+    const [courses, pendingGradeCount] = await Promise.all([
+      prisma.course.findMany({
+        where: { mentorId: user.id },
+        include: { enrollments: true, nodes: { select: { id: true, type: true, title: true } } }
+      }),
+      prisma.assessmentAttempt.count({
+        where: { assessment: { course: { mentorId: user.id } }, status: "PENDING_GRADE" }
+      })
+    ]);
 
     const courseOptions = courses.map(c => ({
       id: c.id, title: c.title,
@@ -355,7 +360,7 @@ export default async function DashboardPage() {
         <div className="responsive-stat-grid">
           <StatCard label="Program Aktif" value={courses.length} desc="Program berjalan" icon={BookOpen} gradient="linear-gradient(135deg, #3b82f6, #60a5fa)" />
           <StatCard label="Total Peserta" value={totalStudents} desc="Dalam semua program" icon={UsersRound} gradient="linear-gradient(135deg, #8b5cf6, #a78bfa)" />
-          <StatCard label="Tugas Menunggu" value={0} desc="Perlu dinilai" icon={Clock} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" />
+          <StatCard label="Tugas Menunggu" value={pendingGradeCount} desc="Perlu dinilai" icon={Clock} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" />
           <StatCard label="Rating" value="4.8" desc="Rata-rata ulasan peserta" icon={Star} gradient="linear-gradient(135deg, #10b981, #34d399)" trend="Baik" />
         </div>
 

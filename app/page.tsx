@@ -142,13 +142,13 @@ export default async function Home() {
           <div className="container al-hero-grid">
             {/* Text column */}
             <div className="al-hero-copy">
-              <div className="al-badge-pill">
+              <div className="al-eyebrow-dossier">
                 <span className="al-badge-dot" />
-                <span>Platform Leadership #1 Terpercaya</span>
+                <span>Exhibit 00 · Leadership Dossier</span>
               </div>
 
               <h1 id="home-title" className="al-hero-title">
-                Pimpin dengan lebih jernih!
+                Pimpin dengan <mark className="al-hero-crop">lebih jernih</mark>!
                 <span>Belajar. Mencoba. Berdampak.</span>
               </h1>
 
@@ -182,15 +182,15 @@ export default async function Home() {
 
               <div className="al-trust-row">
                 <div className="al-trust-item">
-                  <ShieldCheck size={20} />
+                  <ShieldCheck size={16} />
                   <span>Sertifikat Resmi</span>
                 </div>
                 <div className="al-trust-item">
-                  <Target size={20} />
+                  <Target size={16} />
                   <span>Proses Terstruktur</span>
                 </div>
                 <div className="al-trust-item">
-                  <CheckCircle2 size={20} />
+                  <CheckCircle2 size={16} />
                   <span>Kurikulum Terverifikasi</span>
                 </div>
               </div>
@@ -209,24 +209,18 @@ export default async function Home() {
                 />
                 <div className="al-hero-img-gradient" />
               </div>
+              <span className="al-exhibit-tab" aria-hidden="true">Exhibit 01</span>
 
-              {/* Floating card top-right */}
-              <aside className="al-float-card al-float-card--top">
-                <div className="al-float-icon al-float-icon--green">
-                  <CheckCircle2 size={20} />
-                </div>
-                <div>
-                  <small>Progress Belajar</small>
-                  <strong>73% <em>+12 minggu ini</em></strong>
-                </div>
+              {/* Floating card top-right — ledger stat */}
+              <aside className="al-float-card al-float-card--top al-float-card--ledger">
+                <small>Progress Belajar</small>
+                <strong>73<span>%</span></strong>
+                <em>+12 minggu ini</em>
               </aside>
 
-              {/* Floating card bottom-left */}
-              <aside className="al-float-card al-float-card--bottom">
-                <div className="al-stars-small">
-                  <Star size={13} fill="currentColor" /><Star size={13} fill="currentColor" /><Star size={13} fill="currentColor" /><Star size={13} fill="currentColor" /><Star size={13} fill="currentColor" />
-                </div>
-                <p className="al-float-quote">&ldquo;Prosesnya sangat terstruktur dan mentor-nya berpengalaman!&rdquo;</p>
+              {/* Floating card bottom-left — pull-quote */}
+              <aside className="al-float-card al-float-card--bottom al-float-card--quote">
+                <p className="al-float-quote">Prosesnya sangat terstruktur dan mentor-nya berpengalaman!</p>
                 <div className="al-float-author">
                   <span />
                   <small>Alumni, Batch 2025</small>
@@ -238,7 +232,6 @@ export default async function Home() {
                 <div className="al-marquee">
                   {["Leadership Essentials", "Komunikasi Eksekutif", "Delegasi Efektif", "Manajemen Konflik", "Strategic Thinking", "Leadership Essentials", "Komunikasi Eksekutif", "Delegasi Efektif", "Manajemen Konflik", "Strategic Thinking"].map((item, i) => (
                     <span key={i} className="al-marquee-item">
-                      <CheckCircle2 size={16} />
                       {item}
                     </span>
                   ))}

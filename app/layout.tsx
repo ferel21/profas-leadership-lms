@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from 'next/font/google';
+import { Inter, Fraunces, Space_Grotesk } from 'next/font/google';
 import { RouteProgressBar } from "@/components/ui/RouteProgressBar";
 import { GlobalLeafStagger } from "@/components/ui/GlobalLeafStagger";
 import { WebVitalsReporter } from "@/components/ui/WebVitalsReporter";
@@ -18,6 +18,8 @@ import "@/styles/leaf-stagger.css";
 import "@/styles/home-scroll.css";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '600', '900'], style: ['normal', 'italic'], variable: '--font-fraunces', display: 'swap' });
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-space', display: 'swap' });
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";
 
 export const metadata: Metadata = {
@@ -83,7 +85,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} font-sans`} style={{ fontFamily: 'var(--font-inter, "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif)' }}>
+      <body className={`${inter.variable} ${fraunces.variable} ${spaceGrotesk.variable} font-sans`} style={{ fontFamily: 'var(--font-inter, "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif)' }}>
         <RouteProgressBar />
         <GlobalLeafStagger />
         <WebVitalsReporter />

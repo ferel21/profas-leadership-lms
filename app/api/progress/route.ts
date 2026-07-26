@@ -53,6 +53,10 @@ export async function POST(request: Request) {
           existingEnrollment = await tx.enrollment.create({
             data: { userId: user.id, courseId }
           });
+          await tx.course.update({
+            where: { id: courseId },
+            data: { studentsCount: { increment: 1 } }
+          });
           await tx.activityLog.create({
             data: {
               userId: user.id,

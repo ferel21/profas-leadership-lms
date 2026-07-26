@@ -1,3 +1,20 @@
+/* ==========================================================================
+   CASCADE LAYER ORDER — declared once, here, because this is the first
+   stylesheet imported by app/layout.tsx.
+
+   Normal declarations: later layers win, and UNLAYERED beats every layer.
+   That is why `@tailwind utilities` is deliberately left unlayered in
+   design-system.css — utilities are meant to override components.
+
+   Caveat worth knowing: layers do NOT defeat `!important`. For important
+   declarations the order inverts (earlier layers win) and important always
+   beats normal. Verified in a browser. So the ~1,465 legacy !important
+   declarations still win; what layering buys is that legacy NORMAL rules
+   stop beating `components` (reserved for a component library).
+   ========================================================================== */
+@layer reset, tokens, legacy, components, routes;
+
+@layer tokens {
 /* 
   ========================================
   PROFAS GLOBAL TYPOGRAPHY SYSTEM
@@ -72,3 +89,5 @@ h1, h2, h3, h4, h5, h6 {
 .font-bold { font-weight: var(--font-bold); }
 .font-extrabold { font-weight: var(--font-extrabold); }
 .font-black { font-weight: var(--font-black); }
+
+}

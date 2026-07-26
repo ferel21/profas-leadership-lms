@@ -1,3 +1,4 @@
+@layer legacy {
 /*
  * PROFAS LMS — Clear Leadership Workspace
  * A fresh, high-clarity layer shared by Student, Mentor, Admin, and Course Player.
@@ -969,4 +970,6 @@ html body .player-layout .btn-primary:hover {
   background: linear-gradient(135deg, #2a6ba7, #38bdf8) !important;
   box-shadow: 0 12px 28px rgba(42, 107, 167, 0.42) !important;
   transform: translateY(-2px) !important;
+}
+
 }

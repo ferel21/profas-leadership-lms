@@ -1,3 +1,4 @@
+@layer legacy {
 /* ==========================================================================
    PROFAS Leadership LMS - Enterprise UI consolidation layer
    Loaded last to normalize the existing visual system across pages.
@@ -2218,4 +2219,6 @@ button.bg-emerald-600:hover {
   background: linear-gradient(135deg, #2a6ba7, #38bdf8) !important;
   box-shadow: 0 12px 28px rgba(42, 107, 167, 0.42) !important;
   transform: translateY(-2px) !important;
+}
+
 }

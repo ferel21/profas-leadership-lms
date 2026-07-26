@@ -1,3 +1,4 @@
+@layer legacy {
 /*
    PROFAS TASTE LAYER
    Tidal Editorial: calm, asymmetric, tactile, and deliberately free of neon UI.
@@ -1994,4 +1995,6 @@ html body .lms-hero-copy > p {
   max-width: min(1240px, 95%);
   margin: 40px auto 0;
   z-index: 10;
+}
+
 }

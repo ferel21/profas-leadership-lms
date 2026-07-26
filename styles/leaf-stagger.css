@@ -1,3 +1,4 @@
+@layer legacy {
 /*
   PROFAS SCROLL REVEAL
   The browser Web Animations API drives a restrained fade + vertical slide.
@@ -35,4 +36,6 @@
     transition: none !important;
     will-change: auto !important;
   }
+}
+
 }

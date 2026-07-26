@@ -93,6 +93,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
         }
       });
 
+      await tx.notification.create({
+        data: {
+          userId: attempt.userId,
+          title: serverPassed ? 'Tugas Anda Telah Dinilai ✅' : 'Tugas Anda Telah Dinilai',
+          message: serverPassed
+            ? `Selamat! Tugas "${attempt.assessment.title}" pada program ${attempt.assessment.course.title} telah dinilai dan Anda dinyatakan lulus dengan skor ${finalScore}.`
+            : `Tugas "${attempt.assessment.title}" pada program ${attempt.assessment.course.title} telah dinilai dengan skor ${finalScore}. Silakan cek catatan mentor pada riwayat pembelajaran Anda.`,
+          type: 'ASSESSMENT_GRADED',
+          link: '/riwayat'
+        }
+      });
+
       // If passed, award XP and mark completion
       if (serverPassed && !attempt.passed) {
         const existingXp = await tx.xPLog.findUnique({

@@ -27,7 +27,7 @@ export default async function RiwayatPembelajaran() {
   ]);
 
   // Normalisasi aktivitas menjadi format timeline
-  type TimelineItem = { id: string; date: Date; type: "LESSON" | "EVALUATION" | "XP"; title: string; subtitle: string; icon: React.ElementType; meta?: string; link?: string };
+  type TimelineItem = { id: string; date: Date; type: "LESSON" | "EVALUATION" | "XP"; title: string; subtitle: string; icon: React.ElementType; meta?: string; link?: string; feedback?: string };
   const timeline: TimelineItem[] = [];
 
   lessons.forEach((l) => {
@@ -43,14 +43,19 @@ export default async function RiwayatPembelajaran() {
   });
 
   attempts.forEach((a) => {
+    const awaitingGrade = a.status === "PENDING_GRADE" || a.status === "SUBMITTED";
     timeline.push({
       id: `attempt-${a.id}`,
       date: a.submittedAt,
       type: "EVALUATION",
-      title: `Evaluasi ${a.passed ? "Lulus" : "Selesai"}: ${a.assessment.title}`,
+      title: awaitingGrade
+        ? `Menunggu Penilaian: ${a.assessment.title}`
+        : `Evaluasi ${a.passed ? "Lulus" : "Selesai"}: ${a.assessment.title}`,
       subtitle: a.assessment.course.title,
-      icon: a.passed ? CheckCircle2 : Clock,
-      meta: `Skor: ${a.score}`
+      icon: awaitingGrade ? Clock : (a.passed ? CheckCircle2 : Clock),
+      meta: awaitingGrade ? "Menunggu Mentor" : `Skor: ${a.score}`,
+      link: `/belajar/${a.assessment.course.slug}`,
+      feedback: !awaitingGrade && a.feedback ? a.feedback : undefined
     });
   });
 
@@ -106,6 +111,9 @@ export default async function RiwayatPembelajaran() {
                       {item.meta && <strong className={`meta-badge type-${item.type.toLowerCase()}`}>{item.meta}</strong>}
                     </div>
                     <p>{item.subtitle}</p>
+                    {item.feedback && (
+                      <p className="timeline-feedback">&ldquo;{item.feedback}&rdquo;</p>
+                    )}
                     {item.link && (
                       <Link href={item.link} className="timeline-link">
                         Lihat <ArrowRight size={14} />

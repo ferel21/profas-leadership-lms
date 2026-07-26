@@ -1618,6 +1618,11 @@
   line-height: 1.9;
   font-size: 1.18rem;
   color: var(--ink-body);
+  /* Isi pelajaran TEXT/DOCUMENT dirender apa adanya sebagai satu text node,
+     tanpa parser markdown — tanpa ini paragraf ganda dan baris baru dari
+     mentor kolaps jadi satu blok teks tak terputus. Pola yang sama sudah
+     dipakai `.forum-post-content` (:3330) dan `.forum-reply-content`. */
+  white-space: pre-wrap;
 }
 
 .player-actions-row {

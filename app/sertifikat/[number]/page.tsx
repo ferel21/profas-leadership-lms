@@ -73,7 +73,7 @@ export default async function CertificatePage({ params }: { params?: Promise<{ n
 
 				<div className="cert-signature">
 					<span>
-						<i>Ratna Maharani</i>
+						<i>{cert.course?.mentor?.name || "Dr. Ratna Maharani"}</i>
 						<b>{cert.course?.mentor?.name || "Dr. Ratna Maharani"}</b>
 						<small>Lead Facilitator PROFAS</small>
 					</span>

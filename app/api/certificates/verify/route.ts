@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { prisma } from "@/services/prisma";
+import { rateLimit } from "@/services/rate-limit";
 
 const certificatesLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 

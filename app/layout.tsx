@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
-import { RouteProgressBar } from "@/components/RouteProgressBar";
-import { GlobalLeafStagger } from "@/components/GlobalLeafStagger";
-import { WebVitalsReporter } from "@/components/WebVitalsReporter";
-import "./typography.css";
-import "./design-system.css";
-import "./master.css";
+import { RouteProgressBar } from "@/components/ui/RouteProgressBar";
+import { GlobalLeafStagger } from "@/components/ui/GlobalLeafStagger";
+import { WebVitalsReporter } from "@/components/ui/WebVitalsReporter";
+import "@/styles/typography.css";
+import "@/styles/design-system.css";
+import "@/styles/master.css";
 
-import "./premium.css";
-import "./pro-lms.css";
-import "./enterprise-lms.css";
-import "./taste.css";
-import "./lms-fresh.css";
-import './akseslegal-theme.css';
-import './home-landing.css';
-import './leaf-stagger.css';
-import './home-scroll.css';
+import "@/styles/premium.css";
+import "@/styles/pro-lms.css";
+import "@/styles/enterprise-lms.css";
+import "@/styles/taste.css";
+import "@/styles/lms-fresh.css";
+import "@/styles/akseslegal-theme.css";
+import "@/styles/home-landing.css";
+import "@/styles/leaf-stagger.css";
+import "@/styles/home-scroll.css";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";

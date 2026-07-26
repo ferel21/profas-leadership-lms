@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
 import { Role, Persona } from "@prisma/client";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/services/rate-limit";
 
 const userLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 

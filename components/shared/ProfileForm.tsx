@@ -6,7 +6,7 @@ import {
   AtSign, BriefcaseBusiness, Camera, CheckCircle2, LoaderCircle,
   Mail, MapPin, Pencil, Phone, RotateCcw, ShieldCheck, UserRound, XCircle,
 } from "lucide-react";
-import { initials } from "@/lib/utils";
+import { initials } from "@/utils";
 
 type ProfileData = {
   name: string;

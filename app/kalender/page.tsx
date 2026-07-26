@@ -1,9 +1,9 @@
-import { getCurrentUser } from "@/lib/auth";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Calendar as CalendarIcon, Clock, MapPin, Video, Info, ClipboardCheck } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/services/prisma";
 
 export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ m?: string, y?: string }> }) {
   const user = await getCurrentUser();

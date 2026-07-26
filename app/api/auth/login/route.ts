@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
-import { createToken } from "@/lib/auth";
+import { prisma } from "@/services/prisma";
+import { createToken } from "@/services/auth";
 
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/services/rate-limit";
 
 const schema = z.object({ email: z.string().trim().toLowerCase().email().max(120), password: z.string().min(6).max(128), remember: z.boolean().optional() });
 const loginLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });

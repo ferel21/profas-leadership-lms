@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getCurrentUser } from "@/lib/auth";
-import { initials } from "@/lib/utils";
+import { getCurrentUser } from "@/services/auth";
+import { initials } from "@/utils";
 import { Logo } from "./Logo";
 import { MobileMenu } from "./MobileMenu";
 

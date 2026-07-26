@@ -1,7 +1,7 @@
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
 import { redirect } from "next/navigation";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { BuilderClient } from "./BuilderClient";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";

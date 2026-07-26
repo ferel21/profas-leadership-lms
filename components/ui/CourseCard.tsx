@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Clock3, Crown, Sparkles, Star, Users } from "lucide-react";
-import { formatRupiah } from "@/lib/utils";
+import { formatRupiah } from "@/utils";
 
 type CourseCardProps = {
   course: { slug: string; title: string; shortDescription: string; category: string; level: string; price: number; durationHours: number; rating: number; studentsCount: number; image: string; mentor?: { name: string } };

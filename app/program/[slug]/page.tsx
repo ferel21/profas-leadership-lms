@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Award, BookOpen, Check, ChevronRight, Clock3, Globe2, PlayCircle, ShieldCheck, Star, Users } from "lucide-react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { EnrollButton } from "@/components/EnrollButton";
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
-import { formatRupiah, initials } from "@/lib/utils";
+import { Header } from "@/components/ui/Header";
+import { Footer } from "@/components/ui/Footer";
+import { EnrollButton } from "@/components/shared/EnrollButton";
+import { prisma } from "@/services/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { formatRupiah, initials } from "@/utils";
 
 export default async function CourseDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

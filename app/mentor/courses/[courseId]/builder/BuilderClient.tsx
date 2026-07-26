@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Edit2, Trash2, GripVertical, FileText, PlayCircle, Folder, ChevronRight, ChevronDown, Save, Link2, HelpCircle, Loader2, Sparkles, FileUp, X } from "lucide-react";
-
-export type NodeType = "FOLDER" | "VIDEO" | "PDF" | "DOCUMENT" | "IMAGE" | "LINK" | "QUIZ" | "ASSIGNMENT" | "TEXT";
+import { useLocalBackup } from "@/hooks/useLocalBackup";
+import type { NodeType } from "@/types/course";
 
 export type CourseNode = {
   id: string;
@@ -50,36 +50,17 @@ function typeBadge(type: NodeType) {
 }
 
 export function BuilderClient({ course }: { course: { id: string; nodes: CourseNode[] } }) {
-  const [nodes, setNodes] = useState<CourseNode[]>(course.nodes);
+  // MASTER SKILL: Auto-Backup & Auto-Restore ke localStorage (Menanggulangi reset database ephemeral Vercel)
+  const {
+    items: nodes,
+    setItems: setNodes,
+    restored: backupRestored,
+    clearBackup: clearNodesBackup,
+  } = useLocalBackup<CourseNode>(`profas_lms_backup_${course.id}`, course.nodes);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-  const [backupRestored, setBackupRestored] = useState(false);
-
-  // MASTER SKILL: Auto-Backup & Auto-Restore ke localStorage (Menanggulangi reset database ephemeral Vercel)
-  useEffect(() => {
-    const backupKey = `profas_lms_backup_${course.id}`;
-    const savedBackup = localStorage.getItem(backupKey);
-    if (savedBackup) {
-      try {
-        const parsed = JSON.parse(savedBackup);
-        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-          setNodes(parsed);
-          setBackupRestored(true);
-        }
-      } catch (e) {
-        console.error("Failed to restore curriculum backup:", e);
-      }
-    }
-  }, [course.id]);
-
-  useEffect(() => {
-    if (nodes) {
-      const backupKey = `profas_lms_backup_${course.id}`;
-      localStorage.setItem(backupKey, JSON.stringify(nodes));
-    }
-  }, [nodes, course.id]);
 
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -449,9 +430,8 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
             <button 
               onClick={() => {
                 if (confirm("Reset kurikulum ke data asli dari server Vercel dan hapus cadangan lokal browser?")) {
-                  localStorage.removeItem(`profas_lms_backup_${course.id}`);
+                  clearNodesBackup();
                   setNodes(course.nodes);
-                  setBackupRestored(false);
                 }
               }}
               className="btn btn-outline hover-lift" 

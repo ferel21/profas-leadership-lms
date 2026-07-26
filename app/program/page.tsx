@@ -1,7 +1,7 @@
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { ProgramCatalog } from "@/components/ProgramCatalog";
-import { cachedQuery, prisma } from "@/lib/prisma";
+import { Header } from "@/components/ui/Header";
+import { Footer } from "@/components/ui/Footer";
+import { ProgramCatalog } from "@/components/shared/ProgramCatalog";
+import { cachedQuery, prisma } from "@/services/prisma";
 
 export const revalidate = 3600;
 

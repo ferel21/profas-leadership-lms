@@ -1,10 +1,10 @@
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
 import { redirect } from "next/navigation";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { FileCheck2, Search, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
-import { initials } from "@/lib/utils";
+import { initials } from "@/utils";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Makassar" }).format(date);

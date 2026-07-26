@@ -1,0 +1,63 @@
+# Template workflow — copy to .github/workflows/quality.yml once the GitHub
+# token/repository has the `workflow` permission (same convention as
+# deploy/vps/vps-deploy.workflow.yml).
+#
+# Runs on every PR into main: typecheck and duplicate-code checks block the
+# merge on real problems; eslint --fix only touches mechanical issues
+# (formatting, unused imports, etc.) and commits them back to the PR branch.
+# No automatic logic changes are ever made.
+name: Quality gate & autofix
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profas-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Typecheck, autofix, lint, duplicate-code report
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Typecheck (blocks merge on real type errors)
+        run: npm run typecheck
+
+      - name: Autofix mechanical lint issues
+        run: npm run lint:fix
+
+      - name: Commit autofix changes back to the PR branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: autofix mechanical lint issues [skip ci]"
+          file_pattern: "*.ts *.tsx"
+
+      - name: Lint (blocks merge on remaining real issues)
+        run: npm run lint
+
+      - name: Duplicate-code report (blocks merge above threshold)
+        run: npm run dup:check

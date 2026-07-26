@@ -6,11 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { Award, Bell, BookOpen, Check, ClipboardCheck, FolderUp, Gauge, LayoutDashboard, LogOut, Menu, Trophy, X, History, Users, FileCheck2, Calendar, MessageSquare, Settings, PieChart, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
-import { initials } from "@/lib/utils";
+import { initials } from "@/utils";
 import dynamic from "next/dynamic";
 
 const CommandPalette = dynamic(() => import("./CommandPalette").then(m => ({ default: m.CommandPalette })), { ssr: false });
-const ExecutiveExportHubModal = dynamic(() => import("./ExecutiveExportHubModal").then(m => ({ default: m.ExecutiveExportHubModal })), { ssr: false });
+const ExecutiveExportHubModal = dynamic(() => import("@/components/shared/ExecutiveExportHubModal").then(m => ({ default: m.ExecutiveExportHubModal })), { ssr: false });
 
 type UserShape = { name:string;username?:string|null;email:string;role:string;avatar?:string|null;headline?:string|null };
 type NotificationItem = { id: string; title: string; message: string; read: boolean; link: string | null; createdAt: string };

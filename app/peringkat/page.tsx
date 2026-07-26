@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { Trophy } from "lucide-react";
-import { DashboardChrome } from "@/components/DashboardChrome";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma, cachedQuery } from "@/lib/prisma";
-import { initials, personaLabel } from "@/lib/utils";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { prisma, cachedQuery } from "@/services/prisma";
+import { initials, personaLabel } from "@/utils";
 
 const getLeaderboardStudents = cachedQuery(
   async () => prisma.user.findMany({where:{role:"STUDENT"},take: 200,select:{id:true,name:true,persona:true,xpLogs:{select:{points:true}},userBadges:{include:{badge:true}}}}),

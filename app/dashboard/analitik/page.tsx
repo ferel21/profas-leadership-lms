@@ -1,10 +1,10 @@
-import { getCurrentUser } from "@/lib/auth";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/services/prisma";
 import { BarChart3, TrendingUp, Users, Activity, Clock } from "lucide-react";
-import { ExportDeckButton } from "@/components/ExportDeckButton";
-import { ExportTranscriptButton } from "@/components/ExportTranscriptButton";
+import { ExportDeckButton } from "@/components/shared/ExportDeckButton";
+import { ExportTranscriptButton } from "@/components/shared/ExportTranscriptButton";
 
 export default async function AnalyticsDashboardPage() {
   const user = await getCurrentUser();

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Download, CheckCircle2, Loader2, Award } from "lucide-react";
-import { generateCertificatePDF, CertificatePDFOptions } from "@/lib/pdfGenerator";
+import { generateCertificatePDF, CertificatePDFOptions } from "@/services/export/pdfGenerator";
 
 interface CertificatePDFButtonProps extends CertificatePDFOptions {
   className?: string;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Download, Share2, Loader2 } from "lucide-react";
-import { CertificatePDFButton } from "@/components/CertificatePDFButton";
+import { CertificatePDFButton } from "@/components/shared/CertificatePDFButton";
 
 interface CertificateActionsProps {
   title: string;

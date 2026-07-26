@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/services/prisma";
 import { CourseLevel } from "@prisma/client";
 import { z } from "zod";
-import { cachedQuery } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { cachedQuery } from "@/services/prisma";
+import { rateLimit } from "@/services/rate-limit";
 
 const coursesLimiter = rateLimit({ limit: 60, windowMs: 60 * 1000 });
 

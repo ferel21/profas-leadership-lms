@@ -1,8 +1,8 @@
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import nextDynamic from "next/dynamic";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/services/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/services/prisma";
 import Link from "next/link";
 import {
   BookOpen, UsersRound, Award, ChevronRight, Activity, TrendingUp,
@@ -10,13 +10,13 @@ import {
   BookMarked, PieChart
 } from "lucide-react";
 import Image from "next/image";
-import type { ReportRow } from "@/components/AdminReportTable";
+import type { ReportRow } from "@/components/shared/AdminReportTable";
 
-const AdminReportTable = nextDynamic(() => import("@/components/AdminReportTable").then(module => module.AdminReportTable));
-const MentorCourseActions = nextDynamic(() => import("@/components/MentorCourseActions").then(module => module.MentorCourseActions));
-const AdminUserManagement = nextDynamic(() => import("@/components/AdminUserManagement").then(module => module.AdminUserManagement));
-const BroadcastManager = nextDynamic(() => import("@/components/BroadcastManager").then(module => module.BroadcastManager));
-const SuperAdminAnalyticsPanel = nextDynamic(() => import("@/components/SuperAdminAnalyticsPanel").then(module => module.SuperAdminAnalyticsPanel));
+const AdminReportTable = nextDynamic(() => import("@/components/shared/AdminReportTable").then(module => module.AdminReportTable));
+const MentorCourseActions = nextDynamic(() => import("@/components/shared/MentorCourseActions").then(module => module.MentorCourseActions));
+const AdminUserManagement = nextDynamic(() => import("@/components/shared/AdminUserManagement").then(module => module.AdminUserManagement));
+const BroadcastManager = nextDynamic(() => import("@/components/shared/BroadcastManager").then(module => module.BroadcastManager));
+const SuperAdminAnalyticsPanel = nextDynamic(() => import("@/components/shared/SuperAdminAnalyticsPanel").then(module => module.SuperAdminAnalyticsPanel));
 
 export const dynamic = "force-dynamic";
 

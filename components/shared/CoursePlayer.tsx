@@ -3,11 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, Clock3, Download, FileText, Film, Image as ImageIcon, Link2, LoaderCircle, Menu, MessageSquare, Play, Send, X, Folder, FileCheck, FileCode, RefreshCw } from "lucide-react";
-import { initials } from "@/lib/utils";
-import { CompletionCelebration } from "./CompletionCelebration";
+import { initials } from "@/utils";
+import { CompletionCelebration } from "@/components/ui/CompletionCelebration";
 import { AILeadershipTutor } from "./AILeadershipTutor";
-
-export type NodeType = "FOLDER" | "VIDEO" | "PDF" | "DOCUMENT" | "IMAGE" | "LINK" | "QUIZ" | "ASSIGNMENT" | "TEXT";
+import type { NodeType } from "@/types/course";
 
 export type DiscussionPost = { id: string; content: string; createdAt: Date | string; user: { id: string; name: string } };
 export type CourseNode = {

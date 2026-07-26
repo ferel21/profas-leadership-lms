@@ -17,13 +17,13 @@ import {
   Target,
   Users2,
 } from "lucide-react";
-import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { CourseCard } from "@/components/CourseCard";
-import { LandingScrollDirector } from "@/components/LandingScrollDirector";
-import ScrollStack, { ScrollStackItem } from "@/components/ScrollStack";
-import { LiveActivityFeed } from "@/components/LiveActivityFeed";
+import { prisma } from "@/services/prisma";
+import { Header } from "@/components/ui/Header";
+import { Footer } from "@/components/ui/Footer";
+import { CourseCard } from "@/components/ui/CourseCard";
+import { LandingScrollDirector } from "@/components/shared/LandingScrollDirector";
+import ScrollStack, { ScrollStackItem } from "@/components/ui/ScrollStack";
+import { LiveActivityFeed } from "@/components/ui/LiveActivityFeed";
 
 type FeaturedCourse = {
   id: string;

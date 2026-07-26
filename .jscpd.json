@@ -1,0 +1,21 @@
+{
+  "threshold": 3,
+  "minLines": 10,
+  "minTokens": 70,
+  "reporters": ["console"],
+  "path": [
+    "app",
+    "components",
+    "services",
+    "utils",
+    "hooks",
+    "context",
+    "types",
+    "constants",
+    "middleware.ts"
+  ],
+  "ignore": [
+    "**/*.d.ts"
+  ],
+  "absolute": true
+}

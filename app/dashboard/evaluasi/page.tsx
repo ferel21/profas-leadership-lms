@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { DashboardChrome } from "@/components/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { Filter, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/utils";
 
 export default async function MentorEvaluasiPage({ searchParams }: { searchParams: Promise<{ userId?: string }> }) {
   const user = await getCurrentUser();

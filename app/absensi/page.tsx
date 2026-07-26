@@ -1,9 +1,9 @@
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { AttendanceClient } from "@/components/AttendanceClient";
-import { DashboardChrome } from "@/components/DashboardChrome";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { AttendanceClient } from "@/components/shared/AttendanceClient";
+import { DashboardChrome } from "@/components/ui/DashboardChrome";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
 
 export default async function AttendancePage() {
   const user = await getCurrentUser();

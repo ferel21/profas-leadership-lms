@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Award, CheckCircle2, ExternalLink, QrCode } from "lucide-react";
-import { prisma } from "@/lib/prisma";
-import { Logo } from "@/components/Logo";
-import { CertificateActions } from "@/components/CertificateActions";
+import { prisma } from "@/services/prisma";
+import { Logo } from "@/components/ui/Logo";
+import { CertificateActions } from "@/components/shared/CertificateActions";
 
 export default async function CertificatePage({ params }: { params?: Promise<{ number: string }> }) {
 	const resolvedParams = await params;

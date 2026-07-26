@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/services/prisma";
 import { Persona } from "@prisma/client";
 import { z } from "zod";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/services/rate-limit";
 
 const leaderboardLimiter = rateLimit({ limit: 60, windowMs: 60 * 1000 });
 

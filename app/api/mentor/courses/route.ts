@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
 import { CourseLevel } from "@prisma/client";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/services/rate-limit";
 
 const courseLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 

@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { extname } from "node:path";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { getReadableUploadRoots, resolveUploadPath } from "@/lib/upload-storage";
-import { rateLimit } from "@/lib/rate-limit";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { getReadableUploadRoots, resolveUploadPath } from "@/services/upload-storage";
+import { rateLimit } from "@/services/rate-limit";
 
 const uploadsLimiter = rateLimit({ limit: 120, windowMs: 60 * 1000 });
 

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
 import { unlink } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { getReadableUploadRoots, resolveUploadPath, uploadSegmentsFromUrl } from "@/lib/upload-storage";
-import { rateLimit } from "@/lib/rate-limit";
+import { getReadableUploadRoots, resolveUploadPath, uploadSegmentsFromUrl } from "@/services/upload-storage";
+import { rateLimit } from "@/services/rate-limit";
 
 const deleteLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 

@@ -12,7 +12,8 @@
 - **Local Development**: `npm run dev` (Runs on port 3000)
 - **Build**: `npm run build` (Executes Prisma generate, schema push, seeding, and Next.js production build)
 - **Typecheck**: `npm run typecheck`
-- **Lint**: `npm run lint`
+- **Lint**: `npm run lint` (auto-fix mechanical issues: `npm run lint:fix`)
+- **Duplicate-code check**: `npm run dup:check` (jscpd, config in `.jscpd.json`)
 - **Smoke Test**: `npm run smoke`
 - **Autopilot Loop**: `npm run autopilot:start` / `npm run autopilot:status`
 
@@ -31,10 +32,23 @@
    - Modular, clean TypeScript code with strict typing.
    - Avoid ad-hoc utility clutter; leverage reusable design tokens and components.
    - Preserve existing documentation and docstrings.
+4. **Folder Structure** (adapted from standard React layout to Next.js App Router — `app/` stays at root for routing):
+   - `app/` — routes only (App Router convention, cannot move).
+   - `components/ui/` — small, reusable presentational components (Header, Footer, Logo, cards, chrome).
+   - `components/shared/` — feature/business-logic components (CoursePlayer, Quiz, admin/mentor panels, export buttons).
+   - `services/` — DB client, auth, rate-limit, uploads, and `services/export/` (docx/pdf/pptx/xlsx generators).
+   - `utils/` — small pure helper functions.
+   - `hooks/` — reusable client-side React hooks (e.g. `useLocalBackup`).
+   - `context/` — reserved for React Context providers (empty until a real cross-cutting client state need appears).
+   - `types/` — shared TypeScript types not already covered by Prisma-generated types.
+   - `constants/` — reserved for cross-cutting constants (domain enums live in `prisma/schema.prisma` instead).
+   - `styles/` — global CSS, imported from `app/layout.tsx`.
 
 ---
 
 ## 🔄 Self-Improvement & Progress Log
+- **2026-07-26 [Phase 9 - Drop Netlify, VPS Deploy Prep]**: Removed Netlify as a deployment target — its PR preview checks were failing near-instantly (1–4s, too fast for a real build) with no accessible logs, which pointed to a broken/unconfigured integration rather than a code issue. Deleted `netlify.toml` and `docs/DEPLOYMENT_NETLIFY.md`, and updated the two docs/UI copy references (`docs/governance/ROPA-PRIVACY-RECORD.md`, `components/shared/MentorCourseActions.tsx`) that mentioned it. Note: the Netlify GitHub App/site connection itself still needs to be disconnected from Netlify's dashboard or the repo's GitHub App settings — that's outside what a code change can do. Also found and fixed real CI duplication: `deploy/ci/production.workflow.yml` and `deploy/vps/vps-deploy.workflow.yml` were two near-identical "quality gate + SSH deploy to VPS" workflows; consolidated into the single, more defensive `vps-deploy.workflow.yml` (explicit `StrictHostKeyChecking`, pre-flight secret validation, no third-party SSH action, release-SHA verification on the target host) and deleted the redundant one. Verified all VPS deploy tooling (`Dockerfile`, `docker-compose.yml`, `deploy/vps/*.sh`, `ecosystem.config.js`, nginx configs, `.env.example`) has no stale paths left over from the Phase 8 restructure. Copied both workflow templates into `.github/workflows/` now that the repo token has `workflow` permission, activating the quality gate and VPS deploy pipeline. Verified with typecheck, lint, `dup:check`, and a full production build (54/54 routes). Activation immediately surfaced a real bug: the VPS workflow's job-level `NODE_ENV=production` made `npm ci` silently skip all devDependencies (npm's `--omit=dev` behavior), which broke the `prepare: husky` lifecycle script and would have broken lint/build too — this was almost certainly also failing Vercel's build the whole time. Fixed with `"prepare": "husky || true"` in `package.json` and by dropping the unneeded job-level `NODE_ENV=production` (the build/validate-env steps don't need it ambiently). Re-verified end to end; the VPS workflow's `Quality gates` job now passes every step (install, validate-env, typecheck, lint, build, perf budget, smoke).
+- **2026-07-26 [Phase 8 - Project Restructure & Auto-Fix Pipeline]**: Reorganized the codebase to match a standard React layout adapted for Next.js App Router: split `lib/` into `services/` (DB/auth/rate-limit/uploads) + `services/export/` (docx/pdf/pptx/xlsx generators) + `utils/`; split `components/` into `components/ui/` (presentational) and `components/shared/` (feature/business logic); moved global CSS into `styles/`; added `hooks/`, `context/`, `types/`, `constants/`. Deleted two dead/unimported CSS files (`landing.css`, `home-fresh.css`) and moved four unreferenced one-off patch scripts into `scripts/legacy/`. Eliminated real duplicate code: extracted a shared `ExportActionButton` (removed ~90% duplicated state-machine/markup across the four `Export*Button` components), extracted a `useLocalBackup` hook (removed an identical localStorage auto-backup/restore pattern duplicated between the course builder and quiz builder), and centralized the duplicated `NodeType` type into `types/course.ts`. Added tooling so this stays clean going forward: `jscpd` duplicate-code gate (`npm run dup:check`, threshold 3%, current baseline 1.96%), a husky + lint-staged pre-commit hook that runs `eslint --fix` on staged files, and a CI quality-gate template (`deploy/ci/quality.workflow.yml`, follows the existing template convention — copy into `.github/workflows/` once the repo token has `workflow` permission) that runs typecheck → autofix-and-commit → lint → duplicate-code check on every PR, blocking merge on real errors without ever changing logic automatically. Verified with a full `npm ci`, `prisma generate`, typecheck, lint, `dup:check`, and production `next build` (all 54 routes) after the restructure.
 - **2026-07-13 [Phase 7 - Production Resilience]**: Hardened `getCurrentUser()` so transient Prisma/Supabase connection failures fall back to guest rendering instead of taking public pages into the global error boundary. Verified with a deliberately unavailable database, plus typecheck, lint, build, smoke, and live production health checks.
 - **2026-07-13 [Phase 6 - Credential Verification]**: Replaced simulated admin certificate checks with database-backed verification, added the public `/verifikasi` portal with loading/success/error states, linked it from the admin panel and footer, and extended the smoke test to cover the new route.
 - **2026-07-13 [Phase 5 - Landing Page Refinement]**: Refined the public landing page around the active royal-blue identity (`#2A6BA7`), repaired the unstyled insight cards, added an accessible FAQ section with an organization CTA, improved CTA hierarchy and focus states, and verified with typecheck, changed-file lint, production build, and the full smoke test.

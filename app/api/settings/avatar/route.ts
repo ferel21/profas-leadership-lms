@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { getCurrentUser } from "@/services/auth";
+import { prisma } from "@/services/prisma";
+import { rateLimit } from "@/services/rate-limit";
 
 const avatarLimiter = rateLimit({ limit: 10, windowMs: 60 * 1000 });
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB

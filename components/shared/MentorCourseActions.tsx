@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Plus, Upload, Loader2, X, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ExportReportsButton } from "@/components/ExportReportsButton";
+import { ExportReportsButton } from "@/components/shared/ExportReportsButton";
 
 type CourseOption = {
   id: string;
@@ -289,7 +289,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                   type="url" value={matLink} onChange={e => setMatLink(e.target.value)} placeholder="https://youtube.com/... atau https://drive.google.com/..."
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
                 />
-                <small className="text-slate-400 text-xs mt-1 block">Sangat disarankan untuk serverless / Netlify / Vercel agar tidak membebani penyimpanan sementara.</small>
+                <small className="text-slate-400 text-xs mt-1 block">Sangat disarankan untuk deployment serverless / Vercel agar tidak membebani penyimpanan sementara.</small>
               </div>
 
               <div>

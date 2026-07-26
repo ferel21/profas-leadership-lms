@@ -58,7 +58,7 @@ export async function POST(request: Request) {
           author: { select: { id: true, name: true, role: true, avatar: true } }
         }
       });
-      
+
       // Update thread updatedAt timestamp
       await tx.forumThread.update({
         where: { id: threadId },
@@ -68,6 +68,28 @@ export async function POST(request: Request) {
       await tx.activityLog.create({
         data: { userId: user.id, action: "CREATE_FORUM_REPLY", metadata: JSON.stringify({ replyId: created.id, threadId }) }
       });
+
+      // Notify other thread participants (the original author plus anyone
+      // else who has replied) so a reply doesn't go unnoticed by everyone
+      // except whoever happens to revisit the thread.
+      const previousReplies = await tx.forumReply.findMany({
+        where: { threadId, id: { not: created.id } },
+        select: { authorId: true },
+        distinct: ["authorId"]
+      });
+      const participantIds = new Set([thread.authorId, ...previousReplies.map(r => r.authorId)]);
+      participantIds.delete(user.id);
+      if (participantIds.size > 0) {
+        await tx.notification.createMany({
+          data: [...participantIds].map(userId => ({
+            userId,
+            title: "Balasan Baru di Diskusi",
+            message: `${user.name ?? "Seseorang"} membalas diskusi "${thread.title}".`,
+            type: "FORUM_REPLY",
+            link: `/forum/${threadId}`
+          }))
+        });
+      }
 
       return created;
     });

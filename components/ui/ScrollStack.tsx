@@ -1,29 +1,9 @@
 'use client';
 
-import React, { useLayoutEffect, useRef, useCallback, useState, useEffect } from 'react';
+import React, { useLayoutEffect, useRef, useCallback } from 'react';
 import Lenis from 'lenis';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import './ScrollStack.css';
-
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-
-// Sinkron dengan preferensi sistem, dan ikut berubah bila user mengubahnya
-// tanpa reload. Ini tidak bisa ditangani oleh blok CSS `prefers-reduced-motion`
-// mana pun: Lenis membajak scroll window lewat JS, dan transform pin-and-scale
-// ditulis sebagai inline style pada tiap frame — keduanya kebal terhadap CSS.
-function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia(REDUCED_MOTION_QUERY);
-    setReduced(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-
-  return reduced;
-}
 
 export interface ScrollStackItemProps {
   children: React.ReactNode;

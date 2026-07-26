@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Award, CheckCircle2, Home, Sparkles } from "lucide-react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type LessonCompleteProps = {
   mode: "lesson";
@@ -21,6 +22,7 @@ type Props = LessonCompleteProps | CourseCompleteProps;
 
 export function CompletionCelebration(props: Props) {
   const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
   const [countdown, setCountdown] = useState(6);
   const [visible, setVisible] = useState(false);
 
@@ -54,23 +56,30 @@ export function CompletionCelebration(props: Props) {
 
   return (
     <div className={`completion-overlay ${visible ? "show" : ""}`}>
-      <div className="completion-confetti" aria-hidden="true">
-        {Array.from({ length: 40 }, (_, i) => (
-          <span
-            key={i}
-            style={{
-              left: `${Math.random() * 100}%`,
-              backgroundColor: confettiColors[i % confettiColors.length],
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-              width: `${6 + Math.random() * 8}px`,
-              height: `${6 + Math.random() * 8}px`,
-              borderRadius: Math.random() > 0.5 ? "50%" : "2px",
-              transform: `rotate(${Math.random() * 360}deg)`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Confetti tidak dirender sama sekali saat hemat gerak: 40 partikel yang
+          berjatuhan memenuhi layar adalah pemicu klasik gangguan vestibular, dan
+          keberadaannya di DOM *adalah* animasinya — sehingga tidak bisa diredam
+          lewat blok CSS `prefers-reduced-motion`. Isi perayaannya sendiri
+          (checkmark, judul, sertifikat) tetap tampil utuh. */}
+      {!prefersReducedMotion && (
+        <div className="completion-confetti" aria-hidden="true">
+          {Array.from({ length: 40 }, (_, i) => (
+            <span
+              key={i}
+              style={{
+                left: `${Math.random() * 100}%`,
+                backgroundColor: confettiColors[i % confettiColors.length],
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${2 + Math.random() * 3}s`,
+                width: `${6 + Math.random() * 8}px`,
+                height: `${6 + Math.random() * 8}px`,
+                borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+                transform: `rotate(${Math.random() * 360}deg)`,
+              }}
+            />
+          ))}
+        </div>
+      )}
       <div className="completion-content">
         <div className="completion-checkmark">
           <Sparkles />

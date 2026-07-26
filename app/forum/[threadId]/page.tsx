@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { DashboardChrome } from "@/components/ui/DashboardChrome";
+import { ForumReplyForm } from "@/components/shared/ForumReplyForm";
 import Link from "next/link";
 import { formatDate, initials } from "@/utils";
 import { ArrowLeft, MessageSquare, Pin, Shield } from "lucide-react";
@@ -102,13 +103,7 @@ export default async function ForumThreadPage({ params }: { params: Promise<{ th
         {!thread.locked ? (
           <div className="forum-reply-box">
             <h3 className="m-0 mb-4 text-lg font-bold text-slate-800">Tulis Balasan</h3>
-            <form className="flex flex-col gap-4">
-              <textarea 
-                placeholder="Tulis pendapat atau pertanyaan Anda di sini..."
-                className="forum-textarea"
-              />
-              <button type="button" className="btn btn-primary self-end">Kirim Balasan</button>
-            </form>
+            <ForumReplyForm threadId={thread.id} />
           </div>
         ) : (
           <div className="p-8 text-center bg-slate-100 rounded-xl text-slate-500 font-medium">

@@ -1908,6 +1908,15 @@
   gap: 8px;
 }
 
+.player-tree-chevron {
+  transition: transform 180ms ease, color 180ms ease;
+  color: var(--teal);
+}
+
+details[open] > summary > .player-tree-chevron {
+  transform: rotate(180deg);
+}
+
 .player-tree-children {
   margin-left: 12px;
   padding-left: 8px;

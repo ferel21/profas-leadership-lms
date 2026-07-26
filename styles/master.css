@@ -18,7 +18,7 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-glass: 0 8px 32px 0 rgba(13, 148, 136, 0.15);
+  --shadow-glass: 0 8px 32px 0 rgba(42, 107, 167, 0.15);
 
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -360,7 +360,7 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
   max-width: 440px;
   width: 92%;
   text-align: center;
-  box-shadow: var(--shadow-xl), 0 0 60px rgba(13, 148, 136, 0.12);
+  box-shadow: var(--shadow-xl), 0 0 60px rgba(42, 107, 167, 0.12);
   animation: scale-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
 }
 
@@ -388,7 +388,7 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
   margin-bottom: 1.25rem;
   animation: checkmark-bounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.35s
     both;
-  box-shadow: 0 8px 30px rgba(13, 148, 136, 0.35);
+  box-shadow: 0 8px 30px rgba(42, 107, 167, 0.35);
 }
 
 .completion-checkmark svg {
@@ -718,12 +718,12 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
     var(--color-primary-dark)
   );
   color: #fff;
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+  box-shadow: 0 4px 14px rgba(42, 107, 167, 0.3);
 }
 
 .completion-actions .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
+  box-shadow: 0 6px 20px rgba(42, 107, 167, 0.4);
 }
 
 .completion-actions .btn-secondary {
@@ -801,9 +801,9 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
 
 .upload-zone.dragover {
   border-color: var(--color-primary);
-  background: rgba(13, 148, 136, 0.06);
+  background: rgba(42, 107, 167, 0.06);
   border-style: solid;
-  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.08);
+  box-shadow: 0 0 0 4px rgba(42, 107, 167, 0.08);
 }
 
 .upload-zone-icon {
@@ -826,7 +826,7 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
 
 .upload-zone.dragover .upload-zone-icon {
   transform: scale(1.12);
-  background: rgba(13, 148, 136, 0.15);
+  background: rgba(42, 107, 167, 0.15);
 }
 
 .upload-zone-text {
@@ -882,7 +882,7 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
 .upload-form select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+  box-shadow: 0 0 0 3px rgba(42, 107, 167, 0.1);
 }
 
 .upload-form textarea {
@@ -1534,12 +1534,12 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
 }
 
 .notification-item.unread {
-  background: rgba(13, 148, 136, 0.03);
+  background: rgba(42, 107, 167, 0.03);
   border-left: 3px solid var(--color-primary);
 }
 
 .notification-item.unread:hover {
-  background: rgba(13, 148, 136, 0.06);
+  background: rgba(42, 107, 167, 0.06);
 }
 
 .notification-item .notif-icon {
@@ -2020,9 +2020,9 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
 .attendance-notice.error { color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; }
 .attendance-list { display: flex; flex-direction: column; gap: 1rem; }
 .attendance-card { padding: 0; overflow: hidden; border-color: #e2e8f0; }
-.attendance-card.is-open { border-color: #5eead4; box-shadow: 0 8px 28px rgba(13,148,136,.08); }
+.attendance-card.is-open { border-color: #5eead4; box-shadow: 0 8px 28px rgba(42, 107, 167,.08); }
 .attendance-card-head { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; }
-.attendance-date { width: 54px; height: 58px; border-radius: 10px; display: grid; place-content: center; text-align: center; background: #f0fdfa; color: #0f766e; }
+.attendance-date { width: 54px; height: 58px; border-radius: 10px; display: grid; place-content: center; text-align: center; background: #f0fdfa; color: #2a6ba7; }
 .attendance-date b { font-size: 1.35rem; line-height: 1; }
 .attendance-date span { margin-top: .25rem; font-size: .65rem; font-weight: 800; text-transform: uppercase; }
 .attendance-event-title > span { color: var(--color-primary); font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
@@ -2055,7 +2055,7 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
 .attendance-table td { padding: .8rem 1.5rem; border-top: 1px solid #f1f5f9; color: #475569; }
 .attendance-table select { min-width: 125px; padding: .45rem .55rem; border: 1px solid #cbd5e1; border-radius: 7px; color: #334155; background: #fff; font-size: .72rem; }
 .attendance-person { display: flex; align-items: center; gap: .65rem; min-width: 200px; }
-.attendance-person > span { width: 31px; height: 31px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; color: #0f766e; background: #ccfbf1; font-size: .62rem; font-weight: 800; }
+.attendance-person > span { width: 31px; height: 31px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; color: #2a6ba7; background: #ccfbf1; font-size: .62rem; font-weight: 800; }
 .attendance-person div { display: flex; flex-direction: column; }
 .attendance-person b { color: #0f172a; font-size: .75rem; }
 .attendance-person small { margin-top: .15rem; color: #94a3b8; font-size: .65rem; }
@@ -2418,12 +2418,12 @@ input[type="text"]:focus, input[type="email"]:focus {
 .profile-label small { margin-left: auto; color: #94a3b8; font-size: .68rem; font-weight: 500; }
 .profile-field input, .profile-field select, .profile-field textarea { width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 9px; padding: .72rem .8rem; color: #0f172a; background: #fff; font: inherit; font-size: .84rem; transition: border-color .2s, box-shadow .2s, background .2s; }
 .profile-field textarea { resize: vertical; min-height: 96px; line-height: 1.5; }
-.profile-field input:focus, .profile-field select:focus, .profile-field textarea:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(13,148,136,.1); }
+.profile-field input:focus, .profile-field select:focus, .profile-field textarea:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(42, 107, 167,.1); }
 .profile-field input:disabled, .profile-field select:disabled, .profile-field textarea:disabled { color: #475569; background: #f8fafc; border-color: #e2e8f0; opacity: 1; cursor: default; }
 .input-prefix { display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 9px; overflow: hidden; background: #f8fafc; }
 .input-prefix > span { padding-left: .8rem; color: #64748b; font-size: .85rem; }
 .input-prefix input { border: 0; border-radius: 0; box-shadow: none !important; }
-.input-prefix:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(13,148,136,.1); }
+.input-prefix:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(42, 107, 167,.1); }
 .has-error input, .has-error select, .has-error textarea, .has-error .input-prefix { border-color: #ef4444; }
 .field-error { color: #dc2626; font-size: .7rem; }
 .profile-actions { display: flex; justify-content: flex-end; gap: .75rem; padding: 1rem 1.75rem; border-top: 1px solid #e5e7eb; background: #f8fafc; }

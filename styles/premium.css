@@ -12,9 +12,9 @@
 }
 
 @keyframes pulseGlow {
-  0% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(13, 148, 136, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(42, 107, 167, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(42, 107, 167, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(42, 107, 167, 0); }
 }
 
 /* Base interactive elements */
@@ -42,14 +42,14 @@ input:focus, select:focus, textarea:focus {
 /* 3. BUTTONS */
 .btn-primary {
   background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%) !important;
-  box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(42, 107, 167, 0.3) !important;
   border: none !important;
   font-weight: 700 !important;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4) !important;
+  box-shadow: 0 8px 25px rgba(42, 107, 167, 0.4) !important;
 }
 
 .btn-outline {
@@ -302,8 +302,8 @@ input:focus, select:focus, textarea:focus {
 
 .glass-card:hover {
   transform: translateY(-4px) !important;
-  box-shadow: 0 12px 40px 0 rgba(13, 148, 136, 0.15) !important;
-  border-color: rgba(13, 148, 136, 0.4) !important;
+  box-shadow: 0 12px 40px 0 rgba(42, 107, 167, 0.15) !important;
+  border-color: rgba(42, 107, 167, 0.4) !important;
 }
 
 .glass-header {
@@ -323,7 +323,7 @@ input:focus, select:focus, textarea:focus {
 
 /* Glow effects */
 .glow-teal {
-  box-shadow: 0 0 25px rgba(13, 148, 136, 0.3) !important;
+  box-shadow: 0 0 25px rgba(42, 107, 167, 0.3) !important;
 }
 .glow-gold {
   box-shadow: 0 0 25px rgba(245, 158, 11, 0.3) !important;

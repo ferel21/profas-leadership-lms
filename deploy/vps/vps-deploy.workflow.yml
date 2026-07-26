@@ -30,7 +30,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Build-time values or secrets if provided; production secrets never enter the CI build artifact.
-      NODE_ENV: production
+      # NODE_ENV is intentionally NOT set here: `npm ci` treats an ambient
+      # NODE_ENV=production as --omit=dev and silently skips devDependencies
+      # (eslint, tailwindcss, jscpd, husky, ...), breaking lint/build/dup:check.
+      # `npm run validate:env -- --production` forces production-mode checks via
+      # its own --production flag, and `next build` sets production mode itself.
       DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1' }}
       DIRECT_URL: ${{ secrets.DIRECT_URL || 'postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1' }}
       JWT_SECRET: ci-only-jwt-secret-012345678901234567890123456789

@@ -3,6 +3,12 @@ import { Inter, Fraunces, Space_Grotesk } from 'next/font/google';
 import { RouteProgressBar } from "@/components/ui/RouteProgressBar";
 import { GlobalLeafStagger } from "@/components/ui/GlobalLeafStagger";
 import { WebVitalsReporter } from "@/components/ui/WebVitalsReporter";
+import { MantineProvider, ColorSchemeScript } from "@mantine/core";
+import { profasTheme } from "@/styles/mantine-theme";
+// Mantine's `styles.layer.css` build ships pre-wrapped in `@layer mantine`,
+// which is exactly what this project's cascade-layer setup needs. The layer's
+// position is declared in styles/typography.css alongside the others.
+import "@mantine/core/styles.layer.css";
 import "@/styles/typography.css";
 import "@/styles/design-system.css";
 import "@/styles/master.css";
@@ -80,16 +86,19 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="id">
       <head>
+        <ColorSchemeScript defaultColorScheme="light" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className={`${inter.variable} ${fraunces.variable} ${spaceGrotesk.variable} font-sans`} style={{ fontFamily: 'var(--font-inter, "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif)' }}>
-        <RouteProgressBar />
-        <GlobalLeafStagger />
-        <WebVitalsReporter />
-        {children}
+        <MantineProvider theme={profasTheme} defaultColorScheme="light">
+          <RouteProgressBar />
+          <GlobalLeafStagger />
+          <WebVitalsReporter />
+          {children}
+        </MantineProvider>
       </body>
     </html>
   );

@@ -12,7 +12,21 @@
    declarations still win; what layering buys is that legacy NORMAL rules
    stop beating `components` (reserved for a component library).
    ========================================================================== */
-@layer reset, tokens, legacy, components, routes;
+@layer reset, tokens, mantine, legacy, components, routes;
+
+/* `mantine` sits BELOW `legacy` deliberately.
+
+   Mantine's `styles.layer.css` bundles its component styles together with
+   global element resets (`input, button, textarea, select { font: inherit }`,
+   `*, ::before, ::after { box-sizing }`). Because layer order beats
+   specificity, putting `mantine` above `legacy` would let those bare element
+   resets override this product's own form styling everywhere — including
+   inputs that are not Mantine components at all.
+
+   Below `legacy`, Mantine's components still render correctly (nothing in
+   `legacy` targets Mantine's own class names) while its global resets stop
+   short of the existing UI. Revisit per-component if a Mantine surface is ever
+   found to be overridden by a legacy rule. */
 
 @layer tokens {
 /* 

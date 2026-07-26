@@ -22,7 +22,14 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
 // applied through CSS variables, so Next cannot tell which route uses them and
 // preloads both on every page. /masuk renders Inter only, yet was downloading
 // all four font files. They now load on demand, when a page actually uses them.
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '600', '900'], style: ['normal', 'italic'], variable: '--font-fraunces', display: 'swap', preload: false });
+// Weights track what the CSS actually authors. 700 is used by
+// .certificate-paper h2 (the recipient's name); without it loaded the browser
+// resolved 700 up to 900. 900 is authored nowhere and was only ever reached as
+// that fallback, so it is dropped -- the file count is unchanged.
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces', display: 'swap', preload: false });
+// NOT adding 600 here, though .al-float-card--ledger small authors it and the
+// browser resolves it up to 700: rendering both ways was measured at 115.77px vs
+// 115.75px, so an extra font file buys a 0.02px difference. Left as-is.
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-space', display: 'swap', preload: false });
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";
 

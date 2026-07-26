@@ -36,6 +36,49 @@ interface TransformData {
   blur: number;
 }
 
+// Multiple <ScrollStack useWindowScroll> instances on the same page (e.g. the
+// landing page's methodology and pathway sections) must not each spin up
+// their own Lenis instance — Lenis takes over the page's native scrolling to
+// apply smooth momentum, so two independent instances fight for control of
+// the same window scroll and drive two separate rAF loops, which is a real
+// source of scroll jank. Share a single instance across all of them instead.
+let sharedWindowLenis: Lenis | null = null;
+let sharedWindowLenisRefCount = 0;
+let sharedWindowLenisRaf: number | null = null;
+
+function acquireWindowLenis(): Lenis {
+  if (!sharedWindowLenis) {
+    sharedWindowLenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 2,
+      infinite: false,
+      wheelMultiplier: 1,
+      lerp: 0.1,
+      syncTouch: true,
+      syncTouchLerp: 0.075
+    });
+    const raf = (time: number) => {
+      sharedWindowLenis?.raf(time);
+      sharedWindowLenisRaf = requestAnimationFrame(raf);
+    };
+    sharedWindowLenisRaf = requestAnimationFrame(raf);
+  }
+  sharedWindowLenisRefCount += 1;
+  return sharedWindowLenis;
+}
+
+function releaseWindowLenis() {
+  sharedWindowLenisRefCount = Math.max(0, sharedWindowLenisRefCount - 1);
+  if (sharedWindowLenisRefCount === 0) {
+    if (sharedWindowLenisRaf !== null) cancelAnimationFrame(sharedWindowLenisRaf);
+    sharedWindowLenis?.destroy();
+    sharedWindowLenis = null;
+    sharedWindowLenisRaf = null;
+  }
+}
+
 const ScrollStack: React.FC<ScrollStackProps> = ({
   children,
   className = '',
@@ -214,26 +257,8 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     if (typeof window === 'undefined') return;
 
     if (useWindowScroll) {
-      const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-        touchMultiplier: 2,
-        infinite: false,
-        wheelMultiplier: 1,
-        lerp: 0.1,
-        syncTouch: true,
-        syncTouchLerp: 0.075
-      });
-
+      const lenis = acquireWindowLenis();
       lenis.on('scroll', handleScroll);
-
-      const raf = (time: number) => {
-        lenis.raf(time);
-        animationFrameRef.current = requestAnimationFrame(raf);
-      };
-      animationFrameRef.current = requestAnimationFrame(raf);
-
       lenisRef.current = lenis;
       return lenis;
     } else {
@@ -309,7 +334,12 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
       if (lenisRef.current) {
-        lenisRef.current.destroy();
+        if (useWindowScroll) {
+          lenisRef.current.off('scroll', handleScroll);
+          releaseWindowLenis();
+        } else {
+          lenisRef.current.destroy();
+        }
       }
       stackCompletedRef.current = false;
       cardsRef.current = [];

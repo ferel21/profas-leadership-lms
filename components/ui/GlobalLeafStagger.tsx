@@ -314,26 +314,33 @@ function GlobalLeafStaggerInner() {
 
       // IntersectionObserver is the primary trigger. This synchronous
       // viewport check is a safety net for hydration, prerendered Chromium,
-      // and browsers that delay their first observer callback.
-      sortTopToBottom(topLevelGroups().filter(isInViewport)).forEach((group, index) => {
-        if (group.getAttribute(REVEAL_GROUP_STATE) === "done") return;
+      // and browsers that delay their first observer callback. Already-done
+      // elements are excluded from the query itself (not just skipped after
+      // the fact) so a scroll on a long, mostly-settled page doesn't force a
+      // getBoundingClientRect() layout reflow for every already-revealed node.
+      const pendingGroups = topLevelGroups().filter(
+        (group) => group.getAttribute(REVEAL_GROUP_STATE) !== "done",
+      );
+      sortTopToBottom(pendingGroups.filter(isInViewport)).forEach((group, index) => {
         observer.unobserve(group);
         revealGroup(group, index * STAGGER_DELAY_MS);
       });
 
-      document.querySelectorAll<HTMLElement>(`.${LEAF_ITEM_CLASS}`).forEach((item) => {
-        // Some existing dashboard blocks contain a revealable item several
-        // levels below its group wrapper. If an observer callback misses that
-        // nested relationship, the visible-item safety net must still finish
-        // it rather than leaving the child at opacity: 0 forever.
-        if (!isInViewport(item)) return;
-        observer.unobserve(item);
-        if (item.classList.contains(LEAF_GROUP_CLASS)) {
-          revealGroup(item, 0);
-        } else {
-          revealElement(item, 0);
-        }
-      });
+      document
+        .querySelectorAll<HTMLElement>(`.${LEAF_ITEM_CLASS}:not([${REVEAL_STATE}="done"])`)
+        .forEach((item) => {
+          // Some existing dashboard blocks contain a revealable item several
+          // levels below its group wrapper. If an observer callback misses that
+          // nested relationship, the visible-item safety net must still finish
+          // it rather than leaving the child at opacity: 0 forever.
+          if (!isInViewport(item)) return;
+          observer.unobserve(item);
+          if (item.classList.contains(LEAF_GROUP_CLASS)) {
+            revealGroup(item, 0);
+          } else {
+            revealElement(item, 0);
+          }
+        });
     };
 
     const scheduleVisibleReveal = () => {

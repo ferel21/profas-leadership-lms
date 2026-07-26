@@ -285,8 +285,6 @@ input:focus, select:focus, textarea:focus {
 .logo b { font-size: var(--text-2xl) !important; }
 .logo small { font-size: var(--text-base) !important; }
 
-/* Global adjustments for readability */
-h1, h2, h3, h4, h5, h6 { font-family: inherit !important; }
 
 /* 
   ========================================

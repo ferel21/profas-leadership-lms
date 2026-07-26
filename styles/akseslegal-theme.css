@@ -209,7 +209,7 @@
 }
 
 .al-page .al-hero-title {
-  font-family: var(--font-fraunces, var(--font-inter, 'Inter', sans-serif)) !important;
+  font-family: var(--font-fraunces, var(--font-inter, 'Inter', sans-serif));
   font-size: clamp(2.75rem, 7vw, 6.5rem);
   font-weight: 600;
   color: var(--al-ink);

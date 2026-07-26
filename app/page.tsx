@@ -149,7 +149,7 @@ export default async function Home() {
               </div>
 
               <h1 id="home-title" className="al-hero-title">
-                Pimpin dengan <mark className="al-hero-crop">lebih jernih</mark>!
+                Pimpin dengan <mark className="al-hero-crop">lebih jernih!</mark>
                 <span>Belajar. Mencoba. Berdampak.</span>
               </h1>
 

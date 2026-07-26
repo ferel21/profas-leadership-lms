@@ -224,6 +224,13 @@
   padding: 0 0.15em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+  /* Keep the highlighted phrase on one line. Without this it wrapped between
+     "lebih" and "jernih" at every width from 768px up, rendering as two stacked
+     blue blocks whose widths differed by 26-50px -- and stranding the "!" at
+     the start of the second line. Measured safe down to 320px, where the block
+     is 248px inside a 320px viewport. `box-decoration-break: clone` stays as
+     the guard for any future phrase that does have to wrap. */
+  white-space: nowrap;
 }
 
 .al-hero-title span {
@@ -236,7 +243,11 @@
      (`color: #1e5a8f !important` di bawah) tidak pernah berpengaruh karena
      `-webkit-text-fill-color: transparent` selalu mengalahkan `color`. */
   color: var(--al-primary-dark);
-  margin-top: 10px;
+  /* Was a flat 10px, which the highlight's background box overlapped by 1-3px
+     at 1280px and above -- the block's bottom edge sat on this line. An em
+     margin tracks the clamped type scale instead, giving a consistent 9-12px
+     from 390px to 1920px. */
+  margin-top: 0.6em;
 }
 
 .al-hero-desc {

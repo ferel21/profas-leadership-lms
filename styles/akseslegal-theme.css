@@ -413,11 +413,16 @@
 }
 
 /* Visual Column */
+/* `display: block`, bukan flex. Satu-satunya anak yang berada dalam alur
+   normal di sini adalah `.al-hero-img-wrap` (exhibit tab, kedua floating card,
+   dan marquee semuanya `position: absolute`), sehingga flex tidak memberi
+   manfaat apa pun — namun kombinasi flex + `align-items: center` + child
+   ber-`aspect-ratio` membuat `width: 100%` diabaikan dan gambar disusutkan
+   dari tinggi intrinsik: 261×274px di dalam kolom selebar 511px. Dengan
+   block, gambar mengisi kolomnya (511×537px) sebagaimana dimaksud. */
 .al-hero-visual {
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
   animation: subtleFloat 8s ease-in-out infinite;
 }
 

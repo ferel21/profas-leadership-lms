@@ -4,6 +4,21 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Eye, EyeOff, LoaderCircle } from "lucide-react";
 
+/**
+ * Kotak "Akun demo" hanya untuk pengembangan lokal.
+ *
+ * Sebelumnya blok ini dirender tanpa syarat, sehingga halaman login produksi
+ * mencetak kata sandi SUPER_ADMIN yang berfungsi (`admin@profas.id`) dalam teks
+ * biasa untuk siapa pun yang membukanya.
+ *
+ * Konstanta ini sengaja dievaluasi di module scope: Next.js mengganti
+ * `process.env.NODE_ENV` saat build, sehingga pada build produksi seluruh
+ * cabang di bawah ini dihapus oleh dead-code elimination — string kata sandinya
+ * tidak ikut terkirim ke bundle sama sekali, bukan sekadar disembunyikan.
+ */
+const SHOW_DEMO_ACCOUNTS = process.env.NODE_ENV !== "production";
+const DEMO_PASSWORD = "profas123";
+
 export function AuthForm({ 
   mode, 
   redirectTo = "/dashboard", 
@@ -35,10 +50,10 @@ export function AuthForm({
     } catch { setError("Koneksi bermasalah. Periksa jaringan lalu coba lagi."); setLoading(false); }
   }
 
-  const demo = (email: string) => { 
-    const input = document.querySelector<HTMLInputElement>('input[name="email"]'); 
-    const pass = document.querySelector<HTMLInputElement>('input[name="password"]'); 
-    if (input && pass) { input.value = email; pass.value = "profas123"; } 
+  const demo = (email: string) => {
+    const input = document.querySelector<HTMLInputElement>('input[name="email"]');
+    const pass = document.querySelector<HTMLInputElement>('input[name="password"]');
+    if (input && pass) { input.value = email; pass.value = DEMO_PASSWORD; }
   };
 
   return <form onSubmit={submit} className="auth-form">
@@ -99,6 +114,6 @@ export function AuthForm({
     </div>
     {mode === "login" && <div className="form-row"><label className="remember" htmlFor="auth-remember"><input id="auth-remember" name="remember" type="checkbox"/> Ingat saya</label><Link href="mailto:halo@profas.id?subject=Bantuan%20kata%20sandi%20PROFAS">Lupa kata sandi?</Link></div>}
     <button className="btn btn-primary auth-submit auth-submit-mt hover-lift" disabled={loading} aria-busy={loading}>{loading?<LoaderCircle className="spin" aria-hidden="true"/>:<>{mode==="login"?"Masuk ke Dashboard":"Buat Akun Gratis"}<ArrowRight aria-hidden="true"/></>}</button>
-    {mode === "login" && <div className="demo-box auth-demo-mt"><b>Akun demo</b><div><button type="button" onClick={()=>demo("peserta@profas.id")} aria-label="Isi demo akun peserta">Peserta</button><button type="button" onClick={()=>demo("mentor@profas.id")} aria-label="Isi demo akun mentor">Mentor</button><button type="button" onClick={()=>demo("admin@profas.id")} aria-label="Isi demo akun admin">Admin</button></div><small>Kata sandi semua akun: profas123</small></div>}
+    {mode === "login" && SHOW_DEMO_ACCOUNTS && <div className="demo-box auth-demo-mt"><b>Akun demo <span className="demo-box-env">dev</span></b><div><button type="button" onClick={()=>demo("peserta@profas.id")} aria-label="Isi demo akun peserta">Peserta</button><button type="button" onClick={()=>demo("mentor@profas.id")} aria-label="Isi demo akun mentor">Mentor</button><button type="button" onClick={()=>demo("admin@profas.id")} aria-label="Isi demo akun admin">Admin</button></div><small>Kata sandi semua akun: {DEMO_PASSWORD}</small></div>}
   </form>;
 }

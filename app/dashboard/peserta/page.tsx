@@ -4,6 +4,7 @@ import { prisma } from "@/services/prisma";
 import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { Search, Trophy, Activity } from "lucide-react";
 import Link from "next/link";
+import { formatRelativeTime } from "@/utils";
 
 export default async function MentorPesertaPage() {
   const user = await getCurrentUser();
@@ -31,7 +32,7 @@ export default async function MentorPesertaPage() {
   });
 
   // Flatten and aggregate student data
-  type StudentRow = { id: string; name: string; email: string; persona: string | null; programs: string[]; avgProgress: number; totalXp: number; lastActive: string };
+  type StudentRow = { id: string; name: string; email: string; persona: string | null; programs: string[]; avgProgress: number; totalXp: number; lastActiveAt: Date | null };
   const studentMap = new Map<string, StudentRow>();
 
   courses.forEach(c => {
@@ -46,7 +47,7 @@ export default async function MentorPesertaPage() {
           programs: [c.title],
           avgProgress: e.progressPercent,
           totalXp,
-          lastActive: "Aktif"
+          lastActiveAt: null
         });
       } else {
         const s = studentMap.get(e.user.id)!;
@@ -55,6 +56,20 @@ export default async function MentorPesertaPage() {
       }
     });
   });
+
+  const studentIds = Array.from(studentMap.keys());
+  if (studentIds.length > 0) {
+    const lastActivities = await prisma.activityLog.findMany({
+      where: { userId: { in: studentIds } },
+      orderBy: { createdAt: "desc" },
+      distinct: ["userId"],
+      select: { userId: true, createdAt: true }
+    });
+    lastActivities.forEach(a => {
+      const s = studentMap.get(a.userId);
+      if (s) s.lastActiveAt = a.createdAt;
+    });
+  }
 
   const students = Array.from(studentMap.values()).sort((a, b) => b.totalXp - a.totalXp);
 
@@ -125,7 +140,7 @@ export default async function MentorPesertaPage() {
                   </td>
                   <td>
                     <span className="flex items-center gap-1 text-emerald-500 text-sm">
-                      <Activity size={14} /> {s.lastActive}
+                      <Activity size={14} /> {formatRelativeTime(s.lastActiveAt)}
                     </span>
                   </td>
                   <td>

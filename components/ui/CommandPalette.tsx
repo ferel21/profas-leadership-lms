@@ -93,7 +93,11 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
   if (!isOpen) return null;
 
   return (
-    <div style={{
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command palette"
+      style={{
       position: "fixed",
       inset: 0,
       zIndex: 99999,
@@ -124,6 +128,11 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
           <Search size={20} style={{ color: "#2a6ba7" }} />
           <input
             type="text"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="command-palette-listbox"
+            aria-activedescendant={filteredItems[selectedIndex]?.id}
+            aria-autocomplete="list"
             placeholder="Ketik perintah atau cari materi eksekutif (misal: 'Sertifikat', 'Modul')..."
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -139,7 +148,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
             }}
           />
           <span style={{ fontSize: "0.7rem", background: "rgba(255, 255, 255, 0.15)", padding: "4px 8px", borderRadius: "6px", color: "#cbd5e1", fontWeight: 700 }}>ESC</span>
-          <button onClick={onClose} style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", display: "flex" }}>
+          <button onClick={onClose} aria-label="Tutup" style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", display: "flex", padding: "8px", margin: "-8px", borderRadius: "8px" }}>
             <X size={20} />
           </button>
         </div>
@@ -153,13 +162,16 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
               <p style={{ margin: "4px 0 0", fontSize: "0.8rem", opacity: 0.7 }}>Coba kata kunci lain seperti &quot;Program&quot;, &quot;Forum&quot;, atau &quot;AI&quot;.</p>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div role="listbox" id="command-palette-listbox" style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               {filteredItems.map((item, idx) => {
                 const Icon = item.icon;
                 const isSelected = idx === selectedIndex;
                 return (
                   <div
                     key={item.id}
+                    id={item.id}
+                    role="option"
+                    aria-selected={isSelected}
                     onClick={() => selectItem(item)}
                     onMouseEnter={() => setSelectedIndex(idx)}
                     style={{

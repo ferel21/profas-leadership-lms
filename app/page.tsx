@@ -331,8 +331,12 @@ export default async function Home() {
               </div>
             </div>
             <div className="al-faq-list">
-              {faqItems.map(([question, answer]) => <details key={question}>
-                <summary><span>{question}</span><span className="al-faq-chevron" aria-hidden="true"><ChevronRight size={18} /></span></summary>
+              {faqItems.map(([question, answer], idx) => <details key={question}>
+                <summary>
+                  <span className="al-faq-index" aria-hidden="true">{String(idx + 1).padStart(2, "0")}</span>
+                  <span className="al-faq-question">{question}</span>
+                  <span className="al-faq-chevron" aria-hidden="true"><ChevronRight size={18} /></span>
+                </summary>
                 <p>{answer}</p>
               </details>)}
             </div>

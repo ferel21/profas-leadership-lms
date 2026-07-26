@@ -6,16 +6,16 @@
 */
 
 :root {
-  --taste-canvas: #f4f6f1;
+  --taste-canvas: #f9fafb;
   --taste-surface: #ffffff;
-  --taste-ink: #1c2825;
-  --taste-body: #586761;
-  --taste-muted: #82908a;
-  --taste-line: #dbe5df;
-  --taste-accent: #0f766e;
-  --taste-accent-soft: #e4f2ec;
-  --taste-deep: #173c37;
-  --taste-shadow: 0 24px 52px -28px rgba(29, 67, 58, 0.28);
+  --taste-ink: #101519;
+  --taste-body: #374151;
+  --taste-muted: #6b7280;
+  --taste-line: #e5e7eb;
+  --taste-accent: #2a6ba7;
+  --taste-accent-soft: #eff6ff;
+  --taste-deep: #1e5a8f;
+  --taste-shadow: 0 24px 52px -28px rgba(16, 21, 25, 0.28);
   --taste-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -181,7 +181,7 @@ html body .lms-hero {
   border: 5px solid var(--taste-surface);
   border-radius: 14px;
   background: url("/images/profas-leadership-hero.webp") center / cover no-repeat;
-  box-shadow: 0 10px 24px -16px rgba(23, 60, 55, 0.6);
+  box-shadow: 0 10px 24px -16px rgba(30, 90, 143, 0.6);
 }
 
 .lms-hero h1 .lms-inline-image {
@@ -475,7 +475,7 @@ html body .lms-hero {
 
 .lms-video-placeholder {
   background:
-    linear-gradient(135deg, rgba(23, 60, 55, 0.18), rgba(15, 118, 110, 0.56)),
+    linear-gradient(135deg, rgba(30, 90, 143, 0.18), rgba(42, 107, 167, 0.56)),
     url("/images/profas-leadership-hero.webp") center / cover no-repeat;
 }
 
@@ -523,7 +523,7 @@ html body .lms-hero {
 html body .site-header {
   background: rgba(244, 246, 241, 0.9) !important;
   border-bottom-color: var(--taste-line) !important;
-  box-shadow: 0 10px 28px -24px rgba(23, 60, 55, 0.5) !important;
+  box-shadow: 0 10px 28px -24px rgba(30, 90, 143, 0.5) !important;
 }
 
 .desktop-nav {
@@ -552,7 +552,7 @@ html body .site-header {
 }
 
 .course-card:hover {
-  border-color: rgba(15, 118, 110, 0.55) !important;
+  border-color: rgba(42, 107, 167, 0.55) !important;
   box-shadow: var(--taste-shadow) !important;
 }
 
@@ -750,7 +750,7 @@ html body .module-list button.active {
 .route-progress-bar__fill {
   height: 100%;
   background: var(--taste-accent);
-  box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.08);
+  box-shadow: 0 0 0 1px rgba(42, 107, 167, 0.08);
   transition: width 180ms var(--taste-ease), opacity 180ms ease;
 }
 
@@ -838,8 +838,8 @@ html body .dash-card-clean:hover,
 html body .dash-chart-card:hover,
 html body .dash-roadmap-box:hover {
   transform: translateY(-1px);
-  border-color: rgba(15, 118, 110, 0.34) !important;
-  box-shadow: 0 16px 36px -28px rgba(23, 60, 55, 0.55) !important;
+  border-color: rgba(42, 107, 167, 0.34) !important;
+  box-shadow: 0 16px 36px -28px rgba(30, 90, 143, 0.55) !important;
 }
 
 html body .stat-card-icon {
@@ -896,7 +896,7 @@ html body .dash-roadmap-node {
 }
 
 html body .dash-roadmap-node.active {
-  border-color: rgba(15, 118, 110, 0.42) !important;
+  border-color: rgba(42, 107, 167, 0.42) !important;
   background: var(--taste-accent-soft) !important;
 }
 
@@ -926,7 +926,7 @@ html body .dash-mentor-course-item:hover,
 html body .dash-quick-item:hover,
 html body .dash-quick-admin-item:hover {
   background: var(--taste-surface) !important;
-  border-color: rgba(15, 118, 110, 0.38) !important;
+  border-color: rgba(42, 107, 167, 0.38) !important;
 }
 
 html body .dash-progress-track,
@@ -1164,7 +1164,7 @@ html body .lms-hero-media {
   border: 1px solid rgba(219, 229, 223, 0.98);
   border-radius: 30px 30px 10px 30px;
   background: var(--taste-deep);
-  box-shadow: 0 30px 60px -38px rgba(23, 60, 55, 0.55);
+  box-shadow: 0 30px 60px -38px rgba(30, 90, 143, 0.55);
 }
 
 .lms-hero-photo::after {
@@ -1172,7 +1172,7 @@ html body .lms-hero-media {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(135deg, rgba(23, 60, 55, 0.1), rgba(15, 118, 110, 0.18));
+  background: linear-gradient(135deg, rgba(30, 90, 143, 0.1), rgba(42, 107, 167, 0.18));
   content: "";
 }
 
@@ -1205,7 +1205,7 @@ html body .lms-hero-media {
   border-color: rgba(219, 229, 223, 0.98);
   border-radius: 22px 22px 8px 22px;
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 28px 52px -30px rgba(23, 60, 55, 0.55);
+  box-shadow: 0 28px 52px -30px rgba(30, 90, 143, 0.55);
   backdrop-filter: blur(14px);
 }
 
@@ -1476,8 +1476,8 @@ html body .hero-banner-admin {
 }
 
 .dash-focus-card:hover {
-  border-color: rgba(15, 118, 110, 0.36);
-  box-shadow: 0 16px 36px -28px rgba(23, 60, 55, 0.55);
+  border-color: rgba(42, 107, 167, 0.36);
+  box-shadow: 0 16px 36px -28px rgba(30, 90, 143, 0.55);
   transform: translateY(-2px);
 }
 
@@ -1885,7 +1885,7 @@ html body .lms-hero-photo {
   overflow: visible !important;
   box-shadow: 0 25px 60px -20px rgba(42, 107, 167, 0.25) !important;
   border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  background: #173c37 !important;
+  background: #1e5a8f !important;
 }
 
 html body .lms-hero-photo img {
@@ -1954,7 +1954,7 @@ html body .lms-course-card:hover {
 
 /* Fresh Typography Glow */
 html body .lms-hero h1.lms-title-fresh {
-  background: linear-gradient(135deg, #0f172a 0%, #0f766e 55%, #2563eb 100%) !important;
+  background: linear-gradient(135deg, #0f172a 0%, #2a6ba7 55%, #2563eb 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   font-weight: 950 !important;
@@ -1970,8 +1970,8 @@ html body .lms-hero h1.lms-title-fresh span {
   font-size: clamp(1.6rem, 3.2vw, 2.6rem) !important;
   line-height: 1.15 !important;
   margin-top: 10px !important;
-  color: #0f766e !important;
-  -webkit-text-fill-color: #0f766e !important;
+  color: #2a6ba7 !important;
+  -webkit-text-fill-color: #2a6ba7 !important;
 }
 
 html body .lms-hero-copy > p {

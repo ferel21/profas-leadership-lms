@@ -242,7 +242,7 @@ export default async function DashboardPage() {
                     <Link href={`/belajar/${item.course.slug}`} key={item.id} style={{ textDecoration: "none" }}>
                       <div className={`dash-enroll-item hover-lift ${isCompleted ? "completed" : ""}`}>
                         <div className="dash-enroll-thumb">
-                          <Image src={item.course.image} fill alt={item.course.title} style={{ objectFit: "cover" }} />
+                          <Image src={item.course.image} fill alt={item.course.title} sizes="80px" style={{ objectFit: "cover" }} />
                         </div>
                         <div className="dash-enroll-info">
                           <div className="dash-enroll-tags">
@@ -375,7 +375,7 @@ export default async function DashboardPage() {
               {courses.map(course => (
                 <div key={course.id} className="dash-mentor-course-item hover-lift">
                   <div className="dash-mentor-course-thumb">
-                    <Image src={course.image} fill alt={course.title} style={{ objectFit: "cover" }} />
+                    <Image src={course.image} fill alt={course.title} sizes="80px" style={{ objectFit: "cover" }} />
                   </div>
                   <div className="dash-mentor-course-info">
                     <span className="dash-mentor-course-cat">{course.category}</span>

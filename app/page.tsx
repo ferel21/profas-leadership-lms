@@ -24,6 +24,7 @@ import { CourseCard } from "@/components/ui/CourseCard";
 import { LandingScrollDirector } from "@/components/shared/LandingScrollDirector";
 import ScrollStack, { ScrollStackItem } from "@/components/ui/ScrollStack";
 import { LiveActivityFeed } from "@/components/ui/LiveActivityFeed";
+import { MetricsLedger } from "@/components/ui/MetricsLedger";
 
 type FeaturedCourse = {
   id: string;
@@ -41,11 +42,11 @@ type FeaturedCourse = {
 };
 
 const metrics = [
-  ["2.500+", "Alumni aktif"],
-  ["40+", "Modul studi kasus"],
-  ["15+", "Mentor praktisi"],
-  ["87%", "Progress terselesaikan"],
-] as const;
+  { value: 2500, suffix: "+", label: "Alumni aktif" },
+  { value: 40, suffix: "+", label: "Modul studi kasus" },
+  { value: 15, suffix: "+", label: "Mentor praktisi" },
+  { value: 87, suffix: "%", label: "Progress terselesaikan" },
+];
 
 const pathways = [
   {
@@ -241,9 +242,7 @@ export default async function Home() {
           </div>
 
           {/* Metrics bar */}
-          <div className="container al-metrics" aria-label="Statistik PROFAS">
-            {metrics.map(([value, label]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}
-          </div>
+          <MetricsLedger items={metrics} />
         </section>
 
         <section className="al-section al-section--white al-activity al-overlap-section" aria-labelledby="activity-title">

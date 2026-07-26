@@ -18,8 +18,12 @@ import "@/styles/leaf-stagger.css";
 import "@/styles/home-scroll.css";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '600', '900'], style: ['normal', 'italic'], variable: '--font-fraunces', display: 'swap' });
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-space', display: 'swap' });
+// preload: false — Fraunces and Space Grotesk are route-specific display faces
+// applied through CSS variables, so Next cannot tell which route uses them and
+// preloads both on every page. /masuk renders Inter only, yet was downloading
+// all four font files. They now load on demand, when a page actually uses them.
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '600', '900'], style: ['normal', 'italic'], variable: '--font-fraunces', display: 'swap', preload: false });
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-space', display: 'swap', preload: false });
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";
 
 export const metadata: Metadata = {

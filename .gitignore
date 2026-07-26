@@ -24,6 +24,8 @@ next-env.d.ts
 
 # Throwaway diagnostic scripts, harnesses and screenshots written at the repo
 # root during local investigation (hardcoded sandbox paths and localhost URLs).
-# Underscore prefix is the convention for these, and nothing shipped lives at
-# the repo root with one -- so ignore the prefix rather than chasing extensions.
+# Nothing shipped lives at the repo root under either name, and real tooling
+# belongs in scripts/ -- so ignore the two prefixes rather than chasing
+# individual filenames and extensions.
 /_*
+/probe*

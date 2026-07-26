@@ -28,10 +28,13 @@ input, select, textarea {
   background-color: #f8fafc !important;
 }
 
-input:focus, select:focus, textarea:focus, input:focus-visible {
-  border-color: var(--teal) !important;
-  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15) !important;
-  outline: none !important;
+/* `outline: none !important` dihapus: aturan ini mematikan indikator fokus pada
+   setiap input di produk. Halo penggantinya juga memakai teal #0d9488 di luar
+   palette, dan hanya berkontras 1,19:1. Border-tint tetap dipertahankan sebagai
+   umpan balik pointer; cincin fokus keyboard kini datang dari aturan
+   `:focus-visible` global di enterprise-lms.css. */
+input:focus, select:focus, textarea:focus {
+  border-color: var(--al-primary, #2a6ba7) !important;
   background-color: #fff !important;
 }
 

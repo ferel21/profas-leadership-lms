@@ -9,9 +9,13 @@
   scroll-margin-top: 96px;
 }
 
+/* Selaras dengan cincin fokus global di enterprise-lms.css. Selector ini
+   berspesifisitas lebih tinggi, jadi nilainya harus sama persis — sebelumnya
+   memakai biru 42% (1,86:1) yang juga gagal memenuhi WCAG 3:1. */
 .al-page :is(a, button, summary, input, select, textarea):focus-visible {
-  outline: 3px solid rgba(42, 107, 167, 0.42);
-  outline-offset: 4px;
+  outline: 2px solid var(--al-primary, #2a6ba7);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #ffffff;
 }
 
 .al-page .al-btn-secondary {
@@ -512,10 +516,11 @@
   font-weight: 500;
 }
 
+/* `outline: none` dihapus — selector ini lebih spesifik daripada aturan
+   `:focus-visible` global, sehingga mematikan cincin fokus pada input
+   verifikasi sertifikat. Halo 10%-nya hanya ~1,1:1. */
 .al-page .verification-input-row input:focus {
   border-color: var(--al-primary);
-  box-shadow: 0 0 0 4px rgba(42, 107, 167, 0.1);
-  outline: none;
 }
 
 .al-page .verification-input-row button {

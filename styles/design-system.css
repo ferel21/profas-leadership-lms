@@ -1571,7 +1571,7 @@
 .player-pulse-circle {
   width: 88px;
   height: 88px;
-  background: linear-gradient(135deg, var(--teal), #06b6d4);
+  background: linear-gradient(135deg, var(--teal), #38bdf8);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1646,7 +1646,7 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  background: linear-gradient(135deg, var(--teal), #0891b2);
+  background: linear-gradient(135deg, var(--teal), #0284c7);
   color: #fff;
   box-shadow: 0 8px 20px rgba(42, 107, 167, 0.3);
   transition: var(--ease-smooth);

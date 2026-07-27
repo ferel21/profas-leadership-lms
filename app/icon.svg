@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PROFAS">
-  <rect width="64" height="64" rx="15" fill="#14243A"/>
-  <path d="M13 24V13h11M40 51h11V40" fill="none" stroke="#F29E6D" stroke-width="3" stroke-linecap="square"/>
-  <path d="M23 45V19h12.5c8 0 13 4.6 13 11.5S43.5 42 35.5 42H29v3h-6Zm6-9h6c4.8 0 7.5-1.9 7.5-5.5S39.8 25 35 25h-6v11Z" fill="#fff"/>
-  <circle cx="49" cy="15" r="4" fill="#17786F"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="18" fill="#123F3A"/>
+  <path d="M18 48V24.5L25 18v30h-7Zm11 0V17l7-5v36h-7Zm11 0V27l7-6v27h-7Z" fill="#9DE1CE"/>
+  <path d="M15 48h35" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
 </svg>

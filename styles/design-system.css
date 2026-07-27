@@ -1584,8 +1584,8 @@
 .player-link-circle {
   width: 80px;
   height: 80px;
-  background: #f3e8ff;
-  color: #7e22ce;
+  background: var(--teal-light);
+  color: var(--teal);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1664,16 +1664,16 @@
   padding: 16px 36px;
   font-size: 1.1rem;
   border-radius: 14px;
-  background: #7e22ce;
+  background: var(--teal);
   color: #fff;
   text-decoration: none;
   font-weight: 700;
-  box-shadow: 0 8px 20px rgba(126, 34, 206, 0.3);
+  box-shadow: 0 8px 20px rgba(42, 107, 167, 0.3);
   transition: var(--ease-smooth);
 }
 
 .player-btn-external:hover {
-  background: #6b21a8;
+  background: var(--teal-dark);
   transform: translateY(-2px);
 }
 
@@ -1961,10 +1961,6 @@ details[open] > summary > .player-tree-chevron {
   font-weight: 600;
   font-size: 1.1rem;
   margin: 0;
-}
-
-.player-eyebrow-purple {
-  color: #7e22ce;
 }
 
 .player-btn-dl-mat {

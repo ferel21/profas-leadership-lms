@@ -622,6 +622,9 @@ a {
   grid-template-columns: minmax(0, 1.28fr) minmax(340px, 0.72fr);
   align-items: stretch;
   gap: 0;
+  border-radius: var(--pf-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--pf-shadow-md);
 }
 
 .pf-proof-media {
@@ -3780,6 +3783,9 @@ html body .player-footer .complete-btn:hover {
   color: var(--pf-ink);
   background: var(--pf-app) !important;
   font-family: var(--pf-font-body);
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
 }
 
 .pf-workspace-shell *,

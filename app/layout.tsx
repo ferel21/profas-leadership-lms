@@ -4,17 +4,6 @@ import { RouteProgressBar } from "@/components/ui/RouteProgressBar";
 import { WebVitalsReporter } from "@/components/ui/WebVitalsReporter";
 import "@/styles/typography.css";
 import "@/styles/design-system.css";
-import "@/styles/master.css";
-
-import "@/styles/premium.css";
-import "@/styles/pro-lms.css";
-import "@/styles/enterprise-lms.css";
-import "@/styles/taste.css";
-import "@/styles/lms-fresh.css";
-import "@/styles/akseslegal-theme.css";
-import "@/styles/home-landing.css";
-import "@/styles/leaf-stagger.css";
-import "@/styles/home-scroll.css";
 import "@/styles/profas-reframe.css";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });

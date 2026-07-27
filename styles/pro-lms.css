@@ -1,0 +1,459 @@
+@layer legacy {
+/* ==========================================================================
+   PROFAS LEADERSHIP LMS — ULTRA PREMIUM PRO UI/UX SYSTEM
+   State-of-the-art Glassmorphism, Micro-animations, Confetti & Dark Mode
+   ========================================================================== */
+
+:root {
+  --color-primary: #2a6ba7;
+  --color-primary-dark: #1e5a8f;
+  --color-primary-light: #38bdf8;
+  --color-accent: #0284c7;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-gold: #f3b444;
+  --shadow-glow: 0 0 25px rgba(42, 107, 167, 0.35);
+  --shadow-glow-accent: 0 0 30px rgba(6, 182, 212, 0.4);
+  --shadow-gold: 0 0 25px rgba(251, 191, 36, 0.4);
+}
+
+/* --- 1. GLASSMORPHISM & PREMIUN CARDS --- */
+.pro-glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pro-glass-card:hover {
+  transform: translateY(-4px) scale(1.008);
+  box-shadow: 0 20px 40px -15px rgba(42, 107, 167, 0.18);
+  border-color: rgba(42, 107, 167, 0.3);
+}
+
+/* --- 2. INTERACTIVE LAUNCH BUTTONS & NEON GLOW --- */
+.pro-btn-glow {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: white;
+  font-weight: 700;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-glow);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pro-btn-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-accent);
+  filter: brightness(1.08);
+}
+
+.pro-btn-glow::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-20deg);
+  transition: 0.75s;
+}
+
+.pro-btn-glow:hover::after {
+  left: 150%;
+}
+
+/* --- 3. MICRO-ANIMATIONS & SHIMMERS --- */
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(42, 107, 167, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(42, 107, 167, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(42, 107, 167, 0); }
+}
+
+.pro-pulse-badge {
+  animation: pulse-ring 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+/* --- 4. COMPLETION CELEBRATION & PURE CSS CONFETTI --- */
+@keyframes scale-bounce {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.15); opacity: 1; }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.pro-celebrate-check {
+  animation: scale-bounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.pro-confetti-particle {
+  position: fixed;
+  top: -20px;
+  width: 10px;
+  height: 20px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confetti-fall 3.5s ease-in forwards;
+}
+
+/* --- 5. ENHANCED COURSE PLAYER & QUIZ LAUNCHER --- */
+
+/* --- 6. EXECUTIVE CLEAN LIGHT MODE --- */
+/* Dark mode auto-switch disabled to keep UI crystal clear white and bright as requested */
+
+/* --- 7. DYNAMIC AURORA MESH & EXECUTIVE TOOLTIPS (24/7 AUTONOMOUS SUITE V3) --- */
+
+.pro-glass-tooltip .tooltip-text {
+  visibility: hidden;
+  width: max-content;
+  max-width: 260px;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #f8fafc;
+  text-align: center;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.825rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  position: absolute;
+  z-index: 9999;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pro-glass-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* --- 8. LIVE ACTIVITY PULSE & EXECUTIVE BADGES (24/7 HOURLY AUDIT V4) --- */
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.pro-live-pulse-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+  margin-right: 8px;
+  animation: pulse-dot 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+/* --- 9. EXECUTIVE PROGRESS RINGS & FLOATING COMMAND BAR (24/7 HOURLY AUDIT V5) --- */
+
+/* --- 10. STUDY STREAK FLAME & PODIUM MEDALS (24/7 HOURLY AUDIT V6) --- */
+
+.pro-streak-flame {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+  color: #1e5a8f !important;
+  font-weight: 700;
+  font-size: 0.8rem;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* --- 11. HOLOGRAPHIC CERTIFICATE SEAL & BOOKMARK CARDS (24/7 HOURLY AUDIT V7) --- */
+
+/* --- 12. INTERACTIVE VIDEO SCRUBBER & XP BADGES (24/7 HOURLY AUDIT V8) --- */
+
+/* --- 13. LEARNING ROADMAP NODES & SHIMMER TROPHIES (24/7 HOURLY AUDIT V9) --- */
+
+.pro-shimmer-trophy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(30, 90, 143, 0.15), rgba(42, 107, 167, 0.08));
+  border: 1px solid rgba(42, 107, 167, 0.4);
+  border-radius: 20px;
+  color: #2a6ba7;
+  box-shadow: 0 10px 25px -5px rgba(42, 107, 167, 0.25);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.pro-shimmer-trophy::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: translateX(-200%) skewX(-20deg);
+  animation: shimmer-swipe 4s infinite;
+}
+
+/* Drives the sweep with `transform` rather than `left`: the element is 50% of
+   the chip's width, so -200%/400% of its own width spans the same travel the
+   original `left: -100% -> 200%` intended, but on the compositor instead of
+   forcing layout on every frame. Sweeps for the first half, rests for the
+   second. The global prefers-reduced-motion block in master.css already
+   neutralises this for users who ask for it. */
+@keyframes shimmer-swipe {
+  0% { transform: translateX(-200%) skewX(-20deg); }
+  50%, 100% { transform: translateX(400%) skewX(-20deg); }
+}
+
+.pro-shimmer-trophy:hover {
+  transform: translateY(-4px) scale(1.05);
+  border-color: var(--al-accent, #f3b444);
+  box-shadow: 0 15px 35px -5px rgba(42, 107, 167, 0.35);
+}
+
+/* --- 14. CERTIFICATE QR VERIFICATION & CONFETTI BUTTONS (24/7 HOURLY AUDIT V10) --- */
+
+/* --- 15. EXECUTIVE STUDENT ID CARD & MENTOR VERIFIED PILLS (24/7 HOURLY AUDIT V11) --- */
+
+/* --- 16. EXECUTIVE FORUM CARDS & VERIFIED EXPERT BADGES (24/7 HOURLY AUDIT V13) --- */
+
+.pro-expert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(251, 191, 36, 0.15));
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  color: #c4b5fd;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 4px 15px -2px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.pro-expert-badge:hover {
+  transform: scale(1.05);
+  border-color: #fbbf24;
+  color: #fde047;
+  box-shadow: 0 6px 20px -2px rgba(251, 191, 36, 0.4);
+}
+
+/* --- 17. EXECUTIVE AUDIO WAVEFORM & PODCAST BADGES (24/7 HOURLY AUDIT V14) --- */
+
+/* --- 18. EXECUTIVE LIVE WEBINAR & BOOKMARK RIBBONS (24/7 HOURLY AUDIT V15) --- */
+
+/* --- 19. EXECUTIVE AI SPARKLES & MASTERCLASS BADGES (24/7 HOURLY AUDIT V16) --- */
+.pro-ai-sparkle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(30, 90, 143, 0.18), rgba(42, 107, 167, 0.12));
+  border: 1px solid rgba(42, 107, 167, 0.5);
+  color: #2a6ba7;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 15px -2px rgba(42, 107, 167, 0.25);
+  transition: all 0.3s ease;
+}
+
+.pro-ai-sparkle:hover {
+  transform: translateY(-2px) scale(1.05);
+  border-color: #38bdf8;
+  color: #1e5a8f;
+  box-shadow: 0 6px 20px -2px rgba(42, 107, 167, 0.45);
+}
+
+/* --- 20. EXECUTIVE VERIFICATION SEAL & MENTOR BIO CARDS (24/7 HOURLY AUDIT V17) --- */
+
+/* --- 21. EXECUTIVE PEER REVIEW SCORECARDS & SYLLABUS ACCORDIONS (24/7 HOURLY AUDIT V18) --- */
+
+/* --- 22. EXECUTIVE MENTOR CALENDAR & VIP PRIORITY SUPPORT (24/7 HOURLY AUDIT V19) --- */
+
+/* --- 23. EXECUTIVE VOICE EQUALIZER & FEATURED COURSE RIBBONS (24/7 HOURLY AUDIT V20) --- */
+
+.pro-course-ribbon {
+  position: absolute;
+  top: 14px;
+  right: -8px;
+  padding: 4px 16px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 4px 0 0 4px;
+  box-shadow: -4px 4px 12px rgba(16, 185, 129, 0.4);
+  z-index: 5;
+}
+
+.pro-course-ribbon::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  border-top: 8px solid #047857;
+  border-right: 8px solid transparent;
+}
+
+/* --- 24. EXECUTIVE NFT HOLOGRAPHIC SEAL & MENTOR STATUS (24/7 HOURLY AUDIT V21) --- */
+.pro-nft-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(30, 90, 143, 0.18), rgba(42, 107, 167, 0.12));
+  border: 1px solid rgba(42, 107, 167, 0.55);
+  color: #2a6ba7;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 20px rgba(42, 107, 167, 0.35);
+  animation: nft-shimmer 3s infinite linear;
+}
+
+@keyframes nft-shimmer {
+  0% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); border-color: rgba(168, 85, 247, 0.5); }
+  50% { box-shadow: 0 0 28px rgba(236, 72, 153, 0.6); border-color: rgba(236, 72, 153, 0.8); color: #f472b6; }
+  100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); border-color: rgba(168, 85, 247, 0.5); }
+}
+
+.pro-mentor-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.pro-mentor-status::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  animation: status-ping 1.5s infinite ease-in-out;
+}
+
+@keyframes status-ping {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; box-shadow: 0 0 16px #34d399; }
+}
+
+/* --- 25. HIGH-DEFINITION CERTIFICATE PRINT RULES --- */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .certificate-print-container, .certificate-print-container * {
+    visibility: visible !important;
+  }
+  .certificate-print-container {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+}
+
+/* --- 26. MOBILE & TABLET RESPONSIVE OVERHAUL (PROFAS LMS) --- */
+@media (max-width: 768px) {
+  .pro-roadmap-node,
+  .pro-id-card,
+  .pro-forum-card {
+    padding: 14px !important;
+    gap: 10px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .pro-id-card::before {
+    width: 100% !important;
+    height: 4px !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+  .pro-shimmer-trophy {
+    padding: 10px 14px !important;
+    font-size: 0.8rem !important;
+  }
+  .pro-confetti-btn {
+    padding: 10px 20px !important;
+    font-size: 0.8rem !important;
+    width: 100% !important;
+  }
+  .pro-audio-wave {
+    height: 16px !important;
+  }
+  .pro-video-container {
+    border-radius: 12px !important;
+  }
+  .pro-video-controls {
+    padding: 10px !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+  .pro-nft-seal,
+  .pro-mentor-verified,
+  .pro-expert-badge {
+    font-size: 0.65rem !important;
+    padding: 3px 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .pro-roadmap-node h3,
+  .pro-forum-card h3 {
+    font-size: 1rem !important;
+  }
+  .pro-roadmap-node p,
+  .pro-forum-card p {
+    font-size: 0.85rem !important;
+  }
+}
+
+}

@@ -57,5 +57,30 @@ async function getCourses(): Promise<CatalogCourse[]> {
 
 export default async function ProgramsPage() {
   const courses = await getCourses();
-  return <div className="al-page"><Header/><main className="catalog-page"><section className="catalog-hero"><div className="container"><span className="eyebrow">PROGRAM PROFAS LEADERSHIP</span><h1>Temukan jalur tumbuh<br/><em>yang tepat untuk Anda.</em></h1><p>Program terstruktur, kontekstual, dan terukur untuk setiap tahap kepemimpinan.</p></div></section><ProgramCatalog courses={courses}/></main><Footer/></div>;
+  return (
+    <div className="pf-public-page">
+      <Header />
+      <main>
+        <section className="pf-section pf-hero" aria-labelledby="catalog-title" style={{ paddingBottom: '48px', minHeight: 'auto', background: 'transparent' }}>
+          <div className="container pf-hero-layout" style={{ minHeight: 'auto', gridTemplateColumns: '1fr', paddingBottom: '0', gap: '24px' }}>
+            <div className="pf-hero-copy" style={{ paddingTop: '12px' }}>
+              <span className="pf-kicker">
+                <span aria-hidden="true" />
+                PROGRAM PROFAS LEADERSHIP
+              </span>
+              <h1 id="catalog-title">
+                Temukan jalur tumbuh<br />
+                <em>yang tepat untuk Anda.</em>
+              </h1>
+              <p className="pf-hero-lead">
+                Program terstruktur, kontekstual, dan terukur untuk setiap tahap kepemimpinan.
+              </p>
+            </div>
+          </div>
+        </section>
+        <ProgramCatalog courses={courses} />
+      </main>
+      <Footer />
+    </div>
+  );
 }

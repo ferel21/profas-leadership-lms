@@ -469,7 +469,7 @@ export function SuperAdminAnalyticsPanel({
                   type="button"
                   onClick={handleSystemOptimize}
                   disabled={systemOptimizing}
-                  className="al-btn-primary px-4 py-2 h-9 rounded-xl text-xs font-bold disabled:opacity-50"
+                  className="pf-button pf-button-primary px-4 py-2 h-9 rounded-xl text-xs font-bold disabled:opacity-50"
                 >
                   {systemOptimizing ? "Mengoptimalkan..." : "Jalankan Optimasi Sekarang"}
                 </button>
@@ -497,7 +497,7 @@ export function SuperAdminAnalyticsPanel({
                     onChange={(e) => setCertInput(e.target.value)}
                     className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#2a6ba7]"
                   />
-                  <button type="submit" disabled={certLoading || !certInput.trim()} className="al-btn-primary px-4 py-2 h-9 rounded-xl text-xs font-bold disabled:opacity-50">
+                  <button type="submit" disabled={certLoading || !certInput.trim()} className="pf-button pf-button-primary px-4 py-2 h-9 rounded-xl text-xs font-bold disabled:opacity-50">
                     {certLoading ? "Memeriksa..." : "Verifikasi"}
                   </button>
                 </form>
@@ -649,7 +649,7 @@ export function SuperAdminAnalyticsPanel({
                 <button
                   type="button"
                   onClick={() => exportCSV("users")}
-                  className="mt-4 al-btn-primary px-4 py-2 h-9 rounded-xl text-xs font-bold w-full flex items-center justify-center gap-1.5"
+                  className="mt-4 pf-button pf-button-primary px-4 py-2 h-9 rounded-xl text-xs font-bold w-full flex items-center justify-center gap-1.5"
                 >
                   <Download size={14} /> Unduh CSV Role ({userCount} akun)
                 </button>
@@ -663,7 +663,7 @@ export function SuperAdminAnalyticsPanel({
                 <button
                   type="button"
                   onClick={() => exportCSV("monthly")}
-                  className="mt-4 al-btn-primary px-4 py-2 h-9 rounded-xl text-xs font-bold w-full flex items-center justify-center gap-1.5"
+                  className="mt-4 pf-button pf-button-primary px-4 py-2 h-9 rounded-xl text-xs font-bold w-full flex items-center justify-center gap-1.5"
                 >
                   <Download size={14} /> Unduh CSV Tren Bulanan
                 </button>

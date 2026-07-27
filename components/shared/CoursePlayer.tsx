@@ -465,7 +465,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <div className="player-link-circle">
                 <Link2 size={40} />
               </div>
-              <span className="eyebrow-teal player-eyebrow-purple">TAUTAN SUMBER DAYA EKSTERNAL</span>
+              <span className="eyebrow-teal">TAUTAN SUMBER DAYA EKSTERNAL</span>
               <h1 className="player-title-xl">{current.title}</h1>
               <p className="player-desc-lead">
                 {current.description || current.content || "Modul ini merujuk pada tautan sumber eksternal yang disiapkan oleh mentor Anda."}

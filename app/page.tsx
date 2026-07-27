@@ -90,7 +90,7 @@ const services = [
   },
 ];
 
-const process = [
+const processSteps = [
   {
     index: "01",
     title: "Dengar",
@@ -354,7 +354,7 @@ export default function Home() {
               </p>
             </div>
             <div className={styles.processGrid}>
-              {process.map((step) => (
+              {processSteps.map((step) => (
                 <article className={styles.processStep} key={step.index}>
                   <span>{step.index}</span>
                   <h3>{step.title}</h3>

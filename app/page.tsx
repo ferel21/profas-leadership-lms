@@ -1,350 +1,490 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
-import { unstable_cache } from "next/cache";
+import { Sora, Source_Sans_3 } from "next/font/google";
 import {
-  ArrowRight,
-  BarChart3,
-  BookOpen,
-  CheckCircle2,
-  ChevronRight,
-  Compass,
-  Gauge,
-  Layers3,
-  LineChart,
-  Play,
-  ShieldCheck,
-  Star,
-  Target,
+  ArrowUpRight,
+  Check,
+  FileText,
+  Fingerprint,
+  LockKeyhole,
+  Network,
+  Search,
   Users2,
 } from "lucide-react";
-import { prisma } from "@/services/prisma";
-import { Header } from "@/components/ui/Header";
-import { Footer } from "@/components/ui/Footer";
-import { CourseCard } from "@/components/ui/CourseCard";
-import { LandingScrollDirector } from "@/components/shared/LandingScrollDirector";
-import ScrollStack, { ScrollStackItem } from "@/components/ui/ScrollStack";
-import { MetricsLedger } from "@/components/ui/MetricsLedger";
+import styles from "./profas-legal.module.css";
 
-type FeaturedCourse = {
-  id: string;
-  slug: string;
-  title: string;
-  shortDescription: string;
-  category: string;
-  level: string;
-  price: number;
-  durationHours: number;
-  rating: number;
-  studentsCount: number;
-  image: string;
-  mentor?: { name: string };
+const displayFont = Sora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-profas-display",
+  display: "swap",
+});
+
+const bodyFont = Source_Sans_3({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-profas-body",
+  display: "swap",
+});
+
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";
+const consultationHref =
+  "mailto:halo@profas.id?subject=Percakapan%20awal%20dengan%20PROFAS&body=Nama%3A%0AOrganisasi%3A%0AKonteks%20singkat%3A%0A%0AMohon%20jangan%20sertakan%20dokumen%20atau%20informasi%20sensitif%20sebelum%20konfirmasi%20penugasan.";
+
+export const metadata: Metadata = {
+  title: "PROFAS — Kepastian Hukum untuk Keputusan Bisnis",
+  description:
+    "Pendampingan hukum bisnis untuk legalitas, kontrak, ketenagakerjaan, tata kelola, dan risiko—disampaikan dengan jernih dan terukur.",
+  alternates: { canonical: appUrl },
+  openGraph: {
+    title: "PROFAS — Kepastian Hukum untuk Keputusan Bisnis",
+    description:
+      "Penasihat hukum untuk pemimpin dan perusahaan yang membutuhkan pijakan jelas sebelum mengambil keputusan.",
+    url: appUrl,
+    siteName: "PROFAS",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PROFAS — Kepastian Hukum untuk Keputusan Bisnis",
+    description: "Dari konteks yang rumit menuju keputusan yang dapat dipertanggungjawabkan.",
+  },
 };
 
-const metrics = [
-  { value: 2500, suffix: "+", label: "Alumni aktif" },
-  { value: 40, suffix: "+", label: "Modul studi kasus" },
-  { value: 15, suffix: "+", label: "Mentor praktisi" },
-  { value: 87, suffix: "%", label: "Progress terselesaikan" },
+const services = [
+  {
+    code: "CORP / 01",
+    title: "Corporate & Commercial",
+    heading: "Struktur yang memberi ruang untuk tumbuh.",
+    copy: "Menata bentuk usaha, hubungan pemegang saham, transaksi, dan kerja sama komersial agar keputusan bisnis berdiri di atas fondasi yang tepat.",
+    deliverables: ["Struktur badan usaha", "Perjanjian pemegang saham", "Legal due diligence"],
+  },
+  {
+    code: "LIC / 02",
+    title: "Legalitas & Perizinan",
+    heading: "Patuh tanpa kehilangan momentum.",
+    copy: "Memetakan kewajiban dan proses perizinan berdasarkan model usaha, skala operasi, dan tahap pertumbuhan—bukan sekadar daftar dokumen.",
+    deliverables: ["Pendirian & perubahan", "Perizinan berusaha", "Peta kepatuhan"],
+  },
+  {
+    code: "CON / 03",
+    title: "Kontrak & Transaksi",
+    heading: "Kesepakatan yang jelas sebelum risiko muncul.",
+    copy: "Menyusun dan menelaah kontrak dengan fokus pada tujuan bisnis, pembagian tanggung jawab, mekanisme kontrol, dan jalan keluar yang realistis.",
+    deliverables: ["Draft & review kontrak", "Negosiasi", "Transaction checklist"],
+  },
+  {
+    code: "PEO / 04",
+    title: "Ketenagakerjaan & HR",
+    heading: "Keputusan people dengan dasar yang kuat.",
+    copy: "Menyelaraskan kebijakan, hubungan kerja, tindakan disipliner, dan perubahan organisasi dengan aturan serta konteks manusia di baliknya.",
+    deliverables: ["Perjanjian kerja", "Kebijakan internal", "Employee relations"],
+  },
+  {
+    code: "RSK / 05",
+    title: "Risiko & Sengketa",
+    heading: "Pahami pilihan sebelum menentukan posisi.",
+    copy: "Membaca fakta, bukti, eksposur, dan opsi penyelesaian sejak dini agar langkah yang dipilih tetap proporsional dan dapat dijalankan.",
+    deliverables: ["Legal risk assessment", "Strategi penyelesaian", "Pendampingan sengketa"],
+  },
 ];
 
-const pathways = [
+const processSteps = [
   {
-    icon: Gauge,
-    title: "Peserta",
-    copy: "Belajar terarah, lanjutkan materi terakhir, pantau progres, dan ambil sertifikat terverifikasi.",
-  },
-  {
-    icon: Layers3,
-    title: "Mentor",
-    copy: "Bangun kurikulum modular, unggah materi, kelola tugas, dan monitor capaian kelas.",
-  },
-  {
-    icon: LineChart,
-    title: "Admin",
-    copy: "Pantau operasi LMS, kelola pengguna, siarkan pengumuman, dan lihat laporan platform.",
-  },
-] as const;
-
-const capabilities = [
-  ["Course Player", "Video, PDF, dokumen, kuis, tugas, diskusi, dan catatan pribadi dalam satu ruang belajar."],
-  ["Role Dashboard", "Tampilan khusus Admin, Mentor, dan Peserta agar setiap pengguna langsung menemukan aksi penting."],
-  ["Progress Engine", "Progres belajar, kelulusan, XP, dan sertifikat ditangani oleh sistem secara konsisten."],
-  ["Production Flow", "Loading, empty, error, success state, dan akses mobile dirancang untuk pemakaian nyata."],
-] as const;
-
-const faqItems = [
-  ["Siapa yang paling cocok mengikuti PROFAS?", "PROFAS cocok untuk calon pemimpin, pemimpin yang sedang bertumbuh, pemilik usaha, dan organisasi yang ingin membangun kebiasaan kepemimpinan yang lebih konsisten."],
-  ["Bagaimana format belajar di dalam platform?", "Setiap program memadukan materi singkat, video atau bacaan, studi kasus, refleksi, kuis, tugas, dan percakapan agar insight langsung terhubung dengan situasi kerja."],
-  ["Apakah saya bisa belajar lewat smartphone?", "Bisa. Course player, progres, diskusi, dan dashboard dirancang responsif sehingga Anda dapat belajar dari desktop maupun smartphone."],
-  ["Apa yang saya dapatkan setelah menyelesaikan program?", "Peserta mendapatkan rekam progres pembelajaran dan sertifikat PROFAS setelah seluruh persyaratan program, materi, dan evaluasi terpenuhi."],
-  ["Apakah tersedia program untuk organisasi atau tim?", "Tersedia. Tim dapat menggunakan jalur pembelajaran yang lebih terarah untuk menyamakan bahasa kepemimpinan, praktik kerja, dan ukuran capaian."],
-] as const;
-
-const learningMethod = [
-  {
-    icon: Compass,
     index: "01",
-    title: "Orientasi",
-    copy: "Mulai dari konteks kerja yang nyata. Setiap modul membantu peserta melihat tantangan kepemimpinan dengan lebih jernih.",
+    title: "Dengar",
+    copy: "Kami mulai dari keputusan yang perlu Anda ambil, pihak yang terlibat, dan konteks operasional yang tidak tertulis di dokumen.",
   },
   {
-    icon: Users2,
     index: "02",
-    title: "Percakapan",
-    copy: "Uji pemikiran melalui diskusi, studi kasus, dan perspektif rekan belajar maupun mentor praktisi.",
+    title: "Petakan",
+    copy: "Fakta, kewajiban, risiko, serta area abu-abu disusun menjadi peta masalah yang mudah dipahami bersama.",
   },
   {
-    icon: Target,
     index: "03",
-    title: "Penerapan",
-    copy: "Tutup setiap sesi dengan langkah yang bisa dicoba. Progres menjadi kebiasaan, bukan sekadar checklist materi.",
+    title: "Susun",
+    copy: "Pilihan tindakan, keluaran kerja, jadwal, dan biaya dikonfirmasi sebelum pekerjaan substantif dimulai.",
   },
-] as const;
-
-const getFeaturedCoursesCached = unstable_cache(
-  async (): Promise<FeaturedCourse[]> => {
-    const courses = await prisma.course.findMany({
-      where: { published: true, featured: true },
-      include: { mentor: { select: { name: true } } },
-      take: 3,
-    });
-    return courses.map(course => ({
-      ...course,
-      mentor: course.mentor ? { name: course.mentor.name } : undefined,
-    }));
+  {
+    index: "04",
+    title: "Dampingi",
+    copy: "Kami membantu menjalankan langkah yang dipilih, merespons perubahan, dan menjaga dokumentasi keputusan tetap rapi.",
   },
-  ["home-featured-courses-v2"],
-  { revalidate: 60, tags: ["courses", "featured-courses"] }
-);
+];
 
-async function getFeaturedCourses(): Promise<FeaturedCourse[]> {
-  try {
-    return await getFeaturedCoursesCached();
-  } catch (error) {
-    console.warn("[HOME_FEATURED_COURSES_FALLBACK]", error);
-    return [];
-  }
+const scenarios = [
+  {
+    number: "A",
+    title: "Founder menyiapkan putaran pendanaan.",
+    context: "Term sheet mulai dibahas, struktur kepemilikan belum rapi, dan setiap pihak membawa ekspektasi yang berbeda.",
+    direction: "Rapikan struktur, petakan hak para pihak, lalu negosiasikan dokumen dengan prioritas bisnis yang jelas.",
+  },
+  {
+    number: "B",
+    title: "Tim tumbuh lebih cepat daripada kebijakan.",
+    context: "Peran berubah, keputusan HR makin sensitif, sementara perjanjian kerja dan aturan internal tertinggal.",
+    direction: "Audit dokumen dan praktik, urutkan risiko, kemudian bangun kebijakan yang benar-benar dapat dijalankan tim.",
+  },
+  {
+    number: "C",
+    title: "Mitra tidak menjalankan kewajiban.",
+    context: "Komunikasi memburuk, dampak operasional meningkat, dan kontrak tidak memberi jawaban sesederhana yang diharapkan.",
+    direction: "Amankan bukti, ukur eksposur, evaluasi posisi kontraktual, lalu pilih jalur penyelesaian yang proporsional.",
+  },
+];
+
+const principles = [
+  {
+    icon: LockKeyhole,
+    title: "Kerahasiaan sejak percakapan pertama",
+    copy: "Informasi sensitif hanya dibahas setelah jalur komunikasi, konflik kepentingan, dan ruang lingkup awal dipastikan.",
+  },
+  {
+    icon: Fingerprint,
+    title: "Nasihat yang spesifik pada konteks",
+    copy: "Kami tidak berhenti pada kutipan regulasi. Setiap rekomendasi menghubungkan aturan, tujuan, risiko, dan realitas pelaksanaan.",
+  },
+  {
+    icon: Network,
+    title: "Satu garis antara hukum dan operasi",
+    copy: "Dokumen, keputusan, dan pihak yang bertanggung jawab disusun sebagai satu sistem kerja—bukan keluaran yang berdiri sendiri.",
+  },
+];
+
+const faq = [
+  {
+    question: "Apa yang terjadi dalam percakapan awal?",
+    answer:
+      "Kami membahas konteks umum, keputusan yang perlu diambil, urgensi, pihak terkait, dan jenis dukungan yang mungkin dibutuhkan. Percakapan awal belum merupakan pendapat hukum formal atau penugasan.",
+  },
+  {
+    question: "Bagaimana biaya jasa ditentukan?",
+    answer:
+      "Biaya mengikuti ruang lingkup, kompleksitas, jadwal, dan tingkat keterlibatan. Keluaran kerja, asumsi, biaya, serta ketentuan penugasan dikonfirmasi sebelum pekerjaan dimulai.",
+  },
+  {
+    question: "Berapa lama prosesnya?",
+    answer:
+      "Waktu pengerjaan bergantung pada kelengkapan informasi, jenis layanan, pihak eksternal, dan tenggat yang berlaku. Estimasi diberikan setelah konteks dan ruang lingkup cukup jelas.",
+  },
+  {
+    question: "Apakah pendampingan bisa dilakukan secara jarak jauh?",
+    answer:
+      "Bisa untuk banyak kebutuhan konsultasi, review, dan penyusunan dokumen. Pertemuan langsung atau dukungan di lokasi dapat dibahas ketika sifat pekerjaan memerlukannya.",
+  },
+  {
+    question: "Apa yang perlu disiapkan sebelum menghubungi PROFAS?",
+    answer:
+      "Cukup siapkan ringkasan umum mengenai situasi, tujuan, dan tenggat. Jangan mengirim dokumen atau informasi sangat sensitif sebelum konflik kepentingan dan kanal komunikasi dikonfirmasi.",
+  },
+];
+
+function Brand() {
+  return (
+    <span className={styles.brand}>
+      <span className={styles.brandMark} aria-hidden="true">P</span>
+      <span className={styles.brandType}>
+        <strong>PROFAS</strong>
+        <small>Legal advisory</small>
+      </span>
+    </span>
+  );
 }
 
-export default async function Home() {
-  const courses = await getFeaturedCourses();
-
+function DecisionMap() {
   return (
-    <div className="al-page">
-      <Header />
-      <LandingScrollDirector />
-      <main>
-        <section className="al-hero" aria-labelledby="home-title">
-          {/* Gradient blobs */}
-          <div className="al-blob al-blob--blue" aria-hidden="true" />
-          <div className="al-blob al-blob--gold" aria-hidden="true" />
+    <div className={styles.decisionCanvas} aria-hidden="true">
+      <div className={styles.canvasHeader}>
+        <span>Decision map / PROFAS</span>
+        <span>Context first</span>
+      </div>
+      <svg className={styles.mapSvg} viewBox="0 0 600 520" role="presentation" focusable="false">
+        <path className={styles.routeGhost} d="M32 112 C150 112 175 262 300 262 C420 262 438 88 568 88" />
+        <path className={styles.routeGhost} d="M32 264 C148 264 182 262 300 262 C416 262 452 260 568 260" />
+        <path className={styles.routeGhost} d="M32 408 C148 408 180 262 300 262 C420 262 446 422 568 422" />
+        <path className={styles.route} d="M32 112 C150 112 175 262 300 262 C420 262 438 88 568 88" />
+        <path className={styles.routeAlt} d="M32 264 C148 264 182 262 300 262 C416 262 452 260 568 260" />
+        <path className={styles.routeAccent} d="M32 408 C148 408 180 262 300 262 C420 262 446 422 568 422" />
+        <circle className={styles.mapNode} cx="32" cy="112" r="8" />
+        <circle className={styles.mapNode} cx="32" cy="264" r="8" />
+        <circle className={styles.mapNode} cx="32" cy="408" r="8" />
+        <circle className={styles.mapNodeActive} cx="568" cy="88" r="9" />
+        <circle className={styles.mapNodeActive} cx="568" cy="260" r="9" />
+        <circle className={styles.mapNodeActive} cx="568" cy="422" r="9" />
+        <circle className={styles.mapCore} cx="300" cy="262" r="64" />
+        <text className={styles.mapCoreText} x="300" y="257" textAnchor="middle">JELAS</text>
+        <text className={styles.mapLabel} x="300" y="282" textAnchor="middle">DECISION READY</text>
+        <text className={styles.mapLabel} x="48" y="95">KONTEKS</text>
+        <text className={styles.mapLabel} x="48" y="247">RISIKO</text>
+        <text className={styles.mapLabel} x="48" y="391">TUJUAN</text>
+      </svg>
+      <div className={styles.decisionStamp}>
+        <strong>PROFAS</strong>
+        <span>decision-ready</span>
+      </div>
+      <div className={styles.canvasFooter}>
+        <div>
+          <span>Output</span>
+          <strong>Pilihan yang dapat dijalankan</strong>
+        </div>
+        <small>Hukum diterjemahkan menjadi arah, tanggung jawab, dan langkah berikutnya.</small>
+      </div>
+    </div>
+  );
+}
 
-          <div className="container al-hero-grid">
-            {/* Text column */}
-            <div className="al-hero-copy">
-              <div className="al-eyebrow-dossier">
-                <span className="al-badge-dot" />
-                <span>Exhibit 00 · Leadership Dossier</span>
-              </div>
+export default function Home() {
+  return (
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <a className={styles.skipLink} href="#konten-utama">Lewati ke konten utama</a>
 
-              <h1 id="home-title" className="al-hero-title">
-                Pimpin dengan <mark className="al-hero-crop">lebih jernih!</mark>
-                <span>Belajar. Mencoba. Berdampak.</span>
+      <header className={styles.header}>
+        <div className={`${styles.shell} ${styles.headerInner}`}>
+          <Link href="/" aria-label="PROFAS — halaman utama"><Brand /></Link>
+          <nav className={styles.desktopNav} aria-label="Navigasi utama">
+            <a href="#keahlian">Keahlian</a>
+            <a href="#cara-kerja">Cara kerja</a>
+            <a href="#situasi">Situasi</a>
+            <a href="#standar">Standar</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <a className={`${styles.primaryButton} ${styles.headerCta}`} href={consultationHref}>
+            Jadwalkan konsultasi <ArrowUpRight size={16} aria-hidden="true" />
+          </a>
+          <details className={styles.mobileNav}>
+            <summary aria-label="Buka navigasi">
+              <span className={styles.menuBars} aria-hidden="true"><i /><i /></span>
+            </summary>
+            <nav className={styles.mobileMenu} aria-label="Navigasi seluler">
+              <a href="#keahlian">Keahlian</a>
+              <a href="#cara-kerja">Cara kerja</a>
+              <a href="#situasi">Situasi</a>
+              <a href="#standar">Standar</a>
+              <a href="#faq">FAQ</a>
+              <a href={consultationHref}>Jadwalkan konsultasi <ArrowUpRight size={16} /></a>
+            </nav>
+          </details>
+        </div>
+      </header>
+
+      <main id="konten-utama">
+        <section className={styles.hero} aria-labelledby="hero-title">
+          <div className={`${styles.shell} ${styles.heroGrid}`}>
+            <div className={styles.heroCopy}>
+              <span className={styles.eyebrow}>Penasihat hukum untuk pemimpin bisnis</span>
+              <h1 className={styles.heroTitle} id="hero-title">
+                <span>Kepastian hukum.</span>
+                <span>Keputusan yang <em>berani.</em></span>
               </h1>
-
-              <p className="al-hero-desc">
-                PROFAS membantu pemimpin, calon pemimpin, dan organisasi mengubah insight menjadi keputusan yang lebih baik melalui kelas yang dekat dengan tantangan nyata.
+              <p className={styles.heroLead}>
+                PROFAS membantu pemimpin dan perusahaan menata legalitas, kontrak, ketenagakerjaan,
+                tata kelola, dan risiko—dengan arahan yang jernih, proses terukur, dan pendampingan
+                yang bertanggung jawab.
               </p>
-
-              <div className="al-hero-actions">
-                <Link href="/daftar" className="al-btn-primary">
-                  <span>Mulai Sekarang</span>
-                  <ArrowRight size={22} />
-                </Link>
-                <Link href="/program" className="al-btn-green">
-                  <BookOpen size={22} />
-                  <span>Lihat Program</span>
-                </Link>
+              <div className={styles.heroActions}>
+                <a className={styles.primaryButton} href={consultationHref}>
+                  Jadwalkan percakapan awal <ArrowUpRight size={18} aria-hidden="true" />
+                </a>
+                <a className={styles.secondaryButton} href="#keahlian">Jelajahi keahlian</a>
               </div>
+              <p className={styles.heroNote}>
+                <Check size={18} aria-hidden="true" />
+                Ruang lingkup, keluaran, jadwal, dan biaya dikonfirmasi sebelum pekerjaan dimulai.
+              </p>
+            </div>
+            <div className={styles.decisionVisual}>
+              <p className={styles.visuallyHidden}>
+                Ilustrasi alur PROFAS yang menyatukan konteks, risiko, dan tujuan menjadi pilihan tindakan.
+              </p>
+              <DecisionMap />
+            </div>
+          </div>
 
-              <div className="al-proof-row">
-                <div className="al-avatar-row" aria-hidden="true">
-                  <span>RD</span><span>NP</span><span>AY</span><span>+2k</span>
-                </div>
-                <div className="al-rating-block">
-                  <div className="al-stars">
-                    <Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" />
-                    <b>4.9/5</b>
+          <div className={styles.assuranceRail}>
+            <div className={`${styles.shell} ${styles.assuranceGrid}`}>
+              <div className={styles.assuranceLabel}>Dirancang untuk kejelasan</div>
+              <div className={styles.assuranceItem}><span><Check size={15} /></span>Bahasa hukum yang bisa digunakan</div>
+              <div className={styles.assuranceItem}><span><Check size={15} /></span>Alasan di balik setiap rekomendasi</div>
+              <div className={styles.assuranceItem}><span><Check size={15} /></span>Langkah lanjut yang memiliki pemilik</div>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.section} id="keahlian" aria-labelledby="keahlian-title">
+          <div className={styles.shell}>
+            <div className={styles.sectionHeader}>
+              <span className={styles.kicker}>Keahlian / lima ruang keputusan</span>
+              <div className={styles.sectionIntro}>
+                <h2 className={styles.sectionHeading} id="keahlian-title">Keahlian yang bergerak bersama bisnis.</h2>
+                <p>
+                  Bukan katalog dokumen. Kami menghubungkan area hukum yang relevan dengan keputusan,
+                  pihak, dan konsekuensi yang benar-benar Anda hadapi.
+                </p>
+              </div>
+            </div>
+            <div className={styles.serviceGrid}>
+              {services.map((service) => (
+                <article className={styles.serviceCard} key={service.code}>
+                  <div className={styles.serviceTop}>
+                    <span className={styles.serviceCode}>{service.code} · {service.title}</span>
+                    <span className={styles.annotationMark} aria-hidden="true"><span /></span>
                   </div>
-                  <small>Dipercaya 2.500+ alumni di seluruh Indonesia</small>
-                </div>
-              </div>
-
-              <div className="al-trust-row">
-                <div className="al-trust-item">
-                  <ShieldCheck size={16} />
-                  <span>Sertifikat Resmi</span>
-                </div>
-                <div className="al-trust-item">
-                  <Target size={16} />
-                  <span>Proses Terstruktur</span>
-                </div>
-                <div className="al-trust-item">
-                  <CheckCircle2 size={16} />
-                  <span>Kurikulum Terverifikasi</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Visual column */}
-            <div className="al-hero-visual" data-scroll-speed="-0.1">
-              <div className="al-hero-img-wrap">
-                <Image
-                  src="/images/profas-leadership-hero.webp"
-                  alt="Mentor dan peserta PROFAS berdiskusi dalam sesi pembelajaran kepemimpinan"
-                  width={1100}
-                  height={1250}
-                  priority
-                  sizes="(max-width: 820px) 100vw, 52vw"
-                />
-                <div className="al-hero-img-gradient" />
-              </div>
-              <span className="al-exhibit-tab" aria-hidden="true">Exhibit 01</span>
-
-              {/* Floating card top-right — ledger stat */}
-              <aside className="al-float-card al-float-card--top al-float-card--ledger">
-                <small>Progress Belajar</small>
-                <strong>73<span>%</span></strong>
-                <em>+12 minggu ini</em>
-              </aside>
-
-              {/* Floating card bottom-left — pull-quote */}
-              <aside className="al-float-card al-float-card--bottom al-float-card--quote">
-                <p className="al-float-quote">Prosesnya sangat terstruktur dan mentor-nya berpengalaman!</p>
-                <div className="al-float-author">
-                  <span />
-                  <small>Alumni, Batch 2025</small>
-                </div>
-              </aside>
-
-              {/* Marquee strip */}
-              <div className="al-marquee-wrap">
-                <div className="al-marquee">
-                  {["Leadership Essentials", "Komunikasi Eksekutif", "Delegasi Efektif", "Manajemen Konflik", "Strategic Thinking", "Leadership Essentials", "Komunikasi Eksekutif", "Delegasi Efektif", "Manajemen Konflik", "Strategic Thinking"].map((item, i) => (
-                    <span key={i} className="al-marquee-item">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
+                  <h3>{service.heading}</h3>
+                  <p>{service.copy}</p>
+                  <div className={styles.deliverables} aria-label="Contoh cakupan">
+                    {service.deliverables.map((item) => <span key={item}>{item}</span>)}
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
-
-          {/* Metrics bar */}
-          <MetricsLedger items={metrics} />
         </section>
 
-        <section className="al-section al-section--white al-activity al-overlap-section" aria-labelledby="activity-title">
-          <div className="container">
-            <div className="al-activity-intro">
+        <section className={`${styles.section} ${styles.processSection}`} id="cara-kerja" aria-labelledby="process-title">
+          <div className={styles.shell}>
+            <div className={styles.processHeader}>
               <div>
-                <span className="al-eyebrow">Belajar dalam aksi</span>
-                <h2 id="activity-title">Kepemimpinan tumbuh di ruang yang dijalani bersama.</h2>
+                <span className={styles.kicker}>Cara kerja / dari konteks ke keputusan</span>
+                <h2 id="process-title">Kompleksitas diurai. Arah disepakati.</h2>
               </div>
-              <p>Kelas PROFAS mempertemukan refleksi, praktik, dan percakapan yang membuat pembelajaran terasa dekat dengan tantangan kerja sehari-hari.</p>
+              <p>
+                Empat tahap ini menjaga pembahasan tetap dekat dengan masalah, transparan dalam ruang
+                lingkup, dan disiplin saat masuk ke pelaksanaan.
+              </p>
             </div>
-            <figure className="al-activity-frame" data-scroll-speed="0.045">
-              <Image src="/images/profas-activity-collage.jpeg" alt="Kolase kegiatan pembelajaran dan diskusi peserta PROFAS Leadership" width={1599} height={899} sizes="(max-width: 780px) calc(100vw - 28px), 1160px" />
-              <figcaption>Potret proses belajar: berdiskusi, mencoba, dan bertumbuh sebagai satu komunitas.</figcaption>
-            </figure>
-          </div>
-        </section>
-
-        <section className="al-section al-section--gray al-method-section al-overlap-section" aria-labelledby="method-title">
-          <div className="container">
-            <div className="al-method-heading">
-              <div><span className="al-eyebrow">Cara kami bekerja</span><h2 id="method-title">Kepemimpinan bukan teori yang disimpan.</h2></div>
-              <p>PROFAS menghubungkan insight dengan tindakan melalui ritme belajar yang singkat, reflektif, dan relevan dengan ruang kerja peserta.</p>
+            <div className={styles.processGrid}>
+              {processSteps.map((step) => (
+                <article className={styles.processStep} key={step.index}>
+                  <span>{step.index}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.copy}</p>
+                </article>
+              ))}
             </div>
-            <ScrollStack useWindowScroll={true} itemDistance={60} itemScale={0.04} itemStackDistance={30} stackPosition="20%" scaleEndPosition="10%">
-              {learningMethod.map(({ icon: Icon, index, title, copy }) => (
-                <ScrollStackItem key={title} itemClassName="al-method-card scroll-method-item">
-                  <div className="al-method-card-top"><Icon size={22} /><span>{index}</span></div>
-                  <h3>{title}</h3>
-                  <p>{copy}</p>
-                </ScrollStackItem>
+            <div className={styles.scopeNote}>
+              <FileText size={22} aria-hidden="true" />
+              <p><strong>Yang selalu dibuat jelas:</strong> pertanyaan hukum, keluaran, penanggung jawab, tenggat, asumsi, dan biaya.</p>
+              <span>No hidden scope</span>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.section} id="situasi" aria-labelledby="situasi-title">
+          <div className={`${styles.shell} ${styles.scenarioLayout}`}>
+            <div className={styles.scenarioIntro}>
+              <span className={styles.kicker}>Mulai dari situasinya</span>
+              <h2 id="situasi-title">Masalah bisnis jarang datang dengan nama dokumen.</h2>
+              <p>
+                Karena itu, kami memulai dari keputusan yang tertahan—lalu menentukan dukungan hukum
+                yang paling masuk akal.
+              </p>
+            </div>
+            <div className={styles.scenarioList}>
+              {scenarios.map((scenario) => (
+                <article className={styles.scenario} key={scenario.number}>
+                  <span className={styles.scenarioNumber}>{scenario.number}</span>
+                  <div className={styles.scenarioBody}>
+                    <h3>{scenario.title}</h3>
+                    <p>{scenario.context}</p>
+                    <div className={styles.scenarioDirection}>
+                      <span>Arah pendampingan</span>
+                      <p>{scenario.direction}</p>
+                    </div>
+                  </div>
+                </article>
               ))}
-            </ScrollStack>
+            </div>
           </div>
         </section>
 
-        <section className="al-section al-section--white" id="tentang">
-          <div className="container">
-            <div className="al-section-head"><span className="al-eyebrow">Sistem yang siap dipakai</span><h2>Satu platform untuk seluruh alur LMS profesional.</h2><p>PROFAS dirancang sebagai sistem operasional pembelajaran, bukan halaman promosi kosong. Setiap role punya ruang kerja dan alur yang jelas.</p></div>
-            <ScrollStack useWindowScroll={true} itemDistance={60} itemScale={0.04} itemStackDistance={30} stackPosition="20%" scaleEndPosition="10%">
-              {pathways.map(({ icon: Icon, title, copy }) => (
-                <ScrollStackItem key={title} itemClassName="al-pathway-card scroll-pathway-item">
-                  <span><Icon size={24} /></span>
-                  <h3>{title}</h3>
-                  <p>{copy}</p>
-                  <Link href={title === "Peserta" ? "/program" : "/masuk"}>Masuk alur {title}<ChevronRight size={16} /></Link>
-                </ScrollStackItem>
-              ))}
-            </ScrollStack>
-          </div>
-        </section>
-
-        <section className="al-section al-section--gray al-player-section al-overlap-section">
-          <div className="container al-split">
-            <div><span className="al-eyebrow">Pengalaman belajar</span><h2>Course player yang terasa seperti produk SaaS, bukan folder materi.</h2><p>Materi, diskusi, lampiran, catatan, progres, evaluasi, dan tombol penyelesaian ditempatkan dalam alur yang natural. Peserta tidak perlu menebak harus klik apa setelah masuk kelas.</p><div className="al-feature-list">{capabilities.map(([title, copy]) => <div key={title}><CheckCircle2 size={19} /><p><b>{title}</b><span>{copy}</span></p></div>)}</div></div>
-            <div className="al-mockup" data-scroll-speed="-0.055"><div className="al-mockup-toolbar"><span /><span /><span /><b>Course Player</b></div><div className="al-mockup-stage"><div className="al-video-placeholder"><Play fill="currentColor" /></div><div className="al-lesson-panel"><b>Materi berikutnya</b><p>Framework delegasi dan komunikasi eksekutif</p><i><em /></i></div></div></div>
-          </div>
-        </section>
-
-        <section className="al-section al-section--white" id="mentor">
-          <div className="container">
-            <div className="al-section-row"><div className="al-section-head compact"><span className="al-eyebrow">Program unggulan</span><h2>Kurikulum kepemimpinan yang siap dijalankan.</h2></div><Link href="/program" className="al-btn-secondary">Semua Program<ArrowRight size={17} /></Link></div>
-            <div className="course-grid">{courses.length > 0 ? courses.map(course => <CourseCard key={course.id} course={course} />) : <div className="al-empty-course"><BookOpen size={36} /><h3>Katalog sedang disiapkan</h3><p>Program akan muncul setelah mentor menerbitkan kurikulum di dashboard.</p></div>}</div>
-          </div>
-        </section>
-
-        <section className="al-section al-insight al-overlap-section" id="insight">
-          <div className="container al-insight-grid"><div><span className="al-eyebrow">Standar produksi</span><h2>Rapi di layar besar, tetap nyaman di smartphone.</h2><p>Layout responsif, spacing konsisten, CTA jelas, card stabil, focus state aksesibel, dan micro-interaction ringan membuat LMS terasa matang untuk pengguna nyata.</p></div><div className="al-insight-cards"><article><ShieldCheck /><b>Akses aman</b><span>Role dan session diarahkan sesuai kebutuhan pengguna.</span></article><article><BarChart3 /><b>Data terlihat</b><span>Metrik progres, evaluasi, dan aktivitas mudah dipindai.</span></article><article><Users2 /><b>Multi-role</b><span>Admin, Mentor, dan Peserta punya dashboard berbeda.</span></article></div></div>
-        </section>
-
-        <section className="al-section al-section--white al-outcomes" aria-labelledby="outcomes-title"><div className="container al-outcomes-grid"><div><span className="al-eyebrow">Yang dibawa pulang</span><h2 id="outcomes-title">Setiap pembelajaran meninggalkan jejak.</h2><p>Progress terlihat bukan hanya dari persentase, tetapi dari cara peserta mengambil keputusan dan menggerakkan tim setelah kelas selesai.</p></div><div className="al-outcome-list"><div><span>01</span><p><b>Clarity</b><small>Melihat masalah, peran, dan prioritas dengan lebih jernih.</small></p></div><div><span>02</span><p><b>Capability</b><small>Mengubah insight menjadi percakapan dan keputusan yang lebih baik.</small></p></div><div><span>03</span><p><b>Continuity</b><small>Menjaga ritme refleksi agar perubahan bertahan di luar ruang kelas.</small></p></div></div></div></section>
-
-        <section className="al-section al-section--gray al-faq" id="faq" aria-labelledby="faq-title">
-          <div className="container al-faq-grid">
-            <div className="al-faq-intro">
-              <span className="al-eyebrow">Pertanyaan umum</span>
-              <h2 id="faq-title">Sebelum mulai, pastikan jalurnya terasa tepat.</h2>
-              <p>Jawaban singkat untuk membantu Anda memilih langkah pertama di PROFAS dengan lebih percaya diri.</p>
-              <div className="al-faq-aside">
-                <div className="al-faq-aside-icon"><Users2 size={20} /></div>
-                <div>
-                  <b>Untuk kebutuhan tim</b>
-                  <span>Bangun satu bahasa kepemimpinan di organisasi Anda.</span>
-                  <a href="mailto:halo@profas.id?subject=Program%20Kepemimpinan%20Organisasi">Diskusikan kebutuhan tim <ArrowRight size={16} /></a>
+        <section className={`${styles.section} ${styles.principlesSection}`} id="standar" aria-labelledby="standar-title">
+          <div className={`${styles.shell} ${styles.principleLayout}`}>
+            <div className={styles.principleStatement}>
+              <span className={styles.kicker}>Standar pendampingan</span>
+              <h2 id="standar-title">Kerahasiaan bukan ornamen. Kejelasan bukan bonus.</h2>
+              <p>
+                Keduanya adalah syarat agar nasihat hukum dapat dipercaya, dipahami oleh pengambil
+                keputusan, dan dijalankan oleh tim.
+              </p>
+            </div>
+            <dl className={styles.principleList}>
+              {principles.map(({ icon: Icon, title, copy }) => (
+                <div className={styles.principleItem} key={title}>
+                  <span className={styles.principleIcon} aria-hidden="true"><Icon size={21} /></span>
+                  <dt>{title}</dt>
+                  <dd>{copy}</dd>
                 </div>
-              </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <section className={styles.section} id="faq" aria-labelledby="faq-title">
+          <div className={`${styles.shell} ${styles.faqGrid}`}>
+            <div className={styles.faqIntro}>
+              <span className={styles.kicker}>Sebelum memulai</span>
+              <h2 id="faq-title">Pertanyaan yang layak dijawab sejak awal.</h2>
+              <p>Jawaban singkat untuk membantu Anda memahami proses sebelum membagikan informasi lebih jauh.</p>
             </div>
-            <div className="al-faq-list">
-              {faqItems.map(([question, answer], idx) => <details key={question}>
-                <summary>
-                  <span className="al-faq-index" aria-hidden="true">{String(idx + 1).padStart(2, "0")}</span>
-                  <span className="al-faq-question">{question}</span>
-                  <span className="al-faq-chevron" aria-hidden="true"><ChevronRight size={18} /></span>
-                </summary>
-                <p>{answer}</p>
-              </details>)}
+            <div className={styles.faqList}>
+              {faq.map((item) => (
+                <details className={styles.faqItem} key={item.question}>
+                  <summary>{item.question}</summary>
+                  <p>{item.answer}</p>
+                </details>
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="al-section al-final-cta"><div className="container"><div className="al-final-box"><span className="al-eyebrow">Mulai dari sini</span><h2>Bangun kapasitas kepemimpinan dengan sistem belajar yang jelas.</h2><p>Masuk ke katalog, pilih program, lanjutkan materi, tuntaskan evaluasi, lalu dapatkan sertifikat PROFAS.</p><div><Link href="/daftar" className="al-btn-primary">Daftar Sekarang<ArrowRight size={18} /></Link><Link href="/masuk" className="al-btn-secondary">Masuk Dashboard</Link></div></div></div></section>
+        <section className={styles.ctaSection} aria-labelledby="cta-title">
+          <div className={styles.shell}>
+            <div className={styles.ctaPanel}>
+              <div className={styles.ctaCopy}>
+                <span className={styles.kicker}>Langkah berikutnya</span>
+                <h2 id="cta-title">Keputusan penting layak dimulai dengan pijakan yang jelas.</h2>
+                <p>
+                  Ceritakan konteks umumnya. Kami akan membantu menentukan percakapan dan langkah awal
+                  yang paling masuk akal.
+                </p>
+              </div>
+              <div className={styles.ctaContact}>
+                <span>Hubungi PROFAS</span>
+                <a href={consultationHref}>halo@profas.id <ArrowUpRight size={20} aria-hidden="true" /></a>
+                <p>Jangan sertakan dokumen atau informasi sangat sensitif sebelum konflik kepentingan dan penugasan dikonfirmasi.</p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
-      <Footer />
+
+      <footer className={styles.footer}>
+        <div className={`${styles.shell} ${styles.footerTop}`}>
+          <div className={styles.footerBrand}>
+            <Brand />
+            <p className={styles.footerSummary}>
+              Pendampingan hukum bisnis yang mengubah kompleksitas menjadi arah yang dapat dipahami dan dijalankan.
+            </p>
+          </div>
+          <nav className={styles.footerNav} aria-label="Tautan layanan">
+            <strong>Jelajahi</strong>
+            <a href="#keahlian">Keahlian</a>
+            <a href="#cara-kerja">Cara kerja</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <nav className={styles.footerNav} aria-label="Tautan akun dan kebijakan">
+            <strong>Akses</strong>
+            <Link href="/masuk">Portal klien</Link>
+            <Link href="/privasi">Privasi</Link>
+            <Link href="/syarat">Ketentuan</Link>
+          </nav>
+        </div>
+        <div className={`${styles.shell} ${styles.footerBottom}`}>
+          <p>© {new Date().getFullYear()} PROFAS. Seluruh hak dilindungi.</p>
+          <p>Informasi di situs ini bersifat umum dan bukan nasihat hukum.</p>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -125,17 +125,17 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
 
   async function logout(){try{await fetch("/api/auth/logout",{method:"POST"})}finally{router.push("/");router.refresh()}}
 
-  return <div className={`dashboard-layout dashboard-fresh pf-workspace-shell ${roleClass} ${collapsed ? "sidebar-collapsed" : ""}`}>
-    <aside id="dashboard-navigation" className={`dashboard-sidebar pf-workspace-sidebar ${open?"open":""}`} aria-label="Navigasi utama ruang belajar">
-      <div className="sidebar-top pf-workspace-sidebar-header">
+  return <div className={`dashboard-fresh pf-workspace-shell ${roleClass} ${collapsed ? "sidebar-collapsed" : ""}`}>
+    <aside id="dashboard-navigation" className={`pf-workspace-sidebar ${open?"open":""}`} aria-label="Navigasi utama ruang belajar">
+      <div className="pf-workspace-sidebar-header">
         <div className="pf-workspace-logo">
           {!collapsed && <Logo/>}
           {collapsed && <Logo compact />}
         </div>
-        <button type="button" onClick={()=>setOpen(false)} aria-label="Tutup navigasi" aria-controls="dashboard-navigation" className="mobile-close-btn pf-workspace-sidebar-close"><X aria-hidden="true"/></button>
+        <button type="button" onClick={()=>setOpen(false)} aria-label="Tutup navigasi" aria-controls="dashboard-navigation" className="pf-workspace-sidebar-close"><X aria-hidden="true"/></button>
       </div>
-      <section className="sidebar-user pf-workspace-profile" aria-label={`${user.name}, ${roleLabel}`}>
-        <span className={`sidebar-user-avatar pf-workspace-profile-avatar ${user.avatar ? "has-avatar" : "pf-workspace-profile-avatar-fallback"}`} aria-hidden="true">
+      <section className="pf-workspace-profile" aria-label={`${user.name}, ${roleLabel}`}>
+        <span className={`pf-workspace-profile-avatar ${user.avatar ? "has-avatar" : "pf-workspace-profile-avatar-fallback"}`} aria-hidden="true">
           {user.avatar ? <Image src={user.avatar} alt="" width={38} height={38} /> : initials(user.name)}
         </span>
         {!collapsed && <div className="pf-workspace-profile-copy"><b className="pf-workspace-profile-name">{user.username ? `@${user.username}` : user.name}</b><small className="pf-workspace-profile-role">{user.name} · {roleLabel}</small></div>}
@@ -184,17 +184,17 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
           );
         })}
       </nav>
-      <div className="sidebar-bottom pf-workspace-sidebar-footer">
-        <button type="button" onClick={()=>setCollapsed(!collapsed)} className="desktop-toggle-btn pf-workspace-sidebar-toggle" title={collapsed ? "Perluas navigasi" : "Ringkas navigasi"} aria-label={collapsed ? "Perluas navigasi" : "Ringkas navigasi"} aria-controls="dashboard-navigation" aria-expanded={!collapsed}><Menu aria-hidden="true"/><span className={collapsed ? "sr-only" : "pf-workspace-sidebar-action-label"}>{collapsed ? "Perluas navigasi" : "Ringkas menu"}</span></button>
+      <div className="pf-workspace-sidebar-footer">
+        <button type="button" onClick={()=>setCollapsed(!collapsed)} className="pf-workspace-sidebar-toggle" title={collapsed ? "Perluas navigasi" : "Ringkas navigasi"} aria-label={collapsed ? "Perluas navigasi" : "Ringkas navigasi"} aria-controls="dashboard-navigation" aria-expanded={!collapsed}><Menu aria-hidden="true"/><span className={collapsed ? "sr-only" : "pf-workspace-sidebar-action-label"}>{collapsed ? "Perluas navigasi" : "Ringkas menu"}</span></button>
         <button type="button" onClick={logout} className="pf-workspace-logout" title="Keluar" aria-label="Keluar dari sistem"><LogOut aria-hidden="true"/><span className={collapsed ? "sr-only" : "pf-workspace-sidebar-action-label"}>Keluar</span></button>
       </div>
     </aside>
-    {open && <button type="button" className="dashboard-backdrop pf-workspace-backdrop" onClick={()=>setOpen(false)} aria-label="Tutup navigasi" aria-controls="dashboard-navigation" />}
-    <div className="dashboard-canvas pf-workspace-canvas">
-      <header className="dashboard-header pf-workspace-topbar">
-        <button type="button" className="dash-menu pf-workspace-menu-trigger" onClick={()=>setOpen(true)} aria-label="Buka navigasi" aria-controls="dashboard-navigation" aria-expanded={open}><Menu aria-hidden="true"/></button>
-        <div className="dash-welcome flex items-center gap-4 pf-workspace-context">
-          <span className="dash-brand-lockup pf-workspace-brand"><b>PROFAS</b><span>RUANG BELAJAR</span></span>
+    {open && <button type="button" className="pf-workspace-backdrop" onClick={()=>setOpen(false)} aria-label="Tutup navigasi" aria-controls="dashboard-navigation" />}
+    <div className="pf-workspace-canvas">
+      <header className="pf-workspace-topbar">
+        <button type="button" className="pf-workspace-menu-trigger" onClick={()=>setOpen(true)} aria-label="Buka navigasi" aria-controls="dashboard-navigation" aria-expanded={open}><Menu aria-hidden="true"/></button>
+        <div className="flex items-center gap-4 pf-workspace-context">
+          <span className="pf-workspace-brand"><b>PROFAS</b><span>RUANG BELAJAR</span></span>
           <div className="flex items-center gap-2 hide-on-mobile pf-workspace-status-list">
             <div className="pro-live-pulse pf-workspace-status" title="Sistem pembelajaran aktif" role="status">
               <span className="pro-live-pulse-dot" aria-hidden="true"></span>
@@ -207,11 +207,11 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
             )}
           </div>
         </div>
-        <div className="dash-actions flex items-center gap-2.5 pf-workspace-actions" role="group" aria-label="Aksi cepat">
+        <div className="flex items-center gap-2.5 pf-workspace-actions" role="group" aria-label="Aksi cepat">
           <button
             type="button"
             onClick={() => setIsExportHubOpen(true)}
-            className="dashboard-tool-btn dashboard-export-btn pf-workspace-action pf-workspace-export"
+            className="pf-workspace-action pf-workspace-export"
             title="Buka pusat laporan dan ekspor"
             aria-label="Pusat laporan dan ekspor data"
             aria-haspopup="dialog"
@@ -222,7 +222,7 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
           <button
             type="button"
             onClick={() => setIsCommandOpen(true)}
-            className="command-palette-btn dashboard-search-btn hide-on-mobile pf-workspace-action pf-workspace-search"
+            className="hide-on-mobile pf-workspace-action pf-workspace-search"
             title="Cari cepat (Ctrl+K)"
             aria-label="Cari cepat di sistem (Ctrl+K)"
             aria-haspopup="dialog"
@@ -233,21 +233,21 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
             </div>
             <kbd>Ctrl K</kbd>
           </button>
-          <button type="button" onClick={()=>setShowNotifs(v=>!v)} aria-label={`${showNotifs ? "Tutup" : "Buka"} notifikasi${unreadCount > 0 ? `, ${unreadCount} belum dibaca` : ""}`} aria-expanded={showNotifs} aria-haspopup="dialog" aria-controls="workspace-notifications" className="notif-btn pf-workspace-action pf-workspace-notification-trigger">
+          <button type="button" onClick={()=>setShowNotifs(v=>!v)} aria-label={`${showNotifs ? "Tutup" : "Buka"} notifikasi${unreadCount > 0 ? `, ${unreadCount} belum dibaca` : ""}`} aria-expanded={showNotifs} aria-haspopup="dialog" aria-controls="workspace-notifications" className="pf-workspace-action pf-workspace-notification-trigger">
             <Bell aria-hidden="true"/>{unreadCount > 0 && <i className="notification-badge" aria-label={`${unreadCount} notifikasi belum dibaca`}>{unreadCount}</i>}
           </button>
-          {showNotifs&&<div id="workspace-notifications" className="notification-popover pf-workspace-notifications" role="dialog" aria-labelledby="workspace-notifications-title">
-            <div className="notification-popover-header pf-workspace-notifications-header">
+          {showNotifs&&<div id="workspace-notifications" className="pf-workspace-notifications" role="dialog" aria-labelledby="workspace-notifications-title">
+            <div className="pf-workspace-notifications-header">
               <b id="workspace-notifications-title" className="pf-workspace-notifications-title">Notifikasi</b>
-              {unreadCount > 0 && <button type="button" onClick={markReadAll} className="text-link pf-workspace-notifications-read-all"><Check className="icon-xs" aria-hidden="true"/> Tandai semua dibaca</button>}
+              {unreadCount > 0 && <button type="button" onClick={markReadAll} className="pf-workspace-notifications-read-all"><Check className="icon-xs" aria-hidden="true"/> Tandai semua dibaca</button>}
             </div>
-            <div className="notification-list pf-workspace-notifications-list">
+            <div className="pf-workspace-notifications-list">
               {notifs.length === 0 ? (
-                <p className="notification-empty pf-workspace-notifications-empty">Belum ada notifikasi baru.</p>
+                <p className="pf-workspace-notifications-empty">Belum ada notifikasi baru.</p>
               ) : (
                 notifs.map(n => (
-                  <button type="button" key={n.id} className={`notification-item pf-workspace-notification-item ${n.read ? "" : "unread"}`} onClick={() => markRead(n.id, n.link)} aria-label={`${n.read ? "Buka" : "Baca"} notifikasi: ${n.title}`}>
-                    <div className="notif-content pf-workspace-notification-copy">
+                  <button type="button" key={n.id} className={`pf-workspace-notification-item ${n.read ? "" : "unread"}`} onClick={() => markRead(n.id, n.link)} aria-label={`${n.read ? "Buka" : "Baca"} notifikasi: ${n.title}`}>
+                    <div className="pf-workspace-notification-copy">
                       <b>{n.title}</b>
                       <p>{n.message}</p>
                     </div>
@@ -259,7 +259,7 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
           <Link href="/program" prefetch={true} className="btn btn-primary btn-small hide-on-mobile pf-workspace-program-link">Jelajahi program</Link>
         </div>
       </header>
-      <main id="workspace-main" className="dashboard-content pf-workspace-main">{children}</main>
+      <main id="workspace-main" className="pf-workspace-main">{children}</main>
       <CommandPalette isOpen={isCommandOpen} onClose={() => setIsCommandOpen(false)} />
       <ExecutiveExportHubModal isOpen={isExportHubOpen} onClose={() => setIsExportHubOpen(false)} initialRole={user.role} />
     </div>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Fraunces, Space_Grotesk } from 'next/font/google';
 import { RouteProgressBar } from "@/components/ui/RouteProgressBar";
-import { GlobalLeafStagger } from "@/components/ui/GlobalLeafStagger";
 import { WebVitalsReporter } from "@/components/ui/WebVitalsReporter";
 import "@/styles/typography.css";
 import "@/styles/design-system.css";
@@ -16,6 +15,7 @@ import "@/styles/akseslegal-theme.css";
 import "@/styles/home-landing.css";
 import "@/styles/leaf-stagger.css";
 import "@/styles/home-scroll.css";
+import "@/styles/profas-reframe.css";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 // preload: false — Fraunces and Space Grotesk are route-specific display faces
@@ -96,9 +96,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} ${fraunces.variable} ${spaceGrotesk.variable} font-sans`} style={{ fontFamily: 'var(--font-inter, "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif)' }}>
+      <body className={`${inter.variable} ${fraunces.variable} ${spaceGrotesk.variable} font-sans`}>
         <RouteProgressBar />
-        <GlobalLeafStagger />
         <WebVitalsReporter />
         {children}
       </body>

@@ -56,9 +56,9 @@ export function AuthForm({
     if (input && pass) { input.value = email; pass.value = DEMO_PASSWORD; }
   };
 
-  return <form onSubmit={submit} className="auth-form">
+  return <form onSubmit={submit} className="auth-form pf-auth-form">
     {(errorParam || error) && (
-      <div className="auth-alert-box" role="alert" aria-live="assertive">
+      <div className="auth-alert-box pf-auth-alert" role="alert" aria-live="assertive">
         <div className="auth-alert-header">
           <span>Gagal Masuk / Otorisasi Google</span>
         </div>
@@ -76,7 +76,7 @@ export function AuthForm({
       </div>
     )}
 
-    <a href="/api/auth/google" className="auth-btn-google hover-lift">
+    <a href="/api/auth/google" className="auth-btn-google hover-lift pf-auth-google">
       <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -85,35 +85,35 @@ export function AuthForm({
       </svg>
       {mode === "login" ? "Masuk dengan Google" : "Daftar dengan Google"}
     </a>
-    <div className="auth-divider-row">
+    <div className="auth-divider-row pf-auth-divider">
       <div className="auth-divider-line"></div>
       <span className="auth-divider-text">atau dengan email</span>
       <div className="auth-divider-line"></div>
     </div>
 
     {mode === "register" && <>
-      <label htmlFor="register-name">Nama lengkap</label>
-      <input id="register-name" name="name" autoComplete="name" placeholder="Nama Anda" required minLength={3} maxLength={80}/>
-      <label htmlFor="register-username">Nama akun</label>
-      <input id="register-username" name="username" autoComplete="username" placeholder="contoh: nadia.pratama" required minLength={3} maxLength={30} pattern="[a-z0-9][a-z0-9._-]*[a-z0-9]" title="Gunakan huruf kecil, angka, titik, garis bawah, atau tanda hubung." autoCapitalize="none"/>
-      <div className="persona-select" role="group" aria-labelledby="persona-label">
-        <span id="persona-label">Saya adalah</span>
+      <label className="pf-auth-label" htmlFor="register-name">Nama lengkap</label>
+      <input className="pf-auth-input" id="register-name" name="name" autoComplete="name" placeholder="Nama Anda" required minLength={3} maxLength={80}/>
+      <label className="pf-auth-label" htmlFor="register-username">Nama akun</label>
+      <input className="pf-auth-input" id="register-username" name="username" autoComplete="username" placeholder="contoh: nadia.pratama" required minLength={3} maxLength={30} pattern="[a-z0-9][a-z0-9._-]*[a-z0-9]" title="Gunakan huruf kecil, angka, titik, garis bawah, atau tanda hubung." autoCapitalize="none"/>
+      <fieldset className="persona-select pf-auth-persona">
+        <legend id="persona-label">Saya adalah</legend>
         <div>
           {[["STUDENT_ENTREPRENEUR","Pengusaha / Pelajar"],["ACADEMIC","Akademisi"],["ORGANIZATION","Organisasi"],["COOPERATIVE","Koperasi"]].map(([value,label])=>
             <button type="button" key={value} onClick={()=>setPersona(value)} className={persona===value?"active":""} aria-pressed={persona===value}>{label}</button>
           )}
         </div>
-      </div>
+      </fieldset>
     </>}
-    <label htmlFor="auth-email">Email</label>
-    <input id="auth-email" name="email" type="email" autoComplete="email" placeholder="nama@email.com" required/>
-    <label htmlFor="auth-password">Kata sandi</label>
-    <div className="password-input">
-      <input id="auth-password" name="password" autoComplete={mode === "login" ? "current-password" : "new-password"} type={show?"text":"password"} placeholder={mode==="login"?"Masukkan kata sandi":"Minimal 8 karakter"} required minLength={mode==="login"?6:8} maxLength={128}/>
+    <label className="pf-auth-label" htmlFor="auth-email">Email</label>
+    <input className="pf-auth-input" id="auth-email" name="email" type="email" autoComplete="email" placeholder="nama@email.com" required/>
+    <label className="pf-auth-label" htmlFor="auth-password">Kata sandi</label>
+    <div className="password-input pf-auth-password">
+      <input className="pf-auth-input" id="auth-password" name="password" autoComplete={mode === "login" ? "current-password" : "new-password"} type={show?"text":"password"} placeholder={mode==="login"?"Masukkan kata sandi":"Minimal 8 karakter"} required minLength={mode==="login"?6:8} maxLength={128}/>
       <button type="button" onClick={()=>setShow(!show)} aria-label={show ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"} aria-pressed={show}>{show?<EyeOff/>:<Eye/>}</button>
     </div>
-    {mode === "login" && <div className="form-row"><label className="remember" htmlFor="auth-remember"><input id="auth-remember" name="remember" type="checkbox"/> Ingat saya</label><Link href="mailto:halo@profas.id?subject=Bantuan%20kata%20sandi%20PROFAS">Lupa kata sandi?</Link></div>}
-    <button className="btn btn-primary auth-submit auth-submit-mt hover-lift" disabled={loading} aria-busy={loading}>{loading?<LoaderCircle className="spin" aria-hidden="true"/>:<>{mode==="login"?"Masuk ke Dashboard":"Buat Akun Gratis"}<ArrowRight aria-hidden="true"/></>}</button>
-    {mode === "login" && SHOW_DEMO_ACCOUNTS && <div className="demo-box auth-demo-mt"><b>Akun demo <span className="demo-box-env">dev</span></b><div><button type="button" onClick={()=>demo("peserta@profas.id")} aria-label="Isi demo akun peserta">Peserta</button><button type="button" onClick={()=>demo("mentor@profas.id")} aria-label="Isi demo akun mentor">Mentor</button><button type="button" onClick={()=>demo("admin@profas.id")} aria-label="Isi demo akun admin">Admin</button></div><small>Kata sandi semua akun: {DEMO_PASSWORD}</small></div>}
+    {mode === "login" && <div className="form-row pf-auth-options"><label className="remember" htmlFor="auth-remember"><input id="auth-remember" name="remember" type="checkbox"/> Ingat saya</label><Link href="mailto:halo@profas.id?subject=Bantuan%20kata%20sandi%20PROFAS">Lupa kata sandi?</Link></div>}
+    <button className="btn btn-primary auth-submit auth-submit-mt hover-lift pf-auth-submit" disabled={loading} aria-busy={loading}>{loading?<LoaderCircle className="spin" aria-hidden="true"/>:<>{mode==="login"?"Masuk ke Dashboard":"Buat Akun Gratis"}<ArrowRight aria-hidden="true"/></>}</button>
+    {mode === "login" && SHOW_DEMO_ACCOUNTS && <div className="demo-box auth-demo-mt pf-auth-demo"><b>Akun demo <span className="demo-box-env">dev</span></b><div><button type="button" onClick={()=>demo("peserta@profas.id")} aria-label="Isi demo akun peserta">Peserta</button><button type="button" onClick={()=>demo("mentor@profas.id")} aria-label="Isi demo akun mentor">Mentor</button><button type="button" onClick={()=>demo("admin@profas.id")} aria-label="Isi demo akun admin">Admin</button></div><small>Kata sandi semua akun: {DEMO_PASSWORD}</small></div>}
   </form>;
 }

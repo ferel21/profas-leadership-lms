@@ -39,7 +39,12 @@ export function CertificateActions({
         import("jspdf").then((m) => m.default),
       ]);
 
-      const canvas = await html2canvasMod(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const canvas = await html2canvasMod(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        windowWidth: 1200,
+      });
       const imgData = canvas.toDataURL("image/png");
 
       const pdf = new jsPDFMod("landscape", "mm", "a4");
@@ -57,21 +62,21 @@ export function CertificateActions({
   }
 
   return (
-    <div className="cert-actions flex flex-wrap items-center justify-center gap-3 mt-6">
+    <div className="cert-actions">
       <CertificatePDFButton
         recipientName={recipientName}
         courseTitle={title}
         uniqueNumber={uniqueNumber}
         issuedAt={issuedAt}
         mentorName={mentorName}
-        label="Unduh Sertifikat Executive (PDF)"
+        label="Unduh PDF resmi"
       />
-      <button className="btn btn-outline flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-300 hover:border-slate-400 bg-white text-slate-700 font-bold text-sm shadow-sm transition" onClick={downloadPdf} disabled={downloading}>
-        {downloading ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
-        <span>{downloading ? "Membuat PDF Screenshot..." : "Print / Simpan Layout"}</span>
+      <button className="cert-action-button" onClick={downloadPdf} disabled={downloading}>
+        {downloading ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Download aria-hidden="true" />}
+        <span>{downloading ? "Menyiapkan salinan…" : "Simpan salinan visual"}</span>
       </button>
-      <button className="btn btn-outline flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-300 hover:border-slate-400 bg-white text-slate-700 font-bold text-sm shadow-sm transition" onClick={share}>
-        {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-teal-600" />}
+      <button className="cert-action-button" onClick={share}>
+        {copied ? <Check aria-hidden="true" /> : <Share2 aria-hidden="true" />}
         <span>{copied ? "Tautan disalin" : "Bagikan Tautan"}</span>
       </button>
     </div>

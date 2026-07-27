@@ -53,15 +53,15 @@ export function CertificateVerificationForm() {
     : null;
 
   return (
-    <div className="verification-card">
+    <div className="verification-card" aria-busy={loading}>
       <div className="verification-card-heading">
-        <span className="verification-card-icon"><ShieldCheck size={22} /></span>
+        <span className="verification-card-icon"><ShieldCheck size={22} aria-hidden="true" /></span>
         <div>
           <span className="verification-label">Portal publik</span>
           <h2>Periksa sertifikat</h2>
         </div>
       </div>
-      <p className="verification-card-copy">Masukkan nomor unik yang tercetak pada sertifikat untuk melihat status penerbitan dan detail pemiliknya.</p>
+      <p className="verification-card-copy" id="certificate-help">Masukkan nomor unik yang tercetak pada sertifikat untuk melihat status penerbitan dan detail pemiliknya.</p>
 
       <form onSubmit={verify} className="verification-form">
         <label htmlFor="certificate-number">Nomor sertifikat</label>
@@ -74,19 +74,25 @@ export function CertificateVerificationForm() {
             autoComplete="off"
             spellCheck={false}
             disabled={loading}
+            aria-describedby={`certificate-help${result ? " certificate-result" : ""}`}
           />
           <button type="submit" disabled={loading || !number.trim()}>
-            {loading ? <LoaderCircle size={18} className="verification-spinner" /> : <Search size={18} />}
+            {loading ? <LoaderCircle size={18} className="verification-spinner" aria-hidden="true" /> : <Search size={18} aria-hidden="true" />}
             {loading ? "Memeriksa" : "Verifikasi"}
           </button>
         </div>
       </form>
 
       {result && (
-        <div className={`verification-result ${result.valid ? "is-valid" : "is-invalid"}`} role="status" aria-live="polite">
-          {result.valid ? <BadgeCheck size={22} /> : <AlertCircle size={22} />}
+        <div
+          id="certificate-result"
+          className={`verification-result ${result.valid ? "is-valid" : "is-invalid"}`}
+          role={result.valid ? "status" : "alert"}
+          aria-live="polite"
+        >
+          {result.valid ? <BadgeCheck size={22} aria-hidden="true" /> : <AlertCircle size={22} aria-hidden="true" />}
           <div>
-            <strong>{result.valid ? "Sertifikat terverifikasi" : "Sertifikat belum ditemukan"}</strong>
+            <strong>{result.valid ? "Sertifikat terverifikasi" : "Verifikasi belum berhasil"}</strong>
             {result.valid && result.certificate ? (
               <p>{result.certificate.user.name} menyelesaikan <b>{result.certificate.course.title}</b> pada {issuedDate}.</p>
             ) : <p>{result.message}</p>}

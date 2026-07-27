@@ -12,7 +12,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log error untuk diagnostik produksi & 24/7 autonomous monitoring
+    // Keep enough context for production diagnostics without exposing it in the UI.
     console.error("[PROFAS_GLOBAL_ERROR_BOUNDARY]", {
       message: error.message,
       stack: error.stack,
@@ -22,24 +22,25 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="error-container">
-      <div className="error-card hover-lift">
+    <main className="error-container">
+      <div className="error-card" role="alert" aria-labelledby="error-title">
         <div className="error-icon-box">
-          <AlertTriangle size={36} />
+          <AlertTriangle size={36} aria-hidden="true" />
         </div>
-        <h1 className="error-title">Terjadi Kesalahan Sistem</h1>
+        <span className="error-kicker">Jeda sejenak</span>
+        <h1 className="error-title" id="error-title">Halaman belum dapat dimuat.</h1>
         <p className="error-desc">
-          Maaf, sesi Anda mengalami kendala teknis atau koneksi terputus. Sistem maintenance 24/7 kami telah mencatat masalah ini untuk auto-healing.
+          Sesi atau koneksi Anda mungkin terputus. Coba muat ulang halaman; progres yang sudah tersimpan tetap aman.
         </p>
         <div className="error-actions">
           <button onClick={() => reset()} className="btn btn-primary flex items-center gap-2">
-            <RefreshCw size={16} /> Coba Lagi
+            <RefreshCw size={16} aria-hidden="true" /> Muat Ulang
           </button>
           <Link href="/" className="btn btn-secondary flex items-center gap-2">
-            <Home size={16} /> Kembali ke Beranda
+            <Home size={16} aria-hidden="true" /> Ke Beranda
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

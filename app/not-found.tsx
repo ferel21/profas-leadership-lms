@@ -1,29 +1,27 @@
 import Link from "next/link";
-import { Compass, BookOpen, LogIn, ArrowLeft } from "lucide-react";
+import { Compass, BookOpen, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="error-container">
-      <div className="error-card hover-lift">
+    <main className="error-container not-found-container">
+      <div className="error-card" aria-labelledby="not-found-title">
         <div className="error-icon-box">
-          <Compass size={36} />
+          <Compass size={36} aria-hidden="true" />
         </div>
-        <h1 className="error-title">404 - Halaman Tidak Ditemukan</h1>
+        <span className="error-kicker">404 / Di luar rute</span>
+        <h1 className="error-title" id="not-found-title">Halaman ini tidak ditemukan.</h1>
         <p className="error-desc">
-          Halaman yang Anda cari mungkin telah dipindahkan, diperbarui, atau Anda belum memiliki hak akses (enrollment) untuk rute tersebut.
+          Alamatnya mungkin berubah atau tidak lagi tersedia. Pilih rute berikut untuk melanjutkan.
         </p>
         <div className="error-actions">
           <Link href="/program" className="btn btn-primary flex items-center gap-2">
-            <BookOpen size={16} /> Lihat Program Belajar
-          </Link>
-          <Link href="/masuk" className="btn btn-secondary flex items-center gap-2">
-            <LogIn size={16} /> Masuk ke Akun
+            <BookOpen size={16} aria-hidden="true" /> Lihat Program
           </Link>
           <Link href="/" className="btn btn-secondary flex items-center gap-2">
-            <ArrowLeft size={16} /> Beranda Utama
+            <ArrowLeft size={16} aria-hidden="true" /> Beranda
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

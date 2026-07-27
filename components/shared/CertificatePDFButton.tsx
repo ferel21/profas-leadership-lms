@@ -53,22 +53,19 @@ export function CertificatePDFButton({
     <button
       onClick={handleDownload}
       disabled={loading}
-      className={`inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-md border ${
-        success
-          ? "bg-emerald-600 border-emerald-500 text-white shadow-emerald-600/20"
-          : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/40 text-white hover:shadow-blue-500/20 hover:-translate-y-0.5"
-      } backdrop-blur-md ${className}`}
-      title="Unduh sertifikat PDF berbingkai emas dengan verifikasi QR digital"
+      className={`cert-action-button cert-action-primary ${success ? "is-success" : ""} ${className}`}
+      title="Unduh sertifikat resmi dalam format PDF"
+      aria-live="polite"
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin text-white" />
+        <Loader2 className="animate-spin" aria-hidden="true" />
       ) : success ? (
-        <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+        <CheckCircle2 aria-hidden="true" />
       ) : (
-        <Award className="w-4 h-4 text-amber-300" />
+        <Award aria-hidden="true" />
       )}
-      <span>{success ? "Sertifikat PDF Terunduh!" : label}</span>
-      {!loading && !success && <Download className="w-4 h-4 opacity-80" />}
+      <span>{success ? "PDF berhasil diunduh" : label}</span>
+      {!loading && !success && <Download aria-hidden="true" />}
     </button>
   );
 }

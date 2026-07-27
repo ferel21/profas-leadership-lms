@@ -10,8 +10,8 @@ export interface CertificatePDFOptions {
 }
 
 /**
- * Utility untuk membuat dokumen PDF Sertifikat Kelulusan bergaya eksekutif.
- * Didesain dengan filosofi `canvas-design` lanskap, bingkai ornamental emas/teal, dan stempel digital.
+ * Utility untuk membuat dokumen PDF sertifikat dalam bahasa visual PROFAS.
+ * Dokumen menggunakan kanvas A4 lanskap, warna biru PROFAS, aksen emas, dan stempel digital.
  */
 export function generateCertificatePDF({
   recipientName,
@@ -31,23 +31,23 @@ export function generateCertificatePDF({
   const width = doc.internal.pageSize.getWidth();
   const height = doc.internal.pageSize.getHeight();
 
-  // Background krem lembut / putih bersih
-  doc.setFillColor(254, 254, 253);
+  // Warm white canvas.
+  doc.setFillColor(250, 251, 248);
   doc.rect(0, 0, width, height, "F");
 
-  // Outer Border (Emas Tua / Slate)
-  doc.setDrawColor(15, 23, 42); // Slate 900
+  // Deep-blue outer rule.
+  doc.setDrawColor(23, 63, 115);
   doc.setLineWidth(2.5);
   doc.rect(10, 10, width - 20, height - 20);
 
-  // Inner Border (Teal 600 / Emerald)
-  doc.setDrawColor(13, 148, 136); // Teal 600
+  // PROFAS-blue inner rule.
+  doc.setDrawColor(42, 107, 167);
   doc.setLineWidth(0.8);
   doc.rect(14, 14, width - 28, height - 28);
 
-  // Corner Ornaments (Canvas Design Philosophy)
+  // Gold corner markers.
   const cornerSize = 12;
-  doc.setDrawColor(217, 119, 6); // Amber 600 (Emas)
+  doc.setDrawColor(243, 180, 68);
   doc.setLineWidth(1.2);
   // Top-left corner
   doc.line(14, 14 + cornerSize, 14, 14);
@@ -65,27 +65,27 @@ export function generateCertificatePDF({
   // Header Title
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.setTextColor(13, 148, 136); // Teal 600
-  doc.text("PROFAS LEADERSHIP ACADEMY", width / 2, 34, { align: "center" });
+  doc.setTextColor(42, 107, 167);
+  doc.text("PROFAS LEADERSHIP", width / 2, 34, { align: "center" });
 
   doc.setFontSize(28);
-  doc.setTextColor(15, 23, 42); // Slate 900
-  doc.text("SERTIFIKAT KELULUSAN", width / 2, 48, { align: "center" });
+  doc.setTextColor(16, 21, 25);
+  doc.text("SERTIFIKAT PENYELESAIAN", width / 2, 48, { align: "center" });
 
   // Subtitle
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  doc.setTextColor(100, 116, 139); // Slate 500
-  doc.text("Diberikan sebagai pengakuan atas dedikasi dan keunggulan kepemimpinan kepada:", width / 2, 64, { align: "center" });
+  doc.setTextColor(75, 85, 99);
+  doc.text("Diberikan sebagai pengakuan atas penyelesaian perjalanan belajar kepada:", width / 2, 64, { align: "center" });
 
   // Recipient Name
   doc.setFont("helvetica", "bold");
   doc.setFontSize(26);
-  doc.setTextColor(15, 23, 42);
+  doc.setTextColor(16, 21, 25);
   doc.text(recipientName.toUpperCase(), width / 2, 84, { align: "center" });
 
   // Line under name
-  doc.setDrawColor(217, 119, 6); // Amber / Gold
+  doc.setDrawColor(243, 180, 68);
   doc.setLineWidth(0.8);
   const nameWidth = doc.getTextWidth(recipientName.toUpperCase());
   doc.line(width / 2 - nameWidth / 2 - 10, 88, width / 2 + nameWidth / 2 + 10, 88);
@@ -93,68 +93,69 @@ export function generateCertificatePDF({
   // Course Description & Title
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
-  doc.setTextColor(71, 85, 105);
-  doc.text("Telah berhasil menyelesaikan seluruh rangkaian kurikulum, evaluasi, dan pretest pada program:", width / 2, 104, { align: "center" });
+  doc.setTextColor(75, 85, 99);
+  doc.text("Telah berhasil menyelesaikan rangkaian kurikulum dan evaluasi pada program:", width / 2, 104, { align: "center" });
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
-  doc.setTextColor(13, 148, 136); // Teal 600
+  doc.setTextColor(30, 90, 143);
   doc.text(`"${courseTitle}"`, width / 2, 118, { align: "center" });
 
   // Role Description
   doc.setFont("helvetica", "italic");
   doc.setFontSize(10.5);
-  doc.setTextColor(100, 116, 139);
+  doc.setTextColor(107, 114, 128);
   const splitDesc = doc.splitTextToSize(roleDescription, width - 80);
   doc.text(splitDesc, width / 2, 132, { align: "center" });
 
   // Verification Box & Stamp (Left side bottom)
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.setTextColor(100, 116, 139);
+  doc.setTextColor(107, 114, 128);
   doc.text("Nomor Sertifikat Resmi:", 35, 160);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.setTextColor(15, 23, 42);
+  doc.setTextColor(16, 21, 25);
   doc.text(uniqueNumber, 35, 166);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.setTextColor(100, 116, 139);
+  doc.setTextColor(107, 114, 128);
   doc.text(`Tanggal Terbit: ${issuedAt}`, 35, 173);
 
   // Digital Verification Seal (Middle circle)
   const sealX = width / 2;
   const sealY = 168;
-  doc.setDrawColor(217, 119, 6);
+  doc.setDrawColor(243, 180, 68);
   doc.setLineWidth(1.2);
   doc.circle(sealX, sealY, 15, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  doc.setTextColor(217, 119, 6);
+  doc.setTextColor(173, 112, 0);
   doc.text("VERIFIED", sealX, sealY - 2, { align: "center" });
   doc.setFontSize(6.5);
-  doc.text("PROFAS ACADEMY", sealX, sealY + 3, { align: "center" });
+  doc.text("PROFAS LEADERSHIP", sealX, sealY + 3, { align: "center" });
 
   // Signature Area (Right side bottom)
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.setTextColor(15, 23, 42);
+  doc.setTextColor(16, 21, 25);
   doc.text(mentorName, width - 65, 168, { align: "center" });
 
-  doc.setDrawColor(15, 23, 42);
+  doc.setDrawColor(23, 63, 115);
   doc.setLineWidth(0.5);
   doc.line(width - 95, 171, width - 35, 171);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.setTextColor(100, 116, 139);
+  doc.setTextColor(107, 114, 128);
   doc.text("Direktur Akademik & Mentor Utama", width - 65, 176, { align: "center" });
 
   // Footer URL
   doc.setFontSize(8);
-  doc.setTextColor(148, 163, 184);
-  doc.text(`Verifikasi keaslian sertifikat secara online di: https://profas-leadership-lms.vercel.app/sertifikat/${uniqueNumber}`, width / 2, 194, { align: "center" });
+  doc.setTextColor(107, 114, 128);
+  const verificationOrigin = typeof window === "undefined" ? "" : window.location.origin;
+  doc.text(`Verifikasi kredensial: ${verificationOrigin}/sertifikat/${uniqueNumber}`, width / 2, 194, { align: "center" });
 
   // Save PDF
   doc.save(`Sertifikat-PROFAS-${uniqueNumber}.pdf`);

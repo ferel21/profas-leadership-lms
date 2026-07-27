@@ -66,63 +66,98 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
     }
   };
 
-  if (result && !showReview) return <div className="quiz-result pro-glass-card pro-celebrate-check hover-lift" style={{ maxWidth: '640px', margin: '4rem auto', padding: '3.5rem', borderRadius: '28px', textAlign: 'center', position: 'relative', boxShadow: '0 20px 50px rgba(42, 107, 167, 0.2)' }}>
-    {result.passed && (
-      <div className="confetti-wrapper" aria-hidden="true">
-        {['#2a6ba7', '#0284c7', '#f3b444', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#38bdf8'].map((color, i) => (
-          <span
-            key={i}
-            className="pro-confetti-particle"
-            style={{
-              left: `${8 + (i * 12)}%`,
-              backgroundColor: color,
-              animationDelay: `${i * 0.15}s`,
-              animationDuration: `${2.5 + (i % 3) * 0.4}s`,
-              transform: `rotate(${i * 45}deg)`
-            }}
-          />
-        ))}
+  if (result && !showReview) return (
+    <main className={`quiz-result pf-quiz-result ${result.passed ? "is-passed" : result.needsManualGrading ? "is-pending" : "is-failed"}`} aria-labelledby="quiz-result-title">
+      <h1 id="quiz-result-title" className="sr-only">Hasil evaluasi {assessment.title}</h1>
+      <div className={`pf-quiz-result-mark ${result.passed ? "passed" : result.needsManualGrading ? "pending" : "failed"}`} aria-hidden="true">
+        {result.passed ? <Trophy /> : result.needsManualGrading ? <CheckCircle2 /> : <XCircle />}
       </div>
-    )}
-    <span className={result.passed ? "passed pro-pulse-badge" : "failed"} style={{ display: 'inline-flex', padding: '24px', borderRadius: '50%', background: result.passed || result.needsManualGrading ? 'linear-gradient(135deg, var(--color-primary), var(--color-accent))' : '#fee2e2', color: result.passed || result.needsManualGrading ? 'white' : '#dc2626', marginBottom: '1.5rem', boxShadow: '0 10px 25px rgba(42, 107, 167, 0.35)' }}>{result.passed || result.needsManualGrading ? <Trophy size={54} /> : <XCircle size={54} />}</span>
-    <small style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', letterSpacing: '2.5px', color: 'var(--color-primary)', marginBottom: '1rem', textTransform: 'uppercase' }}>{result.needsManualGrading ? "TERKIRIM & MENUNGGU PENILAIAN" : (result.passed ? "EVALUASI SELESAI & LULUS" : "BELUM LULUS EVALUASI")}</small>
-    <h1 style={{ fontSize: '78px', margin: '0', color: 'var(--ink)', fontWeight: 900, letterSpacing: '-2px', background: 'linear-gradient(135deg, var(--ink), var(--color-primary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{result.score}</h1>
-    <p style={{ color: 'var(--muted)', marginTop: '0', fontSize: '16px', fontWeight: 600 }}>Skor Kompetensi Akhir</p>
-    {!result.needsManualGrading && <div style={{ display: 'flex', justifyContent: 'center', gap: '3.5rem', margin: '2.5rem 0', padding: '1.75rem', background: 'rgba(239, 246, 255, 0.8)', borderRadius: '20px', border: '1px solid rgba(42, 107, 167, 0.2)' }}><span><b style={{ display: 'block', fontSize: '28px', color: 'var(--color-primary-dark)' }}>{result.correct}/{result.total}</b><small style={{ color: '#475569', fontWeight: 600 }}>Jawaban Tepat</small></span><span><b style={{ display: 'block', fontSize: '28px', color: '#b45309' }}>{assessment.passingScore}</b><small style={{ color: '#475569', fontWeight: 600 }}>Batas Lulus (KKM)</small></span></div>}
-    <h2 style={{ fontSize: '20px', color: 'var(--ink)', lineHeight: 1.6, fontWeight: 700 }}>{result.feedback}</h2>
-    <div className="result-actions" style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', marginTop: '2.5rem', flexWrap: 'wrap' }}>
-      {result.questions && !result.needsManualGrading && <button onClick={() => setShowReview(true)} className="pro-btn-glow hover-lift" style={{ padding: '14px 28px', borderRadius: '14px', fontSize: '16px' }}>Lihat Pembahasan Lengkap</button>}
-      {!result.passed && !result.needsManualGrading && <button onClick={retry} className="btn btn-outline hover-lift" style={{ padding: '14px 28px', borderRadius: '14px', fontSize: '16px', fontWeight: 700 }}><RotateCcw /> Coba Sekali Lagi</button>}
-      <Link href={`/belajar/${assessment.course.slug}`} className="btn btn-outline hover-lift" style={{ padding: '14px 28px', borderRadius: '14px', fontSize: '16px', fontWeight: 700, textDecoration: 'none' }}>Kembali ke Kelas</Link>
-    </div>
-  </div>;
+      <p className="pf-quiz-eyebrow">
+        {result.needsManualGrading
+          ? "Terkirim · Menunggu penilaian"
+          : result.passed
+            ? "Evaluasi selesai · Lulus"
+            : "Evaluasi selesai · Belum lulus"}
+      </p>
+      <div className="pf-quiz-score" aria-label={`Skor ${result.score}`}>
+        <strong>{result.score}</strong>
+        <span>Skor kompetensi akhir</span>
+      </div>
+      {!result.needsManualGrading && (
+        <dl className="pf-quiz-result-metrics">
+          <div>
+            <dt>Jawaban tepat</dt>
+            <dd>{result.correct}/{result.total}</dd>
+          </div>
+          <div>
+            <dt>Batas lulus</dt>
+            <dd>{assessment.passingScore}</dd>
+          </div>
+        </dl>
+      )}
+      <p className="pf-quiz-feedback">{result.feedback}</p>
+      <div className="result-actions pf-quiz-result-actions">
+        {result.questions && !result.needsManualGrading && (
+          <button type="button" onClick={() => setShowReview(true)} className="btn btn-primary">
+            Lihat pembahasan
+          </button>
+        )}
+        {!result.passed && !result.needsManualGrading && (
+          <button type="button" onClick={retry} className="btn btn-outline">
+            <RotateCcw aria-hidden="true" /> Coba sekali lagi
+          </button>
+        )}
+        <Link href={`/belajar/${assessment.course.slug}`} className="btn btn-outline">
+          Kembali ke kelas
+        </Link>
+      </div>
+    </main>
+  );
 
-  if (showReview && result?.questions) return <div className="quiz-review-page">
-    <header className="review-header"><button onClick={() => setShowReview(false)} className="btn btn-small btn-outline"><ArrowLeft /> Kembali ke Skor</button><h2>Pembahasan Evaluasi: {assessment.title}</h2></header>
+  if (showReview && result?.questions) return <div className="quiz-review-page pf-quiz-review-page">
+    <header className="review-header pf-quiz-review-header">
+      <button type="button" onClick={() => setShowReview(false)} className="btn btn-small btn-outline">
+        <ArrowLeft aria-hidden="true" /> Kembali ke skor
+      </button>
+      <div>
+        <p className="pf-quiz-eyebrow">Pembahasan evaluasi</p>
+        <h1>{assessment.title}</h1>
+      </div>
+    </header>
     <main className="review-list">
       {result.questions.map((q, index) => {
         const isMultiple = q.type === 'MULTIPLE_CHOICE' || q.type === 'TRUE_FALSE';
         const opts = isMultiple ? JSON.parse(q.options || "[]") as string[] : [];
         const userAns = answers[q.id];
         const isCorrect = String(userAns) === String(q.correctAnswer);
-        return <article key={q.id} className={`review-card ${isCorrect ? "correct" : "incorrect"}`}>
-          <div className="review-question-header"><span>Soal {index + 1}</span>{isCorrect ? <strong className="status-correct"><CheckCircle2 size={16} /> Benar</strong> : <strong className="status-incorrect"><XCircle size={16} /> Salah</strong>}</div>
+        return <article key={q.id} className={`review-card pf-quiz-review-card ${isCorrect ? "correct" : "incorrect"}`}>
+          <div className="review-question-header">
+            <span>Soal {index + 1}</span>
+            {isCorrect
+              ? <strong className="status-correct"><CheckCircle2 aria-hidden="true" /> Benar</strong>
+              : <strong className="status-incorrect"><XCircle aria-hidden="true" /> Salah</strong>}
+          </div>
           <h3>{q.prompt}</h3>
           {isMultiple && <div className="review-options">
             {opts.map((opt, i) => {
               let className = "review-opt ";
               if (String(i) === String(q.correctAnswer)) className += "is-correct ";
               else if (String(i) === String(userAns)) className += "is-wrong ";
-              return <div key={opt} className={className}><i>{String.fromCharCode(65 + i)}</i> {opt} {String(i) === String(q.correctAnswer) && <CheckCircle2 size={16} />}{String(i) === String(userAns) && String(i) !== String(q.correctAnswer) && <XCircle size={16} />}</div>;
+              return <div key={`${q.id}-${i}`} className={className}>
+                <i aria-hidden="true">{String.fromCharCode(65 + i)}</i>
+                <span>{opt}</span>
+                {String(i) === String(q.correctAnswer) && <CheckCircle2 aria-label="Jawaban benar" />}
+                {String(i) === String(userAns) && String(i) !== String(q.correctAnswer) && <XCircle aria-label="Jawaban Anda" />}
+              </div>;
             })}
           </div>}
           {!isMultiple && (
-            <div style={{ background: '#f8fbfc', padding: '1rem', borderRadius: '8px', marginTop: '1rem' }}>
-              <p style={{ margin: 0 }}><strong>Jawaban Anda:</strong> {String(userAns)}</p>
-              <p style={{ margin: '0.5rem 0 0', color: 'var(--teal)' }}><strong>Jawaban Benar:</strong> {q.correctAnswer}</p>
+            <div className="pf-quiz-review-response">
+              <p><strong>Jawaban Anda:</strong> {String(userAns)}</p>
+              <p><strong>Jawaban benar:</strong> {q.correctAnswer}</p>
             </div>
           )}
-          {q.explanation && <div className="review-explanation"><h4>Pembahasan:</h4><p>{q.explanation}</p></div>}
+          {q.explanation && <div className="review-explanation"><h4>Pembahasan</h4><p>{q.explanation}</p></div>}
         </article>;
       })}
     </main>
@@ -132,52 +167,108 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
   const isMultiple = question.type === 'MULTIPLE_CHOICE' || question.type === 'TRUE_FALSE';
   const options = isMultiple ? JSON.parse(question.options || "[]") as string[] : [];
 
-  return <div className="quiz-page" style={{ minHeight: '100vh', background: 'var(--bg)', paddingBottom: '80px' }}>
-    <header className="glass" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 32px', position: 'sticky', top: 0, zIndex: 10, borderRadius: '0 0 24px 24px', margin: '0 auto', maxWidth: '1200px' }}><Link href={`/belajar/${assessment.course.slug}`} aria-label="Kembali ke kelas" style={{ padding: '8px', background: 'var(--teal-light)', borderRadius: '12px', color: 'var(--teal)', display: 'flex' }}><ArrowLeft /></Link><div style={{ textAlign: 'center' }}><small style={{ display: 'block', color: 'var(--muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>{assessment.course.title}</small><b style={{ fontSize: '14px' }}>{assessment.title}</b></div><span className={`glass ${seconds <= 60 ? "time-warning" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '12px', color: seconds <= 60 ? '#dc2626' : 'var(--teal-dark)', background: seconds <= 60 ? '#fee2e2' : 'white' }}><Clock3 size={18} /><b>{String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}</b></span></header>
-    <main style={{ maxWidth: '800px', margin: '3rem auto', padding: '0 20px' }}>
-      <div className="quiz-top" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 'bold' }}>Soal {current + 1} dari {assessment.questions.length}</span>
-        <div role="progressbar" aria-label="Progres pengisian evaluasi" aria-valuenow={Object.keys(answers).length} aria-valuemin={0} aria-valuemax={assessment.questions.length} style={{ display: 'flex', gap: '6px' }}>{assessment.questions.map((item, index) => <i aria-hidden="true" key={item.id} style={{ width: '32px', height: '6px', borderRadius: '4px', background: answers[item.id] !== undefined ? 'var(--teal)' : index === current ? 'var(--teal-light)' : '#e2e8f0', transition: 'all 0.3s ease' }} />)}</div>
+  return <div className="quiz-page pf-quiz-page">
+    <header className="glass pf-quiz-header">
+      <Link href={`/belajar/${assessment.course.slug}`} className="pf-quiz-back-link" aria-label="Kembali ke kelas">
+        <ArrowLeft aria-hidden="true" />
+      </Link>
+      <div className="pf-quiz-title">
+        <small>{assessment.course.title}</small>
+        <strong>{assessment.title}</strong>
       </div>
-      <article className="question-card glass hover-lift" style={{ padding: '3rem', borderRadius: '24px', background: 'rgba(255,255,255,0.8)' }}>
-        <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--teal)', letterSpacing: '1px' }}>PERTANYAAN {current + 1} ({question.type})</span>
-        <h1 style={{ fontSize: '24px', lineHeight: 1.5, margin: '1rem 0 2rem' }}>{question.prompt}</h1>
+      <span className={`pf-quiz-timer ${seconds <= 60 ? "time-warning" : ""}`} role="timer" aria-label={`Sisa waktu ${Math.floor(seconds / 60)} menit ${seconds % 60} detik`}>
+        <Clock3 aria-hidden="true" />
+        <b>{String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}</b>
+      </span>
+    </header>
+    <main className="pf-quiz-main">
+      <div className="quiz-top pf-quiz-progress">
+        <span>Soal {current + 1} dari {assessment.questions.length}</span>
+        <div
+          className="pf-quiz-progress-track"
+          role="progressbar"
+          aria-label="Progres pengisian evaluasi"
+          aria-valuenow={Object.keys(answers).length}
+          aria-valuemin={0}
+          aria-valuemax={assessment.questions.length}
+          aria-valuetext={`${Object.keys(answers).length} dari ${assessment.questions.length} soal terjawab`}
+        >
+          {assessment.questions.map((item, index) => (
+            <i
+              aria-hidden="true"
+              key={item.id}
+              className={`${answers[item.id] !== undefined ? "is-answered" : ""} ${index === current ? "is-current" : ""}`}
+            />
+          ))}
+        </div>
+      </div>
+      <article className="question-card glass pf-quiz-question" aria-labelledby={`question-${question.id}`}>
+        <p className="pf-quiz-eyebrow">Pertanyaan {current + 1} · {question.type.replaceAll("_", " ").toLocaleLowerCase("id-ID")}</p>
+        <h1 id={`question-${question.id}`}>{question.prompt}</h1>
         
         {isMultiple && (
-          <div className="options" role="radiogroup" aria-label={`Pilihan jawaban untuk soal ${current + 1}`} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {options.map((option, index) => <button type="button" role="radio" aria-checked={answers[question.id] === index} key={option} onClick={() => setAnswers(previous => ({ ...previous, [question.id]: index }))} className={`hover-lift ${answers[question.id] === index ? "selected" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '16px', border: answers[question.id] === index ? '2px solid var(--teal)' : '1px solid var(--line)', background: answers[question.id] === index ? 'var(--teal-light)' : 'white', textAlign: 'left', transition: 'all 0.2s ease', cursor: 'pointer' }}><i aria-hidden="true" style={{ width: '32px', height: '32px', display: 'grid', placeItems: 'center', borderRadius: '8px', background: answers[question.id] === index ? 'var(--teal)' : '#f1f5f9', color: answers[question.id] === index ? 'white' : 'var(--muted)', fontStyle: 'normal', fontWeight: 'bold' }}>{String.fromCharCode(65 + index)}</i><span style={{ flex: 1, fontSize: '15px', color: answers[question.id] === index ? 'var(--teal-dark)' : 'inherit' }}>{option}</span>{answers[question.id] === index && <CheckCircle2 aria-hidden="true" style={{ color: 'var(--teal)' }} />}</button>)}
-          </div>
+          <fieldset className="options pf-quiz-options">
+            <legend className="sr-only">Pilihan jawaban untuk soal {current + 1}</legend>
+            {options.map((option, index) => (
+              <label key={`${question.id}-${index}`} className={`pf-quiz-option ${answers[question.id] === index ? "selected" : ""}`}>
+                <input
+                  type="radio"
+                  name={`answer-${question.id}`}
+                  value={index}
+                  checked={answers[question.id] === index}
+                  onChange={() => setAnswers(previous => ({ ...previous, [question.id]: index }))}
+                />
+                <i aria-hidden="true">{String.fromCharCode(65 + index)}</i>
+                <span>{option}</span>
+                {answers[question.id] === index && <CheckCircle2 aria-hidden="true" />}
+              </label>
+            ))}
+          </fieldset>
         )}
 
         {(question.type === 'SHORT_ANSWER' || question.type === 'ESSAY') && (
-          <div>
+          <div className="pf-quiz-written-answer">
             <label htmlFor={`answer-${question.id}`} className="sr-only">Jawaban soal {current + 1}</label>
             <textarea
               id={`answer-${question.id}`}
               value={answers[question.id] || ""} 
               onChange={e => setAnswers(prev => ({ ...prev, [question.id]: e.target.value }))}
               placeholder="Ketik jawaban Anda di sini..." 
-              style={{ width: '100%', minHeight: question.type === 'ESSAY' ? '150px' : '60px', padding: '1rem', borderRadius: '12px', border: '1px solid var(--line)', fontSize: '1rem' }}
+              className={`pf-quiz-textarea ${question.type === 'ESSAY' ? "is-essay" : ""}`}
             />
           </div>
         )}
 
         {question.type === 'FILE_UPLOAD' && (
-          <div style={{ padding: '2rem', border: '2px dashed var(--line)', borderRadius: '12px', textAlign: 'center', background: '#f8fbfc' }}>
-            <UploadCloud size={32} style={{ color: 'var(--teal)', marginBottom: '1rem' }} />
-            <p style={{ marginBottom: '1rem', color: 'var(--muted)' }}>Pilih file untuk diunggah (PDF, DOCX, ZIP)</p>
-            <label htmlFor={`file-${question.id}`} className="sr-only">Berkas jawaban soal {current + 1}</label>
-            <input id={`file-${question.id}`} type="file" onChange={(e) => handleFileChange(e, question.id)} />
-            {files[question.id] && <p style={{ marginTop: '1rem', color: 'var(--teal-dark)', fontWeight: 'bold' }}>File terpilih: {files[question.id].name}</p>}
+          <div className="pf-quiz-upload">
+            <UploadCloud aria-hidden="true" />
+            <div>
+              <strong>Unggah berkas jawaban</strong>
+              <p>Format yang disarankan: PDF, DOCX, atau ZIP.</p>
+            </div>
+            <label htmlFor={`file-${question.id}`} className="btn btn-outline pf-quiz-upload-action">Pilih berkas</label>
+            <input className="pf-quiz-file-input" id={`file-${question.id}`} type="file" onChange={(e) => handleFileChange(e, question.id)} />
+            {files[question.id] && <p className="pf-quiz-selected-file" aria-live="polite">Berkas terpilih: {files[question.id].name}</p>}
           </div>
         )}
 
       </article>
-      {error && <p className="quiz-error" role="alert" style={{ marginTop: '2rem', padding: '1rem', background: '#fee2e2', color: '#dc2626', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{error} <button type="button" onClick={() => void submit()} style={{ padding: '6px 12px', background: 'white', border: 'none', borderRadius: '6px', color: '#dc2626', fontWeight: 'bold', cursor: 'pointer' }}>Kirim ulang</button></p>}
-      <footer className="glass" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', borderRadius: '20px', marginTop: '2rem', background: 'rgba(255,255,255,0.6)' }}>
-        <button type="button" className="btn btn-outline hover-lift" disabled={current === 0 || loading} onClick={() => setCurrent(current - 1)} style={{ background: 'white' }}><ArrowLeft /> Sebelumnya</button>
-        <small style={{ color: 'var(--muted)', fontWeight: 'bold' }}>{Object.keys(answers).length} dari {assessment.questions.length} terjawab</small>
-        {current < assessment.questions.length - 1 ? <button type="button" className="btn btn-primary hover-lift" disabled={loading} onClick={() => setCurrent(current + 1)}>Berikutnya <ArrowRight /></button> : <button type="button" className="btn btn-primary hover-lift" disabled={Object.keys(answers).length < assessment.questions.length || loading} onClick={() => void submit()}>{loading ? <LoaderCircle className="spin" aria-label="Mengirim jawaban" /> : <>Kirim Jawaban <ArrowRight /></>}</button>}
+      {error && <div className="quiz-error pf-quiz-error" role="alert">
+        <p>{error}</p>
+        <button type="button" className="btn btn-outline btn-small" onClick={() => void submit()}>Kirim ulang</button>
+      </div>}
+      <footer className="glass pf-quiz-footer">
+        <button type="button" className="btn btn-outline" disabled={current === 0 || loading} onClick={() => setCurrent(current - 1)}>
+          <ArrowLeft aria-hidden="true" /> Sebelumnya
+        </button>
+        <small aria-live="polite">{Object.keys(answers).length} dari {assessment.questions.length} terjawab</small>
+        {current < assessment.questions.length - 1
+          ? <button type="button" className="btn btn-primary" disabled={loading} onClick={() => setCurrent(current + 1)}>
+              Berikutnya <ArrowRight aria-hidden="true" />
+            </button>
+          : <button type="button" className="btn btn-primary" disabled={Object.keys(answers).length < assessment.questions.length || loading} onClick={() => void submit()}>
+              {loading ? <><LoaderCircle className="spin" aria-hidden="true" /> Mengirim</> : <>Kirim jawaban <ArrowRight aria-hidden="true" /></>}
+            </button>}
       </footer>
     </main>
   </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Award, CheckCircle2, ExternalLink, QrCode } from "lucide-react";
+import { Award, CheckCircle2, ExternalLink, ShieldCheck } from "lucide-react";
 import { prisma } from "@/services/prisma";
 import { Logo } from "@/components/ui/Logo";
 import { CertificateActions } from "@/components/shared/CertificateActions";
@@ -25,24 +25,25 @@ export default async function CertificatePage({ params }: { params?: Promise<{ n
 			</header>
 
 			<div className="certificate-status">
-				<CheckCircle2 />
+				<CheckCircle2 aria-hidden="true" />
 				<span>
 					<b>Sertifikat Terverifikasi</b>
-					<small>Diterbitkan oleh PROFAS Leadership</small>
+					<small>Nomor penerbitan tercatat di PROFAS Leadership</small>
 				</span>
 			</div>
 
-			<section className="certificate-paper">
+			<section className="certificate-paper" aria-labelledby="certificate-title">
 				<div className="cert-corners" />
 				<div className="cert-brand">
 					<Logo />
 					<span>
-						<Award />
+						<Award aria-hidden="true" />
 					</span>
 				</div>
 
-				<p className="cert-label">SERTIFIKAT PENYELESAIAN</p>
-				<h1>Diberikan kepada</h1>
+				<p className="cert-label">PROFAS LEADERSHIP · KREDENSIAL RESMI</p>
+				<h1 id="certificate-title">Sertifikat Penyelesaian</h1>
+				<p className="cert-recipient-label">Diberikan kepada</p>
 				<h2>{cert.user?.name || "Peserta PROFAS Leadership"}</h2>
 				<p>
 					telah berhasil menyelesaikan seluruh rangkaian pembelajaran ({cert.course?.durationHours || 14} Jam Pembelajaran • {cert.course?._count?.nodes || 12} Materi) dan evaluasi kompetensi pada program resmi:
@@ -61,8 +62,9 @@ export default async function CertificatePage({ params }: { params?: Promise<{ n
 						</b>
 					</span>
 
-					<span className="qr-placeholder">
-						<QrCode />
+					<span className="cert-verification-seal" aria-label="Kredensial terverifikasi">
+						<ShieldCheck aria-hidden="true" />
+						<small>VERIFIED</small>
 					</span>
 
 					<span>
@@ -100,7 +102,7 @@ export default async function CertificatePage({ params }: { params?: Promise<{ n
 				target="_blank"
 				rel="noreferrer"
 			>
-				<ExternalLink /> Verifikasi data sertifikat
+				<ExternalLink aria-hidden="true" /> Lihat rekam verifikasi
 			</a>
 		</main>
 	);

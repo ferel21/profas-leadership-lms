@@ -122,7 +122,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
   }
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={open => { if (!open) onClose(); }}>
+    <Dialog.Root open={isOpen} onOpenChange={(open: boolean) => { if (!open) onClose(); }}>
       <Dialog.Portal>
         <Dialog.Overlay style={{
           position: "fixed",
@@ -136,7 +136,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
         <Dialog.Content
           aria-describedby={undefined}
           onKeyDown={handleKeyDown}
-          onCloseAutoFocus={e => {
+          onCloseAutoFocus={(e: Event) => {
             const target = restoreFocusRef.current;
             if (target?.isConnected) {
               e.preventDefault();

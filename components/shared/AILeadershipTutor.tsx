@@ -1,24 +1,34 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bot, Send, Sparkles, User, Loader2, Lightbulb, Volume2, VolumeX } from "lucide-react";
+import {
+  Bot,
+  ChevronDown,
+  Lightbulb,
+  Loader2,
+  Send,
+  Sparkles,
+  User,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 
 type Message = { role: "user" | "ai"; text: string; time: string };
 
 const SUGGESTED_PROMPTS = [
-  "Simulasi Studi Kasus: Bagaimana menangani krisis kepercayaan tim di masa transisi?",
-  "Refleksi Eksekutif: Apa gaya kepemimpinan dominan saya dan bagaimana mengoptimalkannya?",
-  "Bagaimana cara mendelegasikan tugas strategis tanpa kehilangan kendali mutu?",
-  "Apa langkah konkret menyelesaikan konflik antar manajer senior di divisi?"
+  "Bagaimana menangani krisis kepercayaan tim di masa transisi?",
+  "Apa gaya kepemimpinan dominan saya dan bagaimana mengoptimalkannya?",
+  "Bagaimana mendelegasikan tugas strategis tanpa kehilangan kendali mutu?",
+  "Apa langkah konkret menyelesaikan konflik antar manajer senior?",
 ];
 
 export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "ai",
-      text: `Halo. Saya adalah **Asisten AI PROFAS Leadership**.\n\nSaya siap membantu Anda mendalami konsep kepemimpinan eksekutif pada modul **"${lessonTitle || "Kepemimpinan Strategis"}"**. Apa studi kasus atau tantangan kepemimpinan yang ingin Anda diskusikan hari ini?`,
-      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
-    }
+      text: `Halo. Saya adalah Asisten AI PROFAS Leadership.\n\nSaya siap membantu Anda mendalami konsep pada modul "${lessonTitle || "Kepemimpinan Strategis"}". Tantangan kepemimpinan apa yang ingin Anda diskusikan?`,
+      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+    },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,11 +46,11 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
       setSpeakingIdx(null);
       return;
     }
+
     window.speechSynthesis.cancel();
-    const cleanText = text.replace(/[*#_`~]/g, "");
-    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const utterance = new SpeechSynthesisUtterance(text.replace(/[*#_`~]/g, ""));
     utterance.lang = "id-ID";
-    utterance.rate = 1.0;
+    utterance.rate = 1;
     utterance.onend = () => setSpeakingIdx(null);
     utterance.onerror = () => setSpeakingIdx(null);
     setSpeakingIdx(idx);
@@ -48,41 +58,46 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
   }
 
   async function handleSend(questionText?: string) {
-    const q = questionText || input;
-    if (!q.trim() || loading) return;
+    const question = questionText || input;
+    if (!question.trim() || loading) return;
 
-    const userMsg: Message = {
+    const userMessage: Message = {
       role: "user",
-      text: q,
-      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+      text: question,
+      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(previous => [...previous, userMessage]);
     if (!questionText) setInput("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/ai/tutor", {
+      const response = await fetch("/api/ai/tutor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: q,
+          question,
           lessonTitle,
           history: messages.slice(-8).map(({ role, text }) => ({ role, text })),
-        })
+        }),
       });
-
-      const data = await res.json();
-      const aiMsg: Message = {
+      const data = await response.json();
+      const aiMessage: Message = {
         role: "ai",
-        text: res.ok ? data.reply : "Maaf, terjadi kendala saat merespons. Silakan coba beberapa saat lagi.",
-        time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+        text: response.ok
+          ? data.reply
+          : "Respons belum dapat dimuat. Silakan coba lagi beberapa saat.",
+        time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
       };
-      setMessages(prev => [...prev, aiMsg]);
+      setMessages(previous => [...previous, aiMessage]);
     } catch {
-      setMessages(prev => [
-        ...prev,
-        { role: "ai", text: "Terjadi kesalahan koneksi saat memanggil Asisten AI.", time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) }
+      setMessages(previous => [
+        ...previous,
+        {
+          role: "ai",
+          text: "Koneksi ke Asisten AI terputus. Periksa jaringan lalu coba lagi.",
+          time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+        },
       ]);
     } finally {
       setLoading(false);
@@ -90,161 +105,111 @@ export function AILeadershipTutor({ lessonTitle }: { lessonTitle?: string }) {
   }
 
   return (
-    <div className="glass-card hover-lift" style={{ borderRadius: "16px", border: "1px solid rgba(42, 107, 167, 0.2)", overflow: "hidden", marginTop: "1.5rem", display: "flex", flexDirection: "column", background: "var(--card-bg, rgba(255, 255, 255, 0.8))" }}>
-      {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #1e5a8f, #2a6ba7)", padding: "16px 20px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ background: "rgba(255, 255, 255, 0.2)", padding: "8px", borderRadius: "10px", display: "flex" }}>
-            <Bot size={22} color="#fff" />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "6px" }}>
-              Asisten AI Leadership <Sparkles size={16} style={{ color: "#fef08a" }} />
-            </h3>
-            <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.9 }}>Tanya Jawab Pedagogis & Refleksi Kepemimpinan PROFAS</p>
-          </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "0.7rem", background: "rgba(255, 255, 255, 0.2)", padding: "4px 10px", borderRadius: "20px", fontWeight: 600 }}>Claude-style AI</span>
-        </div>
-      </div>
+    <details className="pf-ai-tutor">
+      <summary>
+        <span className="pf-ai-tutor__icon" aria-hidden="true"><Bot /></span>
+        <span className="pf-ai-tutor__heading">
+          <small>Teman refleksi</small>
+          <strong>Diskusikan materi dengan Asisten AI</strong>
+        </span>
+        <span className="pf-ai-tutor__badge"><Sparkles aria-hidden="true" /> Opsional</span>
+        <ChevronDown className="pf-ai-tutor__chevron" aria-hidden="true" />
+      </summary>
 
-      {/* Chat Messages */}
-      <div aria-live="polite" aria-busy={loading} style={{ padding: "16px", maxHeight: "380px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "14px", background: "rgba(241, 245, 249, 0.4)" }}>
-        {messages.map((m, idx) => (
-          <div key={idx} style={{ display: "flex", gap: "10px", alignSelf: m.role === "user" ? "flex-end" : "flex-start", maxWidth: "85%" }}>
-            {m.role === "ai" && (
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#2a6ba7", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px" }}>
-                <Bot size={18} />
-              </div>
-            )}
-            <div>
-              <div style={{
-                padding: "12px 16px",
-                borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                background: m.role === "user" ? "#2a6ba7" : "#fff",
-                color: m.role === "user" ? "#fff" : "var(--text, #1e293b)",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                fontSize: "0.9rem",
-                lineHeight: "1.5",
-                whiteSpace: "pre-line",
-                position: "relative"
-              }}>
-                {m.text}
-                {m.role === "ai" && (
-                  <button
-                    onClick={() => speakText(m.text, idx)}
-                    style={{
-                      marginTop: "10px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      background: "rgba(13, 148, 136, 0.08)",
-                      border: "1px solid rgba(13, 148, 136, 0.3)",
-                      borderRadius: "8px",
-                      padding: "4px 10px",
-                      fontSize: "0.72rem",
-                      fontWeight: 700,
-                      color: "#0f766e",
-                      cursor: "pointer",
-                      transition: "all 0.2s"
-                    }}
-                    title="Dengarkan pembacaan suara AI"
-                  >
-                    {speakingIdx === idx ? <VolumeX size={14} color="#ef4444" /> : <Volume2 size={14} />}
-                    {speakingIdx === idx ? "Hentikan Suara" : "Dengarkan Suara AI"}
-                  </button>
-                )}
-              </div>
-              <div style={{ fontSize: "0.7rem", color: "#52616d", marginTop: "4px", textAlign: m.role === "user" ? "right" : "left" }}>
-                {m.time}
-              </div>
-            </div>
-            {m.role === "user" && (
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#475569", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px" }}>
-                <User size={18} />
-              </div>
-            )}
-          </div>
-        ))}
-        {loading && (
-          <div style={{ display: "flex", gap: "10px", alignSelf: "flex-start", alignItems: "center", color: "#2a6ba7", fontSize: "0.85rem", fontStyle: "italic" }}>
-            <Loader2 size={18} className="spin" />
-            <span>Asisten AI sedang menyusun panduan kepemimpinan...</span>
-          </div>
-        )}
-        <div ref={messagesEndRef} aria-hidden="true" />
-      </div>
-
-      {/* Suggested Prompts */}
-      <div style={{ padding: "10px 16px", background: "var(--card-bg, #fff)", borderTop: "1px solid rgba(0,0,0,0.05)" }}>
-        <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 600, marginBottom: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
-          <Lightbulb size={14} color="#f59e0b" /> Topik & Simulasi Cepat:
+      <div className="pf-ai-tutor__body">
+        <div className="pf-ai-tutor__intro">
+          Gunakan asisten untuk menguji cara pikir atau membahas studi kasus. Jawaban AI
+          sebaiknya tetap ditimbang bersama konteks kerja dan arahan mentor.
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-          {SUGGESTED_PROMPTS.map((p, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleSend(p)}
-              disabled={loading}
-              style={{
-                fontSize: "0.75rem",
-                padding: "6px 10px",
-                borderRadius: "12px",
-                border: "1px solid rgba(42, 107, 167, 0.3)",
-                background: "rgba(42, 107, 167, 0.05)",
-                color: "#1e5a8f",
-                cursor: "pointer",
-                transition: "all 0.2s"
-              }}
-              className="hover-lift"
-            >
-              {p}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* Input Form */}
-      <form onSubmit={e => { e.preventDefault(); handleSend(); }} style={{ display: "flex", gap: "8px", padding: "12px 16px", background: "var(--card-bg, #fff)", borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-        <label htmlFor="leadership-tutor-input" className="sr-only">Pertanyaan untuk Asisten AI Leadership</label>
-        <input
-          id="leadership-tutor-input"
-          type="text"
-          placeholder="Tanyakan hal tentang kepemimpinan atau manajemen tim..."
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          disabled={loading}
-          style={{
-            flex: 1,
-            padding: "10px 14px",
-            borderRadius: "10px",
-            border: "1px solid #cbd5e1",
-            fontSize: "0.9rem",
-            outline: "none"
-          }}
-        />
-        <button
-          type="submit"
-          aria-label={loading ? "Asisten AI sedang memproses" : "Kirim pertanyaan ke Asisten AI"}
-          disabled={loading || !input.trim()}
-          style={{
-            background: "#2a6ba7",
-            color: "#fff",
-            border: "none",
-            borderRadius: "10px",
-            padding: "0 18px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-            opacity: loading || !input.trim() ? 0.6 : 1
-          }}
-          className="hover-lift"
+        <div
+          className="pf-ai-tutor__messages"
+          aria-live="polite"
+          aria-busy={loading}
+          aria-label="Percakapan dengan Asisten AI"
         >
-          {loading ? <Loader2 size={18} className="spin" aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}
-        </button>
-      </form>
-    </div>
+          {messages.map((message, index) => (
+            <article
+              key={`${message.time}-${index}`}
+              className={`pf-ai-message is-${message.role}`}
+            >
+              <span className="pf-ai-message__avatar" aria-hidden="true">
+                {message.role === "ai" ? <Bot /> : <User />}
+              </span>
+              <div className="pf-ai-message__content">
+                <p>{message.text}</p>
+                <footer>
+                  <time>{message.time}</time>
+                  {message.role === "ai" && (
+                    <button
+                      type="button"
+                      onClick={() => speakText(message.text, index)}
+                      aria-label={speakingIdx === index ? "Hentikan pembacaan" : "Dengarkan jawaban"}
+                    >
+                      {speakingIdx === index
+                        ? <VolumeX aria-hidden="true" />
+                        : <Volume2 aria-hidden="true" />}
+                      {speakingIdx === index ? "Hentikan" : "Dengarkan"}
+                    </button>
+                  )}
+                </footer>
+              </div>
+            </article>
+          ))}
+          {loading && (
+            <div className="pf-ai-tutor__loading" role="status">
+              <Loader2 className="spin" aria-hidden="true" />
+              <span>Menyusun panduan refleksi…</span>
+            </div>
+          )}
+          <div ref={messagesEndRef} aria-hidden="true" />
+        </div>
+
+        <section className="pf-ai-tutor__prompts" aria-labelledby="ai-prompt-title">
+          <h3 id="ai-prompt-title"><Lightbulb aria-hidden="true" /> Mulai dari pertanyaan ini</h3>
+          <div>
+            {SUGGESTED_PROMPTS.map(prompt => (
+              <button
+                type="button"
+                key={prompt}
+                onClick={() => handleSend(prompt)}
+                disabled={loading}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <form
+          className="pf-ai-tutor__form"
+          onSubmit={event => {
+            event.preventDefault();
+            handleSend();
+          }}
+        >
+          <label htmlFor="leadership-tutor-input">Pertanyaan Anda</label>
+          <div>
+            <input
+              id="leadership-tutor-input"
+              type="text"
+              placeholder="Tulis tantangan atau pertanyaan kepemimpinan…"
+              value={input}
+              onChange={event => setInput(event.target.value)}
+              disabled={loading}
+            />
+            <button
+              type="submit"
+              aria-label={loading ? "Asisten AI sedang memproses" : "Kirim pertanyaan"}
+              disabled={loading || !input.trim()}
+            >
+              {loading
+                ? <Loader2 className="spin" aria-hidden="true" />
+                : <Send aria-hidden="true" />}
+            </button>
+          </div>
+        </form>
+      </div>
+    </details>
   );
 }

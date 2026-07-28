@@ -684,7 +684,7 @@ html body .demo-box { border-color: var(--ws-line) !important; border-radius: 14
 }
 
 @media (max-width: 480px) {
-  html body .dashboard-fresh .responsive-stat-grid { grid-template-columns: 1fr !important; }
+  html body .dashboard-fresh .responsive-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
   html body .dashboard-fresh .stat-card-clean { min-height: 124px !important; }
 }
 

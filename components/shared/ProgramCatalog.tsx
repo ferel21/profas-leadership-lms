@@ -44,7 +44,8 @@ export function ProgramCatalog({courses}:{courses:CatalogCourse[]}){
               </label>
               <input
                 id="program-catalog-search"
-                type="search"
+                type="text"
+                inputMode="search"
                 value={query}
                 onChange={event=>setQuery(event.target.value)}
                 placeholder="Cari program, topik, atau mentor..."

@@ -61,9 +61,9 @@ export default async function ProgramsPage() {
     <div className="pf-public-page">
       <Header />
       <main>
-        <section className="pf-section pf-hero" aria-labelledby="catalog-title" style={{ paddingBottom: '48px', minHeight: 'auto', background: 'transparent' }}>
-          <div className="container pf-hero-layout" style={{ minHeight: 'auto', gridTemplateColumns: '1fr', paddingBottom: '0', gap: '24px' }}>
-            <div className="pf-hero-copy" style={{ paddingTop: '12px' }}>
+        <section className="pf-section pf-hero pf-catalog-hero" aria-labelledby="catalog-title">
+          <div className="container pf-hero-layout pf-catalog-hero-layout">
+            <div className="pf-hero-copy pf-catalog-hero-copy">
               <span className="pf-kicker">
                 <span aria-hidden="true" />
                 PROGRAM PROFAS LEADERSHIP

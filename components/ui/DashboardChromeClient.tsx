@@ -125,7 +125,7 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
 
   async function logout(){try{await fetch("/api/auth/logout",{method:"POST"})}finally{router.push("/");router.refresh()}}
 
-  return <div className={`dashboard-fresh pf-workspace-shell ${roleClass} ${collapsed ? "sidebar-collapsed" : ""}`}>
+  return <div className={`dashboard-fresh dashboard-layout pf-workspace-shell ${roleClass} ${collapsed ? "sidebar-collapsed" : ""}`}>
     <aside id="dashboard-navigation" className={`pf-workspace-sidebar ${open?"open":""}`} aria-label="Navigasi utama ruang belajar">
       <div className="pf-workspace-sidebar-header">
         <div className="pf-workspace-logo">

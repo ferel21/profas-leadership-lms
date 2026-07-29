@@ -9396,6 +9396,9 @@ html body .overall-progress > small {
 @media (min-width: 921px) {
   .pf-workspace-shell {
     display: flex !important;
+    /* Let the sticky sidebar use the viewport as its containing scroll area.
+       `overflow: hidden` here made the sidebar scroll away with long pages. */
+    overflow: clip !important;
   }
 
   .pf-workspace-sidebar {

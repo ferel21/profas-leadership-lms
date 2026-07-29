@@ -16,7 +16,7 @@ type UserShape = { name:string;username?:string|null;email:string;role:string;av
 type NotificationItem = { id: string; title: string; message: string; read: boolean; link: string | null; createdAt: string };
 
 const studentNav=[["Ringkasan",LayoutDashboard,"/dashboard"],["Program Saya",BookOpen,"/dashboard#program"],["Riwayat",History,"/riwayat"],["Kalender",Calendar,"/kalender"],["Absensi",ClipboardCheck,"/absensi"],["Sertifikat",Award,"/dashboard#sertifikat"],["Peringkat",Trophy,"/peringkat"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
-const mentorNav=[["Ringkasan",Gauge,"/dashboard"],["Manajemen Peserta",Users,"/dashboard/peserta"],["Riwayat Evaluasi",FileCheck2,"/dashboard/evaluasi"],["Materi Pembelajaran",FolderUp,"/dashboard#materi"],["Kalender",Calendar,"/kalender"],["Absensi",ClipboardCheck,"/absensi"],["Analitik",PieChart,"/dashboard/analitik"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
+const mentorNav=[["Ringkasan",Gauge,"/dashboard"],["Manajemen Peserta",Users,"/dashboard/peserta"],["Riwayat Evaluasi",FileCheck2,"/dashboard/evaluasi"],["Materi Pembelajaran",FolderUp,"/dashboard#program"],["Kalender",Calendar,"/kalender"],["Absensi",ClipboardCheck,"/absensi"],["Analitik",PieChart,"/dashboard/analitik"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
 const adminNav=[["Analitik",PieChart,"/dashboard"],["Absensi",ClipboardCheck,"/absensi"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
 
 export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;children:React.ReactNode;streak?:number}){
@@ -27,6 +27,7 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
   const [unreadCount,setUnreadCount]=useState(0);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isExportHubOpen, setIsExportHubOpen] = useState(false);
+  const [currentHash, setCurrentHash] = useState("");
   const router=useRouter();
   const pathname=usePathname();
   const nav=user.role==="MENTOR"?mentorNav:user.role==="SUPER_ADMIN"?adminNav:studentNav;
@@ -56,6 +57,9 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
 
   useEffect(()=>{
     let cancelled = false;
+    const syncHash = () => setCurrentHash(window.location.hash);
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
     const loadNotifications = () => {
       const now = Date.now();
       const globalCache = (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache;
@@ -103,9 +107,14 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
       cancelled = true;
       if (hasIdleCallback && browserWindow.cancelIdleCallback) browserWindow.cancelIdleCallback(idleId as number);
       else window.clearTimeout(idleId as number);
+      window.removeEventListener("hashchange", syncHash);
       window.removeEventListener("keydown", handleKeyDown);
     };
   },[]);
+
+  useEffect(() => {
+    setCurrentHash(window.location.hash);
+  }, [pathname]);
 
   async function markReadAll(){
     setUnreadCount(0);
@@ -149,7 +158,11 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
               <div className="pf-workspace-nav-links">
                 {section.indices.map(index => {
                   const [label, Icon, href] = nav[index];
-                  const isActive = pathname === href || (index === 0 && pathname === "/dashboard");
+                  const [hrefPath, hrefHash] = href.split("#");
+                  // The mentor dashboard also has a legacy /mentor entry point;
+                  // keep the same shell state when users arrive from either URL.
+                  const isHome = index === 0 && (pathname === "/dashboard" || (user.role === "MENTOR" && pathname === "/mentor"));
+                  const isActive = isHome || (pathname === hrefPath && (!hrefHash || currentHash === `#${hrefHash}`));
                   return (
                     <Link
                       href={href}
@@ -162,11 +175,13 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
                       aria-current={isActive ? "page" : undefined}
                       aria-label={collapsed ? label : undefined}
                       onClick={(e) => {
-                        if (href.includes('#') && pathname === href.split('#')[0]) {
-                          const id = href.split('#')[1];
+                        if (hrefHash && pathname === hrefPath) {
+                          const id = hrefHash;
                           const el = document.getElementById(id);
                           if (el) {
                             e.preventDefault();
+                            window.history.replaceState(null, "", `#${id}`);
+                            setCurrentHash(`#${id}`);
                             el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                           }
                         }

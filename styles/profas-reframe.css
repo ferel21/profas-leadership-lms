@@ -9388,3 +9388,38 @@ html body .dashboard-fresh .pf-workspace-nav-section-title {
 html body .overall-progress > small {
   color: var(--pf-body) !important;
 }
+
+/* Workspace alignment contract.
+   The shell is a flex row, so the canvas must never add a second desktop
+   offset. Keeping width and flex-basis in lockstep prevents the sidebar and
+   content column drifting apart at intermediate viewport widths. */
+@media (min-width: 921px) {
+  .pf-workspace-shell {
+    display: flex !important;
+  }
+
+  .pf-workspace-sidebar {
+    width: 264px !important;
+    flex: 0 0 264px !important;
+  }
+
+  .pf-workspace-shell.sidebar-collapsed .pf-workspace-sidebar {
+    width: 84px !important;
+    flex-basis: 84px !important;
+  }
+
+  .pf-workspace-canvas,
+  .pf-workspace-shell.sidebar-collapsed .pf-workspace-canvas {
+    width: auto !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    flex: 1 1 auto !important;
+  }
+}
+
+@media (min-width: 921px) and (max-width: 1180px) {
+  .pf-workspace-sidebar {
+    width: 238px !important;
+    flex-basis: 238px !important;
+  }
+}

@@ -7548,13 +7548,157 @@ html body .player-footer .complete-btn:hover {
 
 .pf-catalog-hero-layout.pf-hero-layout {
   min-height: auto !important;
-  grid-template-columns: 1fr !important;
-  gap: 24px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px) !important;
+  align-items: center;
+  gap: clamp(42px, 7vw, 96px) !important;
   padding-bottom: 0 !important;
 }
 
 .pf-catalog-hero-copy.pf-hero-copy {
   padding-top: 12px !important;
+}
+
+.pf-catalog-hero-aside {
+  min-width: 0;
+  justify-self: end;
+  width: min(100%, 380px);
+}
+
+.pf-catalog-route-card {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 26px 24px;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 5px 24px 5px 24px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    var(--pf-deep);
+  background-size: 28px 28px;
+  box-shadow: 0 22px 42px rgba(23, 63, 115, 0.22);
+}
+
+.pf-catalog-route-card::after {
+  content: "";
+  position: absolute;
+  top: -56px;
+  right: -46px;
+  width: 150px;
+  height: 150px;
+  border: 1px solid rgba(243, 180, 68, 0.42);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(243, 180, 68, 0.08), 0 0 0 36px rgba(243, 180, 68, 0.04);
+}
+
+.pf-catalog-route-heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.64);
+  font-family: var(--pf-font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.pf-catalog-route-heading b {
+  color: var(--pf-gold);
+  font-size: 0.6rem;
+  letter-spacing: 0;
+}
+
+.pf-catalog-route-card h2 {
+  position: relative;
+  z-index: 1;
+  max-width: 270px;
+  margin: 34px 0 24px;
+  color: #ffffff;
+  font-family: var(--pf-font-ui);
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-weight: 570;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.pf-catalog-route-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+}
+
+.pf-catalog-route-step {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pf-catalog-route-number {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--pf-ink);
+  border-radius: 50%;
+  background: var(--pf-gold);
+  font-family: var(--pf-font-ui);
+  font-size: 0.61rem;
+  font-weight: 800;
+}
+
+.pf-catalog-route-step div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.pf-catalog-route-step small {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.58);
+  font-family: var(--pf-font-ui);
+  font-size: 0.56rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pf-catalog-route-step strong {
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-catalog-route-card > p {
+  position: relative;
+  z-index: 1;
+  margin: 20px 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.7rem;
+  line-height: 1.65;
+}
+
+@media (max-width: 860px) {
+  .pf-catalog-hero-layout.pf-hero-layout {
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+  }
+
+  .pf-catalog-hero-aside {
+    justify-self: start;
+    width: min(100%, 620px);
+  }
 }
 
 /* ==========================================================================

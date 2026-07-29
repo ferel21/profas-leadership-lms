@@ -57,6 +57,12 @@ async function getCourses(): Promise<CatalogCourse[]> {
 
 export default async function ProgramsPage() {
   const courses = await getCourses();
+  const routeSteps = courses.slice(0, 3).map((course, index) => ({
+    number: String(index + 1).padStart(2, "0"),
+    label: index === 0 ? "Fondasi" : index === 1 ? "Penguatan" : "Strategi",
+    category: course.category,
+    title: course.title,
+  }));
   return (
     <div className="pf-public-page">
       <Header />
@@ -70,12 +76,33 @@ export default async function ProgramsPage() {
               </span>
               <h1 id="catalog-title">
                 Temukan jalur tumbuh<br />
-                <em>yang tepat untuk Anda.</em>
+                {" "}<em>yang tepat untuk Anda.</em>
               </h1>
               <p className="pf-hero-lead">
                 Program terstruktur, kontekstual, dan terukur untuk setiap tahap kepemimpinan.
               </p>
             </div>
+            <aside className="pf-catalog-hero-aside" aria-label="Peta jalur program">
+              <div className="pf-catalog-route-card">
+                <div className="pf-catalog-route-heading">
+                  <span>JALUR BELAJAR</span>
+                  <b>{courses.length} program</b>
+                </div>
+                <h2>Mulai dari tantangan yang paling dekat.</h2>
+                <div className="pf-catalog-route-list">
+                  {(routeSteps.length ? routeSteps : [{ number: "01", label: "Mulai", category: "Program PROFAS", title: "Pilih ruang tumbuh Anda" }]).map(step => (
+                    <div className="pf-catalog-route-step" key={`${step.number}-${step.title}`}>
+                      <span className="pf-catalog-route-number">{step.number}</span>
+                      <div>
+                        <small>{step.label} · {step.category}</small>
+                        <strong>{step.title}</strong>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p>Pilih satu program. Ritme belajar dibangun dari langkah yang bisa dijalankan hari ini.</p>
+              </div>
+            </aside>
           </div>
         </section>
         <ProgramCatalog courses={courses} />

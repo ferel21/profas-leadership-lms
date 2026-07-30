@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Fraunces, Space_Grotesk } from 'next/font/google';
 import { RouteProgressBar } from "@/components/ui/RouteProgressBar";
+import { GlobalLeafStagger } from "@/components/ui/GlobalLeafStagger";
 import { WebVitalsReporter } from "@/components/ui/WebVitalsReporter";
 import "@/styles/typography.css";
 import "@/styles/design-system.css";
@@ -90,6 +91,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className={`${inter.variable} ${fraunces.variable} ${spaceGrotesk.variable} font-sans`}>
         <RouteProgressBar />
+        <GlobalLeafStagger />
         <WebVitalsReporter />
         {children}
       </body>

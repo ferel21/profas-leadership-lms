@@ -9599,3 +9599,1041 @@ html body .overall-progress > small {
   object-fit: contain !important;
   object-position: left center !important;
 }
+
+/* ==========================================================================
+   Minimal learner workspace
+   The student view follows the quiet, high-whitespace Akses Legal vocabulary:
+   white navigation, a soft app canvas, blue focus states, and one clear task.
+   Mentor and admin workspaces intentionally keep their denser operating tools.
+   ========================================================================== */
+
+html body .dashboard-fresh.role-student {
+  --pf-learner-navy: #003466;
+  --pf-learner-success: #00c758;
+  min-height: 100dvh;
+  color: #101519;
+  border-top: 5px solid var(--pf-learner-navy);
+  background: #f9fafb !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar {
+  width: 260px !important;
+  height: calc(100dvh - 5px);
+  flex: 0 0 260px !important;
+  color: #4a5565 !important;
+  border: 0 !important;
+  border-right: 1px solid #e5e7eb !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar-header {
+  min-height: 128px;
+  align-items: flex-start;
+  padding: 32px 28px 24px !important;
+  border: 0 !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-logo .logo {
+  width: 154px !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-logo-caption {
+  padding-left: 1px;
+  color: #6a7282;
+  font-family: var(--pf-font-ui);
+  font-size: 0.61rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-nav {
+  padding: 22px 20px !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-nav-section {
+  margin: 0;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-nav-links {
+  gap: 8px;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar nav .pf-workspace-nav-link {
+  min-height: 52px !important;
+  gap: 14px !important;
+  padding: 0 16px !important;
+  color: #4a5565 !important;
+  border: 1px solid transparent !important;
+  border-radius: 11px !important;
+  background: transparent !important;
+  font-family: var(--pf-font-body);
+  font-size: 0.86rem !important;
+  font-weight: 650 !important;
+  transform: none;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar nav .pf-workspace-nav-link:hover {
+  color: #003466 !important;
+  border-color: #e5e7eb !important;
+  background: #f9fafb !important;
+  transform: none;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar nav .pf-workspace-nav-link.active {
+  color: #1e5a8f !important;
+  border-color: transparent !important;
+  background: #eff6ff !important;
+  box-shadow: none !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-nav-icon {
+  width: 19px !important;
+  height: 19px !important;
+  flex-basis: 19px;
+  stroke-width: 1.65;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar-footer {
+  display: block !important;
+  padding: 18px 20px 24px !important;
+  border-top: 1px solid #eef0f2 !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar-footer button {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 16px !important;
+  color: #6a7282 !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  font-family: var(--pf-font-body);
+  font-size: 0.78rem !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar-footer button:hover {
+  color: #101519 !important;
+  border-color: #e5e7eb !important;
+  background: #f9fafb !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-sidebar-close {
+  color: #003466 !important;
+  background: #f3f4f6 !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-canvas {
+  width: auto !important;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0 !important;
+  background: #f9fafb !important;
+  background-image: none !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-topbar {
+  min-height: 94px !important;
+  gap: 18px;
+  padding: 0 clamp(28px, 4.5vw, 64px) !important;
+  color: #101519 !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: rgba(249, 250, 251, 0.96) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(12px);
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-menu-trigger {
+  display: none !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-page-title {
+  color: #101519;
+  font-family: var(--pf-font-ui);
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-actions {
+  gap: 8px !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-action {
+  width: 42px !important;
+  min-width: 42px;
+  min-height: 42px !important;
+  display: grid !important;
+  place-items: center;
+  padding: 0 !important;
+  color: #4a5565 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-action:hover {
+  color: #003466 !important;
+  border-color: rgba(42, 107, 167, 0.32) !important;
+  background: #eff6ff !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-action > svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-notifications {
+  top: 54px !important;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-user-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 2px;
+  padding: 3px 5px 3px 3px;
+  color: #101519;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-user-link:hover {
+  border-color: #e5e7eb;
+  background: #ffffff;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-user-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  overflow: hidden;
+  color: #003466;
+  border: 1px solid rgba(42, 107, 167, 0.2);
+  border-radius: 50%;
+  background: #eff6ff;
+  font-family: var(--pf-font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-user-copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  padding-right: 7px;
+  line-height: 1.2;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-user-copy b {
+  max-width: 150px;
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-user-copy small {
+  color: #6a7282;
+  font-size: 0.59rem;
+}
+
+html body .dashboard-fresh.role-student .pf-workspace-main {
+  width: min(100%, 1480px) !important;
+  min-height: calc(100dvh - 99px);
+  margin: 0 auto !important;
+  padding: clamp(28px, 4vw, 52px) clamp(24px, 4.5vw, 64px) 72px !important;
+}
+
+html body .dashboard-fresh.role-student .pf-student-dashboard {
+  width: 100%;
+  display: grid;
+  gap: 28px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume {
+  min-height: 350px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.24fr) minmax(320px, 0.76fr);
+  align-items: stretch;
+  gap: clamp(24px, 4vw, 64px);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(16, 21, 25, 0.03);
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(36px, 5vw, 64px) 0 clamp(36px, 5vw, 64px) clamp(34px, 5vw, 68px);
+}
+
+html body .dashboard-fresh.role-student .pf-student-kicker,
+html body .dashboard-fresh.role-student .pf-student-section-heading > div > span {
+  display: block;
+  color: #2a6ba7;
+  font-family: var(--pf-font-ui);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume h2 {
+  max-width: 650px;
+  margin: 15px 0 10px;
+  color: #101519;
+  font-family: var(--pf-font-ui);
+  font-size: clamp(2.15rem, 4.2vw, 3.7rem);
+  font-weight: 650;
+  line-height: 1.04;
+  letter-spacing: -0.06em;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-copy > p {
+  margin: 0;
+  color: #6a7282;
+  font-size: 0.91rem;
+}
+
+html body .dashboard-fresh.role-student .pf-student-progress {
+  width: min(100%, 580px);
+  height: 7px;
+  margin-top: 36px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+html body .dashboard-fresh.role-student .pf-student-progress > i {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: #2a6ba7;
+}
+
+html body .dashboard-fresh.role-student .pf-student-progress-meta {
+  width: min(100%, 580px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 9px;
+  color: #6a7282;
+  font-size: 0.69rem;
+}
+
+html body .dashboard-fresh.role-student .pf-student-progress-meta span:first-child {
+  color: #1e5a8f;
+  font-weight: 700;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-action {
+  width: max-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 26px;
+  padding: 0 18px;
+  color: #ffffff;
+  border: 1px solid #2a6ba7;
+  border-radius: 10px;
+  background: #2a6ba7;
+  font-family: var(--pf-font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-action:hover {
+  border-color: #003466;
+  background: #003466;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-action svg {
+  width: 16px;
+  height: 16px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-visual {
+  position: relative;
+  min-height: 270px;
+  display: grid;
+  place-items: center;
+  margin: 32px 32px 32px 0;
+  overflow: hidden;
+  color: #ffffff;
+  border-radius: 12px 44px 12px 12px;
+  background:
+    radial-gradient(circle at 86% 14%, rgba(255, 255, 255, 0.12), transparent 22%),
+    linear-gradient(140deg, #2a6ba7 0%, #003466 100%);
+  text-decoration: none;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-visual::before,
+html body .dashboard-fresh.role-student .pf-student-resume-visual::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-visual::before {
+  width: 250px;
+  height: 250px;
+  right: -126px;
+  bottom: -118px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-visual::after {
+  width: 150px;
+  height: 150px;
+  right: -76px;
+  bottom: -69px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-play {
+  position: relative;
+  z-index: 1;
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  padding-left: 3px;
+  color: #003466;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgba(0, 24, 48, 0.2);
+  transition: transform 180ms var(--pf-ease);
+}
+
+html body .dashboard-fresh.role-student .pf-student-resume-visual:hover .pf-student-play {
+  transform: scale(1.06);
+}
+
+html body .dashboard-fresh.role-student .pf-student-play svg {
+  width: 25px;
+  height: 25px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-visual-label {
+  position: absolute;
+  z-index: 1;
+  right: 22px;
+  bottom: 19px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.65rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+html body .dashboard-fresh.role-student .pf-student-lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.65fr);
+  align-items: start;
+  gap: 28px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-programs,
+html body .dashboard-fresh.role-student .pf-student-summary {
+  min-width: 0;
+  padding: 30px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(16, 21, 25, 0.03);
+}
+
+html body .dashboard-fresh.role-student .pf-student-section-heading {
+  min-height: 42px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-section-heading h2 {
+  margin: 5px 0 0;
+  color: #101519;
+  font-family: var(--pf-font-ui);
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+html body .dashboard-fresh.role-student .pf-student-section-heading > a,
+html body .dashboard-fresh.role-student .pf-student-certificate a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1e5a8f;
+  font-size: 0.69rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+html body .dashboard-fresh.role-student .pf-student-section-heading > a {
+  margin-top: 6px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-section-heading svg,
+html body .dashboard-fresh.role-student .pf-student-certificate a svg {
+  width: 14px;
+  height: 14px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-list {
+  margin-top: 22px;
+  border-top: 1px solid #e5e7eb;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-row {
+  min-height: 96px;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 2px;
+  color: #101519;
+  border-bottom: 1px solid #e5e7eb;
+  text-decoration: none;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 2px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #eff6ff;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-thumb img {
+  object-fit: cover;
+  transition: transform 220ms var(--pf-ease);
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-row:hover .pf-student-program-thumb img {
+  transform: scale(1.04);
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-copy small {
+  color: #2a6ba7;
+  font-size: 0.61rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-copy strong {
+  overflow: hidden;
+  color: #101519;
+  font-family: var(--pf-font-ui);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-copy > span {
+  color: #6a7282;
+  font-size: 0.66rem;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #6a7282;
+  font-size: 0.68rem;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-state b {
+  color: #1e5a8f;
+  font-weight: 700;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-state svg {
+  width: 16px;
+  height: 16px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-empty {
+  min-height: 118px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 18px;
+  color: #6a7282;
+  border-top: 1px solid #e5e7eb;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-empty > svg {
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  color: #2a6ba7;
+  border-radius: 10px;
+  background: #eff6ff;
+}
+
+html body .dashboard-fresh.role-student .pf-student-program-empty p {
+  margin: 0;
+  font-size: 0.76rem;
+}
+
+html body .dashboard-fresh.role-student .pf-student-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 24px 0 0;
+  padding: 20px 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+html body .dashboard-fresh.role-student .pf-student-summary-stats > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+  padding: 0 12px;
+  text-align: center;
+}
+
+html body .dashboard-fresh.role-student .pf-student-summary-stats > div:first-child {
+  padding-left: 0;
+}
+
+html body .dashboard-fresh.role-student .pf-student-summary-stats > div:last-child {
+  padding-right: 0;
+}
+
+html body .dashboard-fresh.role-student .pf-student-summary-stats > div + div {
+  border-left: 1px solid #e5e7eb;
+}
+
+html body .dashboard-fresh.role-student .pf-student-summary-stats dt {
+  color: #6a7282;
+  font-size: 0.6rem;
+}
+
+html body .dashboard-fresh.role-student .pf-student-summary-stats dd {
+  margin: 0;
+  color: #003466;
+  font-family: var(--pf-font-ui);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+html body .dashboard-fresh.role-student .pf-student-certificate {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 13px;
+  margin-top: 22px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-certificate > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: #003466;
+  border-radius: 11px;
+  background: #f3b444;
+}
+
+html body .dashboard-fresh.role-student .pf-student-certificate > span svg {
+  width: 19px;
+  height: 19px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-certificate > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+html body .dashboard-fresh.role-student .pf-student-certificate small {
+  color: #6a7282;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html body .dashboard-fresh.role-student .pf-student-certificate strong {
+  overflow: hidden;
+  color: #101519;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html body .dashboard-fresh.role-student .pf-student-certificate p {
+  margin: 0;
+  color: #6a7282;
+  font-size: 0.7rem;
+}
+
+/* Dashboard route skeleton mirrors the final learner geometry. */
+.dashboard-loading-shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  border-top: 5px solid #003466;
+  background: #f9fafb;
+}
+
+.dashboard-loading-sidebar {
+  padding: 32px 20px;
+  border-right: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.dashboard-loading-logo,
+.dashboard-loading-nav,
+.dashboard-loading-header > div,
+.dashboard-loading-header > span,
+.dashboard-loading-resume-copy > div,
+.dashboard-loading-resume-visual,
+.dashboard-loading-panel > div {
+  overflow: hidden;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eef1f4 25%, #f8fafc 50%, #eef1f4 75%);
+  background-size: 200% 100%;
+  animation: pf-loading-sheen 1.4s linear infinite;
+}
+
+.dashboard-loading-logo {
+  width: 154px;
+  height: 42px;
+  margin-bottom: 66px;
+}
+
+.dashboard-loading-nav {
+  width: 100%;
+  height: 52px;
+  margin-bottom: 8px;
+}
+
+.dashboard-loading-main {
+  min-width: 0;
+}
+
+.dashboard-loading-header {
+  min-height: 94px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(28px, 4.5vw, 64px);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-loading-header > div {
+  width: 150px;
+  height: 25px;
+}
+
+.dashboard-loading-header > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.dashboard-loading-content {
+  display: grid;
+  gap: 28px;
+  padding: clamp(28px, 4vw, 52px) clamp(24px, 4.5vw, 64px) 72px;
+}
+
+.dashboard-loading-resume {
+  min-height: 350px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.24fr) minmax(320px, 0.76fr);
+  gap: clamp(24px, 4vw, 64px);
+  padding: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.dashboard-loading-resume-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.dashboard-loading-resume-copy > div:nth-child(1) { width: 120px; height: 14px; }
+.dashboard-loading-resume-copy > div:nth-child(2) { width: 78%; height: 56px; }
+.dashboard-loading-resume-copy > div:nth-child(3) { width: 42%; height: 16px; }
+.dashboard-loading-resume-copy > div:nth-child(4) { width: 88%; height: 7px; margin-top: 20px; }
+.dashboard-loading-resume-copy > div:nth-child(5) { width: 150px; height: 44px; }
+
+.dashboard-loading-resume-visual {
+  min-height: 286px;
+  border-radius: 12px 44px 12px 12px;
+}
+
+.dashboard-loading-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.65fr);
+  gap: 28px;
+}
+
+.dashboard-loading-panel > div {
+  height: 230px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+}
+
+@keyframes pf-loading-sheen {
+  to { background-position: -200% 0; }
+}
+
+@media (max-width: 1100px) {
+  html body .dashboard-fresh.role-student .pf-student-lower-grid,
+  .dashboard-loading-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 920px) {
+  html body .dashboard-fresh.role-student .pf-workspace-sidebar {
+    position: fixed !important;
+    top: 5px;
+    bottom: 0;
+    left: 0;
+    z-index: 1100 !important;
+    width: min(286px, 88vw) !important;
+    height: calc(100dvh - 5px) !important;
+    flex: none !important;
+    transform: translateX(-104%) !important;
+    transition: transform 220ms var(--pf-ease) !important;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-sidebar-close {
+    display: grid !important;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-canvas {
+    width: 100% !important;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-menu-trigger {
+    display: grid !important;
+    color: #003466 !important;
+    border-color: #e5e7eb !important;
+    background: #ffffff !important;
+  }
+
+  .dashboard-loading-shell {
+    display: block;
+  }
+
+  .dashboard-loading-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  html body .dashboard-fresh.role-student .pf-workspace-topbar {
+    min-height: 72px !important;
+    padding: 0 16px !important;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-page-title {
+    font-size: 1.08rem;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-user-copy {
+    display: none;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-user-link {
+    margin: 0;
+    padding: 2px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-main {
+    min-height: calc(100dvh - 77px);
+    padding: 20px 14px 48px !important;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-dashboard {
+    gap: 18px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-resume {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-radius: 15px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-resume-copy {
+    padding: 30px 24px 26px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-resume h2 {
+    font-size: clamp(1.8rem, 9vw, 2.55rem);
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-progress {
+    margin-top: 28px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-resume-visual {
+    min-height: 210px;
+    margin: 0 16px 16px;
+    border-radius: 10px 34px 10px 10px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-lower-grid {
+    gap: 18px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-programs,
+  html body .dashboard-fresh.role-student .pf-student-summary {
+    padding: 22px 20px;
+    border-radius: 15px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-program-row {
+    grid-template-columns: 54px minmax(0, 1fr) auto;
+    gap: 13px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-program-thumb {
+    width: 54px;
+    height: 54px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-program-state b {
+    display: none;
+  }
+
+  .dashboard-loading-header {
+    min-height: 72px;
+    padding: 0 16px;
+  }
+
+  .dashboard-loading-content {
+    gap: 18px;
+    padding: 20px 14px 48px;
+  }
+
+  .dashboard-loading-resume {
+    min-height: 500px;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 460px) {
+  html body .dashboard-fresh.role-student .pf-workspace-page-title {
+    max-width: 116px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-actions {
+    gap: 5px !important;
+  }
+
+  html body .dashboard-fresh.role-student .pf-workspace-action,
+  html body .dashboard-fresh.role-student .pf-workspace-user-avatar {
+    width: 38px !important;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px !important;
+    flex-basis: 38px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-progress-meta span:last-child {
+    display: none;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-section-heading {
+    gap: 12px;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-section-heading > a {
+    font-size: 0;
+  }
+
+  html body .dashboard-fresh.role-student .pf-student-section-heading > a svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .dashboard-fresh.role-student .pf-student-play,
+  html body .dashboard-fresh.role-student .pf-student-program-thumb img,
+  .dashboard-loading-logo,
+  .dashboard-loading-nav,
+  .dashboard-loading-header > div,
+  .dashboard-loading-header > span,
+  .dashboard-loading-resume-copy > div,
+  .dashboard-loading-resume-visual,
+  .dashboard-loading-panel > div {
+    animation: none !important;
+    transition: none !important;
+  }
+}

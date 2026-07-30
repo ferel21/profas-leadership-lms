@@ -6,8 +6,8 @@ import { prisma } from "@/services/prisma";
 import Link from "next/link";
 import {
   BookOpen, UsersRound, Award, ChevronRight, Activity, TrendingUp,
-  Target, Zap, Clock, Star, ArrowUpRight, ArrowRight, GraduationCap,
-  BookMarked, PieChart
+  Target, Clock, Star, ArrowUpRight, ArrowRight, GraduationCap,
+  BookMarked, PieChart, Play
 } from "lucide-react";
 import Image from "next/image";
 import type { ReportRow } from "@/components/shared/AdminReportTable";
@@ -121,206 +121,143 @@ export default async function DashboardPage() {
       if (a.status !== "ACTIVE" && b.status === "ACTIVE") return 1;
       return b.progressPercent - a.progressPercent;
     });
-    const nextCourseSlug = sortedEnrollments[0]?.course.slug;
-    const nextCourseTitle = sortedEnrollments[0]?.course.title;
+    const primaryEnrollment = sortedEnrollments[0];
+    const otherEnrollments = sortedEnrollments.slice(1);
 
     return (
       <DashboardChrome user={user}>
-        {/* ── Hero greeting ── */}
-        <div className="hero-banner-student">
-          <div className="dash-hero-layout">
-            <div>
-              <p className="eyebrow-teal" style={{ margin: "0 0 4px", opacity: 0.85 }}>
-                SELAMAT DATANG KEMBALI
-              </p>
-              <h1 className="hero-banner-title">
-                {user.name}!
-              </h1>
-              <p className="hero-banner-subtitle">
-                Lanjutkan perjalanan kepemimpinan Anda hari ini.
-              </p>
-            </div>
-            <div className="dash-hero-momentum">
-              <div className="dash-hero-momentum-label"><span>Momentum belajar</span><span>LIVE</span></div>
-              <strong>{avgProgress}%</strong>
-              <div className="dash-hero-meter" role="progressbar" aria-label="Progres rata-rata" aria-valuenow={avgProgress} aria-valuemin={0} aria-valuemax={100}><i style={{ width: `${avgProgress}%` }} /></div>
-              <Link href={nextCourseSlug ? `/belajar/${nextCourseSlug}` : "/program"}>
-                {nextCourseSlug ? "Lanjutkan program" : "Pilih program"} <ArrowRight size={15} />
-              </Link>
-            </div>
-          </div>
-        </div>
+        <div className="pf-student-dashboard">
+          <h1 className="sr-only">Program saya</h1>
 
-        {/* ── Stat Cards ── */}
-        <div className="responsive-stat-grid">
-          <StatCard label="Program Diikuti" value={enrollments.length} desc="Kelas kepemimpinan aktif" icon={BookOpen} gradient="linear-gradient(135deg, #2a6ba7, #1e5a8f)" trend={enrollments.length > 0 ? "Aktif" : undefined} />
-          <StatCard label="Sertifikat" value={certificates.length} desc="Bukti kelulusan terverifikasi" icon={Award} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" trend={certificates.length > 0 ? "Diperoleh" : undefined} />
-          <StatCard label="Progres Rata-rata" value={`${avgProgress}%`} desc="Penyelesaian materi" icon={TrendingUp} gradient="linear-gradient(135deg, #6366f1, #818cf8)" />
-          <StatCard label="Program Selesai" value={completedEnrollments.length} desc="Dari total program" icon={GraduationCap} gradient="linear-gradient(135deg, #10b981, #34d399)" />
-        </div>
-
-        <div className="dash-focus-grid">
-          <section className="dash-focus-card primary" aria-labelledby="focus-title">
-            <div className="dash-focus-kicker"><span>Fokus berikutnya</span><Target size={16} /></div>
-            <h2 id="focus-title">{nextCourseTitle || "Pilih langkah belajar pertama Anda"}</h2>
-            <p>{nextCourseSlug ? "Satu sesi kecil hari ini menjaga perjalanan kepemimpinan tetap bergerak." : "Jelajahi katalog untuk menemukan program yang paling dekat dengan tantangan Anda."}</p>
-            <Link href={nextCourseSlug ? `/belajar/${nextCourseSlug}` : "/program"} className="dash-focus-action">
-              {nextCourseSlug ? "Masuk ke course player" : "Jelajahi katalog"} <ArrowRight size={16} />
-            </Link>
-          </section>
-          <section className="dash-focus-card" aria-labelledby="snapshot-title">
-            <div className="dash-focus-kicker"><span id="snapshot-title">Snapshot minggu ini</span><Activity size={16} /></div>
-            <div className="dash-focus-snapshot">
-              <div><b>{avgProgress}%</b><span>rata-rata progres</span></div>
-              <div><b>{completedEnrollments.length}</b><span>program selesai</span></div>
-              <div><b>{certificates.length}</b><span>sertifikat aktif</span></div>
-            </div>
-            <p className="dash-focus-note">Gunakan ringkasan ini untuk menentukan ritme belajar berikutnya.</p>
-          </section>
-        </div>
-
-        {/* ── Executive Learning Roadmap & Career Pathway ── */}
-        <div className="dash-roadmap-box">
-          <SectionTitle title="Alur Kepemimpinan Eksekutif" subtitle="Jalur tahapan evolusi kepemimpinan Anda di PROFAS Institute" />
-          <div className="dash-roadmap-grid">
-            <div className="dash-roadmap-node active hover-lift">
-              <div>
-                <span className="dash-node-badge active">TAHAP 1 • AKTIF</span>
-                <h3 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Fondasi & Self-Leadership</h3>
-                <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.8 }}>Memimpin diri, integritas, dan kecerdasan emosional.</p>
-              </div>
-            </div>
-            <div className="dash-roadmap-node next hover-lift">
-              <div>
-                <span className="dash-node-badge next">TAHAP 2 • BERIKUTNYA</span>
-                <h3 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Manajemen Tim & Kolaborasi</h3>
-                <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.7 }}>Resolusi konflik, delegasi efektif, dan budaya agile.</p>
-              </div>
-            </div>
-            <div className="dash-roadmap-node locked hover-lift">
-              <div>
-                <span className="dash-node-badge locked">TAHAP 3 • EKSKLUSIF</span>
-                <h3 style={{ margin: "6px 0 4px", fontSize: "0.95rem", fontWeight: 700 }}>Kepemimpinan Strategis</h3>
-                <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.6 }}>Visi organisasi, manajemen perubahan, dan eksekusi.</p>
-              </div>
-            </div>
-          </div>
-          <div className="dash-roadmap-banner">
-            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-              <div className="pro-shimmer-trophy" style={{ padding: "12px", borderRadius: "14px", background: "linear-gradient(135deg, #1e5a8f, #2a6ba7)", color: "#fff", boxShadow: "0 4px 12px rgba(42, 107, 167, 0.3)" }}>
-                <Award size={24} color="#fff" />
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>Target Kelulusan Eksekutif Anda: Certified Leadership Executive (CLE)</h3>
-                <p style={{ margin: "2px 0 0", fontSize: "0.78rem", color: "#334155", fontWeight: 600 }}>Selesaikan seluruh modul di atas untuk mendapatkan lencana holografik dan gelar profesional kepemimpinan.</p>
-              </div>
-            </div>
-            <Link href="/program" className="btn btn-primary btn-small hover-lift" style={{ whiteSpace: "nowrap" }}>Lihat Semua Modul</Link>
-          </div>
-        </div>
-
-        {/* ── Main Content Grid ── */}
-        <div className="responsive-main-grid">
-          {/* Program Aktif */}
-          <div className="dash-card-clean" id="program">
-            <SectionTitle
-              title="Program Aktif Anda"
-              subtitle="Lanjutkan dari modul terakhir"
-              action={
-                <Link href="/program" style={{ fontSize: "0.82rem", color: "#2a6ba7", fontWeight: 700, textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
-                  Jelajahi lebih <ChevronRight size={14} />
+          {primaryEnrollment ? (
+            <section className="pf-student-resume" aria-labelledby="resume-course-title">
+              <div className="pf-student-resume-copy">
+                <span className="pf-student-kicker">Lanjutkan belajar</span>
+                <h2 id="resume-course-title">{primaryEnrollment.course.title}</h2>
+                <p>
+                  {primaryEnrollment.course.category} · {primaryEnrollment.course.nodes.length} materi
+                </p>
+                <div
+                  className="pf-student-progress"
+                  role="progressbar"
+                  aria-label={`Progres ${primaryEnrollment.course.title}`}
+                  aria-valuenow={primaryEnrollment.progressPercent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <i style={{ width: `${primaryEnrollment.progressPercent}%` }} />
+                </div>
+                <div className="pf-student-progress-meta">
+                  <span>{primaryEnrollment.progressPercent}% selesai</span>
+                  <span>{primaryEnrollment.course.durationHours} jam belajar</span>
+                </div>
+                <Link href={`/belajar/${primaryEnrollment.course.slug}`} className="pf-student-resume-action">
+                  {primaryEnrollment.progressPercent === 100 ? "Tinjau kembali" : "Lanjutkan program"}
+                  <ArrowRight aria-hidden="true" />
                 </Link>
-              }
-            />
-            {enrollments.length === 0 ? (
-              <EmptyCard text="Belum ada program yang diikuti. Eksplorasi katalog program sekarang." icon={BookOpen} />
-            ) : (
-              <div className="dash-enroll-list">
-                {sortedEnrollments.map(item => {
-                  const isCompleted = item.status === "COMPLETED" || item.progressPercent === 100;
-                  return (
-                    <Link href={`/belajar/${item.course.slug}`} key={item.id} style={{ textDecoration: "none" }}>
-                      <div className={`dash-enroll-item hover-lift ${isCompleted ? "completed" : ""}`}>
-                        <div className="dash-enroll-thumb">
-                          <Image src={item.course.image} fill alt={item.course.title} sizes="80px" style={{ objectFit: "cover" }} />
-                        </div>
-                        <div className="dash-enroll-info">
-                          <div className="dash-enroll-tags">
-                            <span className="dash-enroll-category">
-                              {item.course.category}
-                            </span>
-                            <span className={`dash-enroll-status ${isCompleted ? "done" : "active"}`}>
-                              {isCompleted ? "✓ Selesai" : "Aktif"}
-                            </span>
-                          </div>
-                          <h3 className="dash-enroll-title">
-                            {item.course.title}
-                          </h3>
-                          <p className="dash-enroll-meta">
-                            {item.course.nodes.length} materi • {item.course.durationHours} jam
-                          </p>
-                          {/* Progress bar */}
-                          <div className="dash-progress-track">
-                            <div className={`dash-progress-fill ${isCompleted ? "done" : "active"}`} style={{ width: `${item.progressPercent}%` }} />
-                          </div>
-                          <p className="dash-progress-text">
-                            {item.progressPercent}% selesai
-                          </p>
-                        </div>
-                        <ChevronRight size={18} color="#94a3b8" style={{ flexShrink: 0 }} />
-                      </div>
-                    </Link>
-                  );
-                })}
               </div>
-            )}
-          </div>
+              <Link
+                href={`/belajar/${primaryEnrollment.course.slug}`}
+                className="pf-student-resume-visual"
+                aria-label={`Buka program ${primaryEnrollment.course.title}`}
+              >
+                <span className="pf-student-play"><Play fill="currentColor" aria-hidden="true" /></span>
+                <span className="pf-student-visual-label">
+                  {primaryEnrollment.progressPercent === 100 ? "Pelajari kembali" : "Masuk ruang belajar"}
+                </span>
+              </Link>
+            </section>
+          ) : (
+            <section className="pf-student-resume pf-student-resume-empty" aria-labelledby="empty-program-title">
+              <div className="pf-student-resume-copy">
+                <span className="pf-student-kicker">Mulai perjalanan Anda</span>
+                <h2 id="empty-program-title">Pilih program kepemimpinan pertama Anda.</h2>
+                <p>Temukan materi yang paling dekat dengan tantangan Anda hari ini.</p>
+                <Link href="/program" className="pf-student-resume-action">
+                  Jelajahi program <ArrowRight aria-hidden="true" />
+                </Link>
+              </div>
+              <Link href="/program" className="pf-student-resume-visual" aria-label="Jelajahi katalog program">
+                <span className="pf-student-play"><BookOpen aria-hidden="true" /></span>
+                <span className="pf-student-visual-label">Lihat katalog</span>
+              </Link>
+            </section>
+          )}
 
-          {/* Sidebar kanan */}
-          <div className="dash-sidebar-col">
-            {/* Sertifikat */}
-            <div className="dash-card-clean" id="sertifikat">
-              <SectionTitle title="Sertifikat & Pencapaian" subtitle="Lulusan terverifikasi" />
-              {certificates.length === 0 ? (
-                <EmptyCard text="Sertifikat muncul setelah program selesai." icon={Award} />
-              ) : (
-                <div className="dash-cert-list">
-                  {certificates.slice(0, 3).map(cert => (
-                    <div key={cert.id} className="dash-cert-mini">
-                      <div className="dash-cert-mini-icon">
-                        <Award size={18} color="#fff" />
-                      </div>
-                      <div className="dash-cert-mini-info">
-                        <p className="dash-cert-mini-title">
-                          {cert.course.title}
-                        </p>
-                        <p className="dash-cert-mini-no">
-                          No: {cert.uniqueNumber}
-                        </p>
-                      </div>
-                      <Link href={`/sertifikat/${cert.uniqueNumber}`} className="dash-cert-mini-btn">
-                        Lihat
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Quick tip card */}
-            <div className="dash-tip-card">
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", position: "relative", zIndex: 1 }}>
-                <div className="dash-tip-icon">
-                  <Zap size={18} color="#fef08a" />
-                </div>
+          <div className="pf-student-lower-grid">
+            <section className="pf-student-programs" aria-labelledby="other-programs-title">
+              <header className="pf-student-section-heading">
                 <div>
-                  <p style={{ margin: "0 0 4px", fontSize: "0.8rem", fontWeight: 700, opacity: 0.9 }}>Tips Belajar Hari Ini</p>
-                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.8, lineHeight: 1.5 }}>
-                    Dedikasikan minimal 30 menit per hari untuk meningkatkan keterampilan kepemimpinan Anda secara konsisten.
+                  <span>Ruang belajar</span>
+                  <h2 id="other-programs-title">Program lainnya</h2>
+                </div>
+                <Link href="/program">Lihat katalog <ArrowRight aria-hidden="true" /></Link>
+              </header>
+
+              {otherEnrollments.length > 0 ? (
+                <div className="pf-student-program-list">
+                  {otherEnrollments.map(item => {
+                    const isCompleted = item.status === "COMPLETED" || item.progressPercent === 100;
+                    return (
+                      <Link href={`/belajar/${item.course.slug}`} key={item.id} className="pf-student-program-row">
+                        <span className="pf-student-program-thumb">
+                          <Image src={item.course.image} fill alt="" sizes="64px" />
+                        </span>
+                        <span className="pf-student-program-copy">
+                          <small>{item.course.category}</small>
+                          <strong>{item.course.title}</strong>
+                          <span>{item.course.nodes.length} materi · {item.course.durationHours} jam</span>
+                        </span>
+                        <span className="pf-student-program-state">
+                          <b>{isCompleted ? "Selesai" : `${item.progressPercent}%`}</b>
+                          <ChevronRight aria-hidden="true" />
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="pf-student-program-empty">
+                  <BookOpen aria-hidden="true" />
+                  <p>
+                    {primaryEnrollment
+                      ? "Program lain yang Anda ikuti akan muncul di sini."
+                      : "Belum ada program yang diikuti."}
                   </p>
                 </div>
+              )}
+            </section>
+
+            <section className="pf-student-summary" id="sertifikat" aria-labelledby="learning-summary-title">
+              <header className="pf-student-section-heading">
+                <div>
+                  <span>Progres Anda</span>
+                  <h2 id="learning-summary-title">Ringkasan belajar</h2>
+                </div>
+              </header>
+              <dl className="pf-student-summary-stats">
+                <div><dt>Program</dt><dd>{enrollments.length}</dd></div>
+                <div><dt>Rata-rata</dt><dd>{avgProgress}%</dd></div>
+                <div><dt>Selesai</dt><dd>{completedEnrollments.length}</dd></div>
+              </dl>
+
+              <div className="pf-student-certificate">
+                <span><Award aria-hidden="true" /></span>
+                <div>
+                  <small>Sertifikat</small>
+                  {certificates[0] ? (
+                    <>
+                      <strong>{certificates[0].course.title}</strong>
+                      <Link href={`/sertifikat/${certificates[0].uniqueNumber}`}>
+                        Lihat sertifikat <ArrowRight aria-hidden="true" />
+                      </Link>
+                    </>
+                  ) : (
+                    <p>Tersedia setelah program selesai.</p>
+                  )}
+                </div>
               </div>
-            </div>
+            </section>
           </div>
         </div>
       </DashboardChrome>

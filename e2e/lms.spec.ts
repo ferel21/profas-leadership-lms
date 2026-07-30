@@ -10,6 +10,14 @@ async function waitForApp(page: import("@playwright/test").Page) {
   await expect(page.locator("body")).toBeVisible();
 }
 
+async function waitForLeafAnimations(page: import("@playwright/test").Page) {
+  await page.waitForFunction(
+    () => document.querySelector('[data-leaf-state="running"]') === null,
+    undefined,
+    { timeout: 5_000 },
+  );
+}
+
 async function loginAsLearner(page: import("@playwright/test").Page) {
   await page.goto("/masuk");
   await page.locator('input[name="email"]').fill(learnerEmail);
@@ -27,6 +35,9 @@ test.describe("public performance and accessibility", () => {
     await page.goto("/");
     await waitForApp(page);
 
+    await expect(page.locator(".pf-public-page > main > section").first()).toHaveAttribute("data-leaf-group-state", "done", { timeout: 5_000 });
+    await expect(page.locator(".pf-hero-layout")).toHaveAttribute("data-leaf-group-state", "done", { timeout: 5_000 });
+    await waitForLeafAnimations(page);
     await expect(page.getByRole("link", { name: /program/i }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /mulai|jelajahi/i }).first()).toBeVisible();
     expect(errors).toEqual([]);
@@ -38,6 +49,7 @@ test.describe("public performance and accessibility", () => {
   test("program catalog keeps search and navigation usable on mobile", async ({ page }) => {
     await page.goto("/program");
     await waitForApp(page);
+    await waitForLeafAnimations(page);
     await expect(page.getByRole("textbox", { name: /cari program/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /program/i }).first()).toBeVisible();
 
@@ -58,10 +70,13 @@ test.describe("public performance and accessibility", () => {
 test.describe("learner journey", () => {
   test("learner can reach dashboard and course player with accessible controls", async ({ page }) => {
     await loginAsLearner(page);
-    await expect(page.locator(".hero-banner-student")).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator(".pf-student-resume")).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator(".pf-workspace-main > .pf-student-dashboard")).toHaveAttribute("data-leaf-group-state", "done", { timeout: 5_000 });
+    await waitForLeafAnimations(page);
 
     const sidebar = page.getByRole("complementary", { name: /navigasi utama ruang belajar/i });
     await expect(sidebar.getByRole("link", { name: "Ringkasan" })).toBeVisible();
+    await expect(sidebar.getByRole("link")).toHaveCount(5);
     await expect(sidebar.getByRole("link", { name: "Program Saya" })).toHaveCount(0);
     await expect(sidebar.getByRole("link", { name: "Sertifikat" })).toHaveCount(0);
     await expect(sidebar.locator(".logo")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");

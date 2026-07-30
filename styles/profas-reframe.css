@@ -9571,14 +9571,13 @@ html body .overall-progress > small {
   }
 }
 
-/* Use the same full-colour lockup as the public landing header. On dark
-   surfaces it sits on a quiet white keyline so the original blue/green mark
-   remains legible instead of being replaced by a monochrome filter. */
+/* The source lockup already includes transparency. Let the sidebar and auth
+   surfaces show through instead of placing the logo on a white tile. */
 .pf-workspace-logo .logo,
 .pf-auth-story-top .logo {
-  padding: 7px 9px !important;
-  border-radius: 11px;
-  background: #ffffff;
+  padding: 0 !important;
+  border-radius: 0;
+  background: transparent;
 }
 
 .pf-workspace-logo .logo-image,
@@ -9590,7 +9589,7 @@ html body .overall-progress > small {
   width: 42px !important;
   height: 42px;
   overflow: hidden;
-  padding: 5px !important;
+  padding: 0 !important;
 }
 
 .pf-workspace-shell.sidebar-collapsed .pf-workspace-logo .logo-image {

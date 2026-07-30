@@ -29,7 +29,7 @@ export default function MentorError({
           <button onClick={() => reset()} className="btn btn-primary flex items-center gap-2">
             <RefreshCw size={16} /> Muat Ulang Ruang Mentor
           </button>
-          <Link href="/mentor" className="btn btn-secondary flex items-center gap-2">
+          <Link href="/dashboard" className="btn btn-secondary flex items-center gap-2">
             <Briefcase size={16} /> Menu Mentor
           </Link>
         </div>

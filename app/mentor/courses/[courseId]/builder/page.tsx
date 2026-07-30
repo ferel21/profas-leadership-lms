@@ -21,7 +21,7 @@ export default async function CourseBuilderPage({ params }: { params: Promise<{ 
     }
   });
 
-  if (!course || course.mentorId !== user.id) redirect("/mentor");
+  if (!course || course.mentorId !== user.id) redirect("/dashboard");
 
   type TreeNode = import("@prisma/client").CourseNode & { children: TreeNode[] };
   const nodes = course.nodes;
@@ -36,7 +36,7 @@ export default async function CourseBuilderPage({ params }: { params: Promise<{ 
   return (
     <DashboardChrome user={user}>
       <div className="mb-6">
-        <Link href="/mentor" className="text-link inline-flex items-center gap-2">
+        <Link href="/dashboard" className="text-link inline-flex items-center gap-2">
           <ArrowLeft size={16} /> Kembali ke Dashboard
         </Link>
       </div>

@@ -60,6 +60,12 @@ test.describe("learner journey", () => {
     await loginAsLearner(page);
     await expect(page.locator(".hero-banner-student")).toBeVisible({ timeout: 20_000 });
 
+    const sidebar = page.getByRole("complementary", { name: /navigasi utama ruang belajar/i });
+    await expect(sidebar.getByRole("link", { name: "Ringkasan" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Program Saya" })).toHaveCount(0);
+    await expect(sidebar.getByRole("link", { name: "Sertifikat" })).toHaveCount(0);
+    await expect(sidebar.locator(".logo")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+
     const dashboardResults = await new AxeBuilder({ page }).analyze();
     expect(dashboardResults.violations).toEqual([]);
 

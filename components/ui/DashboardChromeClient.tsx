@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Award, Bell, BookOpen, Check, ClipboardCheck, FolderUp, Gauge, LayoutDashboard, LogOut, Menu, Trophy, X, History, Users, FileCheck2, Calendar, MessageSquare, Settings, PieChart, Search } from "lucide-react";
+import { Bell, Check, ClipboardCheck, Gauge, LayoutDashboard, LogOut, Menu, Trophy, X, History, Users, FileCheck2, Calendar, MessageSquare, Settings, PieChart, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { initials } from "@/utils";
@@ -15,9 +15,27 @@ const ExecutiveExportHubModal = dynamic(() => import("@/components/shared/Execut
 type UserShape = { name:string;username?:string|null;email:string;role:string;avatar?:string|null;headline?:string|null };
 type NotificationItem = { id: string; title: string; message: string; read: boolean; link: string | null; createdAt: string };
 
-const studentNav=[["Ringkasan",LayoutDashboard,"/dashboard"],["Program Saya",BookOpen,"/dashboard#program"],["Riwayat",History,"/riwayat"],["Kalender",Calendar,"/kalender"],["Absensi",ClipboardCheck,"/absensi"],["Sertifikat",Award,"/dashboard#sertifikat"],["Peringkat",Trophy,"/peringkat"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
-const mentorNav=[["Ringkasan",Gauge,"/dashboard"],["Manajemen Peserta",Users,"/dashboard/peserta"],["Riwayat Evaluasi",FileCheck2,"/dashboard/evaluasi"],["Materi Pembelajaran",FolderUp,"/dashboard#program"],["Kalender",Calendar,"/kalender"],["Absensi",ClipboardCheck,"/absensi"],["Analitik",PieChart,"/dashboard/analitik"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
-const adminNav=[["Analitik",PieChart,"/dashboard"],["Absensi",ClipboardCheck,"/absensi"],["Komunitas",MessageSquare,"/forum"],["Pengaturan",Settings,"/pengaturan"]] as const;
+const studentNavSections = [
+  { label: "Beranda", items: [["Ringkasan", LayoutDashboard, "/dashboard"]] },
+  { label: "Aktivitas belajar", items: [["Riwayat", History, "/riwayat"], ["Kalender", Calendar, "/kalender"], ["Absensi", ClipboardCheck, "/absensi"]] },
+  { label: "Pencapaian", items: [["Peringkat", Trophy, "/peringkat"]] },
+  { label: "Dukungan", items: [["Komunitas", MessageSquare, "/forum"]] },
+  { label: "Akun", items: [["Pengaturan", Settings, "/pengaturan"]] },
+] as const;
+
+const mentorNavSections = [
+  { label: "Beranda", items: [["Ringkasan", Gauge, "/dashboard"]] },
+  { label: "Peserta & evaluasi", items: [["Manajemen Peserta", Users, "/dashboard/peserta"], ["Riwayat Evaluasi", FileCheck2, "/dashboard/evaluasi"]] },
+  { label: "Operasional", items: [["Kalender", Calendar, "/kalender"], ["Absensi", ClipboardCheck, "/absensi"]] },
+  { label: "Wawasan & komunitas", items: [["Analitik", PieChart, "/dashboard/analitik"], ["Komunitas", MessageSquare, "/forum"]] },
+  { label: "Akun", items: [["Pengaturan", Settings, "/pengaturan"]] },
+] as const;
+
+const adminNavSections = [
+  { label: "Beranda", items: [["Analitik", PieChart, "/dashboard"]] },
+  { label: "Operasional", items: [["Absensi", ClipboardCheck, "/absensi"], ["Komunitas", MessageSquare, "/forum"]] },
+  { label: "Akun", items: [["Pengaturan", Settings, "/pengaturan"]] },
+] as const;
 
 export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;children:React.ReactNode;streak?:number}){
   const [open,setOpen]=useState(false);
@@ -27,39 +45,14 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
   const [unreadCount,setUnreadCount]=useState(0);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isExportHubOpen, setIsExportHubOpen] = useState(false);
-  const [currentHash, setCurrentHash] = useState("");
   const router=useRouter();
   const pathname=usePathname();
-  const nav=user.role==="MENTOR"?mentorNav:user.role==="SUPER_ADMIN"?adminNav:studentNav;
+  const navSections=user.role==="MENTOR"?mentorNavSections:user.role==="SUPER_ADMIN"?adminNavSections:studentNavSections;
   const roleClass = `role-${user.role.toLowerCase().replace(/_/g, "-")}`;
   const roleLabel = user.role==="STUDENT"?"Peserta":user.role==="MENTOR"?"Mentor":"Super Admin";
-  const navSections = user.role === "MENTOR"
-    ? [
-        { label: "Beranda", indices: [0] },
-        { label: "Peserta & evaluasi", indices: [1, 2] },
-        { label: "Pembelajaran", indices: [3, 4, 5] },
-        { label: "Wawasan", indices: [6, 7] },
-        { label: "Akun", indices: [8] },
-      ]
-    : user.role === "SUPER_ADMIN"
-      ? [
-          { label: "Beranda", indices: [0] },
-          { label: "Operasional", indices: [1, 2] },
-          { label: "Akun", indices: [3] },
-        ]
-      : [
-          { label: "Beranda", indices: [0, 1] },
-          { label: "Aktivitas belajar", indices: [2, 3, 4] },
-          { label: "Pencapaian", indices: [5, 6] },
-          { label: "Dukungan", indices: [7] },
-          { label: "Akun", indices: [8] },
-        ];
 
   useEffect(()=>{
     let cancelled = false;
-    const syncHash = () => setCurrentHash(window.location.hash);
-    syncHash();
-    window.addEventListener("hashchange", syncHash);
     const loadNotifications = () => {
       const now = Date.now();
       const globalCache = (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache;
@@ -107,14 +100,9 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
       cancelled = true;
       if (hasIdleCallback && browserWindow.cancelIdleCallback) browserWindow.cancelIdleCallback(idleId as number);
       else window.clearTimeout(idleId as number);
-      window.removeEventListener("hashchange", syncHash);
       window.removeEventListener("keydown", handleKeyDown);
     };
   },[]);
-
-  useEffect(() => {
-    setCurrentHash(window.location.hash);
-  }, [pathname]);
 
   async function markReadAll(){
     setUnreadCount(0);
@@ -156,13 +144,10 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
             <section className="pf-workspace-nav-section" aria-labelledby={sectionTitleId} key={section.label}>
               <h2 id={sectionTitleId} className={`pf-workspace-nav-section-title ${collapsed ? "sr-only" : ""}`}>{section.label}</h2>
               <div className="pf-workspace-nav-links">
-                {section.indices.map(index => {
-                  const [label, Icon, href] = nav[index];
-                  const [hrefPath, hrefHash] = href.split("#");
-                  // The mentor dashboard also has a legacy /mentor entry point;
-                  // keep the same shell state when users arrive from either URL.
-                  const isHome = index === 0 && (pathname === "/dashboard" || (user.role === "MENTOR" && pathname === "/mentor"));
-                  const isActive = isHome || (pathname === hrefPath && (!hrefHash || currentHash === `#${hrefHash}`));
+                {section.items.map(([label, Icon, href]) => {
+                  const isActive = href === "/dashboard"
+                    ? pathname === href
+                    : pathname === href || pathname.startsWith(`${href}/`);
                   return (
                     <Link
                       href={href}
@@ -174,19 +159,7 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
                       className={`pf-workspace-nav-link ${isActive ? "active" : ""}`}
                       aria-current={isActive ? "page" : undefined}
                       aria-label={collapsed ? label : undefined}
-                      onClick={(e) => {
-                        if (hrefHash && pathname === hrefPath) {
-                          const id = hrefHash;
-                          const el = document.getElementById(id);
-                          if (el) {
-                            e.preventDefault();
-                            window.history.replaceState(null, "", `#${id}`);
-                            setCurrentHash(`#${id}`);
-                            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }
-                        }
-                        setOpen(false);
-                      }}
+                      onClick={() => setOpen(false)}
                       title={collapsed ? label : undefined}
                     >
                       <Icon className="pf-workspace-nav-icon" aria-hidden="true"/>

@@ -5,73 +5,143 @@ import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { Search, Trophy, Activity } from "lucide-react";
 import Link from "next/link";
 import { formatRelativeTime } from "@/utils";
+import {
+  activityMetadataBelongsToMentorScope,
+  buildMentorActivityWhere,
+  buildMentorAnalyticsScope,
+  mentorXpSourceIds,
+} from "@/services/mentor-analytics-scope";
 
-export default async function MentorPesertaPage() {
+export default async function MentorPesertaPage({
+  searchParams
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
   const user = await getCurrentUser();
   if (!user || user.role !== "MENTOR") redirect("/masuk");
 
-  // Fetch courses with enrollments and students' details
+  const params = await searchParams;
+  const query = params.q?.trim().slice(0, 100) ?? "";
+
+  // Fetch only the mentor-owned course graph used to scope participant data.
   const courses = await prisma.course.findMany({
     where: { mentorId: user.id },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      nodes: { select: { id: true } },
+      assessments: { select: { id: true } },
+      calendarEvents: { select: { id: true } },
       enrollments: {
         where: { user: { role: "STUDENT" } },
-        include: {
+        select: {
+          userId: true,
+          progressPercent: true,
           user: {
             select: {
               id: true,
               name: true,
               email: true,
               persona: true,
-              xpLogs: { select: { points: true } }
             }
-          }
+          },
         }
-      }
-    }
+      },
+    },
   });
+  const mentorScope = buildMentorAnalyticsScope(courses);
 
   // Flatten and aggregate student data
-  type StudentRow = { id: string; name: string; email: string; persona: string | null; programs: string[]; avgProgress: number; totalXp: number; lastActiveAt: Date | null };
+  type StudentRow = {
+    id: string;
+    name: string;
+    email: string;
+    persona: string | null;
+    programs: string[];
+    progressTotal: number;
+    programCount: number;
+    avgProgress: number;
+    totalXp: number;
+    lastActiveAt: Date | null;
+  };
   const studentMap = new Map<string, StudentRow>();
 
   courses.forEach(c => {
     c.enrollments.forEach(e => {
       if (!studentMap.has(e.user.id)) {
-        const totalXp = e.user.xpLogs.reduce((acc, log) => acc + log.points, 0);
         studentMap.set(e.user.id, {
           id: e.user.id,
           name: e.user.name,
           email: e.user.email,
           persona: e.user.persona,
           programs: [c.title],
+          progressTotal: e.progressPercent,
+          programCount: 1,
           avgProgress: e.progressPercent,
-          totalXp,
+          totalXp: 0,
           lastActiveAt: null
         });
       } else {
         const s = studentMap.get(e.user.id)!;
         s.programs.push(c.title);
-        s.avgProgress = Math.round((s.avgProgress + e.progressPercent) / s.programs.length);
+        s.progressTotal += e.progressPercent;
+        s.programCount += 1;
+        s.avgProgress = Math.round(s.progressTotal / s.programCount);
       }
     });
   });
 
-  const studentIds = Array.from(studentMap.keys());
+  const normalizedQuery = query.toLocaleLowerCase("id-ID");
+  const visibleStudents = Array.from(studentMap.values()).filter(student => {
+    if (!normalizedQuery) return true;
+    return [
+      student.name,
+      student.email,
+      ...student.programs
+    ].some(value => value.toLocaleLowerCase("id-ID").includes(normalizedQuery));
+  });
+
+  const studentIds = visibleStudents.map(student => student.id);
   if (studentIds.length > 0) {
-    const lastActivities = await prisma.activityLog.findMany({
-      where: { userId: { in: studentIds } },
-      orderBy: { createdAt: "desc" },
-      distinct: ["userId"],
-      select: { userId: true, createdAt: true }
+    const xpStats = await prisma.xPLog.groupBy({
+      by: ["userId"],
+      where: {
+        userId: { in: studentIds },
+        sourceId: { in: mentorXpSourceIds(mentorScope) },
+      },
+      _sum: { points: true },
+      _max: { createdAt: true },
     });
-    lastActivities.forEach(a => {
-      const s = studentMap.get(a.userId);
-      if (s) s.lastActiveAt = a.createdAt;
+    const candidateActivityLogs = await prisma.activityLog.findMany({
+      where: buildMentorActivityWhere(mentorScope, studentIds),
+      select: {
+        userId: true,
+        metadata: true,
+        createdAt: true,
+      },
+    });
+
+    const applyLastActivity = (studentId: string, candidate: Date | null) => {
+      if (!candidate) return;
+      const student = studentMap.get(studentId);
+      if (student && (!student.lastActiveAt || candidate > student.lastActiveAt)) {
+        student.lastActiveAt = candidate;
+      }
+    };
+
+    xpStats.forEach(stat => {
+      const student = studentMap.get(stat.userId);
+      if (student) student.totalXp = stat._sum.points ?? 0;
+      applyLastActivity(stat.userId, stat._max.createdAt);
+    });
+    candidateActivityLogs.forEach(log => {
+      if (activityMetadataBelongsToMentorScope(log.metadata, mentorScope)) {
+        applyLastActivity(log.userId, log.createdAt);
+      }
     });
   }
 
-  const students = Array.from(studentMap.values()).sort((a, b) => b.totalXp - a.totalXp);
+  const students = visibleStudents.sort((a, b) => b.totalXp - a.totalXp);
 
   return (
     <DashboardChrome user={user}>
@@ -85,14 +155,26 @@ export default async function MentorPesertaPage() {
       <div className="data-card mt-8">
         <div className="data-title border-b border-slate-200 pb-4 mb-4 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h2>Daftar Peserta Kelas ({students.length})</h2>
+            <h2>
+              Daftar Peserta Kelas ({students.length}
+              {query ? ` dari ${studentMap.size}` : ""})
+            </h2>
           </div>
-          <div className="flex gap-2">
+          <form method="get" className="flex gap-2 items-center">
             <div className="search-box">
               <Search size={16} />
-              <input type="text" placeholder="Cari nama atau email..." />
+              <label htmlFor="participant-search" className="sr-only">Cari peserta</label>
+              <input
+                id="participant-search"
+                name="q"
+                type="search"
+                defaultValue={query}
+                placeholder="Cari nama atau email..."
+              />
             </div>
-          </div>
+            <button type="submit" className="btn btn-primary btn-small">Cari</button>
+            {query && <Link href="/dashboard/peserta" className="btn btn-outline btn-small">Hapus</Link>}
+          </form>
         </div>
 
         <div className="table-responsive">
@@ -110,7 +192,9 @@ export default async function MentorPesertaPage() {
             <tbody>
               {students.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center p-8 text-muted">Belum ada peserta yang mendaftar.</td>
+                  <td colSpan={6} className="text-center p-8 text-muted">
+                    {query ? "Tidak ada peserta yang cocok dengan pencarian." : "Belum ada peserta yang mendaftar."}
+                  </td>
                 </tr>
               ) : students.map(s => (
                 <tr key={s.id}>
@@ -139,12 +223,12 @@ export default async function MentorPesertaPage() {
                     </span>
                   </td>
                   <td>
-                    <span className="flex items-center gap-1 text-emerald-500 text-sm">
+                    <span className={`flex items-center gap-1 text-sm ${s.lastActiveAt ? "text-emerald-600" : "text-slate-500"}`}>
                       <Activity size={14} /> {formatRelativeTime(s.lastActiveAt)}
                     </span>
                   </td>
                   <td>
-                    <Link href={`/dashboard/evaluasi?userId=${s.id}`} className="btn btn-outline btn-small">
+                    <Link href={`/mentor/evaluasi?userId=${encodeURIComponent(s.id)}`} className="btn btn-outline btn-small">
                       Lihat Evaluasi
                     </Link>
                   </td>

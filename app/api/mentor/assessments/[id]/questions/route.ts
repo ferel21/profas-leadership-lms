@@ -6,6 +6,18 @@ import { QuestionType } from '@prisma/client';
 
 const questionsLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
+function normalizeChoiceAnswer(value: unknown, options: string[]) {
+  const answer = typeof value === 'number'
+    ? String(value)
+    : typeof value === 'string'
+      ? value.trim()
+      : '';
+
+  if (!/^(0|[1-9]\d*)$/.test(answer)) return null;
+  const index = Number(answer);
+  return Number.isSafeInteger(index) && index < options.length ? String(index) : null;
+}
+
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const ipCheck = questionsLimiter.check(req);
   if (!ipCheck.success) {
@@ -36,19 +48,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     const cleanExplanation = typeof explanation === 'string' ? explanation.replace(/<[^>]*>?/gm, "").trim().slice(0, 1000) : null;
-    const cleanCorrectAnswer = typeof correctAnswer === 'string' ? correctAnswer.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) : null;
+    let cleanCorrectAnswer = typeof correctAnswer === 'string' ? correctAnswer.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) || null : null;
     const safePoints = typeof points === 'number' && !isNaN(points) && points >= 1 && points <= 100 ? Math.round(points) : 10;
     const cleanOptions = Array.isArray(options)
-      ? options.slice(0, 10).map((opt: unknown) => typeof opt === 'string' ? opt.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) : "").filter(Boolean)
+      ? options.slice(0, 10).map((opt: unknown) => typeof opt === 'string' ? opt.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) : "")
       : null;
 
     const qType = typeof type === 'string' && Object.values(QuestionType).includes(type as QuestionType) ? (type as QuestionType) : QuestionType.MULTIPLE_CHOICE;
-    if (qType === QuestionType.MULTIPLE_CHOICE) {
-      if (!cleanOptions || cleanOptions.length < 2) {
+    if (qType === QuestionType.MULTIPLE_CHOICE || qType === QuestionType.TRUE_FALSE) {
+      if (!cleanOptions || cleanOptions.length < 2 || cleanOptions.some(option => !option)) {
         return NextResponse.json({ error: 'Soal pilihan ganda harus memiliki minimal 2 pilihan jawaban yang tidak kosong.' }, { status: 400 });
       }
-      if (!cleanCorrectAnswer || !cleanOptions.includes(cleanCorrectAnswer)) {
-        return NextResponse.json({ error: 'Jawaban yang benar harus dipilih dan cocok dengan salah satu pilihan jawaban.' }, { status: 400 });
+      cleanCorrectAnswer = normalizeChoiceAnswer(correctAnswer, cleanOptions);
+      if (cleanCorrectAnswer === null) {
+        return NextResponse.json({ error: 'Jawaban yang benar harus berupa indeks pilihan yang valid.' }, { status: 400 });
       }
     }
 

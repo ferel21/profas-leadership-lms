@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Pengecekan sesi untuk rute yang membutuhkan autentikasi
-  const protectedRoutes = ["/dashboard", "/mentor", "/pengaturan", "/riwayat", "/peringkat", "/forum", "/kalender", "/evaluasi", "/kuis"];
+  const protectedRoutes = ["/dashboard", "/mentor", "/pengaturan", "/riwayat", "/peringkat", "/forum", "/kalender", "/absensi", "/belajar", "/evaluasi", "/kuis"];
   const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
 
   if (isProtected) {

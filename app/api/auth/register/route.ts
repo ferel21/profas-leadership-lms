@@ -25,8 +25,11 @@ export async function POST(request: Request) {
     const input = schema.parse(await request.json());
     const duplicate = await prisma.user.findFirst({ where: { OR: [{ email: input.email }, { username: input.username }] }, select: { email: true, username: true } });
     if (duplicate) return NextResponse.json({ message: duplicate.email === input.email ? "Email sudah terdaftar." : "Nama akun sudah digunakan." }, { status: 409 });
+    // Password hashing is intentionally completed before opening a database
+    // transaction so a CPU-bound bcrypt operation never holds a pool slot.
+    const passwordHash = await bcrypt.hash(input.password, 10);
     const user = await prisma.$transaction(async (tx) => {
-      const createdUser = await tx.user.create({ data: { name: input.name, username: input.username, email: input.email, passwordHash: await bcrypt.hash(input.password, 10), persona: input.persona, role: "STUDENT" } });
+      const createdUser = await tx.user.create({ data: { name: input.name, username: input.username, email: input.email, passwordHash, persona: input.persona, role: "STUDENT" } });
       await tx.activityLog.create({
         data: {
           userId: createdUser.id,
@@ -37,7 +40,7 @@ export async function POST(request: Request) {
       return createdUser;
     });
     
-    const token = await createToken({ userId: user.id, role: user.role, email: user.email, name: user.name, avatar: user.avatar || undefined, authProvider: "LOCAL" });
+    const token = await createToken({ userId: user.id, role: user.role });
     
     const response = NextResponse.json({ user: { id: user.id, name: user.name, role: user.role } }, { status: 201 });
     response.cookies.set("profas_session", token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 604800, path: "/" });

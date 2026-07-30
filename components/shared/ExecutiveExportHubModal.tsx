@@ -94,21 +94,26 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
   // 2. Handle Transcript PDF (.pdf)
   const handleExportPdf = async () => {
     if (!data) return;
+    if (data.role !== "STUDENT") {
+      alert("Transkrip akademik pribadi hanya tersedia saat masuk sebagai peserta. Gunakan laporan Excel untuk rekap staf.");
+      return;
+    }
     setDownloadingPdf(true);
     setSuccessPdf(false);
     try {
-      const studentName = data.studentName || (data.students?.[0]?.name) || "Peserta Kepemimpinan Eksekutif";
-      const studentEmail = data.studentEmail || (data.students?.[0]?.email) || "peserta@profas.id";
-      const organization = data.organization || "PROFAS Institute Network";
+      const studentName = data.studentName;
+      const studentEmail = data.studentEmail;
+      if (!studentName || !studentEmail) throw new Error("Identitas peserta belum tersedia.");
+      const organization = data.organization || "";
       const role = data.role || initialRole;
-      const totalXP = data.totalXP || (data.students?.[0]?.totalXP) || 1250;
-      const badgesCount = data.badgesCount || 3;
+      const totalXP = Number(data.totalXP) || 0;
+      const badgesCount = Number(data.badgesCount) || 0;
       const courses = (data.courses || []).map((c: any) => ({
-        title: c.title || "Program Kepemimpinan",
-        category: c.category || "Executive Leadership",
-        level: c.level || "ADVANCED",
-        progressPercent: c.progressPercent !== undefined ? c.progressPercent : 100,
-        status: c.status || "COMPLETED"
+        title: c.title,
+        category: c.category,
+        level: c.level,
+        progressPercent: Number(c.progressPercent) || 0,
+        status: c.status,
       }));
 
       const { generateAcademicTranscriptPDF } = await import("@/services/export/pdfTranscriptGenerator");
@@ -141,13 +146,16 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
     setSuccessPptx(false);
     try {
       const course = data.courses[selectedCourseIndex] || data.courses[0];
+      if (!course.title || !course.category || !course.level || !course.mentorName) {
+        throw new Error("Data program belum lengkap untuk membuat slide deck.");
+      }
       const { generateExecutiveSlideDeck } = await import("@/services/export/pptxGenerator");
       generateExecutiveSlideDeck({
-        courseTitle: course.title || "Strategic Leadership Architecture",
-        category: course.category || "Executive Management",
-        level: course.level || "ADVANCED",
-        mentorName: course.mentorName || "Dr. H. Hendra Syahputra, M.M.",
-        durationHours: course.durationHours || 24,
+        courseTitle: course.title,
+        category: course.category,
+        level: course.level,
+        mentorName: course.mentorName,
+        durationHours: Number(course.durationHours) || 0,
         modules: (course.modules || []).map((m: any) => ({
           title: m.title,
           type: m.type,
@@ -176,13 +184,16 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
     setSuccessDocx(false);
     try {
       const course = data.courses[selectedCourseIndex] || data.courses[0];
+      if (!course.title || !course.category || !course.level || !course.mentorName) {
+        throw new Error("Data program belum lengkap untuk membuat silabus.");
+      }
       const { generateSyllabusDocx } = await import("@/services/export/docxExport");
       await generateSyllabusDocx({
-        courseTitle: course.title || "Executive Leadership Academy",
-        category: course.category || "Strategic Leadership",
-        level: course.level || "ADVANCED",
-        mentorName: course.mentorName || "Dr. H. Hendra Syahputra, M.M.",
-        durationHours: course.durationHours || 24,
+        courseTitle: course.title,
+        category: course.category,
+        level: course.level,
+        mentorName: course.mentorName,
+        durationHours: Number(course.durationHours) || 0,
         // generateSyllabusDocx expects SyllabusModule ({title, duration,
         // description, keyTakeaways}). This previously emitted
         // {title, type, durationMin}, so docxExport crashed on
@@ -190,12 +201,12 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
         // TypeScript could not catch it because `course` comes from an
         // untyped fetch, so `any` propagated through the map.
         modules: (course.modules || []).map((m: any) => ({
-          title: m.title ?? "Modul",
+          title: m.title ?? "",
           duration: m.durationMin ? `${m.durationMin} menit` : "—",
           description: m.description ?? "",
           keyTakeaways: Array.isArray(m.keyTakeaways) ? m.keyTakeaways : [],
         })),
-        userNotes: `Catatan Eksekutif: Kurikulum ini telah disesuaikan untuk implementasi praktis di lingkungan kepemimpinan strategis PROFAS Institute.`
+        userNotes: "Silabus ini diekspor dari data kurikulum yang tersimpan di LMS PROFAS."
       });
       setSuccessDocx(true);
       setTimeout(() => setSuccessDocx(false), 3000);
@@ -219,9 +230,6 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
             <div>
               <h2 className="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
                 Pusat Ekspor & Pelaporan Lengkap
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 font-semibold border border-teal-500/30">
-                  Antigravity Skills Powered
-                </span>
               </h2>
               <p className="text-xs text-slate-400">
                 Ekspor data analitik, transkrip, slide presentasi, dan silabus dalam format Excel, PDF, PPTX, dan DOCX.
@@ -360,13 +368,15 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                       Transkrip Akademik Resmi (.pdf)
                     </h3>
                     <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                      Dokumen PDF berstandar A4 dengan stempel verifikasi resmi PROFAS, merangkum seluruh portofolio kelas, badge, dan akreditasi kepemimpinan.
+                      {data.role === "STUDENT"
+                        ? "Dokumen PDF A4 yang merangkum program, progres, badge, dan XP peserta berdasarkan data tersimpan."
+                        : "Transkrip pribadi tersedia untuk akun Peserta. Staf dapat memakai laporan Excel untuk rekap lintas peserta."}
                     </p>
                   </div>
 
                   <button
                     onClick={handleExportPdf}
-                    disabled={downloadingPdf}
+                    disabled={downloadingPdf || data.role !== "STUDENT"}
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successPdf
                         ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
@@ -380,7 +390,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     ) : (
                       <Download className="w-4 h-4" />
                     )}
-                    <span>{successPdf ? "Transkrip Terunduh!" : "Unduh Transkrip Akademik (.pdf)"}</span>
+                    <span>{data.role !== "STUDENT" ? "Khusus akun Peserta" : successPdf ? "Transkrip Terunduh!" : "Unduh Transkrip Akademik (.pdf)"}</span>
                   </button>
                 </div>
 
@@ -470,7 +480,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     <BarChart3 className="w-4 h-4 text-teal-400" /> Preview Metrik Sistem yang Siap Diekspor
                   </h4>
                   <span className="text-[11px] text-slate-400 font-mono">
-                    {data.courses?.length || 0} Program • {data.students?.length || 1} Entitas Data
+                    {data.courses?.length || 0} Program • {data.students?.length || 0} Baris Peserta
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -479,16 +489,16 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     <span className="text-base font-extrabold text-teal-400">{data.courses?.length || 0}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-                    <span className="text-[10px] text-slate-400 font-medium block">Akreditasi System</span>
-                    <span className="text-base font-extrabold text-emerald-400">100% Verified</span>
+                    <span className="text-[10px] text-slate-400 font-medium block">Catatan Absensi</span>
+                    <span className="text-base font-extrabold text-emerald-400">{data.attendances?.length || 0}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
                     <span className="text-[10px] text-slate-400 font-medium block">Format Tersedia</span>
                     <span className="text-base font-extrabold text-purple-400">4 Engine</span>
                   </div>
                   <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-                    <span className="text-[10px] text-slate-400 font-medium block">Kesiapan Vercel</span>
-                    <span className="text-base font-extrabold text-blue-400">Serverless OK</span>
+                    <span className="text-[10px] text-slate-400 font-medium block">Rekap XP</span>
+                    <span className="text-base font-extrabold text-blue-400">{data.xpLogs?.length || 0}</span>
                   </div>
                 </div>
               </div>
@@ -500,7 +510,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
         <div className="px-6 py-4 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between">
           <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5 text-teal-400" />
-            Semua file diekspor lokal di sisi klien/server tanpa batas ukuran eksternal.
+            File dibuat dari data terbaru yang tersedia untuk hak akses akun ini.
           </span>
           <button
             onClick={onClose}

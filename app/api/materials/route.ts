@@ -5,6 +5,7 @@ import { prisma } from "@/services/prisma";
 import { unlink } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { getReadableUploadRoots, resolveUploadPath, uploadSegmentsFromUrl } from "@/services/upload-storage";
+import { deleteStoredObject, getObjectStorageMode } from "@/services/object-storage";
 import { rateLimit } from "@/services/rate-limit";
 
 const deleteLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
@@ -77,6 +78,25 @@ export async function DELETE(request: Request) {
   });
   if (!material) return NextResponse.json({ message: "Materi tidak ditemukan." }, { status: 404 });
 
+  const segments = material.type !== "LINK" && material.fileUrl
+    ? uploadSegmentsFromUrl(material.fileUrl)
+    : null;
+  const durableObjectPath = segments?.[0] === "materials" ? segments.join("/") : null;
+  if (durableObjectPath) {
+    const storage = getObjectStorageMode();
+    if (storage.mode === "unavailable") {
+      return NextResponse.json({ message: storage.message }, { status: 503 });
+    }
+    if (storage.mode === "supabase") {
+      try {
+        await deleteStoredObject(durableObjectPath);
+      } catch (error) {
+        console.error("[MATERIAL_OBJECT_DELETE_ERROR]", error);
+        return NextResponse.json({ message: "Berkas materi belum dapat dihapus dari penyimpanan." }, { status: 503 });
+      }
+    }
+  }
+
   await prisma.$transaction(async (tx) => {
     await tx.courseNode.delete({ where: { id } });
     await tx.activityLog.create({
@@ -89,7 +109,6 @@ export async function DELETE(request: Request) {
   });
 
   if (material.type !== "LINK" && material.fileUrl) {
-    const segments = uploadSegmentsFromUrl(material.fileUrl);
     if (segments) {
       for (const root of getReadableUploadRoots()) {
         try {

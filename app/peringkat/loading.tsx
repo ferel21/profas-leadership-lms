@@ -1,8 +1,6 @@
-import { DashboardChrome } from "@/components/ui/DashboardChrome";
-
 export default function PeringkatLoading() {
   return (
-    <DashboardChrome user={{ name: "Loading...", email: "", role: "STUDENT" }}>
+    <main className="loader-container min-h-screen bg-slate-50 p-6" aria-busy="true" aria-label="Memuat papan peringkat">
       <div className="loader-container">
         <div className="spinner-modern" />
         <div className="skeleton-grid mt-4">
@@ -16,6 +14,6 @@ export default function PeringkatLoading() {
           </div>
         </div>
       </div>
-    </DashboardChrome>
+    </main>
   );
 }

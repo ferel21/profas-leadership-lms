@@ -12,12 +12,8 @@ if (secretString.length < 32) {
 
 const secret = new TextEncoder().encode(secretString);
 
-export type SessionPayload = {
+type SessionPayload = {
   userId: string;
-  email?: string;
-  name?: string;
-  avatar?: string;
-  authProvider?: string;
   role: "STUDENT" | "MENTOR" | "SUPER_ADMIN";
 };
 
@@ -29,7 +25,7 @@ export async function createToken(payload: SessionPayload) {
     .sign(secret);
 }
 
-export const getSession = cache(async () => {
+const getSession = cache(async () => {
   const store = await cookies();
   const token = store.get("profas_session")?.value;
   if (!token) return null;
@@ -47,7 +43,24 @@ export const getCurrentUser = cache(async () => {
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: session.userId }
+      where: { id: session.userId },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        email: true,
+        authProvider: true,
+        role: true,
+        persona: true,
+        avatar: true,
+        headline: true,
+        phone: true,
+        bio: true,
+        organization: true,
+        location: true,
+        createdAt: true,
+        updatedAt: true,
+      }
     });
 
     // User yang sudah dihapus/nonaktif tidak boleh dibuat kembali hanya karena

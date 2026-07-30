@@ -20,11 +20,25 @@ const forumSchema = z.object({
 });
 
 export async function GET(request: Request) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { searchParams } = new URL(request.url);
   const categoryId = searchParams.get("categoryId");
+  const query = searchParams.get("q")?.trim().slice(0, 120) ?? "";
 
   try {
-    const where = categoryId ? { categoryId } : {};
+    const where = {
+      ...(categoryId ? { categoryId } : {}),
+      ...(query
+        ? {
+            OR: [
+              { title: { contains: query, mode: "insensitive" as const } },
+              { content: { contains: query, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    };
     
     const [categories, threads] = await Promise.all([
       prisma.forumCategory.findMany({ orderBy: { order: "asc" } }),
@@ -73,6 +87,14 @@ export async function POST(request: Request) {
     }
 
     const thread = await prisma.$transaction(async (tx) => {
+      const category = await tx.forumCategory.findUnique({
+        where: { id: categoryId },
+        select: { id: true },
+      });
+      if (!category) {
+        throw new Error("FORUM_CATEGORY_NOT_FOUND");
+      }
+
       const created = await tx.forumThread.create({
         data: {
           title,
@@ -96,6 +118,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json(thread);
   } catch (error) {
+    if (error instanceof Error && error.message === "FORUM_CATEGORY_NOT_FOUND") {
+      return NextResponse.json({ error: "Kategori diskusi tidak ditemukan." }, { status: 400 });
+    }
     console.error("[FORUM_POST_ERROR]", error);
     return NextResponse.json({ error: "Failed to create thread" }, { status: 500 });
   }

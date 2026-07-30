@@ -6,7 +6,6 @@ import { WebVitalsReporter } from "@/components/ui/WebVitalsReporter";
 import "@/styles/typography.css";
 import "@/styles/design-system.css";
 import "@/styles/lms-fresh.css";
-import "@/styles/pro-lms.css";
 import "@/styles/master.css";
 import "@/styles/profas-reframe.css";
 

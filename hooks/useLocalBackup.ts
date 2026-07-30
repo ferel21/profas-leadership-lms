@@ -10,7 +10,7 @@ interface UseLocalBackupOptions {
 /**
  * Auto-backs up an array of edits to localStorage and restores it on mount
  * when a non-empty backup exists. Used by the course/quiz builders to survive
- * ephemeral database resets (serverless SQLite) while a mentor is mid-edit.
+ * transient network/database interruptions while a mentor is mid-edit.
  */
 export function useLocalBackup<T>(key: string, initial: T[], options: UseLocalBackupOptions = {}) {
   const { persistWhenEmpty = true } = options;

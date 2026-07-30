@@ -14,7 +14,7 @@ Docker Compose: profas-lms
     `-- DATABASE_URL / DIRECT_URL -> database existing
 ```
 
-Tidak ada service PostgreSQL di `docker-compose.yml`. Deploy tidak menjalankan `prisma db push`, `prisma migrate`, `npm run setup`, atau `npm run db:seed`.
+Tidak ada service PostgreSQL di `docker-compose.yml`. Deploy tidak menjalankan `prisma db push`, `prisma migrate`, atau `npm run db:seed`.
 
 ## 1. Persiapan VPS
 
@@ -48,7 +48,6 @@ NODE_ENV=production
 DATABASE_URL="postgresql://...existing-database..."
 DIRECT_URL="postgresql://...existing-database..."
 JWT_SECRET="hasil-openssl-rand-minimal-32-karakter"
-NEXTAUTH_URL="https://lms.example.com"
 NEXT_PUBLIC_APP_URL="https://lms.example.com"
 PRIVATE_UPLOAD_DIR="/app/.data/uploads"
 HEALTHCHECK_TOKEN="hasil-openssl-rand-minimal-32-karakter"
@@ -61,7 +60,7 @@ Generate secret tanpa menuliskannya ke shell history:
 openssl rand -base64 48
 ```
 
-`GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` harus diisi berpasangan jika Google OAuth dipakai. `ANTHROPIC_API_KEY` tetap opsional karena aplikasi memiliki fallback tutor lokal.
+`GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` harus diisi berpasangan jika Google OAuth dipakai. Konfigurasi `PHI3_*` atau `OPENAI_*` tetap opsional karena aplikasi memiliki fallback tutor lokal. VPS memakai volume private secara default; untuk memakai Supabase Storage, set `SUPABASE_STORAGE_ENABLED=true`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, dan bucket opsional `SUPABASE_STORAGE_BUCKET`.
 
 ## 3. Deploy pertama atau deploy manual
 
@@ -98,7 +97,9 @@ HTTPS termination berada di Nginx. Header `X-Forwarded-Proto: https` diteruskan 
 
 ## 5. CI/CD GitHub Actions
 
-Template workflow [`vps-deploy.workflow.yml`](../deploy/vps/vps-deploy.workflow.yml) menjalankan quality gate (`validate:env`, typecheck, lint, build, performance budget, smoke test) pada setiap PR ke `main` maupun push ke `main`; SSH deploy ke VPS hanya berjalan setelah push ke `main` lulus quality gate. Salin template ini ke `.github/workflows/vps-deploy.yml` setelah GitHub token/repository memiliki permission `workflow`. Ini adalah satu-satunya workflow deploy VPS di repo ini — sebelumnya ada duplikat di `deploy/ci/production.workflow.yml`, yang sudah dihapus karena workflow ini lebih defensif (validasi secret sebelum SSH, `StrictHostKeyChecking` eksplisit, tanpa action SSH pihak ketiga, dan verifikasi release SHA di VPS target).
+Workflow canonical [`.github/workflows/quality.yml`](../.github/workflows/quality.yml) menjalankan typecheck, lint, dan duplicate-code gate pada pull request. Deployment VPS berada di [`.github/workflows/vps-deploy.yml`](../.github/workflows/vps-deploy.yml) dan sengaja **manual-only** melalui `workflow_dispatch`; push ke `main` tidak lagi memicu SSH deploy otomatis.
+
+Saat operator berwenang menjalankan workflow VPS secara manual, job terlebih dahulu menjalankan validasi environment, typecheck, lint, build, performance budget, dan smoke test. Deploy SSH baru berjalan jika seluruh quality gate lulus. Workflow memakai `StrictHostKeyChecking`, memvalidasi secret sebelum koneksi, tidak memakai action SSH pihak ketiga, dan memverifikasi release SHA di target.
 
 Buat GitHub Environment bernama `production`, lalu tambahkan secrets:
 

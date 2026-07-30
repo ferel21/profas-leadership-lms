@@ -85,6 +85,10 @@ const ITEM_SELECTORS = [
   ".pf-route-list > li",
   ".pf-role-grid > article",
   ".pf-course-grid > *",
+  ".pf-home-stats > *",
+  ".pf-home-benefit-grid > *",
+  ".pf-home-method-grid > *",
+  ".pf-home-role-grid > *",
   ".pf-faq-list > details",
   ".pf-footer .footer-grid > div",
   // Dashboard cards, rows, and common controls

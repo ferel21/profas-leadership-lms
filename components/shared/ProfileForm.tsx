@@ -24,6 +24,7 @@ type ProfileUser = ProfileData & {
   id: string;
   role: string;
   avatar: string | null;
+  authProvider: string;
 };
 
 type FieldErrors = Partial<Record<keyof ProfileData, string[]>>;
@@ -60,6 +61,7 @@ export function ProfileForm({ user }: { user: ProfileUser }) {
 
   const avatarSrc = preview ?? avatar;
   const roleLabel = roleLabels[user.role] ?? user.role;
+  const isGoogleAccount = user.authProvider.toUpperCase() === "GOOGLE";
   const completeness = useMemo(() => {
     const values = [form.name, form.username, form.email, form.phone, form.headline, form.bio, form.organization, form.location];
     return Math.round((values.filter(Boolean).length / values.length) * 100);
@@ -77,8 +79,8 @@ export function ProfileForm({ user }: { user: ProfileUser }) {
       setNotice({ type: "error", text: "Foto harus berformat JPG, PNG, atau WebP." });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setNotice({ type: "error", text: "Ukuran foto maksimal 5MB." });
+    if (file.size > 2 * 1024 * 1024) {
+      setNotice({ type: "error", text: "Ukuran foto maksimal 2MB." });
       return;
     }
     if (preview) URL.revokeObjectURL(preview);
@@ -181,7 +183,7 @@ export function ProfileForm({ user }: { user: ProfileUser }) {
         {notice && <div className={`profile-notice ${notice.type}`} role="status">{notice.type === "success" ? <CheckCircle2 /> : <XCircle />}<span>{notice.text}</span></div>}
 
         <div className="avatar-upload-row">
-          <div><b>Foto profil</b><p>JPG, PNG, atau WebP. Ukuran maksimal 5MB.</p></div>
+          <div><b>Foto profil</b><p>JPG, PNG, atau WebP. Ukuran maksimal 2MB.</p></div>
           <input ref={fileRef} type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" onChange={event => chooseAvatar(event.target.files?.[0])} hidden />
           <button type="button" className="btn btn-outline btn-small" onClick={() => fileRef.current?.click()} disabled={!editing || saving}><Camera /> {avatarFile ? "Ganti foto" : "Upload foto"}</button>
         </div>
@@ -193,8 +195,22 @@ export function ProfileForm({ user }: { user: ProfileUser }) {
           <Field icon={<AtSign />} label="Nama akun" hint="Huruf kecil, angka, titik, _ atau -" error={errors.username?.[0]}>
             <div className="input-prefix"><span>@</span><input value={form.username} onChange={e => update("username", e.target.value.toLowerCase().replace(/\s/g, ""))} minLength={3} maxLength={30} disabled={!editing || saving} required /></div>
           </Field>
-          <Field icon={<Mail />} label="Email" error={errors.email?.[0]}>
-            <input type="email" value={form.email} onChange={e => update("email", e.target.value)} maxLength={120} disabled={!editing || saving} required />
+          <Field
+            icon={<Mail />}
+            label="Email"
+            hint={isGoogleAccount ? "Dikelola oleh Google" : undefined}
+            error={errors.email?.[0]}
+          >
+            <input
+              type="email"
+              value={form.email}
+              onChange={e => update("email", e.target.value)}
+              maxLength={120}
+              disabled={!editing || saving || isGoogleAccount}
+              aria-describedby={isGoogleAccount ? "google-email-note" : undefined}
+              required
+            />
+            {isGoogleAccount && <small id="google-email-note">Email akun Google tidak dapat diubah dari LMS.</small>}
           </Field>
           <Field icon={<Phone />} label="Nomor telepon" hint="Contoh: +6281234567890" error={errors.phone?.[0]}>
             <input type="tel" value={form.phone} onChange={e => update("phone", e.target.value)} maxLength={20} disabled={!editing || saving} placeholder="+6281234567890" />

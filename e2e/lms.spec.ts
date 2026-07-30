@@ -3,6 +3,8 @@ import AxeBuilder from "@axe-core/playwright";
 
 const learnerEmail = process.env.E2E_TEST_EMAIL || "peserta@profas.id";
 const learnerPassword = process.env.E2E_TEST_PASSWORD || "profas123";
+const mentorEmail = process.env.E2E_MENTOR_EMAIL || "mentor@profas.id";
+const adminEmail = process.env.E2E_ADMIN_EMAIL || "admin@profas.id";
 const coursePath = "/belajar/fondasi-kepemimpinan-berdampak";
 
 async function waitForApp(page: import("@playwright/test").Page) {
@@ -18,14 +20,18 @@ async function waitForLeafAnimations(page: import("@playwright/test").Page) {
   );
 }
 
-async function loginAsLearner(page: import("@playwright/test").Page) {
+async function loginAs(page: import("@playwright/test").Page, email: string, password = learnerPassword) {
   await page.goto("/masuk");
-  await page.locator('input[name="email"]').fill(learnerEmail);
-  await page.locator('input[name="password"]').fill(learnerPassword);
+  await page.locator('input[name="email"]').fill(email);
+  await page.locator('input[name="password"]').fill(password);
   await page.getByRole("button", { name: /masuk ke dashboard/i }).click();
   await page.waitForURL("**/dashboard", { timeout: 20_000 });
   await waitForApp(page);
   await expect(page.locator(".dashboard-layout")).toBeVisible({ timeout: 20_000 });
+}
+
+async function loginAsLearner(page: import("@playwright/test").Page) {
+  await loginAs(page, learnerEmail);
 }
 
 test.describe("public performance and accessibility", () => {
@@ -76,7 +82,9 @@ test.describe("learner journey", () => {
 
     const sidebar = page.getByRole("complementary", { name: /navigasi utama ruang belajar/i });
     await expect(sidebar.getByRole("link", { name: "Ringkasan" })).toBeVisible();
-    await expect(sidebar.getByRole("link")).toHaveCount(5);
+    await expect(sidebar.getByRole("link", { name: "Absensi" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Peringkat" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Pengaturan" })).toBeVisible();
     await expect(sidebar.getByRole("link", { name: "Program Saya" })).toHaveCount(0);
     await expect(sidebar.getByRole("link", { name: "Sertifikat" })).toHaveCount(0);
     await expect(sidebar.locator(".logo")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
@@ -114,5 +122,48 @@ test.describe("learner journey", () => {
     await expect(firstLesson).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page.getByRole("tab", { name: /materi/i })).toHaveAttribute("aria-selected", "true");
+  });
+});
+
+test.describe("mentor and admin workspaces", () => {
+  test("mentor keeps grading, participants, attendance, ranking, and calendar available", async ({ page }) => {
+    await loginAs(page, mentorEmail);
+    await expect(page.locator(".pf-mentor-dashboard")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /evaluasi|semua evaluasi/i }).first()).toBeVisible();
+
+    const sidebar = page.getByRole("complementary", { name: /navigasi utama ruang belajar/i });
+    for (const label of ["Manajemen Peserta", "Evaluasi", "Kalender", "Absensi", "Analitik", "Peringkat", "Komunitas"]) {
+      await expect(sidebar.getByRole("link", { name: label })).toHaveCount(1);
+    }
+
+    await page.goto("/mentor/evaluasi");
+    await waitForApp(page);
+    await expect(page.getByRole("heading", { name: "Riwayat Evaluasi" })).toBeVisible();
+    await expect(page.getByRole("searchbox", { name: "Cari evaluasi" })).toBeVisible();
+    await expect(page.getByLabel("Filter status")).toBeVisible();
+
+    await page.goto("/kalender");
+    await waitForApp(page);
+    await expect(page.getByRole("button", { name: /tambah jadwal/i })).toBeVisible();
+  });
+
+  test("admin receives the same minimal shell and all platform controls", async ({ page }) => {
+    await loginAs(page, adminEmail);
+    await expect(page.locator(".pf-admin-dashboard")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Operasional LMS dalam satu ruang." })).toBeVisible();
+
+    const sidebar = page.getByRole("complementary", { name: /navigasi utama ruang belajar/i });
+    for (const label of ["Pengguna", "Program", "Siaran", "Kalender", "Absensi", "Analitik", "Peringkat", "Komunitas"]) {
+      await expect(sidebar.getByRole("link", { name: label })).toHaveCount(1);
+    }
+
+    await expect(page.locator("#program")).toBeAttached();
+    await expect(page.locator("#broadcast-mgmt")).toBeAttached();
+    await expect(page.locator("#admin-user-mgmt")).toBeAttached();
+    await expect(page.locator("#reports")).toBeAttached();
+
+    await page.goto("/kalender");
+    await waitForApp(page);
+    await expect(page.getByRole("button", { name: /tambah jadwal/i })).toBeVisible();
   });
 });

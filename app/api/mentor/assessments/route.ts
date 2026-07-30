@@ -75,9 +75,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(assessment, { status: 201 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Error creating assessment";
     console.error('Error creating assessment:', error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Gagal membuat evaluasi." }, { status: 500 });
   }
 }
 
@@ -116,7 +115,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(assessments);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Error fetching assessments";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Error fetching assessments:", error);
+    return NextResponse.json({ error: "Gagal mengambil daftar evaluasi." }, { status: 500 });
   }
 }

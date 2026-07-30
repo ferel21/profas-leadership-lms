@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, Save, XCircle, FileText, Download } from "lucide-react";
-import Link from "next/link";
+import { CheckCircle, Save, XCircle, Download } from "lucide-react";
 
 export function GradingClient({ attempt }: { attempt: any }) {
-  const [score, setScore] = useState(attempt.score || 0);
   const [feedback, setFeedback] = useState(attempt.feedback || "");
   const [saving, setSaving] = useState(false);
 
@@ -21,32 +19,38 @@ export function GradingClient({ attempt }: { attempt: any }) {
     setAnswersScores(prev => prev.map(a => a.questionId === questionId ? { ...a, [field]: value } : a));
   };
 
-  const calculateTotalScore = () => {
-    const maxScore = attempt.assessment.questions?.reduce((acc: number, q: any) => acc + (q.points || 10), 0) || 100;
-    const earned = answersScores.reduce((acc: number, a: any) => acc + (a.score || 0), 0);
-    const normalized = maxScore > 0 ? Math.round((earned / maxScore) * 100) : 0;
-    setScore(normalized);
-  };
+  const maxScore = attempt.assessment.questions.reduce((acc: number, q: any) => acc + q.points, 0);
+  const score = attempt.answers.length > 0 && maxScore > 0
+    ? Math.round((answersScores.reduce((acc: number, a: any) => acc + (Number(a.score) || 0), 0) / maxScore) * 100)
+    : Math.max(0, Math.min(100, Number(attempt.score) || 0));
+  const passingScore = attempt.assessment.passingScore;
+  const willPass = attempt.assessment.type === "PRETEST" || score >= passingScore;
 
-  const saveGrade = async (passed: boolean) => {
+  const saveGrade = async () => {
     setSaving(true);
     try {
       const res = await fetch(`/api/mentor/evaluations/${attempt.id}/grade`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ score, feedback, passed, answersScores })
+        body: JSON.stringify({ score, feedback, answersScores })
       });
-      if (res.ok) {
-        alert("Penilaian berhasil disimpan!");
-        window.location.href = "/mentor/evaluasi";
-      } else {
-        alert("Gagal menyimpan.");
+      const result = await res.json().catch(() => null);
+      if (!res.ok) {
+        alert(result?.error || "Gagal menyimpan penilaian.");
+        return;
       }
+      alert(`Penilaian berhasil disimpan. Status: ${result.passed ? "Lulus" : "Belum lulus"}.`);
+      window.location.href = "/mentor/evaluasi";
     } catch {
-      alert("Error.");
+      alert("Tidak dapat terhubung ke server. Silakan coba lagi.");
     } finally {
       setSaving(false);
     }
+  };
+
+  const clampQuestionScore = (questionId: string, rawValue: string, maxPoints: number) => {
+    const nextValue = Math.max(0, Math.min(maxPoints, Number.parseInt(rawValue, 10) || 0));
+    updateAnswerScore(questionId, "score", nextValue);
   };
 
   return (
@@ -57,9 +61,7 @@ export function GradingClient({ attempt }: { attempt: any }) {
             <h2 className="text-xl font-bold text-slate-900 m-0">Tinjauan Jawaban Peserta</h2>
             <p className="text-slate-500 text-sm mt-1 mb-0">Berikan skor per soal, dan isi feedback keseluruhan.</p>
           </div>
-          <button className="btn btn-outline btn-small" onClick={calculateTotalScore}>
-            Hitung Skor Otomatis
-          </button>
+          <span className="meta-badge">Skor otomatis: {score}</span>
         </div>
 
         {attempt.answers.map((ans: any, i: number) => {
@@ -93,7 +95,14 @@ export function GradingClient({ attempt }: { attempt: any }) {
               <div className="flex gap-4 items-center flex-wrap">
                 <div className="w-32">
                   <label className="form-label text-xs font-semibold">Beri Skor</label>
-                  <input type="number" max={q.points} min={0} className="form-input w-full" value={currentAns?.score || 0} onChange={(e) => updateAnswerScore(q.id, 'score', parseInt(e.target.value) || 0)} />
+                  <input
+                    type="number"
+                    max={q.points}
+                    min={0}
+                    className="form-input w-full"
+                    value={currentAns?.score || 0}
+                    onChange={(e) => clampQuestionScore(q.id, e.target.value, q.points)}
+                  />
                 </div>
                 <div className="flex-1 min-w-[200px]">
                   <label className="form-label text-xs font-semibold">Komentar / Feedback Spesifik (Opsional)</label>
@@ -111,7 +120,7 @@ export function GradingClient({ attempt }: { attempt: any }) {
         <div className="flex gap-4 mb-4 flex-wrap">
           <div className="w-36">
             <label className="form-label text-xs font-semibold">Nilai Akhir (0-100)</label>
-            <input type="number" className="form-input w-full text-2xl font-bold text-center text-primary" value={score} onChange={(e) => setScore(parseInt(e.target.value)||0)} />
+            <output className="form-input w-full text-2xl font-bold text-center text-primary block">{score}</output>
           </div>
           <div className="flex-1 min-w-[250px]">
             <label className="form-label text-xs font-semibold">Feedback Keseluruhan</label>
@@ -119,12 +128,21 @@ export function GradingClient({ attempt }: { attempt: any }) {
           </div>
         </div>
 
-        <div className="flex gap-4 justify-end mt-8 flex-wrap">
-          <button className="btn btn-outline text-red-600 border-red-600 hover:bg-red-50 flex items-center gap-2" onClick={() => saveGrade(false)} disabled={saving}>
-            <XCircle size={16}/> {saving ? "Loading..." : "Gagalkan"}
-          </button>
-          <button className="btn btn-primary flex items-center gap-2" onClick={() => saveGrade(true)} disabled={saving}>
-            <CheckCircle size={16}/> {saving ? "Loading..." : "Luluskan & Selesai"}
+        <div className={`rounded-xl border p-4 mt-6 flex gap-3 items-start ${willPass ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}>
+          {willPass ? <CheckCircle size={20} className="shrink-0 mt-0.5" /> : <XCircle size={20} className="shrink-0 mt-0.5" />}
+          <div>
+            <strong>{willPass ? "Akan dinyatakan lulus" : "Belum memenuhi nilai kelulusan"}</strong>
+            <p className="m-0 text-sm">
+              {attempt.assessment.type === "PRETEST"
+                ? "Pre-test selalu dicatat sebagai selesai setelah dinilai."
+                : `Keputusan mengikuti nilai minimum ${passingScore}.`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-end mt-8">
+          <button className="btn btn-primary flex items-center gap-2" onClick={saveGrade} disabled={saving}>
+            <Save size={16}/> {saving ? "Menyimpan..." : "Simpan Penilaian"}
           </button>
         </div>
       </div>

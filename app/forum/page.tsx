@@ -5,17 +5,31 @@ import Link from "next/link";
 import { formatDate, initials } from "@/utils";
 import { MessageSquare, Pin, Search, Plus } from "lucide-react";
 import { redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 
-export default async function ForumPage({ searchParams }: { searchParams: Promise<{ c?: string }> }) {
+export default async function ForumPage({ searchParams }: { searchParams: Promise<{ c?: string; q?: string }> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/masuk");
 
-  const { c: categoryId } = await searchParams;
+  const { c: categoryId, q } = await searchParams;
+  const searchQuery = q?.trim().slice(0, 120) ?? "";
+  const threadWhere: Prisma.ForumThreadWhereInput = {
+    ...(categoryId ? { categoryId } : {}),
+    ...(searchQuery
+      ? {
+          OR: [
+            { title: { contains: searchQuery, mode: "insensitive" } },
+            { content: { contains: searchQuery, mode: "insensitive" } },
+            { author: { is: { name: { contains: searchQuery, mode: "insensitive" } } } },
+          ],
+        }
+      : {}),
+  };
 
   const [categories, threads] = await Promise.all([
     prisma.forumCategory.findMany({ orderBy: { order: "asc" } }),
     prisma.forumThread.findMany({
-      where: categoryId ? { categoryId } : {},
+      where: threadWhere,
       orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
       include: {
         author: { select: { id: true, name: true, role: true } },
@@ -44,7 +58,7 @@ export default async function ForumPage({ searchParams }: { searchParams: Promis
             <h3 className="forum-cat-head">Kategori</h3>
             <div className="category-list forum-cat-list">
               <Link 
-                href="/forum" 
+                href={searchQuery ? `/forum?q=${encodeURIComponent(searchQuery)}` : "/forum"}
                 className={`category-item forum-cat-item ${!categoryId ? "active" : ""}`}
               >
                 Semua Diskusi
@@ -52,7 +66,7 @@ export default async function ForumPage({ searchParams }: { searchParams: Promis
               {categories.map(cat => (
                 <Link 
                   key={cat.id} 
-                  href={`/forum?c=${cat.id}`}
+                  href={`/forum?c=${encodeURIComponent(cat.id)}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`}
                   className={`category-item forum-cat-item ${categoryId === cat.id ? "active" : ""}`}
                 >
                   {cat.name}
@@ -66,17 +80,19 @@ export default async function ForumPage({ searchParams }: { searchParams: Promis
           <div className="data-card forum-card-p0">
             <div className="forum-card-head">
               <h2 className="forum-card-title">Utas Terbaru</h2>
-              <div className="search-box forum-search-box">
+              <form className="search-box forum-search-box" action="/forum" method="get" role="search">
                 <Search size={16} />
-                <input type="text" placeholder="Cari diskusi..." />
-              </div>
+                {categoryId && <input type="hidden" name="c" value={categoryId} />}
+                <input type="search" name="q" defaultValue={searchQuery} placeholder="Cari diskusi..." aria-label="Cari diskusi" />
+                <button type="submit" className="sr-only">Cari</button>
+              </form>
             </div>
 
             <div className="thread-list">
               {threads.length === 0 ? (
                 <div className="forum-empty-box">
                   <MessageSquare size={48} className="forum-empty-icon" />
-                  <p>Belum ada diskusi di kategori ini.</p>
+                  <p>{searchQuery ? `Tidak ada diskusi untuk “${searchQuery}”.` : "Belum ada diskusi di kategori ini."}</p>
                 </div>
               ) : (
                 threads.map(thread => (

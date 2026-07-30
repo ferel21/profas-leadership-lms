@@ -7,6 +7,47 @@ import { QuestionType } from '@prisma/client';
 
 const putLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
+type NormalizedQuestion = {
+  id: string | null;
+  type: QuestionType;
+  prompt: string;
+  options: string | null;
+  correctAnswer: string | null;
+  points: number;
+  explanation: string | null;
+  order: number;
+};
+
+function sanitizeOptions(value: unknown): string[] | null {
+  let parsed = value;
+  if (typeof value === 'string') {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return null;
+    }
+  }
+  if (!Array.isArray(parsed)) return null;
+
+  return parsed.slice(0, 10).map((option: unknown) => (
+    typeof option === 'string'
+      ? option.replace(/<[^>]*>?/gm, '').trim().slice(0, 300)
+      : ''
+  ));
+}
+
+function normalizeChoiceAnswer(value: unknown, options: string[]) {
+  const answer = typeof value === 'number'
+    ? String(value)
+    : typeof value === 'string'
+      ? value.trim()
+      : '';
+
+  if (!/^(0|[1-9]\d*)$/.test(answer)) return null;
+  const index = Number(answer);
+  return Number.isSafeInteger(index) && index < options.length ? String(index) : null;
+}
+
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const ipCheck = putLimiter.check(req);
   if (!ipCheck.success) {
@@ -26,110 +67,139 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const { questions } = body;
-    if (questions && Array.isArray(questions) && questions.length > 100) {
+    if (!Array.isArray(questions)) {
+      return NextResponse.json({ error: 'Daftar soal harus berupa array.' }, { status: 400 });
+    }
+    if (questions.length > 100) {
       return NextResponse.json({ error: 'Maksimal 100 soal per evaluasi.' }, { status: 400 });
     }
 
-    let assessment = await prisma.assessment.findUnique({
+    const normalizedQuestions: NormalizedQuestion[] = [];
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+      if (!question || typeof question !== 'object') {
+        return NextResponse.json({ error: `Soal nomor ${i + 1} tidak valid.` }, { status: 400 });
+      }
+      const suppliedId = typeof question.id === "string" ? question.id.trim() : "";
+      const id = suppliedId && !suppliedId.startsWith("temp_") ? suppliedId : null;
+
+      const prompt = typeof question.prompt === 'string'
+        ? question.prompt.replace(/<[^>]*>?/gm, '').trim().slice(0, 1000)
+        : '';
+      if (!prompt) {
+        return NextResponse.json({ error: `Pertanyaan soal nomor ${i + 1} wajib diisi.` }, { status: 400 });
+      }
+
+      const type = typeof question.type === 'string' && Object.values(QuestionType).includes(question.type as QuestionType)
+        ? question.type as QuestionType
+        : QuestionType.MULTIPLE_CHOICE;
+      const explanation = typeof question.explanation === 'string'
+        ? question.explanation.replace(/<[^>]*>?/gm, '').trim().slice(0, 1000) || null
+        : null;
+      const points = Math.max(1, Math.min(100, Math.round(Number(question.points) || 10)));
+
+      let options: string | null = null;
+      let correctAnswer = typeof question.correctAnswer === 'string'
+        ? question.correctAnswer.replace(/<[^>]*>?/gm, '').trim().slice(0, 300) || null
+        : null;
+
+      if (type === QuestionType.MULTIPLE_CHOICE || type === QuestionType.TRUE_FALSE) {
+        const parsedOptions = sanitizeOptions(question.options);
+        if (!parsedOptions || parsedOptions.length < 2 || parsedOptions.some(option => !option)) {
+          return NextResponse.json({
+            error: `Soal nomor ${i + 1} harus memiliki minimal 2 opsi jawaban yang tidak kosong.`,
+          }, { status: 400 });
+        }
+
+        correctAnswer = normalizeChoiceAnswer(question.correctAnswer, parsedOptions);
+        if (correctAnswer === null) {
+          return NextResponse.json({
+            error: `Soal nomor ${i + 1} harus memiliki indeks jawaban benar yang valid.`,
+          }, { status: 400 });
+        }
+        options = JSON.stringify(parsedOptions);
+      }
+
+      normalizedQuestions.push({
+        id,
+        type,
+        prompt,
+        options,
+        correctAnswer,
+        points,
+        explanation,
+        order: i,
+      });
+    }
+
+    const assessment = await prisma.assessment.findUnique({
       where: { id: assessmentId },
-      include: { course: true }
+      include: {
+        course: true,
+        questions: {
+          select: {
+            id: true,
+            _count: { select: { answers: true } },
+          },
+        },
+        _count: { select: { attempts: true } },
+      }
     });
 
     if (!assessment) {
-      // MASTER SKILL: Self-Healing Auto-Create Assessment in PUT route to survive ephemeral Vercel container resets!
-      const node = await prisma.courseNode.findFirst({ where: { OR: [{ id: assessmentId }, { assessmentId: assessmentId }] } });
-      const courseIdToUse = node ? node.courseId : (await prisma.course.findFirst({ where: { ...(user.role === 'MENTOR' ? { mentorId: user.id } : {}) } }))?.id;
-
-      if (!courseIdToUse) {
-        return NextResponse.json({ error: 'Course not found for mentor' }, { status: 404 });
-      }
-
-      const course = await prisma.course.findUnique({ where: { id: courseIdToUse } });
-      if (!course || (user.role !== 'SUPER_ADMIN' && course.mentorId !== user.id)) {
-        return NextResponse.json({ error: 'Unauthorized course' }, { status: 401 });
-      }
-
-      assessment = await prisma.assessment.create({
-        data: {
-          id: assessmentId,
-          courseId: courseIdToUse,
-          title: node ? node.title : "Evaluasi / Kuis",
-          type: (node && node.type === "ASSIGNMENT") ? "FINAL" : "MODULE",
-          isAssignment: node ? node.type === "ASSIGNMENT" : false,
-          passingScore: 70,
-          timeLimitMin: 30
-        },
-        include: { course: true }
-      });
-
-      if (node && !node.assessmentId) {
-        await prisma.courseNode.update({ where: { id: node.id }, data: { assessmentId: assessment.id } }).catch(() => {});
-      }
+      return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
     }
 
     if (user.role !== 'SUPER_ADMIN' && assessment.course.mentorId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized assessment' }, { status: 401 });
     }
 
+    const existingById = new Map(assessment.questions.map(question => [question.id, question]));
+    const submittedExistingIds = normalizedQuestions
+      .map(question => question.id)
+      .filter((id): id is string => Boolean(id));
+    if (new Set(submittedExistingIds).size !== submittedExistingIds.length) {
+      return NextResponse.json({ error: "ID soal tidak boleh duplikat." }, { status: 400 });
+    }
+    if (submittedExistingIds.some(id => !existingById.has(id))) {
+      return NextResponse.json({ error: "Soal berasal dari evaluasi lain atau sudah tidak tersedia." }, { status: 400 });
+    }
+
+    const removedQuestions = assessment.questions.filter(question => !submittedExistingIds.includes(question.id));
+    if (removedQuestions.some(question => question._count.answers > 0)) {
+      return NextResponse.json({
+        error: "Soal yang sudah memiliki jawaban peserta tidak dapat dihapus. Pertahankan soal tersebut untuk menjaga riwayat penilaian.",
+      }, { status: 409 });
+    }
+
     await prisma.$transaction(async (tx) => {
-      // Delete existing questions
-      await tx.assessmentQuestion.deleteMany({
-        where: { assessmentId }
-      });
-
-      // Create new ones with clamping and sanitization
-      if (questions && Array.isArray(questions) && questions.length > 0) {
-        for (let i = 0; i < questions.length; i++) {
-          const q = questions[i];
-          if (!q || typeof q !== 'object') continue;
-          const cleanPrompt = typeof q.prompt === 'string' ? q.prompt.replace(/<[^>]*>?/gm, "").trim().slice(0, 1000) : "Pertanyaan";
-          const cleanExplanation = typeof q.explanation === 'string' ? q.explanation.replace(/<[^>]*>?/gm, "").trim().slice(0, 1000) : null;
-          const clampedPoints = Math.max(1, Math.min(100, Math.round(Number(q.points) || 10)));
-          const qType = typeof q.type === 'string' && Object.values(QuestionType).includes(q.type as QuestionType) ? (q.type as QuestionType) : QuestionType.MULTIPLE_CHOICE;
-
-          let cleanOptionsStr: string | null = null;
-          if (Array.isArray(q.options)) {
-            const arr = q.options.slice(0, 10).map((opt: unknown) => typeof opt === 'string' ? opt.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) : "").filter(Boolean);
-            if (arr.length > 0) cleanOptionsStr = JSON.stringify(arr);
-          } else if (typeof q.options === 'string' && q.options.trim()) {
-            cleanOptionsStr = q.options.trim();
-          }
-
-          const cleanAnswer = typeof q.correctAnswer === 'string' ? q.correctAnswer.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) : '';
-
-          if (qType === QuestionType.MULTIPLE_CHOICE) {
-            let parsedArr: string[] = [];
-            if (cleanOptionsStr) {
-              try { parsedArr = JSON.parse(cleanOptionsStr); } catch {}
-            }
-            if (!Array.isArray(parsedArr) || parsedArr.length < 2) {
-              throw new Error(`Soal nomor ${i + 1} (Pilihan Ganda) harus memiliki minimal 2 opsi jawaban yang valid.`);
-            }
-            if (!cleanAnswer || !parsedArr.includes(cleanAnswer)) {
-              throw new Error(`Soal nomor ${i + 1} (Pilihan Ganda) harus memiliki jawaban benar yang cocok dengan opsi.`);
-            }
-          }
-
+      for (const question of normalizedQuestions) {
+        const { id, ...data } = question;
+        if (id) {
+          await tx.assessmentQuestion.update({
+            where: { id },
+            data,
+          });
+        } else {
           await tx.assessmentQuestion.create({
-            data: {
-              assessmentId,
-              type: qType,
-              prompt: cleanPrompt || "Pertanyaan",
-              options: cleanOptionsStr,
-              correctAnswer: cleanAnswer,
-              points: clampedPoints,
-              explanation: cleanExplanation,
-              order: i
-            }
+            data: { assessmentId, ...data },
           });
         }
+      }
+      if (removedQuestions.length > 0) {
+        await tx.assessmentQuestion.deleteMany({
+          where: {
+            assessmentId,
+            id: { in: removedQuestions.map(question => question.id) },
+          },
+        });
       }
 
       await tx.activityLog.create({
         data: {
           userId: user.id,
           action: "UPDATE_ASSESSMENT_QUESTIONS",
-          metadata: JSON.stringify({ assessmentId, questionsCount: questions?.length || 0 })
+          metadata: JSON.stringify({ assessmentId, questionsCount: normalizedQuestions.length })
         }
       });
     });
@@ -144,9 +214,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal menyimpan asesmen";
     console.error("Error saving assessment:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Gagal menyimpan asesmen." }, { status: 500 });
   }
 }
 
@@ -197,11 +266,19 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const { id: assessmentId } = await params;
     const assessment = await prisma.assessment.findUnique({
       where: { id: assessmentId },
-      select: { course: { select: { id: true, mentorId: true, slug: true } } }
+      select: {
+        course: { select: { id: true, mentorId: true, slug: true } },
+        _count: { select: { attempts: true } },
+      }
     });
 
     if (!assessment || (user.role !== 'SUPER_ADMIN' && assessment.course.mentorId !== user.id)) {
       return NextResponse.json({ error: 'Assessment not found or unauthorized' }, { status: 404 });
+    }
+    if (assessment._count.attempts > 0) {
+      return NextResponse.json({
+        error: "Evaluasi yang sudah memiliki kiriman peserta tidak dapat dihapus karena merupakan bagian dari riwayat belajar.",
+      }, { status: 409 });
     }
 
     await prisma.$transaction(async (tx) => {

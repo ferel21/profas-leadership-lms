@@ -28,6 +28,15 @@ export async function GET(request: Request) {
     if (userId !== user.id && user.role !== "MENTOR" && user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Anda hanya dapat melihat badge milik sendiri." }, { status: 403 });
     }
+    if (userId !== user.id && user.role === "MENTOR") {
+      const managesParticipant = await prisma.enrollment.findFirst({
+        where: { userId, course: { mentorId: user.id } },
+        select: { id: true },
+      });
+      if (!managesParticipant) {
+        return NextResponse.json({ error: "Peserta tidak terdaftar pada program yang Anda kelola." }, { status: 403 });
+      }
+    }
 
     const userBadges = await prisma.userBadge.findMany({
       where: { userId },

@@ -11,6 +11,7 @@ node_modules
 .env*.local
 .data/
 .deploy-state/
+prisma/dev.db*
 test-results/
 playwright-report/
 

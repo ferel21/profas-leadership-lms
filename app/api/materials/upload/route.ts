@@ -1,24 +1,17 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { randomUUID } from "node:crypto";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { getWritableUploadRoots, resolveUploadPath } from "@/services/upload-storage";
 import { validateFileMagicBytes } from "@/services/file-security";
+import { getObjectStorageMode } from "@/services/object-storage";
 import { rateLimit } from "@/services/rate-limit";
+import { sanitizeMaterialDescription, validateUploadMetadata } from "@/services/upload-policy";
 
 const uploadLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
-
-const ALLOWED_TYPES = new Map([
-  ["application/pdf", "PDF"],
-  ["image/jpeg", "IMAGE"], ["image/png", "IMAGE"], ["image/webp", "IMAGE"], ["image/gif", "IMAGE"],
-  ["video/mp4", "VIDEO"], ["video/webm", "VIDEO"],
-  ["application/msword", "DOCUMENT"], ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "DOCUMENT"],
-  ["application/vnd.ms-powerpoint", "DOCUMENT"], ["application/vnd.openxmlformats-officedocument.presentationml.presentation", "DOCUMENT"],
-  ["text/plain", "TEXT"],
-]);
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export async function POST(request: Request) {
   const ipCheck = uploadLimiter.check(request);
@@ -32,13 +25,19 @@ export async function POST(request: Request) {
   }
 
   const formData = await request.formData();
-  const file = formData.get("file") as File | null;
-  const lessonId = formData.get("lessonId") as string | null;
-  const courseIdParam = formData.get("courseId") as string | null;
-  const rawDesc = (formData.get("description") as string || "").trim();
-  const rawLink = (formData.get("linkUrl") as string || "").trim();
+  const fileValue = formData.get("file");
+  const lessonValue = formData.get("lessonId");
+  const courseValue = formData.get("courseId");
+  const descriptionValue = formData.get("description");
+  const linkValue = formData.get("linkUrl");
+  const file = fileValue instanceof File ? fileValue : null;
+  const lessonId = typeof lessonValue === "string" ? lessonValue.trim() : null;
+  const courseIdParam = typeof courseValue === "string" ? courseValue.trim() : null;
+  const rawDesc = typeof descriptionValue === "string" ? descriptionValue.trim() : "";
+  const rawLink = typeof linkValue === "string" ? linkValue.trim() : "";
+  const deferNodeCommit = formData.get("deferNodeCommit") === "true";
 
-  const description = rawDesc.replace(/<[^>]*>?/gm, "").slice(0, 1000);
+  const description = sanitizeMaterialDescription(rawDesc);
   const linkUrl = rawLink.replace(/<[^>]*>?/gm, "").slice(0, 500);
 
   let courseId = courseIdParam;
@@ -50,7 +49,12 @@ export async function POST(request: Request) {
       select: { id: true, type: true, course: { select: { id: true, title: true } } }
     });
     if (existingLesson) {
+      if (courseIdParam && courseIdParam !== existingLesson.course.id) {
+        return NextResponse.json({ message: "Program dan materi tujuan tidak sesuai." }, { status: 400 });
+      }
       courseId = existingLesson.course.id;
+    } else {
+      return NextResponse.json({ message: "Materi tujuan tidak ditemukan." }, { status: 404 });
     }
   }
 
@@ -81,8 +85,23 @@ export async function POST(request: Request) {
           data: { fileUrl: linkUrl, fileName: linkUrl, content: description || linkUrl, description: description || linkUrl, type: "LINK" }
         });
       } else if (existingLesson && existingLesson.type === "FOLDER") {
+        const siblingOrder = await tx.courseNode.aggregate({
+          where: { courseId, parentId: existingLesson.id },
+          _max: { order: true }
+        });
         const createdNode = await tx.courseNode.create({
-          data: { parentId: existingLesson.id, courseId, title: description || linkUrl, type: "LINK", fileUrl: linkUrl, fileName: linkUrl, fileSize: 0, description: description || linkUrl, content: description || linkUrl, order: 999 }
+          data: {
+            parentId: existingLesson.id,
+            courseId,
+            title: description || linkUrl,
+            type: "LINK",
+            fileUrl: linkUrl,
+            fileName: linkUrl,
+            fileSize: 0,
+            description: description || linkUrl,
+            content: description || linkUrl,
+            order: (siblingOrder._max.order ?? -1) + 1
+          }
         });
         nodeId = createdNode.id;
       }
@@ -113,28 +132,44 @@ export async function POST(request: Request) {
   }
 
   if (!file) return NextResponse.json({ message: "File atau URL diperlukan." }, { status: 400 });
-  if (file.size > MAX_FILE_SIZE) return NextResponse.json({ message: "Ukuran file maksimal 50MB." }, { status: 400 });
+  if (!deferNodeCommit && !existingLesson) {
+    return NextResponse.json({ message: "Materi tujuan yang tersimpan diperlukan." }, { status: 400 });
+  }
 
-  const fileType = ALLOWED_TYPES.get(file.type);
-  if (!fileType) return NextResponse.json({ message: "Jenis file tidak didukung." }, { status: 400 });
+  const storage = getObjectStorageMode();
+  if (storage.mode === "supabase") {
+    return NextResponse.json({
+      message: "Unggahan file di Vercel harus menggunakan alur unggahan langsung.",
+    }, { status: 409 });
+  }
+  if (storage.mode === "unavailable") {
+    return NextResponse.json({ message: storage.message }, { status: 503 });
+  }
+
+  const validated = validateUploadMetadata({
+    purpose: "material",
+    fileName: file.name,
+    fileSize: file.size,
+    mimeType: file.type,
+  });
+  if (!validated.ok) return NextResponse.json({ message: validated.message }, { status: 400 });
+  const fileType = validated.value.descriptor.nodeType;
 
   // Save outside /public so the static file server cannot bypass the
-  // authorization check in /api/uploads. /tmp remains the serverless fallback.
-  const timestamp = Date.now();
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120) || "material";
-  const fileName = `${timestamp}-${safeName}`;
+  // authorization check in /api/uploads.
+  const fileName = `${randomUUID()}${validated.value.descriptor.extension}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  if (!validateFileMagicBytes(buffer, file.type)) {
+  if (!validateFileMagicBytes(buffer, validated.value.mimeType)) {
     return NextResponse.json({ message: "Format isi berkas tidak sesuai dengan jenis MIME (Magic Byte Validation failed)." }, { status: 400 });
   }
 
   let stored = false;
   for (const root of getWritableUploadRoots()) {
     try {
-      const uploadDir = resolveUploadPath(root, [courseId]);
+      const uploadDir = resolveUploadPath(root, ["materials", courseId]);
       if (!existsSync(uploadDir)) await mkdir(uploadDir, { recursive: true });
-      await writeFile(resolveUploadPath(root, [courseId, fileName]), buffer);
+      await writeFile(resolveUploadPath(root, ["materials", courseId, fileName]), buffer);
       stored = true;
       break;
     } catch {
@@ -143,67 +178,90 @@ export async function POST(request: Request) {
   }
   if (!stored) return NextResponse.json({ message: "Penyimpanan materi sedang tidak tersedia." }, { status: 503 });
 
-  const fileUrl = `/api/uploads/${courseId}/${fileName}`;
+  const fileUrl = `/api/uploads/materials/${courseId}/${fileName}`;
 
-  await prisma.$transaction(async (tx) => {
-    let nodeId = existingLesson?.id;
-    if (existingLesson && existingLesson.type !== "FOLDER") {
-      await tx.courseNode.update({
-        where: { id: existingLesson.id },
-        data: {
-          fileUrl,
-          fileName: file.name,
-          fileSize: file.size,
-          type: fileType as import("@prisma/client").NodeType,
-          description: description || file.name,
-          content: description || file.name
-        }
-      });
-    } else if (existingLesson && existingLesson.type === "FOLDER") {
-      const createdNode = await tx.courseNode.create({
-        data: { parentId: existingLesson.id, courseId, title: file.name, type: fileType as import("@prisma/client").NodeType, fileName: file.name, fileUrl, fileSize: file.size, description: description || file.name, content: description || file.name, order: 999 }
-      });
-      nodeId = createdNode.id;
-    }
-    if (nodeId) {
-      await tx.activityLog.create({
-        data: {
-          userId: user.id,
-          action: "UPLOAD_MATERIAL",
-          metadata: JSON.stringify({ courseId, nodeId, fileName: file.name, fileSize: file.size, fileUrl })
-        }
-      });
-    }
-  });
+  if (!deferNodeCommit) {
+    await prisma.$transaction(async (tx) => {
+      let nodeId = existingLesson?.id;
+      if (existingLesson && existingLesson.type !== "FOLDER") {
+        await tx.courseNode.update({
+          where: { id: existingLesson.id },
+          data: {
+            fileUrl,
+            fileName: validated.value.fileName,
+            fileSize: file.size,
+            type: fileType,
+            description: description || validated.value.fileName,
+            content: description || validated.value.fileName
+          }
+        });
+      } else if (existingLesson && existingLesson.type === "FOLDER") {
+        const siblingOrder = await tx.courseNode.aggregate({
+          where: { courseId, parentId: existingLesson.id },
+          _max: { order: true }
+        });
+        const createdNode = await tx.courseNode.create({
+          data: {
+            parentId: existingLesson.id,
+            courseId,
+            title: validated.value.fileName,
+            type: fileType,
+            fileName: validated.value.fileName,
+            fileUrl,
+            fileSize: file.size,
+            description: description || validated.value.fileName,
+            content: description || validated.value.fileName,
+            order: (siblingOrder._max.order ?? -1) + 1
+          }
+        });
+        nodeId = createdNode.id;
+      }
+      if (nodeId) {
+        await tx.activityLog.create({
+          data: {
+            userId: user.id,
+            action: "UPLOAD_MATERIAL",
+            metadata: JSON.stringify({
+              courseId,
+              nodeId,
+              fileName: validated.value.fileName,
+              fileSize: file.size,
+              fileUrl
+            })
+          }
+        });
+      }
+    });
 
-  // Notify enrolled students jika materi baru diunggah in chunked batches
-  const enrollments = await prisma.enrollment.findMany({ where: { courseId, status: "ACTIVE" }, select: { userId: true } });
-  if (enrollments.length > 0) {
-    for (let i = 0; i < enrollments.length; i += 500) {
-      const batch = enrollments.slice(i, i + 500);
-      await prisma.notification.createMany({
-        data: batch.map(e => ({
-          userId: e.userId,
-          title: "Materi Baru Tersedia",
-          message: `Mentor menambahkan materi baru: ${file.name}`,
-          type: "MATERIAL_ADDED",
-          link: `/belajar/${courseId}`
-        }))
-      });
+    // Notify enrolled students jika materi baru diunggah in chunked batches
+    const enrollments = await prisma.enrollment.findMany({ where: { courseId, status: "ACTIVE" }, select: { userId: true } });
+    if (enrollments.length > 0) {
+      for (let i = 0; i < enrollments.length; i += 500) {
+        const batch = enrollments.slice(i, i + 500);
+        await prisma.notification.createMany({
+          data: batch.map(e => ({
+            userId: e.userId,
+            title: "Materi Baru Tersedia",
+            message: `Mentor menambahkan materi baru: ${validated.value.fileName}`,
+            type: "MATERIAL_ADDED",
+            link: `/belajar/${course.slug}`
+          }))
+        });
+      }
     }
+
+    revalidatePath(`/belajar/${course.slug}`);
+    revalidatePath(`/belajar/${courseId}`);
+    revalidatePath("/dashboard");
+    revalidatePath(`/mentor/courses/${courseId}/builder`);
   }
-
-  revalidatePath(`/belajar/${course.slug}`);
-  revalidatePath(`/belajar/${courseId}`);
-  revalidatePath("/dashboard");
-  revalidatePath(`/mentor/courses/${courseId}/builder`);
 
   return NextResponse.json({
     fileUrl,
-    fileName: file.name,
+    fileName: validated.value.fileName,
     fileSize: file.size,
     fileType,
-    description: description || file.name,
-    content: description || file.name
+    description: description || validated.value.fileName,
+    content: description || validated.value.fileName
   });
 }

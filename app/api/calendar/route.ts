@@ -5,6 +5,24 @@ import { rateLimit } from "@/services/rate-limit";
 
 const calendarLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
+function normalizeLocation(value: unknown) {
+  if (typeof value !== "string") return { valid: true as const, value: null };
+  const cleaned = value.replace(/<[^>]*>?/gm, "").trim().slice(0, 150);
+  if (!cleaned) return { valid: true as const, value: null };
+  if (cleaned.includes("://")) {
+    try {
+      const url = new URL(cleaned);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        return { valid: false as const, value: null };
+      }
+      return { valid: true as const, value: url.toString().slice(0, 150) };
+    } catch {
+      return { valid: false as const, value: null };
+    }
+  }
+  return { valid: true as const, value: cleaned };
+}
+
 export async function GET(request: Request) {
   const ipCheck = calendarLimiter.check(request);
   if (!ipCheck.success) {
@@ -23,9 +41,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Parameter bulan atau tahun tidak valid." }, { status: 400 });
     }
 
-    // Determine start and end dates for the given month
-    const startDate = new Date(rawYear, rawMonth - 1, 1);
-    const endDate = new Date(rawYear, rawMonth, 0, 23, 59, 59);
+    const startDate = new Date(`${rawYear}-${String(rawMonth).padStart(2, "0")}-01T00:00:00+08:00`);
+    const nextMonth = rawMonth === 12 ? 1 : rawMonth + 1;
+    const nextYear = rawMonth === 12 ? rawYear + 1 : rawYear;
+    const endDate = new Date(
+      new Date(`${nextYear}-${String(nextMonth).padStart(2, "0")}-01T00:00:00+08:00`).getTime() - 1
+    );
 
     // If student, get their enrolled courses events + global events
     // If mentor, get their managed courses events + global events
@@ -41,10 +62,14 @@ export async function GET(request: Request) {
     const events = await prisma.calendarEvent.findMany({
       where: {
         startTime: { gte: startDate, lte: endDate },
-        OR: [
-          { courseId: null }, // global events
-          { courseId: { in: courseIds } } // specific course events
-        ]
+        ...(user.role === "SUPER_ADMIN"
+          ? {}
+          : {
+              OR: [
+                { courseId: null },
+                { courseId: { in: courseIds } },
+              ],
+            }),
       },
       take: 200,
       include: {
@@ -84,7 +109,7 @@ export async function POST(request: Request) {
 
     const startDt = new Date(startTime);
     const endDt = new Date(endTime);
-    if (isNaN(startDt.getTime()) || isNaN(endDt.getTime()) || startDt > endDt) {
+    if (isNaN(startDt.getTime()) || isNaN(endDt.getTime()) || startDt >= endDt) {
       return NextResponse.json({ error: "Waktu mulai/selesai tidak valid." }, { status: 400 });
     }
 
@@ -103,7 +128,10 @@ export async function POST(request: Request) {
 
     const cleanTitle = title.replace(/<[^>]*>?/gm, "").trim().slice(0, 150);
     const cleanDesc = typeof description === "string" ? description.replace(/<[^>]*>?/gm, "").trim().slice(0, 500) : "";
-    const cleanLocation = typeof location === "string" ? location.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) : "";
+    const normalizedLocation = normalizeLocation(location);
+    if (!normalizedLocation.valid) {
+      return NextResponse.json({ error: "Tautan lokasi hanya boleh menggunakan protokol http atau https." }, { status: 400 });
+    }
     if (!cleanTitle) {
       return NextResponse.json({ error: "Judul acara tidak valid." }, { status: 400 });
     }
@@ -115,7 +143,7 @@ export async function POST(request: Request) {
           description: cleanDesc || null,
           startTime: startDt,
           endTime: endDt,
-          location: cleanLocation || null,
+          location: normalizedLocation.value,
           courseId: safeCourseId
         }
       });
@@ -189,13 +217,18 @@ export async function PATCH(request: Request) {
 
     const startDt = startTime ? new Date(startTime) : existing.startTime;
     const endDt = endTime ? new Date(endTime) : existing.endTime;
-    if (isNaN(startDt.getTime()) || isNaN(endDt.getTime()) || startDt > endDt) {
+    if (isNaN(startDt.getTime()) || isNaN(endDt.getTime()) || startDt >= endDt) {
       return NextResponse.json({ error: "Waktu mulai/selesai tidak valid." }, { status: 400 });
     }
 
     const cleanTitle = typeof title === "string" ? title.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) : existing.title;
     const cleanDesc = typeof description === "string" ? description.replace(/<[^>]*>?/gm, "").trim().slice(0, 500) : existing.description;
-    const cleanLocation = typeof location === "string" ? location.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) : existing.location;
+    const normalizedLocation = location === undefined
+      ? { valid: true as const, value: existing.location }
+      : normalizeLocation(location);
+    if (!normalizedLocation.valid) {
+      return NextResponse.json({ error: "Tautan lokasi hanya boleh menggunakan protokol http atau https." }, { status: 400 });
+    }
 
     const updated = await prisma.$transaction(async (tx) => {
       const result = await tx.calendarEvent.update({
@@ -205,7 +238,7 @@ export async function PATCH(request: Request) {
           description: cleanDesc,
           startTime: startDt,
           endTime: endDt,
-          location: cleanLocation,
+          location: normalizedLocation.value,
           courseId: safeCourseId
         }
       });

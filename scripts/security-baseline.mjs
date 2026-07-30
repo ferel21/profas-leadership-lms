@@ -27,9 +27,9 @@ console.log("=== PROFAS Leadership LMS Security Baseline Audit ===");
 
 // 1. Verify existence of core security files
 const requiredFiles = [
-  "lib/auth.ts",
-  "lib/rate-limit.ts",
-  "lib/file-security.ts",
+  "services/auth.ts",
+  "services/rate-limit.ts",
+  "services/file-security.ts",
   "middleware.ts",
   "app/api/materials/upload/route.ts",
   "app/api/assessments/submit/route.ts",

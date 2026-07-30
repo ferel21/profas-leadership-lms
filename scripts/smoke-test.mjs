@@ -47,14 +47,8 @@ async function assertDatabaseIntegrity() {
   ];
   let indexNames = new Set();
   try {
-    const dbUrl = (process.env.DATABASE_URL || "").toLowerCase();
-    if (dbUrl.includes("postgres") || dbUrl.includes("supabase")) {
-      const indexes = await prisma.$queryRawUnsafe("SELECT indexname as name FROM pg_indexes WHERE schemaname = 'public'");
-      indexNames = new Set(indexes.map(index => index.name));
-    } else {
-      const indexes = await prisma.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type = 'index'");
-      indexNames = new Set(indexes.map(index => index.name));
-    }
+    const indexes = await prisma.$queryRawUnsafe("SELECT indexname as name FROM pg_indexes WHERE schemaname = 'public'");
+    indexNames = new Set(indexes.map(index => index.name));
   } catch (error) {
     console.warn("[SMOKE_TEST_INDEX_WARNING] Tidak dapat membaca tabel metadata sistem database untuk verifikasi indeks:", error.message);
   }
@@ -148,6 +142,7 @@ async function main() {
     console.log("[SMOKE_TEST_SKIP] URL database CI dummy/build-only terdeteksi (`build:build@127.0.0.1`). Melewati koneksi database & pengujian live server di CI runner non-secret.");
     return;
   }
+  assert.match(dbUrl, /^postgres(?:ql)?:\/\//, "Smoke test hanya mendukung PostgreSQL sesuai provider Prisma.");
   await assertDatabaseIntegrity();
   const baseline = await mutationCounts();
   const port = await freePort();
@@ -185,7 +180,13 @@ async function main() {
     const cookie = await loginAs(base, "peserta@profas.id");
     const authHeaders = { Cookie: cookie };
 
-    if (!process.env.ANTHROPIC_API_KEY && !process.env.CLAUDE_API_KEY) {
+    const remoteTutorConfigured = [
+      "PHI3_API_KEY",
+      "PHI3_BASE_URL",
+      "OPENAI_API_KEY",
+      "OPENAI_BASE_URL",
+    ].some(key => Boolean(process.env[key]?.trim()));
+    if (!remoteTutorConfigured) {
       const tutorResponse = await expectStatus(base, "/api/ai/tutor", 200, {
         method: "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },
@@ -197,7 +198,7 @@ async function main() {
       });
       const tutor = await tutorResponse.json();
       assert.ok(typeof tutor.reply === "string" && tutor.reply.length > 0, "Tutor AI tidak mengembalikan jawaban");
-      assert.equal(tutor.source, "profas-local-ai", "Smoke test tanpa key seharusnya menggunakan fallback lokal");
+      assert.equal(tutor.source, "profas-local-ai", "Smoke test tanpa konfigurasi provider seharusnya menggunakan fallback lokal");
     }
 
     await expectStatus(base, "/dashboard", 200, { headers: authHeaders });
@@ -241,8 +242,8 @@ async function main() {
     assert.ok((await invalidCertificatePage.text()).includes("404 - Halaman Tidak Ditemukan"), "Halaman sertifikat yang tidak diterbitkan tidak boleh menampilkan sertifikat");
 
     const roleDashboards = [
-      ["mentor@profas.id", "DASHBOARD MENTOR"],
-      ["admin@profas.id", "Distribusi Pengguna"],
+      ["mentor@profas.id", "Workspace mentor"],
+      ["admin@profas.id", "Operasional LMS dalam satu ruang."],
     ];
     for (const [email, expectedText] of roleDashboards) {
       const roleCookie = await loginAs(base, email);

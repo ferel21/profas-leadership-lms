@@ -37,38 +37,11 @@ export async function generateSyllabusDocx({
   courseTitle,
   category,
   level,
-  mentorName = "Dr. H. Hendra Syahputra, M.M.",
-  durationHours = 14,
+  mentorName,
+  durationHours,
   modules = [],
   userNotes = "",
 }: SyllabusDocxOptions): Promise<void> {
-  const safeModules = modules.length > 0 ? modules : [
-    {
-      title: "Modul 1: Fondasi Kepemimpinan & Pengambilan Keputusan Strategis",
-      duration: "3.5 Jam Pembelajaran",
-      description: "Memahami esensi kepemimpinan di era disrupsi serta framework 5 langkah dalam keputusan bisnis kritis.",
-      keyTakeaways: ["Analisis Risiko Keputusan", "Emotional Intelligence bagi C-Level", "Studi Kasus Transformasi BUMN"],
-    },
-    {
-      title: "Modul 2: Komunikasi Eksekutif & Negosiasi Pemangku Kepentingan",
-      duration: "4.0 Jam Pembelajaran",
-      description: "Teknik menyusun narasi persuasif untuk dewan direksi, pemegang saham, dan tim lintas divisi.",
-      keyTakeaways: ["High-Stakes Negotiation", "Executive Storytelling", "Resolusi Konflik Internal"],
-    },
-    {
-      title: "Modul 3: Inovasi Berkelanjutan & Eksekusi Budaya Kinerja Tinggi",
-      duration: "4.5 Jam Pembelajaran",
-      description: "Membangun sistem akuntabilitas, indikator kinerja utama (KPI), dan inovasi berbasis teknologi.",
-      keyTakeaways: ["OKR & Strategic Alignment", "Foster Psychological Safety", "Audit Inovasi Perusahaan"],
-    },
-    {
-      title: "Modul 4: Evaluasi & Rencana Tindak Lanjut Kepemimpinan (IDP)",
-      duration: "2.0 Jam Pembelajaran",
-      description: "Penyusunan Individual Development Plan (IDP) untuk penerapan kepemimpinan dalam 90 hari pertama.",
-      keyTakeaways: ["90-Day Executive Roadmap", "Sistem Mentoring Lanjutan", "Penilaian Kompetensi Akhir"],
-    },
-  ];
-
   const doc = new Document({
     styles: {
       default: {
@@ -186,36 +159,49 @@ export async function generateSyllabusDocx({
             ],
           }),
 
-          ...safeModules.flatMap((mod, index) => [
-            new Paragraph({
-              spacing: { before: 150, after: 60 },
-              children: [
-                new TextRun({
-                  text: `${index + 1}. ${mod.title} (${mod.duration})`,
-                  bold: true,
-                  size: 24,
-                  color: "0D9488",
-                }),
-              ],
-            }),
-            new Paragraph({
-              spacing: { after: 60 },
-              children: [new TextRun({ text: mod.description })],
-            }),
-            new Paragraph({
-              spacing: { after: 40 },
-              children: [new TextRun({ text: "Fokus Kompetensi Utama:", bold: true, size: 20, color: "475569" })],
-            }),
-            ...mod.keyTakeaways.map(
-              (item) =>
+          ...(modules.length > 0
+            ? modules.flatMap((mod, index) => [
                 new Paragraph({
-                  bullet: { level: 0 },
+                  spacing: { before: 150, after: 60 },
+                  children: [
+                    new TextRun({
+                      text: `${index + 1}. ${mod.title} (${mod.duration})`,
+                      bold: true,
+                      size: 24,
+                      color: "0D9488",
+                    }),
+                  ],
+                }),
+                new Paragraph({
+                  spacing: { after: 60 },
+                  children: [new TextRun({ text: mod.description })],
+                }),
+                new Paragraph({
                   spacing: { after: 40 },
-                  children: [new TextRun({ text: item })],
-                })
-            ),
-            new Paragraph({ spacing: { after: 100 }, text: "" }),
-          ]),
+                  children: [new TextRun({ text: "Fokus Kompetensi Utama:", bold: true, size: 20, color: "475569" })],
+                }),
+                ...mod.keyTakeaways.map(
+                  (item) =>
+                    new Paragraph({
+                      bullet: { level: 0 },
+                      spacing: { after: 40 },
+                      children: [new TextRun({ text: item })],
+                    })
+                ),
+                new Paragraph({ spacing: { after: 100 }, text: "" }),
+              ])
+            : [
+                new Paragraph({
+                  spacing: { before: 120, after: 120 },
+                  children: [
+                    new TextRun({
+                      text: "Belum ada modul kurikulum yang tersimpan untuk program ini.",
+                      italics: true,
+                      color: "64748B",
+                    }),
+                  ],
+                }),
+              ]),
 
           // Bagian Catatan Pribadi
           ...(userNotes

@@ -18,7 +18,24 @@ import { Footer } from "@/components/ui/Footer";
 import { Header } from "@/components/ui/Header";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
-import { formatRupiah, initials } from "@/utils";
+import { initials } from "@/utils";
+
+function parseOutcomes(value: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      const items = parsed.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+      if (items.length > 0) return items;
+    }
+  } catch {
+    // Legacy records stored one outcome per line.
+  }
+
+  return value
+    .split(/\r?\n/)
+    .map(item => item.trim())
+    .filter(Boolean);
+}
 
 export default async function CourseDetail({
   params,
@@ -65,7 +82,7 @@ export default async function CourseDetail({
 
   if (!course) notFound();
 
-  const outcomes = JSON.parse(course.outcomes) as string[];
+  const outcomes = parseOutcomes(course.outcomes);
   const lessonCount = course.nodes.filter((node) => node.type !== "FOLDER").length;
   const folders = course.nodes.filter((node) => node.type === "FOLDER");
   const enrolled = user
@@ -142,8 +159,8 @@ export default async function CourseDetail({
                 </span>
               </div>
               <div className="enroll-body pf-enroll-body">
-                <small>Investasi belajar</small>
-                <h2>{formatRupiah(course.price)}</h2>
+                <small>Akses program</small>
+                <h2>{course.price > 0 ? "Termasuk akses anggota" : "Tanpa biaya"}</h2>
                 <EnrollButton
                   courseId={course.id}
                   slug={course.slug}

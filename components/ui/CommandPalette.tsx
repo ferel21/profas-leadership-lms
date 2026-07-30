@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Search, BookOpen, Award, MessageSquare, Settings, LayoutDashboard, Trophy, Calendar, Sparkles, ArrowRight, X, Command } from "lucide-react";
+import { Search, BookOpen, Award, MessageSquare, Settings, LayoutDashboard, Trophy, Calendar, ArrowRight, X, Command, ClipboardCheck, Users, FileCheck2, BarChart3, Megaphone } from "lucide-react";
 
 /** Visually hidden but exposed to assistive tech — for the required dialog title. */
 const srOnly: React.CSSProperties = {
@@ -27,18 +27,37 @@ type CommandItem = {
   action?: () => void;
 };
 
-const staticItems: CommandItem[] = [
+const sharedItems: CommandItem[] = [
   { id: "nav-dash", title: "Ringkasan Dashboard Utama", category: "Navigasi", icon: LayoutDashboard, href: "/dashboard" },
   { id: "nav-prog", title: "Katalog Program Kepemimpinan", category: "Navigasi", icon: BookOpen, href: "/program" },
-  { id: "nav-cert", title: "Sertifikat & Kelulusan Saya", category: "Navigasi", icon: Award, href: "/dashboard#sertifikat" },
   { id: "nav-lead", title: "Papan Peringkat Eksekutif (Leaderboard)", category: "Navigasi", icon: Trophy, href: "/peringkat" },
   { id: "nav-forum", title: "Forum Komunitas & Diskusi", category: "Navigasi", icon: MessageSquare, href: "/forum" },
   { id: "nav-cal", title: "Kalender Acara & Sesi Mentor", category: "Navigasi", icon: Calendar, href: "/kalender" },
   { id: "nav-set", title: "Pengaturan Akun & Profil", category: "Navigasi", icon: Settings, href: "/pengaturan" },
-  { id: "act-ai", title: "Tanya Asisten AI Leadership Tutor", category: "Aksi Eksekutif", icon: Sparkles, href: "/dashboard#ai-tutor" },
 ];
 
-export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+const roleItems: Record<string, CommandItem[]> = {
+  STUDENT: [
+    { id: "student-cert", title: "Sertifikat & Kelulusan Saya", category: "Navigasi", icon: Award, href: "/dashboard#sertifikat" },
+    { id: "student-attendance", title: "Absensi Saya", category: "Navigasi", icon: ClipboardCheck, href: "/absensi" },
+    { id: "student-history", title: "Riwayat Belajar", category: "Navigasi", icon: BookOpen, href: "/riwayat" },
+  ],
+  MENTOR: [
+    { id: "mentor-participants", title: "Manajemen Peserta", category: "Aksi Eksekutif", icon: Users, href: "/dashboard/peserta" },
+    { id: "mentor-grading", title: "Evaluasi & Penilaian", category: "Aksi Eksekutif", icon: FileCheck2, href: "/mentor/evaluasi" },
+    { id: "mentor-attendance", title: "Manajemen Absensi", category: "Aksi Eksekutif", icon: ClipboardCheck, href: "/absensi" },
+    { id: "mentor-analytics", title: "Analitik Program", category: "Aksi Eksekutif", icon: BarChart3, href: "/dashboard/analitik" },
+  ],
+  SUPER_ADMIN: [
+    { id: "admin-users", title: "Kelola Pengguna & Peran", category: "Aksi Eksekutif", icon: Users, href: "/dashboard#admin-user-mgmt" },
+    { id: "admin-programs", title: "Kelola Program & Materi", category: "Aksi Eksekutif", icon: BookOpen, href: "/dashboard#program" },
+    { id: "admin-broadcast", title: "Kelola Siaran", category: "Aksi Eksekutif", icon: Megaphone, href: "/dashboard#broadcast-mgmt" },
+    { id: "admin-attendance", title: "Manajemen Absensi", category: "Aksi Eksekutif", icon: ClipboardCheck, href: "/absensi" },
+    { id: "admin-analytics", title: "Analitik Platform", category: "Aksi Eksekutif", icon: BarChart3, href: "/dashboard/analitik" },
+  ],
+};
+
+export function CommandPalette({ isOpen, onClose, role }: { isOpen: boolean; onClose: () => void; role: string }) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [courseItems, setCourseItems] = useState<CommandItem[]>([]);
@@ -85,7 +104,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
     return () => { cancelled = true; };
   }, [isOpen, courseItems.length]);
 
-  const items: CommandItem[] = [...staticItems, ...courseItems];
+  const items: CommandItem[] = [...sharedItems, ...(roleItems[role] ?? []), ...courseItems];
 
   const filteredItems = query.trim() === ""
     ? items

@@ -15,19 +15,35 @@ export async function GET(request: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ message: "Silakan masuk." }, { status: 401 });
 
-  const [notifications, unreadCount] = await Promise.all([
-    prisma.notification.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-    }),
-    prisma.notification.count({ where: { userId: user.id, read: false } }),
-  ]);
+  try {
+    // Keep both reads on one checkout. This matters for Supabase transaction
+    // poolers configured with connection_limit=1, which are common in local
+    // previews and should not make the decorative sidebar fail.
+    const [notifications, unreadCount] = await prisma.$transaction([
+      prisma.notification.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      }),
+      prisma.notification.count({ where: { userId: user.id, read: false } }),
+    ]);
 
-  return NextResponse.json(
-    { notifications, unreadCount },
-    { headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=45" } }
-  );
+    return NextResponse.json(
+      { notifications, unreadCount },
+      { headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=45" } }
+    );
+  } catch (error) {
+    // Notifications are non-critical chrome. Render an empty state while the
+    // database recovers instead of turning a sidebar refresh into a runtime
+    // error page.
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Unable to load notifications", error);
+    }
+    return NextResponse.json(
+      { notifications: [], unreadCount: 0 },
+      { headers: { "Cache-Control": "private, max-age=5" } }
+    );
+  }
 }
 
 const patchSchema = z.object({

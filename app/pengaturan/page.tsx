@@ -21,6 +21,7 @@ export default async function SettingsPage() {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        authProvider: user.authProvider,
         phone: user.phone ?? "",
         headline: user.headline ?? "",
         bio: user.bio ?? "",

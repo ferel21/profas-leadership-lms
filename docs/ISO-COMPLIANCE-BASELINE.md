@@ -16,7 +16,7 @@ Beberapa edisi pada permintaan awal sudah berstatus withdrawn: ISO/IEC 25010:201
 | --- | --- | --- | --- |
 | ISO/IEC 25010 | TypeScript strict check, ESLint, production build, smoke flow, dan perbaikan animasi/reveal agar konten tidak tersembunyi saat observer gagal | `npm run typecheck`, `npm run lint`, `npm run build`, `npm run smoke` | Baseline teknis |
 | ISO/IEC 25051 | Alur validasi pre-release dipusatkan pada typecheck, lint, build, smoke test, dependency audit, dan axe audit | Perintah pada bagian Evidence | Sebagian diterapkan; acceptance record/CI artifact masih perlu dibuat |
-| ISO/IEC 27001 | JWT production fail-closed dan minimal 32 karakter; bcrypt; role/ownership authorization di API; OAuth state anti-CSRF; cookie HttpOnly/SameSite/Secure; upload private; security headers; error response generik | Review `lib/auth.ts`, middleware, route auth, route upload, route admin/mentor | Kontrol aplikasi diterapkan; ISMS belum dibuktikan |
+| ISO/IEC 27001 | JWT production fail-closed dan minimal 32 karakter; bcrypt; role/ownership authorization di API; OAuth state anti-CSRF; cookie HttpOnly/SameSite/Secure; upload private; security headers; error response generik | Review `services/auth.ts`, middleware, route auth, route upload, route admin/mentor | Kontrol aplikasi diterapkan; ISMS belum dibuktikan |
 | ISO/IEC 27701 | Data response badges dibatasi; akses berkas dan nilai berbasis ownership; tidak ada self-healing user dari klaim JWT; upload tidak lagi public-cache; export tidak menambahkan demo rows kosong | Review route badges, auth, uploads, export | Privacy-by-design baseline; ROPA/retensi/DSAR belum lengkap |
 | ISO/IEC 40500 / WCAG | Semantic heading order, labelled navigation/progress/dialog, keyboard notification control, form autocomplete/status, dan live axe check pada landing/login/dashboard | `axe-core` audit pada route utama | Baseline route utama; audit manual seluruh route masih perlu |
 | ISO 9241-151 | Struktur navigasi semantic, heading hierarchy, focus state, responsive CSS, dan reusable UI components | Review komponen layout + manual usability test | Sebagian diterapkan |
@@ -29,7 +29,7 @@ Beberapa edisi pada permintaan awal sudah berstatus withdrawn: ISO/IEC 25010:201
 - Token JWT tidak lagi dapat menghidupkan kembali user yang sudah dihapus dari database. User harus tetap ada dan aktif di database.
 - OAuth Google sekarang memakai secret server-only, state cookie yang diverifikasi secara constant-time, validasi token, dan pesan error generik.
 - Endpoint pertanyaan assessment mentor, badges, broadcast, analytics, dan upload diberi validasi input serta pengecekan role/ownership yang eksplisit.
-- File baru disimpan di `.data/uploads` atau `PRIVATE_UPLOAD_DIR`, bukan di `public/uploads`. Endpoint file memakai `private, no-store`, validasi path traversal, dan authorization sebelum membaca file.
+- File baru disimpan di `.data/uploads`/`PRIVATE_UPLOAD_DIR` pada host bervolume, atau bucket private Supabase Storage pada Vercel. Endpoint file memakai authorization aplikasi, signed URL berumur pendek untuk object storage, `private, no-store`, dan validasi path sebelum membaca file.
 - Header security diperketat: HSTS production, `X-Frame-Options`, `X-Content-Type-Options`, Referrer-Policy, Permissions-Policy, COOP/CORP, dan X-Permitted-Cross-Domain-Policies.
 - Library `xlsx` yang memiliki advisory high severity dihapus dan diganti dengan `exceljs`. Audit terakhir harus tetap dijalankan karena dependency transitive dapat berubah.
 
@@ -53,7 +53,7 @@ Untuk accessibility route utama, jalankan audit axe live setelah server developm
 ## Risiko dan pekerjaan lanjutan
 
 1. `npm audit --omit=dev` masih dapat melaporkan vulnerability moderate pada dependency transitive Next/PostCSS/ExcelJS. Tidak boleh menganggap audit bersih sebelum hasil audit release terbaru direview.
-2. File lama di `public/uploads` masih dibaca sebagai compatibility fallback. Migrasikan file lama ke storage private, verifikasi URL, lalu hapus fallback tersebut.
+2. File lama di `public/uploads` masih dibaca sebagai compatibility fallback. Migrasikan file lama ke storage private, verifikasi URL, lalu hapus fallback tersebut. Pastikan bucket Supabase tetap private dan service-role key hanya tersedia di runtime server.
 3. Tambahkan magic-byte/content sniffing untuk file PDF, gambar, dan dokumen; validasi MIME saja belum cukup untuk semua threat model.
 4. Tambahkan rate limiting terdistribusi pada login, register, OAuth initiation/callback, upload, analytics, dan broadcast menggunakan edge/WAF atau store bersama.
 5. Lengkapi risk register ISO/IEC 27001, asset inventory, access review, key rotation, backup/restore test, incident response, vulnerability SLA, dan bukti CI release.

@@ -2,14 +2,13 @@
 
 > Runbook VPS yang menjadi acuan terbaru tersedia di [`VPS-DEPLOYMENT-RUNBOOK.md`](./VPS-DEPLOYMENT-RUNBOOK.md). Persiapan ini tidak memindahkan database dan tidak menjalankan migrasi schema.
 
-Memahami kekesalan Anda terhadap arsitektur **Serverless Vercel**! Arsitektur serverless memang memiliki kelemahan besar untuk aplikasi LMS yang intensif berkas seperti PROFAS Leadership LMS, antara lain:
-1. **Sistem File Read-Only & Ephemeral**: Kontainer Vercel mereset direktori lokal setiap beberapa menit. Akibatnya, berkas video MP4, PDF materi, atau foto profil yang diunggah secara lokal bisa hilang saat kontainer direstart (*cold start*).
-2. **Aggressive Router Caching**: Next.js App Router di Vercel sering menahan cache statis yang membuat sinkronisasi materi terasa lambat.
+Vercel menjalankan function dengan filesystem sementara, sehingga upload persisten harus memakai Supabase Storage sesuai `.env.example`. VPS Linux atau cloud container adalah alternatif ketika organisasi ingin menyimpan berkas pada volume private yang dikelola sendiri.
 
-Dengan memindahkan LMS ini dari Vercel ke **VPS Linux** atau **Cloud Container (Railway / Render / Coolify / Docker)**, Anda mendapatkan:
-- 💾 **Penyimpanan Berkas 100% Permanen** (Video MP4 & PDF tidak akan pernah hilang dari hard disk / volume).
-- ⚡ **Kinerja CPU & RAM Tanpa Batas** (Tidak ada jeda *cold start* atau batas waktu eksekusi fungsi).
-- 🛡️ **Kendali Penuh 100%** atas server, database, dan lalu lintas jaringan.
+Deployment non-Vercel memberi:
+
+- volume upload persistent yang tetap melewati endpoint berotorisasi;
+- kontrol atas alokasi CPU/RAM, timeout, jaringan, dan jadwal pemeliharaan;
+- pilihan memakai PostgreSQL/object storage managed yang sama tanpa memindahkan data.
 
 ---
 
@@ -25,8 +24,8 @@ Platform seperti **Railway.app**, **Render.com**, dan **Coolify** menjalankan ap
    ```env
    DATABASE_URL="postgresql://postgres:[PASSWORD]@db.nvbtuncksyxguwsreeov.supabase.co:5432/postgres"
    DIRECT_URL="postgresql://postgres:[PASSWORD]@db.nvbtuncksyxguwsreeov.supabase.co:5432/postgres"
-   NEXTAUTH_SECRET="rahasia_anda_disini"
-   NEXTAUTH_URL="https://domain-anda.app"
+   JWT_SECRET="rahasia-acak-minimal-32-karakter"
+   NEXT_PUBLIC_APP_URL="https://domain-anda.app"
    GOOGLE_CLIENT_ID="..."
    GOOGLE_CLIENT_SECRET="..."
    ```
@@ -34,7 +33,8 @@ Platform seperti **Railway.app**, **Render.com**, dan **Coolify** menjalankan ap
    - Di pengaturan Railway / Render / Coolify, tambahkan **Volume / Persistent Storage** dan arahkan *mount path* ke:
      `/app/.data/uploads`
    - Set `PRIVATE_UPLOAD_DIR=/app/.data/uploads`. Berkas tidak boleh ditempatkan di `/app/public/uploads`, karena folder `public` dapat dilayani langsung tanpa pemeriksaan hak akses.
-6. Klik **Deploy**! Aplikasi LMS Anda kini berjalan 100% permanen dan super cepat tanpa batas Vercel!
+   - Jika ingin memakai Supabase Storage alih-alih volume, set `SUPABASE_STORAGE_ENABLED=true` bersama `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, dan bucket private opsional `SUPABASE_STORAGE_BUCKET`.
+6. Klik **Deploy**, lalu verifikasi health check, akses upload, dan persistence setelah container direstart.
 
 ---
 
@@ -49,9 +49,9 @@ Saya telah menyiapkan berkas konfigurasi **`ecosystem.config.js`** di dalam proy
    ```bash
    ssh root@ip-vps-anda
    ```
-2. **Install Node.js 20 & PM2**:
+2. **Install Node.js 22 & PM2**:
    ```bash
-   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
    sudo apt-get install -y nodejs git
    sudo npm install -g pm2
    ```

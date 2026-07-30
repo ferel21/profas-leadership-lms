@@ -26,10 +26,6 @@ export function personaLabel(persona?: string | null) {
   return persona ? labels[persona] ?? persona : "Peserta";
 }
 
-export function roleHome(role?: string | null) {
-  return role ? `/dashboard?view=${role.toLowerCase()}` : "/dashboard";
-}
-
 export function formatDate(date:Date|string|number){
   const d = new Date(date);
   return new Intl.DateTimeFormat("id-ID",{day:"numeric",month:"short",year:"numeric",timeZone:"Asia/Makassar"}).format(d);

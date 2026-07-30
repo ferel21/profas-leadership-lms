@@ -17,6 +17,55 @@ function slugify(text: string) {
     .replace(/\-\-+/g, "-");
 }
 
+const DEFAULT_OUTCOMES = [
+  "Memahami kepemimpinan strategis",
+  "Mampu mengambil keputusan berbasis data",
+  "Meningkatkan efektivitas tim",
+];
+
+function normalizeCourseImage(value: unknown) {
+  if (typeof value !== "string") return "/images/profas-leadership-hero.webp";
+  const candidate = value.trim().slice(0, 300);
+  if (/^\/images\/[a-zA-Z0-9._/-]+$/.test(candidate) && !candidate.includes("..")) {
+    return candidate;
+  }
+  try {
+    const url = new URL(candidate);
+    if (url.protocol === "https:" && !url.username && !url.password) return url.toString();
+  } catch {
+    // Use the stable local artwork for malformed or unsupported values.
+  }
+  return "/images/profas-leadership-hero.webp";
+}
+
+function serializeOutcomes(value: unknown): string | undefined {
+  let items: unknown[] = [];
+
+  if (Array.isArray(value)) {
+    items = value;
+  } else if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      items = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      items = trimmed.split(/\r?\n/);
+    }
+  } else {
+    return undefined;
+  }
+
+  const cleanItems = items
+    .filter((item): item is string => typeof item === "string")
+    .map(item => item.replace(/<[^>]*>?/gm, "").trim().slice(0, 300))
+    .filter(Boolean)
+    .slice(0, 20);
+
+  return cleanItems.length > 0 ? JSON.stringify(cleanItems) : undefined;
+}
+
 export async function GET(request: Request) {
   const ipCheck = courseLimiter.check(request);
   if (!ipCheck.success) {
@@ -78,9 +127,12 @@ export async function POST(request: Request) {
     const cleanShortDesc = shortDescription.replace(/<[^>]*>?/gm, "").trim().slice(0, 300);
     const cleanDesc = typeof description === "string" ? description.replace(/<[^>]*>?/gm, "").trim().slice(0, 5000) : cleanShortDesc;
     const cleanCategory = typeof category === "string" ? category.replace(/<[^>]*>?/gm, "").trim().slice(0, 50) : "Kepemimpinan";
-    const validLevel = Object.values(CourseLevel).includes(level as CourseLevel) ? (level as CourseLevel) : CourseLevel.BASIC;
-    const safePrice = Math.min(1000000000, Math.max(0, Number(price) || 0));
-    const safeDuration = Math.min(1000, Math.max(1, Number(durationHours) || 10));
+    if (typeof level !== "string" || !Object.values(CourseLevel).includes(level as CourseLevel)) {
+      return NextResponse.json({ message: "Tingkat program tidak valid." }, { status: 400 });
+    }
+    const validLevel = level as CourseLevel;
+    const safePrice = Math.round(Math.min(1000000000, Math.max(0, Number(price) || 0)));
+    const safeDuration = Math.round(Math.min(1000, Math.max(1, Number(durationHours) || 10)));
 
     let baseSlug = slugify(cleanTitle);
     if (!baseSlug) baseSlug = "program-" + Date.now();
@@ -100,8 +152,8 @@ export async function POST(request: Request) {
           description: cleanDesc || cleanShortDesc,
           price: safePrice,
           durationHours: safeDuration,
-          image: typeof image === "string" ? image.slice(0, 300) : "/images/profas-leadership-hero.webp",
-          outcomes: "Memahami kepemimpinan strategis\nMampu mengambil keputusan berbasis data\nMeningkatkan efektivitas tim",
+          image: normalizeCourseImage(image),
+          outcomes: JSON.stringify(DEFAULT_OUTCOMES),
           published: false,
           mentorId: user.id
         }
@@ -131,9 +183,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, course }, { status: 201 });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Gagal membuat program.";
     console.error("Create Course Error:", err);
-    return NextResponse.json({ message }, { status: 500 });
+    return NextResponse.json({ message: "Gagal membuat program." }, { status: 500 });
   }
 }
 
@@ -169,9 +220,43 @@ export async function PATCH(request: Request) {
     const cleanShortDesc = typeof shortDescription === "string" ? shortDescription.replace(/<[^>]*>?/gm, "").trim().slice(0, 300) : undefined;
     const cleanDesc = typeof description === "string" ? description.replace(/<[^>]*>?/gm, "").trim().slice(0, 5000) : undefined;
     const cleanCategory = typeof category === "string" ? category.replace(/<[^>]*>?/gm, "").trim().slice(0, 50) : undefined;
-    const cleanOutcomes = typeof outcomes === "string" ? outcomes.replace(/<[^>]*>?/gm, "").trim().slice(0, 2000) : undefined;
-    const cleanImage = typeof image === "string" ? image.trim().slice(0, 300) : undefined;
-    const validLevel = typeof level === "string" && Object.values(CourseLevel).includes(level as CourseLevel) ? (level as CourseLevel) : undefined;
+    const cleanOutcomes = serializeOutcomes(outcomes);
+    const cleanImage = image === undefined ? undefined : normalizeCourseImage(image);
+    if (level !== undefined && (typeof level !== "string" || !Object.values(CourseLevel).includes(level as CourseLevel))) {
+      return NextResponse.json({ message: "Tingkat program tidak valid." }, { status: 400 });
+    }
+    const validLevel = typeof level === "string" ? (level as CourseLevel) : undefined;
+
+    if (published === true && !course.published) {
+      const nodes = await prisma.courseNode.findMany({
+        where: { courseId: id },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          fileUrl: true,
+          content: true,
+          assessmentId: true,
+          assessment: { select: { _count: { select: { questions: true } } } },
+        },
+      });
+      const lessons = nodes.filter(node => node.type !== "FOLDER");
+      if (lessons.length === 0) {
+        return NextResponse.json({ message: "Tambahkan minimal satu materi sebelum menerbitkan program." }, { status: 409 });
+      }
+      const incomplete = lessons.find(node => {
+        if (node.type === "QUIZ" || node.type === "ASSIGNMENT") {
+          return !node.assessmentId || !node.assessment || node.assessment._count.questions === 0;
+        }
+        if (node.type === "TEXT") return !node.content?.trim();
+        return !node.fileUrl?.trim() && !node.content?.trim();
+      });
+      if (incomplete) {
+        return NextResponse.json({
+          message: `Materi "${incomplete.title}" belum memiliki konten atau evaluasi yang siap.`,
+        }, { status: 409 });
+      }
+    }
 
     const updated = await prisma.$transaction(async (tx) => {
       const updatedCourse = await tx.course.update({
@@ -183,8 +268,8 @@ export async function PATCH(request: Request) {
           ...(cleanDesc ? { description: cleanDesc } : {}),
           ...(cleanCategory ? { category: cleanCategory } : {}),
           ...(validLevel ? { level: validLevel } : {}),
-          ...(typeof price === "number" && !isNaN(price) ? { price: Math.min(1000000000, Math.max(0, price)) } : {}),
-          ...(typeof durationHours === "number" && !isNaN(durationHours) ? { durationHours: Math.min(1000, Math.max(1, durationHours)) } : {}),
+          ...(typeof price === "number" && Number.isFinite(price) ? { price: Math.round(Math.min(1000000000, Math.max(0, price))) } : {}),
+          ...(typeof durationHours === "number" && Number.isFinite(durationHours) ? { durationHours: Math.round(Math.min(1000, Math.max(1, durationHours))) } : {}),
           ...(cleanImage ? { image: cleanImage } : {}),
           ...(cleanOutcomes ? { outcomes: cleanOutcomes } : {})
         }
@@ -227,9 +312,31 @@ export async function DELETE(request: Request) {
     const where: Prisma.CourseWhereInput = { id };
     if (user.role === "MENTOR") where.mentorId = user.id;
 
-    const course = await prisma.course.findFirst({ where });
+    const course = await prisma.course.findFirst({
+      where,
+      include: {
+        _count: {
+          select: {
+            enrollments: true,
+            payments: true,
+            certificates: true,
+            calendarEvents: true,
+          },
+        },
+      },
+    });
     if (!course) {
       return NextResponse.json({ message: "Program tidak ditemukan atau Anda tidak memiliki hak hapus." }, { status: 404 });
+    }
+    const hasOperationalHistory = course.published
+      || course._count.enrollments > 0
+      || course._count.payments > 0
+      || course._count.certificates > 0
+      || course._count.calendarEvents > 0;
+    if (hasOperationalHistory) {
+      return NextResponse.json({
+        message: "Program yang sudah diterbitkan atau memiliki riwayat peserta tidak dapat dihapus. Nonaktifkan publikasi dan pertahankan arsipnya.",
+      }, { status: 409 });
     }
 
     await prisma.$transaction(async (tx) => {

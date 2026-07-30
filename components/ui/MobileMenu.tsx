@@ -7,10 +7,9 @@ import {
   BookOpen,
   CircleHelp,
   Compass,
-  Lightbulb,
   LogIn,
   Menu,
-  UsersRound,
+  PanelsTopLeft,
   X,
 } from "lucide-react";
 import { Logo } from "./Logo";
@@ -18,8 +17,7 @@ import { Logo } from "./Logo";
 const navigation = [
   { href: "/program", label: "Program", icon: BookOpen, prefetch: true },
   { href: "/#cara-belajar", label: "Cara belajar", icon: Compass },
-  { href: "/#tentang", label: "Tentang", icon: Lightbulb },
-  { href: "/#insight", label: "Ruang kerja", icon: UsersRound },
+  { href: "/#platform", label: "Platform", icon: PanelsTopLeft },
   { href: "/#faq", label: "FAQ", icon: CircleHelp },
 ];
 

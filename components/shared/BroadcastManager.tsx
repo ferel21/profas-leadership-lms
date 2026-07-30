@@ -86,7 +86,7 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tautan Tujuan / Link Aksi (Opsional)</label>
             <input
               type="text"
-              placeholder="Contoh: /belajar/course-id atau https://zoom.us/..."
+              placeholder="Contoh: /belajar/nama-program"
               value={link}
               onChange={e => setLink(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white transition"

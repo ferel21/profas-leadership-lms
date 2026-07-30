@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, Save, HelpCircle, FileText, CheckCircle, Type, UploadCloud } from "lucide-react";
+import { Plus, Trash2, Save, FileText, CheckCircle, Type, UploadCloud } from "lucide-react";
 import { useLocalBackup } from "@/hooks/useLocalBackup";
 
-export function AssessmentEditorClient({ assessment, courseId }: { assessment: any, courseId: string }) {
+export function AssessmentEditorClient({ assessment }: { assessment: any }) {
   // MASTER SKILL: Auto-Backup & Auto-Restore soal kuis ke localStorage
   const {
     items: questions,

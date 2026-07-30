@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { EnrollmentStatus, Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { AttendanceClient } from "@/components/shared/AttendanceClient";
 import { DashboardChrome } from "@/components/ui/DashboardChrome";
@@ -15,7 +15,10 @@ export default async function AttendancePage() {
   let courseIds: string[] | null = null;
 
   if (user.role === Role.STUDENT) {
-    const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id }, select: { courseId: true } });
+    const enrollments = await prisma.enrollment.findMany({
+      where: { userId: user.id, status: EnrollmentStatus.ACTIVE },
+      select: { courseId: true }
+    });
     courseIds = enrollments.map(item => item.courseId);
   } else if (user.role === Role.MENTOR) {
     const courses = await prisma.course.findMany({ where: { mentorId: user.id }, select: { id: true } });
@@ -36,7 +39,14 @@ export default async function AttendancePage() {
         course: {
           select: {
             title: true,
-            enrollments: { where: { user: { role: Role.STUDENT } }, select: { user: { select: { id: true, name: true, email: true } } }, orderBy: { user: { name: "asc" } } },
+            enrollments: {
+              where: {
+                status: EnrollmentStatus.ACTIVE,
+                user: { role: Role.STUDENT }
+              },
+              select: { user: { select: { id: true, name: true, email: true } } },
+              orderBy: { user: { name: "asc" } }
+            },
           },
         },
         attendanceRecords: {
@@ -48,25 +58,35 @@ export default async function AttendancePage() {
     }),
   ]);
 
-  const viewEvents = events.map(event => ({
-    id: event.id,
-    title: event.title,
-    courseTitle: event.course?.title ?? "Agenda PROFAS",
-    startTime: event.startTime.toISOString(),
-    endTime: event.endTime.toISOString(),
-    attendanceEnabled: event.attendanceEnabled,
-    attendanceOpenAt: event.attendanceOpenAt?.toISOString() ?? null,
-    attendanceCloseAt: event.attendanceCloseAt?.toISOString() ?? null,
-    participants: user.role === Role.STUDENT ? [] : (event.course?.enrollments.map(item => item.user) ?? allStudents),
-    records: event.attendanceRecords.map(record => ({
-      id: record.id,
-      userId: record.userId,
-      userName: record.user.name,
-      status: record.status,
-      checkedInAt: record.checkedInAt?.toISOString() ?? null,
-      source: record.source,
-    })),
-  }));
+  const viewEvents = events.map(event => {
+    const participants = user.role === Role.STUDENT
+      ? []
+      : (event.course?.enrollments.map(item => item.user) ?? allStudents);
+    const participantIds = new Set(participants.map(participant => participant.id));
+    const records = user.role === Role.STUDENT
+      ? event.attendanceRecords
+      : event.attendanceRecords.filter(record => participantIds.has(record.userId));
+
+    return {
+      id: event.id,
+      title: event.title,
+      courseTitle: event.course?.title ?? "Agenda PROFAS",
+      startTime: event.startTime.toISOString(),
+      endTime: event.endTime.toISOString(),
+      attendanceEnabled: event.attendanceEnabled,
+      attendanceOpenAt: event.attendanceOpenAt?.toISOString() ?? null,
+      attendanceCloseAt: event.attendanceCloseAt?.toISOString() ?? null,
+      participants,
+      records: records.map(record => ({
+        id: record.id,
+        userId: record.userId,
+        userName: record.user.name,
+        status: record.status,
+        checkedInAt: record.checkedInAt?.toISOString() ?? null,
+        source: record.source,
+      })),
+    };
+  });
 
   return <DashboardChrome user={user}>
     <div className="dash-title attendance-title">

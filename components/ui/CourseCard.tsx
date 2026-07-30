@@ -20,6 +20,8 @@ export const CourseCard = memo(function CourseCard({ course }: CourseCardProps) 
   const levels: Record<string, string> = { BASIC: "Dasar", INTERMEDIATE: "Menengah", ADVANCED: "Lanjutan" };
   const isMasterclass = course.level === "ADVANCED" || course.price > 1000000;
   const isTopRated = course.rating >= 4.8;
+  const imageSource = course.image || "/images/profas-leadership-hero.webp";
+  const isLocalImage = imageSource.startsWith("/");
 
   return (
     <article
@@ -35,16 +37,23 @@ export const CourseCard = memo(function CourseCard({ course }: CourseCardProps) 
 
       <Link
         href={`/program/${course.slug}`}
-        prefetch={true}
+        prefetch={false}
         className="course-image course-image-enterprise pf-course-card__media"
         aria-label={`Lihat ${course.title}`}
       >
-        <Image
-          src={course.image}
-          alt={course.title}
-          fill
-          sizes="(max-width: 800px) 100vw, 33vw"
-        />
+        {isLocalImage ? (
+          <Image
+            src={imageSource}
+            alt={course.title}
+            fill
+            sizes="(max-width: 800px) 100vw, 33vw"
+          />
+        ) : (
+          // Remote mentor-supplied HTTPS artwork is intentionally rendered
+          // without widening Next.js' global image host allowlist.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={imageSource} alt={course.title} loading="lazy" decoding="async" />
+        )}
         <span className="pf-course-card__media-shade" aria-hidden="true" />
         <span className="level-badge pf-course-card__level">
           {levels[course.level] ?? course.level}
@@ -68,7 +77,7 @@ export const CourseCard = memo(function CourseCard({ course }: CourseCardProps) 
             ) : null}
           </div>
           <h2 className="pf-course-card__title">
-            <Link href={`/program/${course.slug}`} prefetch={true}>
+            <Link href={`/program/${course.slug}`} prefetch={false}>
               {course.title}
             </Link>
           </h2>
@@ -117,7 +126,7 @@ export const CourseCard = memo(function CourseCard({ course }: CourseCardProps) 
           </div>
           <Link
             href={`/program/${course.slug}`}
-            prefetch={true}
+            prefetch={false}
             className="pf-course-card__link"
             aria-label={`Lihat ${course.title}`}
           >

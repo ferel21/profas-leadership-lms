@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
 # Step 1: Dependencies
 FROM base AS deps
@@ -20,8 +20,6 @@ ARG NEXT_PUBLIC_APP_URL=https://profas-leadership-lms.vercel.app
 ENV DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1" \
     DIRECT_URL="postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1" \
     JWT_SECRET="build-only-secret-012345678901234567890123456789" \
-    NEXTAUTH_SECRET="build-only-nextauth-secret-012345678901234567890" \
-    NEXTAUTH_URL="https://build.invalid" \
     NEXT_PUBLIC_APP_URL="${NEXT_PUBLIC_APP_URL}" \
     PRIVATE_UPLOAD_DIR="/app/.data/uploads" \
     HEALTHCHECK_TOKEN="build-only-health-token-012345678901234567890"

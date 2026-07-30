@@ -6,7 +6,38 @@ import { prisma, cachedQuery } from "@/services/prisma";
 import { initials, personaLabel } from "@/utils";
 
 const getLeaderboardStudents = cachedQuery(
-  async () => prisma.user.findMany({where:{role:"STUDENT"},take: 200,select:{id:true,name:true,persona:true,xpLogs:{select:{points:true}},userBadges:{include:{badge:true}}}}),
+  async () => {
+    const students = await prisma.user.findMany({
+      where: { role: "STUDENT" },
+      select: {
+        id: true,
+        name: true,
+        persona: true,
+        userBadges: {
+          select: {
+            id: true,
+            badge: { select: { name: true } }
+          }
+        }
+      }
+    });
+    if (students.length === 0) return [];
+
+    const totals = await prisma.xPLog.groupBy({
+      by: ["userId"],
+      where: { userId: { in: students.map(student => student.id) } },
+      _sum: { points: true }
+    });
+    const xpByUser = new Map(totals.map(total => [total.userId, total._sum.points ?? 0]));
+
+    return students
+      .map(student => ({ ...student, xp: xpByUser.get(student.id) ?? 0 }))
+      .sort((a, b) =>
+        (b.xp - a.xp)
+        || a.name.localeCompare(b.name, "id-ID")
+        || a.id.localeCompare(b.id)
+      );
+  },
   ["leaderboard-students"],
   60
 );
@@ -14,8 +45,7 @@ const getLeaderboardStudents = cachedQuery(
 export default async function LeaderboardPage(){
   const user=await getCurrentUser();
   if(!user)redirect("/masuk?next=/peringkat");
-  const students = await getLeaderboardStudents();
-  const ranking=students.map(student=>({...student,xp:student.xpLogs.reduce((sum,log)=>sum+log.points,0)})).sort((a,b)=>b.xp-a.xp).slice(0, 100);
+  const ranking = await getLeaderboardStudents();
   return (
     <DashboardChrome user={user}>
       <div className="leaderboard-heading">
@@ -60,9 +90,6 @@ export default async function LeaderboardPage(){
               </div>
               <h2 className="podium-name-gold">{ranking[0].name}</h2>
               <p className="podium-persona-gold">{personaLabel(ranking[0].persona)}</p>
-              <div className="podium-nft-mb">
-                <span className="pro-nft-seal podium-nft-seal-sm">👑 NFT VERIFIED CHAMPION</span>
-              </div>
               <div className="podium-xp-gold">
                 {ranking[0].xp.toLocaleString("id-ID")} XP
               </div>
@@ -96,26 +123,34 @@ export default async function LeaderboardPage(){
           <span className="lb-col-badge">Penghargaan</span>
           <span className="lb-col-xp">XP</span>
         </div>
-        {ranking.map((student, index) => (
-          <div className={`leaderboard-row leaderboard-item-row ${student.id === user.id ? "me" : ""}`} key={student.id}>
-            <strong className={`lb-rank-num ${index < 3 ? "top-rank" : "normal-rank"}`}>{index + 1}</strong>
-            <span className="leaderboard-person lb-col-user">
-              <i className="lb-user-avatar">{initials(student.name)}</i>
-              <b>{student.id === user.id ? `${student.name} (Anda)` : student.name}</b>
-            </span>
-            <span className="lb-col-persona">{personaLabel(student.persona)}</span>
-            <span className="lb-col-badge">
-              {index === 0 && <span className="pro-ai-sparkle podium-nft-seal-sm">Top 1 Champion</span>}
-              {student.userBadges.map(ub => (
-                <span key={ub.id} title={ub.badge.name} className="lb-badge-pill">
-                  {ub.badge.name}
-                </span>
-              ))}
-              {student.userBadges.length === 0 && index !== 0 && <span className="lb-badge-empty">—</span>}
-            </span>
-            <b className="lb-col-xp lb-xp-num">{student.xp.toLocaleString("id-ID")} XP</b>
+        {ranking.length === 0 ? (
+          <div className="p-12 text-center text-muted" role="status">
+            <Trophy size={42} className="mx-auto mb-3 opacity-40" />
+            <h2 className="text-lg font-bold text-slate-700 m-0">Peringkat belum tersedia</h2>
+            <p className="m-0 mt-1">Peserta akan muncul setelah akun siswa terdaftar dan mulai memperoleh XP.</p>
           </div>
-        ))}
+        ) : (
+          ranking.map((student, index) => (
+            <div className={`leaderboard-row leaderboard-item-row ${student.id === user.id ? "me" : ""}`} key={student.id}>
+              <strong className={`lb-rank-num ${index < 3 ? "top-rank" : "normal-rank"}`}>{index + 1}</strong>
+              <span className="leaderboard-person lb-col-user">
+                <i className="lb-user-avatar">{initials(student.name)}</i>
+                <b>{student.id === user.id ? `${student.name} (Anda)` : student.name}</b>
+              </span>
+              <span className="lb-col-persona">{personaLabel(student.persona)}</span>
+              <span className="lb-col-badge">
+                {index === 0 && <span className="pro-ai-sparkle podium-nft-seal-sm">Peringkat #1</span>}
+                {student.userBadges.map(ub => (
+                  <span key={ub.id} title={ub.badge.name} className="lb-badge-pill">
+                    {ub.badge.name}
+                  </span>
+                ))}
+                {student.userBadges.length === 0 && index !== 0 && <span className="lb-badge-empty">—</span>}
+              </span>
+              <b className="lb-col-xp lb-xp-num">{student.xp.toLocaleString("id-ID")} XP</b>
+            </div>
+          ))
+        )}
       </section>
     </DashboardChrome>
   );

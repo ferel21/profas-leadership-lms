@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, BookOpen, Check, ClipboardCheck, Gauge, LogOut, Menu, X, History, Users, FileCheck2, Calendar, MessageSquare, Settings, PieChart, Search } from "lucide-react";
+import { Bell, BookOpen, Check, ClipboardCheck, Gauge, LogOut, Menu, X, History, Users, FileCheck2, Calendar, MessageSquare, Settings, PieChart, Search, Trophy, Megaphone } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { initials } from "@/utils";
@@ -14,32 +14,39 @@ const ExecutiveExportHubModal = dynamic(() => import("@/components/shared/Execut
 
 type UserShape = { name:string;username?:string|null;email:string;role:string;avatar?:string|null;headline?:string|null };
 type NotificationItem = { id: string; title: string; message: string; read: boolean; link: string | null; createdAt: string };
+type NavItem = readonly [label: string, icon: LucideIcon, href: string];
+type NavSection = { readonly label: string; readonly items: readonly NavItem[] };
+type NotificationCache = { time: number; notifs: NotificationItem[]; unreadCount: number };
+type NotificationCacheGlobal = typeof globalThis & { __profasNotifCache?: Record<string, NotificationCache> };
 
 const studentNavSections = [
+  { label: "Belajar", items: [["Ringkasan", BookOpen, "/dashboard"], ["Riwayat", History, "/riwayat"], ["Kalender", Calendar, "/kalender"]] },
   {
-    label: "Navigasi utama",
+    label: "Aktivitas",
     items: [
-      ["Ringkasan", BookOpen, "/dashboard"],
-      ["Riwayat", History, "/riwayat"],
-      ["Kalender", Calendar, "/kalender"],
+      ["Absensi", ClipboardCheck, "/absensi"],
+      ["Peringkat", Trophy, "/peringkat"],
       ["Komunitas", MessageSquare, "/forum"],
     ],
   },
-] as const;
+  { label: "Akun", items: [["Pengaturan", Settings, "/pengaturan"]] },
+] as const satisfies readonly NavSection[];
 
 const mentorNavSections = [
-  { label: "Beranda", items: [["Ringkasan", Gauge, "/dashboard"]] },
-  { label: "Peserta & evaluasi", items: [["Manajemen Peserta", Users, "/dashboard/peserta"], ["Riwayat Evaluasi", FileCheck2, "/dashboard/evaluasi"]] },
+  { label: "Workspace", items: [["Ringkasan", Gauge, "/dashboard"], ["Program & Materi", BookOpen, "/dashboard#program"]] },
+  { label: "Peserta & evaluasi", items: [["Manajemen Peserta", Users, "/dashboard/peserta"], ["Evaluasi", FileCheck2, "/mentor/evaluasi"]] },
   { label: "Operasional", items: [["Kalender", Calendar, "/kalender"], ["Absensi", ClipboardCheck, "/absensi"]] },
-  { label: "Wawasan & komunitas", items: [["Analitik", PieChart, "/dashboard/analitik"], ["Komunitas", MessageSquare, "/forum"]] },
+  { label: "Wawasan & komunitas", items: [["Analitik", PieChart, "/dashboard/analitik"], ["Peringkat", Trophy, "/peringkat"], ["Komunitas", MessageSquare, "/forum"]] },
   { label: "Akun", items: [["Pengaturan", Settings, "/pengaturan"]] },
-] as const;
+] as const satisfies readonly NavSection[];
 
 const adminNavSections = [
-  { label: "Beranda", items: [["Analitik", PieChart, "/dashboard"]] },
-  { label: "Operasional", items: [["Absensi", ClipboardCheck, "/absensi"], ["Komunitas", MessageSquare, "/forum"]] },
+  { label: "Workspace", items: [["Ringkasan", Gauge, "/dashboard"]] },
+  { label: "Kelola platform", items: [["Pengguna", Users, "/dashboard#admin-user-mgmt"], ["Program", BookOpen, "/dashboard#program"], ["Siaran", Megaphone, "/dashboard#broadcast-mgmt"]] },
+  { label: "Operasional", items: [["Kalender", Calendar, "/kalender"], ["Absensi", ClipboardCheck, "/absensi"]] },
+  { label: "Wawasan & komunitas", items: [["Analitik", PieChart, "/dashboard/analitik"], ["Peringkat", Trophy, "/peringkat"], ["Komunitas", MessageSquare, "/forum"]] },
   { label: "Akun", items: [["Pengaturan", Settings, "/pengaturan"]] },
-] as const;
+] as const satisfies readonly NavSection[];
 
 export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;children:React.ReactNode;streak?:number}){
   const [open,setOpen]=useState(false);
@@ -52,21 +59,27 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
   const router=useRouter();
   const pathname=usePathname();
   const isStudent=user.role==="STUDENT";
-  const navSections=user.role==="MENTOR"?mentorNavSections:user.role==="SUPER_ADMIN"?adminNavSections:studentNavSections;
+  const navSections: readonly NavSection[]=user.role==="MENTOR"?mentorNavSections:user.role==="SUPER_ADMIN"?adminNavSections:studentNavSections;
+  const notificationCacheKey = user.email.trim().toLowerCase();
   const roleClass = `role-${user.role.toLowerCase().replace(/_/g, "-")}`;
   const roleLabel = user.role==="STUDENT"?"Peserta":user.role==="MENTOR"?"Mentor":"Super Admin";
-  const isNavActive = (href:string) => href === "/dashboard"
-    ? pathname === href
-    : pathname === href || pathname.startsWith(`${href}/`);
-  const studentPageTitle = pathname === "/dashboard"
-    ? "Program saya"
-    : studentNavSections[0].items.find(([, , href]) => isNavActive(href))?.[0] ?? "Ruang belajar";
+  const isNavActive = (href:string) => {
+    if (href.includes("#")) return false;
+    return href === "/dashboard"
+      ? pathname === href
+      : pathname === href || pathname.startsWith(`${href}/`);
+  };
+  const roleHomeTitle = user.role === "STUDENT" ? "Program saya" : user.role === "MENTOR" ? "Workspace Mentor" : "Kontrol Admin";
+  const currentPageTitle = navSections
+    .flatMap(section => section.items)
+    .find(([, , href]) => isNavActive(href))?.[0] ?? roleHomeTitle;
 
   useEffect(()=>{
     let cancelled = false;
     const loadNotifications = () => {
       const now = Date.now();
-      const globalCache = (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache;
+      const cacheStore = (globalThis as NotificationCacheGlobal).__profasNotifCache;
+      const globalCache = cacheStore?.[notificationCacheKey];
       if (globalCache && now - globalCache.time < 45000) {
         setNotifs(globalCache.notifs);
         setUnreadCount(globalCache.unreadCount);
@@ -78,7 +91,9 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
           if(data && !cancelled){
             setNotifs(data.notifications ?? []);
             setUnreadCount(data.unreadCount ?? 0);
-            (globalThis as unknown as { __profasNotifCache?: { time: number; notifs: NotificationItem[]; unreadCount: number } }).__profasNotifCache = {
+            const globalScope = globalThis as NotificationCacheGlobal;
+            globalScope.__profasNotifCache ??= {};
+            globalScope.__profasNotifCache[notificationCacheKey] = {
               time: Date.now(),
               notifs: data.notifications ?? [],
               unreadCount: data.unreadCount ?? 0,
@@ -113,17 +128,27 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
       else window.clearTimeout(idleId as number);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  },[]);
+  },[notificationCacheKey]);
 
   async function markReadAll(){
+    const nextNotifs = notifs.map(n=>({...n,read:true}));
     setUnreadCount(0);
-    setNotifs(prev=>prev.map(n=>({...n,read:true})));
+    setNotifs(nextNotifs);
+    const globalScope = globalThis as NotificationCacheGlobal;
+    globalScope.__profasNotifCache ??= {};
+    globalScope.__profasNotifCache[notificationCacheKey] = { time: Date.now(), notifs: nextNotifs, unreadCount: 0 };
     await fetch("/api/notifications",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"read_all"})}).catch(()=>null);
   }
 
   async function markRead(id:string,link:string|null){
-    setNotifs(prev=>prev.map(n=>n.id===id?{...n,read:true}:n));
-    setUnreadCount(prev=>Math.max(0,prev-1));
+    const wasUnread = notifs.some(n=>n.id===id && !n.read);
+    const nextNotifs = notifs.map(n=>n.id===id?{...n,read:true}:n);
+    const nextUnreadCount = wasUnread ? Math.max(0, unreadCount-1) : unreadCount;
+    setNotifs(nextNotifs);
+    setUnreadCount(nextUnreadCount);
+    const globalScope = globalThis as NotificationCacheGlobal;
+    globalScope.__profasNotifCache ??= {};
+    globalScope.__profasNotifCache[notificationCacheKey] = { time: Date.now(), notifs: nextNotifs, unreadCount: nextUnreadCount };
     await fetch("/api/notifications",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"read",id})}).catch(()=>null);
     if(link){
       setShowNotifs(false);
@@ -131,26 +156,27 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
     }
   }
 
-  async function logout(){try{await fetch("/api/auth/logout",{method:"POST"})}finally{router.push("/");router.refresh()}}
+  async function logout(){
+    try{
+      await fetch("/api/auth/logout",{method:"POST"});
+    }finally{
+      const globalScope = globalThis as NotificationCacheGlobal;
+      if(globalScope.__profasNotifCache) delete globalScope.__profasNotifCache[notificationCacheKey];
+      router.push("/");
+      router.refresh();
+    }
+  }
 
-  return <div className={`dashboard-fresh dashboard-layout pf-workspace-shell ${roleClass} ${collapsed ? "sidebar-collapsed" : ""}`}>
+  return <div className={`dashboard-fresh dashboard-layout pf-workspace-shell pf-workspace-minimal ${roleClass} ${collapsed ? "sidebar-collapsed" : ""}`}>
     <aside id="dashboard-navigation" className={`pf-workspace-sidebar ${open?"open":""}`} aria-label="Navigasi utama ruang belajar">
       <div className="pf-workspace-sidebar-header">
         <div className="pf-workspace-logo">
           {!collapsed && <Logo/>}
           {collapsed && <Logo compact />}
-          {isStudent && !collapsed && <span className="pf-workspace-logo-caption">Workspace</span>}
+          {!collapsed && <span className="pf-workspace-logo-caption">Workspace</span>}
         </div>
         <button type="button" onClick={()=>setOpen(false)} aria-label="Tutup navigasi" aria-controls="dashboard-navigation" className="pf-workspace-sidebar-close"><X aria-hidden="true"/></button>
       </div>
-      {!isStudent && (
-        <section className="pf-workspace-profile" aria-label={`${user.name}, ${roleLabel}`}>
-          <span className={`pf-workspace-profile-avatar ${user.avatar ? "has-avatar" : "pf-workspace-profile-avatar-fallback"}`} aria-hidden="true">
-            {user.avatar ? <Image src={user.avatar} alt="" width={38} height={38} /> : initials(user.name)}
-          </span>
-          {!collapsed && <div className="pf-workspace-profile-copy"><b className="pf-workspace-profile-name">{user.username ? `@${user.username}` : user.name}</b><small className="pf-workspace-profile-role">{user.name} · {roleLabel}</small></div>}
-        </section>
-      )}
       <nav className="pf-workspace-nav" aria-label="Menu ruang belajar">
         {navSections.map((section, sectionIndex) => {
           const sectionTitleId = `workspace-nav-section-${sectionIndex}`;
@@ -169,10 +195,7 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
                     <Link
                       href={href}
                       key={label}
-                      prefetch={true}
-                      onMouseEnter={() => {
-                        try { if (href.startsWith("/")) router.prefetch(href.split("#")[0]); } catch {}
-                      }}
+                      prefetch={false}
                       className={`pf-workspace-nav-link ${isActive ? "active" : ""}`}
                       aria-current={isActive ? "page" : undefined}
                       aria-label={collapsed ? label : undefined}
@@ -199,24 +222,8 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
       <header className="pf-workspace-topbar">
         <button type="button" className="pf-workspace-menu-trigger" onClick={()=>setOpen(true)} aria-label="Buka navigasi" aria-controls="dashboard-navigation" aria-expanded={open}><Menu aria-hidden="true"/></button>
         <div className="flex items-center gap-4 pf-workspace-context">
-          {isStudent ? (
-            <strong className="pf-workspace-page-title">{studentPageTitle}</strong>
-          ) : (
-            <>
-              <span className="pf-workspace-brand"><b>PROFAS</b><span>RUANG BELAJAR</span></span>
-              <div className="flex items-center gap-2 hide-on-mobile pf-workspace-status-list">
-                <div className="pro-live-pulse pf-workspace-status" title="Sistem pembelajaran aktif" role="status">
-                  <span className="pro-live-pulse-dot" aria-hidden="true"></span>
-                  <span>Sistem aktif</span>
-                </div>
-                {streak > 0 && (
-                  <div className="pro-streak-flame pf-workspace-status pf-workspace-streak" title={`${streak} hari belajar konsisten`}>
-                    <span>{streak} hari beruntun</span>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+          <strong className="pf-workspace-page-title">{pathname === "/dashboard" ? roleHomeTitle : currentPageTitle}</strong>
+          {isStudent && streak > 0 && <span className="pf-workspace-streak-compact hide-on-mobile">{streak} hari beruntun</span>}
         </div>
         <div className="flex items-center gap-2.5 pf-workspace-actions" role="group" aria-label="Aksi cepat">
           {!isStudent && (
@@ -229,28 +236,17 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
               aria-haspopup="dialog"
             >
               <PieChart size={15} aria-hidden="true" />
-              <span className="hide-on-mobile">Pusat laporan</span>
             </button>
           )}
           <button
             type="button"
             onClick={() => setIsCommandOpen(true)}
-            className={isStudent ? "pf-workspace-action pf-workspace-search-icon" : "hide-on-mobile pf-workspace-action pf-workspace-search"}
+            className="pf-workspace-action pf-workspace-search-icon"
             title="Cari cepat (Ctrl+K)"
             aria-label="Cari cepat di sistem (Ctrl+K)"
             aria-haspopup="dialog"
           >
-            {isStudent ? (
-              <Search aria-hidden="true" />
-            ) : (
-              <>
-                <div>
-                  <Search size={15} aria-hidden="true" />
-                  <span>Cari</span>
-                </div>
-                <kbd>Ctrl K</kbd>
-              </>
-            )}
+            <Search aria-hidden="true" />
           </button>
           <button type="button" onClick={()=>setShowNotifs(v=>!v)} aria-label={`${showNotifs ? "Tutup" : "Buka"} notifikasi${unreadCount > 0 ? `, ${unreadCount} belum dibaca` : ""}`} aria-expanded={showNotifs} aria-haspopup="dialog" aria-controls="workspace-notifications" className="pf-workspace-action pf-workspace-notification-trigger">
             <Bell aria-hidden="true"/>{unreadCount > 0 && <i className="notification-badge" aria-label={`${unreadCount} notifikasi belum dibaca`}>{unreadCount}</i>}
@@ -275,23 +271,23 @@ export function DashboardChromeClient({user,children,streak=0}:{user:UserShape;c
               )}
             </div>
           </div>}
-          {isStudent ? (
-            <Link href="/pengaturan" className="pf-workspace-user-link" aria-label={`Buka pengaturan akun ${user.name}`}>
-              <span className={`pf-workspace-user-avatar ${user.avatar ? "has-avatar" : ""}`} aria-hidden="true">
-                {user.avatar ? <Image src={user.avatar} alt="" width={36} height={36} /> : initials(user.name)}
-              </span>
-              <span className="pf-workspace-user-copy">
-                <b>{user.name}</b>
-                <small>Peserta</small>
-              </span>
-            </Link>
-          ) : (
-            <Link href="/program" prefetch={true} className="btn btn-primary btn-small hide-on-mobile pf-workspace-program-link">Jelajahi program</Link>
-          )}
+          <Link href="/program" prefetch={false} className="pf-workspace-catalog-link hide-on-mobile">Katalog</Link>
+          <Link href="/pengaturan" className="pf-workspace-user-link" aria-label={`Buka pengaturan akun ${user.name}`}>
+            <span className={`pf-workspace-user-avatar ${user.avatar ? "has-avatar" : ""}`} aria-hidden="true">
+              {/* User avatars can be Google-hosted or data URIs; a native image
+                  keeps profile rendering independent from Next remote-host rules. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {user.avatar ? <img src={user.avatar} alt="" width={36} height={36} /> : initials(user.name)}
+            </span>
+            <span className="pf-workspace-user-copy">
+              <b>{user.name}</b>
+              <small>{roleLabel}</small>
+            </span>
+          </Link>
         </div>
       </header>
       <main id="workspace-main" className="pf-workspace-main">{children}</main>
-      <CommandPalette isOpen={isCommandOpen} onClose={() => setIsCommandOpen(false)} />
+      <CommandPalette isOpen={isCommandOpen} onClose={() => setIsCommandOpen(false)} role={user.role} />
       {!isStudent && <ExecutiveExportHubModal isOpen={isExportHubOpen} onClose={() => setIsExportHubOpen(false)} initialRole={user.role} />}
     </div>
   </div>;

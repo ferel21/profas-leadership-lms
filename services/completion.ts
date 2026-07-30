@@ -1,25 +1,69 @@
 import { randomUUID } from "node:crypto";
 import { prisma } from "./prisma";
 
+export function getCourseCompletionState(
+  totalLessons: number,
+  completedLessons: number,
+  requiredAssessments: number,
+  passedAssessments: number,
+) {
+  const progressPercent = totalLessons > 0
+    ? Math.min(100, Math.floor((completedLessons / totalLessons) * 100))
+    : 0;
+  const eligible = totalLessons > 0
+    && completedLessons === totalLessons
+    && passedAssessments === requiredAssessments;
+  return { progressPercent, eligible };
+}
+
 export async function finalizeCourseCompletion(userId: string, courseId: string) {
   return prisma.$transaction(async (tx) => {
     const [enrollment,totalLessons,completedLessons,requiredAssessments,passedAttempts] = await Promise.all([
-      tx.enrollment.findUnique({ where: { userId_courseId: { userId, courseId } }, select: { completedAt: true } }),
+      tx.enrollment.findUnique({
+        where: { userId_courseId: { userId, courseId } },
+        select: {
+          completedAt: true,
+          course: { select: { certificateAvailable: true } },
+        },
+      }),
       tx.courseNode.count({ where: { courseId, type: { not: "FOLDER" } } }),
       tx.nodeProgress.count({ where: { userId, node: { courseId, type: { not: "FOLDER" } } } }),
-      tx.assessment.count({ where: { courseId, type: { not: "PRETEST" } } }),
-      tx.assessmentAttempt.findMany({ where: { userId, passed: true, assessment: { courseId, type: { not: "PRETEST" } } }, select: { assessmentId: true } }),
+      tx.assessment.count({
+        where: {
+          courseId,
+          type: { not: "PRETEST" },
+          nodes: { some: { courseId, type: { in: ["QUIZ", "ASSIGNMENT"] } } }
+        }
+      }),
+      tx.assessmentAttempt.findMany({
+        where: {
+          userId,
+          passed: true,
+          status: "GRADED",
+          assessment: {
+            courseId,
+            type: { not: "PRETEST" },
+            nodes: { some: { courseId, type: { in: ["QUIZ", "ASSIGNMENT"] } } }
+          }
+        },
+        select: { assessmentId: true }
+      }),
     ]);
     if (!enrollment) return null;
-    const progressPercent=Math.round((completedLessons/Math.max(totalLessons,1))*100);
     const passedAssessments=new Set(passedAttempts.map((attempt: { assessmentId: string }) => attempt.assessmentId)).size;
-    const eligible=progressPercent===100&&passedAssessments===requiredAssessments;
+    const { progressPercent, eligible } = getCourseCompletionState(
+      totalLessons,
+      completedLessons,
+      requiredAssessments,
+      passedAssessments,
+    );
+    const certificateEligible = eligible && enrollment.course.certificateAvailable;
     await tx.enrollment.update({
       where: { userId_courseId: { userId, courseId } },
       data: { progressPercent, status: eligible?"COMPLETED":"ACTIVE", completedAt: eligible?(enrollment.completedAt??new Date()):null },
     });
     let certificateNumber: string | null = null;
-    if (eligible) {
+    if (certificateEligible) {
       const existingCert = await tx.certificate.findUnique({
         where: { userId_courseId: { userId, courseId } },
         select: { uniqueNumber: true }
@@ -56,7 +100,46 @@ export async function finalizeCourseCompletion(userId: string, courseId: string)
           }
         });
       }
+    } else if (!eligible) {
+      const certificate = await tx.certificate.findUnique({
+        where: { userId_courseId: { userId, courseId } },
+        select: { id: true, uniqueNumber: true }
+      });
+      if (certificate) {
+        await tx.certificate.delete({ where: { id: certificate.id } });
+        await tx.notification.create({
+          data: {
+            userId,
+            title: "Status kelulusan diperbarui",
+            message: "Sertifikat ditarik sementara karena syarat penyelesaian program belum lagi terpenuhi.",
+            type: "COURSE_COMPLETION_REOPENED",
+            link: "/dashboard"
+          }
+        });
+        await tx.activityLog.create({
+          data: {
+            userId,
+            action: "REVOKE_CERTIFICATE",
+            metadata: JSON.stringify({ certificateNumber: certificate.uniqueNumber, courseId })
+          }
+        });
+      }
+    } else {
+      const existingCert = await tx.certificate.findUnique({
+        where: { userId_courseId: { userId, courseId } },
+        select: { uniqueNumber: true },
+      });
+      certificateNumber = existingCert?.uniqueNumber ?? null;
     }
-    return { progressPercent, completedLessons, totalLessons, passedAssessments, requiredAssessments, eligible, certificateNumber };
+    return {
+      progressPercent,
+      completedLessons,
+      totalLessons,
+      passedAssessments,
+      requiredAssessments,
+      eligible,
+      certificateAvailable: enrollment.course.certificateAvailable,
+      certificateNumber,
+    };
   });
 }

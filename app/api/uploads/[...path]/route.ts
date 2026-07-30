@@ -5,6 +5,7 @@ import { extname } from "node:path";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { getReadableUploadRoots, resolveUploadPath } from "@/services/upload-storage";
+import { createSignedObjectDownload, getObjectStorageMode } from "@/services/object-storage";
 import { rateLimit } from "@/services/rate-limit";
 
 const uploadsLimiter = rateLimit({ limit: 120, windowMs: 60 * 1000 });
@@ -40,13 +41,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     }
 
     const relativePath = path.join("/");
-    const candidates = getReadableUploadRoots().map(root => {
-      try { return resolveUploadPath(root, path); } catch { return null; }
-    });
-    if (candidates.some(candidate => candidate === null)) {
-      return NextResponse.json({ error: "Path berkas tidak valid." }, { status: 400 });
-    }
-
     const storedUrl = `/api/uploads/${relativePath}`;
     if (path[0] === "assignments") {
       const answer = await prisma.attemptAnswer.findFirst({
@@ -67,25 +61,59 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
       );
       if (!canAccess) return NextResponse.json({ error: "Berkas tidak ditemukan." }, { status: 404 });
     } else {
-      const courseId = path[0];
+      const courseId = path[0] === "materials" ? path[1] : path[0];
+      if (!courseId) return NextResponse.json({ error: "Path berkas tidak valid." }, { status: 400 });
       const material = await prisma.courseNode.findFirst({
         where: {
           courseId,
           fileUrl: storedUrl,
-          course: {
-            OR: [
-              { mentorId: user.id },
-              { published: true, enrollments: { some: { userId: user.id } } },
-            ],
-          },
+          ...(user.role === "SUPER_ADMIN"
+            ? {}
+            : {
+                course: {
+                  OR: [
+                    { mentorId: user.id },
+                    {
+                      published: true,
+                      enrollments: {
+                        some: {
+                          userId: user.id,
+                          status: { in: ["ACTIVE", "COMPLETED"] },
+                        },
+                      },
+                    },
+                  ],
+                },
+              }),
         },
         select: { id: true },
       });
-      if (!material && user.role !== "SUPER_ADMIN") {
+      if (!material) {
         return NextResponse.json({ error: "Berkas tidak ditemukan." }, { status: 404 });
       }
     }
 
+    const isDurableObjectPath = path[0] === "materials" || (path[0] === "assignments" && path.length >= 4);
+    if (isDurableObjectPath) {
+      const storage = getObjectStorageMode();
+      if (storage.mode === "supabase") {
+        const signedUrl = await createSignedObjectDownload(relativePath, 60);
+        const response = NextResponse.redirect(signedUrl, 307);
+        response.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+        response.headers.set("Referrer-Policy", "no-referrer");
+        return response;
+      }
+      if (storage.mode === "unavailable") {
+        return NextResponse.json({ error: storage.message }, { status: 503 });
+      }
+    }
+
+    const candidates = getReadableUploadRoots().map(root => {
+      try { return resolveUploadPath(root, path); } catch { return null; }
+    });
+    if (candidates.some(candidate => candidate === null)) {
+      return NextResponse.json({ error: "Path berkas tidak valid." }, { status: 400 });
+    }
     const filePath = candidates.find((candidate): candidate is string => Boolean(candidate && existsSync(candidate)));
     if (!filePath) {
       return NextResponse.json({ error: "Berkas tidak ditemukan." }, { status: 404 });

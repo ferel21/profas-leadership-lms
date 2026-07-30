@@ -382,7 +382,15 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                   />
                 ) : (
                   <>
-                    <iframe src={current.fileUrl || current.content || undefined} title={current.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="player-video-inner" />
+                    <iframe
+                      src={current.fileUrl || undefined}
+                      title={current.title}
+                      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                      sandbox="allow-scripts allow-same-origin allow-presentation"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      className="player-video-inner"
+                    />
                     <div className="player-video-fallback"><Play fill="currentColor" size={60} /></div>
                   </>
                 )}
@@ -441,7 +449,13 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               {(current.description || current.content) && <p className="player-desc-lead player-desc-left">{current.description || current.content}</p>}
               {current.fileUrl ? (
                 <div className="player-pdf-viewer">
-                  <iframe src={`${current.fileUrl}#toolbar=1&navpanes=0&scrollbar=1`} className="player-pdf-iframe" title={current.title} />
+                  <iframe
+                    src={`${current.fileUrl}#toolbar=1&navpanes=0&scrollbar=1`}
+                    className="player-pdf-iframe"
+                    title={current.title}
+                    sandbox="allow-same-origin allow-downloads"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
                 </div>
               ) : (
                 <div className="player-pdf-missing">

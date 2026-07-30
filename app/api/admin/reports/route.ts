@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
+import { AttemptStatus } from "@prisma/client";
 
 const reportsLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
@@ -26,14 +27,52 @@ export async function GET(request: Request) {
   }
 
   try {
-    const enrollments = await prisma.enrollment.findMany({
-      take: 1000,
-      orderBy: { enrolledAt: "desc" },
-      include: {
-        user: { select: { name: true, email: true } },
-        course: { select: { title: true } }
+    const { enrollments, attempts } = await prisma.$transaction(async tx => {
+      const enrollmentRows = await tx.enrollment.findMany({
+        take: 1000,
+        orderBy: { enrolledAt: "desc" },
+        select: {
+          id: true,
+          userId: true,
+          courseId: true,
+          progressPercent: true,
+          status: true,
+          enrolledAt: true,
+          user: { select: { name: true, email: true } },
+          course: { select: { title: true } },
+        },
+      });
+
+      if (enrollmentRows.length === 0) {
+        return { enrollments: enrollmentRows, attempts: [] };
       }
+
+      const attemptRows = await tx.assessmentAttempt.findMany({
+        where: {
+          status: AttemptStatus.GRADED,
+          userId: { in: Array.from(new Set(enrollmentRows.map(item => item.userId))) },
+          assessment: {
+            courseId: { in: Array.from(new Set(enrollmentRows.map(item => item.courseId))) },
+          },
+        },
+        select: {
+          userId: true,
+          score: true,
+          assessment: { select: { courseId: true } },
+        },
+      });
+
+      return { enrollments: enrollmentRows, attempts: attemptRows };
     });
+
+    const scoreBuckets = new Map<string, { total: number; count: number }>();
+    for (const attempt of attempts) {
+      const key = `${attempt.userId}:${attempt.assessment.courseId}`;
+      const bucket = scoreBuckets.get(key) ?? { total: 0, count: 0 };
+      bucket.total += attempt.score;
+      bucket.count += 1;
+      scoreBuckets.set(key, bucket);
+    }
 
     const rows = enrollments.map(e => ({
       id: e.id,
@@ -41,7 +80,7 @@ export async function GET(request: Request) {
       email: sanitizeSpreadsheetText(e.user.email),
       course: sanitizeSpreadsheetText(e.course.title),
       progress: e.progressPercent,
-      score: e.progressPercent > 0 ? Math.round(e.progressPercent * 0.9) : null,
+      score: averageScore(scoreBuckets.get(`${e.userId}:${e.courseId}`)),
       status: e.status,
       enrolledAt: e.enrolledAt.toISOString()
     }));
@@ -53,4 +92,8 @@ export async function GET(request: Request) {
     console.error(error);
     return NextResponse.json({ message: "Gagal mengambil data laporan" }, { status: 500 });
   }
+}
+
+function averageScore(bucket: { total: number; count: number } | undefined) {
+  return bucket && bucket.count > 0 ? Math.round(bucket.total / bucket.count) : null;
 }

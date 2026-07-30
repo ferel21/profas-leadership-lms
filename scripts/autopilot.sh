@@ -93,7 +93,6 @@ snapshot_workspace() {
     --exclude='.next/' \
     --exclude='node_modules/' \
     --exclude='.env' \
-    --exclude='prisma/dev.db*' \
     "$ROOT/" "$snapshot/"
   printf '%s' "$snapshot"
 }

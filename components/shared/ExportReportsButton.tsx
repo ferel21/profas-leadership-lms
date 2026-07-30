@@ -14,6 +14,7 @@ interface ExportReportsButtonProps {
   attendances?: AttendanceReportRow[];
   xpLogs?: XPReportRow[];
   className?: string;
+  loadLatest?: boolean;
 }
 
 export function ExportReportsButton({
@@ -22,6 +23,7 @@ export function ExportReportsButton({
   attendances = [],
   xpLogs = [],
   className,
+  loadLatest = false,
 }: ExportReportsButtonProps) {
   return (
     <ExportActionButton
@@ -33,12 +35,25 @@ export function ExportReportsButton({
       className={className}
       errorMessage="Terjadi kesalahan saat membuat file Excel. Silakan coba lagi."
       onExport={async () => {
+        let latestStudents = students;
+        let latestAttendances = attendances;
+        let latestXpLogs = xpLogs;
+        if (loadLatest) {
+          const response = await fetch("/api/analytics/export-data");
+          const data = await response.json().catch(() => null);
+          if (!response.ok || !data) {
+            throw new Error(data?.message ?? "Data laporan belum dapat dimuat.");
+          }
+          latestStudents = Array.isArray(data.students) ? data.students : [];
+          latestAttendances = Array.isArray(data.attendances) ? data.attendances : [];
+          latestXpLogs = Array.isArray(data.xpLogs) ? data.xpLogs : [];
+        }
         const { generateExcelReport } = await import("@/services/export/xlsxExport");
         return generateExcelReport({
           fileName: `PROFAS-LMS-Analytics-${new Date().toISOString().split("T")[0]}.xlsx`,
-          students,
-          attendances,
-          xpLogs,
+          students: latestStudents,
+          attendances: latestAttendances,
+          xpLogs: latestXpLogs,
         });
       }}
     />

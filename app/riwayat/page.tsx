@@ -18,7 +18,7 @@ export default async function RiwayatPembelajaran() {
       include: { node: { select: { title: true, type: true, course: { select: { title: true, slug: true } } } } }
     }),
     prisma.assessmentAttempt.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id, status: { not: "IN_PROGRESS" } },
       include: { assessment: { select: { title: true, course: { select: { title: true, slug: true } } } } }
     }),
     prisma.xPLog.findMany({

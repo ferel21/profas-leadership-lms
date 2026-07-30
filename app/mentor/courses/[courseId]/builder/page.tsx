@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 
 export default async function CourseBuilderPage({ params }: { params: Promise<{ courseId: string }> }) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR") redirect("/masuk");
+  if (!user || (user.role !== "MENTOR" && user.role !== "SUPER_ADMIN")) redirect("/masuk");
 
   const courseId = (await params).courseId;
 
@@ -21,7 +21,7 @@ export default async function CourseBuilderPage({ params }: { params: Promise<{ 
     }
   });
 
-  if (!course || course.mentorId !== user.id) redirect("/dashboard");
+  if (!course || (user.role === "MENTOR" && course.mentorId !== user.id)) redirect("/dashboard");
 
   type TreeNode = import("@prisma/client").CourseNode & { children: TreeNode[] };
   const nodes = course.nodes;

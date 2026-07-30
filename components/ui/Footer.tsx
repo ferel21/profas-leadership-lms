@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowUpRight, Compass, Instagram, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowUpRight, Compass, Instagram, Linkedin, Mail, MapPin } from 'lucide-react';
 import { Logo } from './Logo';
 
 export function Footer() {
@@ -62,10 +62,6 @@ export function Footer() {
           <a className="footer-contact" href="mailto:halo@profas.id">
             <Mail size={17} aria-hidden="true" />
             <span>halo@profas.id</span>
-          </a>
-          <a className="footer-contact" href="tel:+6281234567890">
-            <Phone size={17} aria-hidden="true" />
-            <span>+62 812-3456-7890</span>
           </a>
           <p className="footer-contact">
             <MapPin size={17} aria-hidden="true" />

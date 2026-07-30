@@ -159,49 +159,47 @@ export default async function Home() {
   const courses = await getFeaturedCourses();
 
   return (
-    <div className="pf-public-page">
+    <div className="pf-public-page pf-home">
+      <a className="pf-skip-link" href="#main-content">
+        Lewati ke konten utama
+      </a>
       <Header />
-      <main>
-        <section className="pf-hero" aria-labelledby="home-title">
-          <div className="container pf-hero-layout">
-            <div className="pf-hero-copy">
-              <span className="pf-kicker">
+      <main id="main-content">
+        <section className="pf-home-hero" aria-labelledby="home-title">
+          <div className="container pf-hero-layout pf-home-hero-layout">
+            <div className="pf-home-hero-copy">
+              <span className="pf-home-pill">
                 <span aria-hidden="true" />
-                Ruang belajar kepemimpinan
+                Platform belajar kepemimpinan
               </span>
               <h1 id="home-title">
-                Belajar memimpin
-                <em> dengan cara memimpin.</em>
+                Pimpin lebih jernih.
+                <span> Bertindak lebih yakin.</span>
               </h1>
-              <p className="pf-hero-lead">
+              <p className="pf-home-hero-lead">
                 PROFAS membantu Anda membaca situasi, menguji keputusan, dan
-                membawa pembelajaran ke ruang kerja—satu langkah nyata setiap
-                kali belajar.
+                mengubah pembelajaran menjadi tindakan yang relevan di ruang
+                kerja.
               </p>
-              <div className="pf-hero-actions">
-                <Link href="/daftar" className="pf-button pf-button-primary">
-                  Mulai perjalanan
+              <div className="pf-home-hero-actions">
+                <Link href="/daftar" className="pf-home-button pf-home-button-primary">
+                  Mulai belajar
                   <ArrowRight aria-hidden="true" />
                 </Link>
-                <Link href="/program" className="pf-button pf-button-secondary">
+                <Link href="/program" className="pf-home-button pf-home-button-secondary">
                   <BookOpen aria-hidden="true" />
                   Lihat program
                 </Link>
               </div>
-              <div className="pf-hero-proof" aria-label="Ringkasan kepercayaan">
-                <div>
-                  <strong>2.500+</strong>
-                  <span>alumni bertumbuh bersama</span>
-                </div>
-                <div>
-                  <strong>4,9/5</strong>
-                  <span>penilaian pengalaman belajar</span>
-                </div>
-              </div>
+              <ul className="pf-home-assurances" aria-label="Keunggulan platform">
+                <li><ShieldCheck aria-hidden="true" /> Mentor praktisi</li>
+                <li><Check aria-hidden="true" /> Progres tersimpan</li>
+                <li><Award aria-hidden="true" /> Sertifikat terverifikasi</li>
+              </ul>
             </div>
 
-            <div className="pf-hero-visual" aria-label="Peta perjalanan belajar PROFAS">
-              <figure className="pf-hero-photo">
+            <div className="pf-home-hero-visual" aria-label="Pengalaman belajar PROFAS">
+              <figure className="pf-home-hero-photo">
                 <Image
                   src="/images/profas-leadership-hero.webp"
                   alt="Mentor PROFAS memandu percakapan bersama peserta"
@@ -210,77 +208,58 @@ export default async function Home() {
                   priority
                   sizes="(max-width: 860px) 100vw, 48vw"
                 />
-                <figcaption>
-                  <span>Di dalam kelas</span>
-                  Percakapan yang dekat dengan situasi kerja nyata.
-                </figcaption>
               </figure>
 
-              <div className="pf-journey-card">
-                <div className="pf-journey-card-head">
-                  <span>Perjalanan Anda</span>
-                  <strong>03 langkah</strong>
-                </div>
-                <svg
-                  viewBox="0 0 420 152"
-                  role="img"
-                  aria-label="Alur dari memahami konteks, berlatih, hingga berdampak"
-                >
-                  <path
-                    d="M24 112 C92 112 82 42 158 42 C232 42 226 112 298 112 C346 112 362 78 396 38"
-                    pathLength="1"
-                  />
-                  <circle cx="24" cy="112" r="8" />
-                  <circle cx="158" cy="42" r="8" />
-                  <circle cx="298" cy="112" r="8" />
-                  <circle className="is-current" cx="396" cy="38" r="11" />
-                </svg>
-                <div className="pf-journey-labels" aria-hidden="true">
-                  <span>Konteks</span>
-                  <span>Latihan</span>
-                  <span>Refleksi</span>
-                  <span>Dampak</span>
+              <div className="pf-home-hero-status">
+                <span><Check aria-hidden="true" /></span>
+                <div>
+                  <small>Ritme belajar terjaga</small>
+                  <strong>Progres tersimpan otomatis</strong>
                 </div>
               </div>
 
-              <div className="pf-hero-note">
+              <div className="pf-home-next-card">
                 <span><Play fill="currentColor" aria-hidden="true" /></span>
                 <div>
-                  <small>Sesi berikutnya</small>
+                  <small>Contoh materi berikutnya</small>
                   <strong>Memimpin percakapan sulit</strong>
                   <p>12 menit · Studi kasus</p>
                 </div>
+                <ArrowRight aria-hidden="true" />
+              </div>
+
+              <div className="pf-home-hero-tags" aria-hidden="true">
+                <span>Refleksi</span>
+                <span>Diskusi</span>
+                <span>Praktik</span>
               </div>
             </div>
-          </div>
-
-          <div className="container pf-trust-strip">
-            <span><ShieldCheck aria-hidden="true" /> Akses berbasis peran</span>
-            <span><Check aria-hidden="true" /> Progres tersimpan otomatis</span>
-            <span><Award aria-hidden="true" /> Sertifikat terverifikasi</span>
-            <span><Users2 aria-hidden="true" /> Mentor praktisi</span>
           </div>
         </section>
 
-        <section className="pf-section pf-outcome-section" id="tentang" aria-labelledby="outcome-title">
+        <section className="pf-home-stats-section" aria-label="Ringkasan PROFAS">
+          <div className="container pf-home-stats">
+            <div><strong>2.500+</strong><span>Alumni bertumbuh</span></div>
+            <div><strong>4,9/5</strong><span>Pengalaman belajar</span></div>
+            <div><strong>3</strong><span>Ruang kerja berbasis peran</span></div>
+            <div><strong>Fleksibel</strong><span>Belajar sesuai ritme Anda</span></div>
+          </div>
+        </section>
+
+        <section className="pf-home-section pf-home-benefits" id="manfaat" aria-labelledby="outcome-title">
           <div className="container">
-            <div className="pf-section-heading pf-section-heading-split">
-              <div>
-                <span className="pf-kicker">Yang berubah setelah belajar</span>
-                <h2 id="outcome-title">Bukan sekadar materi yang selesai.</h2>
-              </div>
+            <div className="pf-home-heading pf-home-heading-centered">
+              <span className="pf-home-pill">Mengapa PROFAS</span>
+              <h2 id="outcome-title">Belajar yang bergerak sampai ke praktik.</h2>
               <p>
-                Pembelajaran dirancang untuk meninggalkan cara kerja yang lebih
-                jernih—bukan hanya menambah daftar konsep yang pernah dibaca.
+                Setiap program membantu Anda memahami konteks, melatih cara
+                berpikir, dan membawa satu tindakan nyata kembali ke pekerjaan.
               </p>
             </div>
-            <div className="pf-outcome-grid">
-              {outcomes.map(({ icon: Icon, title, copy }, index) => (
-                <article key={title} className="pf-outcome-card">
-                  <div>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <Icon aria-hidden="true" />
-                  </div>
+            <div className="pf-home-benefit-grid">
+              {outcomes.map(({ icon: Icon, title, copy }) => (
+                <article key={title} className="pf-home-benefit-card">
+                  <span><Icon aria-hidden="true" /></span>
                   <h3>{title}</h3>
                   <p>{copy}</p>
                 </article>
@@ -289,89 +268,27 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="pf-proof-section" id="mentor" aria-labelledby="proof-title">
-          <div className="container pf-proof-layout">
-            <figure className="pf-proof-media">
-              <Image
-                src="/images/profas-activity-collage.jpeg"
-                alt="Kolase diskusi dan kegiatan belajar peserta PROFAS"
-                width={1599}
-                height={899}
-                sizes="(max-width: 860px) 100vw, 62vw"
-              />
-              <figcaption>Kelas PROFAS · Makassar</figcaption>
-            </figure>
-            <div className="pf-proof-copy">
-              <span className="pf-kicker">Belajar terjadi bersama</span>
-              <h2 id="proof-title">
-                Ruang aman untuk mencoba cara memimpin yang baru.
-              </h2>
-              <p>
-                Mentor tidak hanya menjelaskan. Mereka membuka percakapan,
-                mempertajam pertanyaan, dan membantu peserta menghubungkan
-                konsep dengan keputusan yang sedang dihadapi.
-              </p>
-              <blockquote>
-                “Saya pulang bukan dengan jawaban instan, tetapi dengan cara
-                melihat masalah yang jauh lebih jernih.”
-                <cite>Alumni PROFAS · Batch 2025</cite>
-              </blockquote>
-            </div>
-          </div>
-        </section>
-
-        <section className="pf-section pf-route-section" id="cara-belajar" aria-labelledby="route-title">
-          <div className="container pf-route-layout">
-            <div className="pf-route-intro">
-              <span className="pf-kicker">Ritme belajar PROFAS</span>
-              <h2 id="route-title">Satu rute, tiga gerakan.</h2>
-              <p>
-                Urutan ini menjaga pembelajaran tetap dekat dengan pekerjaan:
-                pahami, uji, lalu jalankan.
-              </p>
-              <Link href="/program" className="pf-text-link">
-                Temukan jalur Anda <ArrowRight aria-hidden="true" />
-              </Link>
-            </div>
-            <ol className="pf-route-list">
-              {journey.map(({ icon: Icon, index, label, title, copy }) => (
-                <li key={index}>
-                  <div className="pf-route-marker">
-                    <span>{index}</span>
-                    <i aria-hidden="true" />
-                  </div>
-                  <article>
-                    <div><Icon aria-hidden="true" /> {label}</div>
-                    <h3>{title}</h3>
-                    <p>{copy}</p>
-                  </article>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        <section className="pf-section pf-program-section" aria-labelledby="program-title">
+        <section className="pf-home-section pf-home-programs" aria-labelledby="program-title">
           <div className="container">
-            <div className="pf-section-heading pf-program-heading">
+            <div className="pf-home-heading pf-home-heading-split">
               <div>
-                <span className="pf-kicker">Program pilihan</span>
-                <h2 id="program-title">Pilih tantangan yang ingin Anda jawab.</h2>
+                <span className="pf-home-pill">Program pilihan</span>
+                <h2 id="program-title">Mulai dari tantangan yang sedang Anda hadapi.</h2>
               </div>
-              <Link href="/program" className="pf-button pf-button-secondary">
+              <Link href="/program" className="pf-home-button pf-home-button-secondary">
                 Semua program <ArrowRight aria-hidden="true" />
               </Link>
             </div>
             {courses.length > 0 ? (
-              <div className="course-grid pf-course-grid">
+              <div className="course-grid pf-course-grid pf-home-course-grid">
                 {courses.map(course => <CourseCard key={course.id} course={course} />)}
               </div>
             ) : (
-              <div className="pf-empty-state">
+              <div className="pf-home-empty-state">
                 <BookOpen aria-hidden="true" />
                 <div>
-                  <h3>Katalog sedang disiapkan</h3>
-                  <p>Program akan muncul setelah mentor menerbitkan kurikulum.</p>
+                  <h3>Temukan program yang tepat untuk Anda</h3>
+                  <p>Buka katalog untuk melihat seluruh jalur belajar yang tersedia.</p>
                 </div>
                 <Link href="/program">Buka katalog <ChevronRight aria-hidden="true" /></Link>
               </div>
@@ -379,22 +296,63 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="pf-section pf-product-section" id="insight" aria-labelledby="product-title">
+        <section className="pf-home-section pf-home-method" id="cara-belajar" aria-labelledby="route-title">
           <div className="container">
-            <div className="pf-section-heading pf-section-heading-centered">
-              <span className="pf-kicker">Satu sistem, tiga ruang kerja</span>
-              <h2 id="product-title">Setiap orang melihat apa yang perlu dilakukan berikutnya.</h2>
+            <div className="pf-home-heading pf-home-heading-split">
+              <div>
+                <span className="pf-home-pill">Cara belajar</span>
+                <h2 id="route-title">Satu rute yang menjaga Anda tetap bergerak.</h2>
+              </div>
               <p>
-                Navigasi, ringkasan, dan tindakan disesuaikan dengan peran tanpa
-                memisahkan pengalaman menjadi produk yang berbeda.
+                Belajar dimulai dari situasi nyata, dipertajam bersama, lalu
+                ditutup dengan tindakan yang dapat dijalankan.
               </p>
             </div>
-            <div className="pf-role-grid">
+            <div className="pf-home-method-grid">
+              {journey.map(({ icon: Icon, index, label, title, copy }, itemIndex) => (
+                <article key={index} className={`pf-home-method-card is-step-${itemIndex + 1}`}>
+                  <div className="pf-home-method-meta">
+                    <span>{index}</span>
+                    <Icon aria-hidden="true" />
+                  </div>
+                  <small>{label}</small>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                </article>
+              ))}
+              <figure className="pf-home-method-photo">
+                <Image
+                  src="/images/profas-activity-collage.jpeg"
+                  alt="Diskusi dan kegiatan belajar peserta PROFAS"
+                  width={1599}
+                  height={899}
+                  sizes="(max-width: 860px) 100vw, 34vw"
+                />
+                <figcaption>
+                  <span>Belajar bersama mentor</span>
+                  Percakapan yang dekat dengan situasi kerja nyata.
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <section className="pf-home-section pf-home-platform" id="platform" aria-labelledby="product-title">
+          <div className="container">
+            <div className="pf-home-heading pf-home-heading-centered">
+              <span className="pf-home-pill">Satu platform, tiga ruang kerja</span>
+              <h2 id="product-title">Navigasi yang jelas untuk setiap peran.</h2>
+              <p>
+                Peserta, mentor, dan admin melihat informasi serta tindakan yang
+                paling relevan tanpa kehilangan konteks pembelajaran.
+              </p>
+            </div>
+            <div className="pf-home-role-grid">
               {rolePaths.map(({ icon: Icon, role, title, copy, href, action }, index) => (
-                <article key={role} className={index === 0 ? "is-featured" : ""}>
-                  <div className="pf-role-top">
+                <article key={role} className={index === 0 ? "is-primary" : ""}>
+                  <div className="pf-home-role-top">
                     <span><Icon aria-hidden="true" /></span>
-                    <small>{role}</small>
+                    <small>Untuk {role}</small>
                   </div>
                   <h3>{title}</h3>
                   <p>{copy}</p>
@@ -402,7 +360,7 @@ export default async function Home() {
                 </article>
               ))}
             </div>
-            <div className="pf-product-preview" aria-label="Pratinjau course player">
+            <div className="pf-product-preview pf-home-product-preview" aria-label="Pratinjau dashboard peserta">
               <div className="pf-preview-sidebar">
                 <div className="pf-preview-brand">PROFAS <span>workspace</span></div>
                 {["Ringkasan", "Program saya", "Kalender", "Komunitas"].map((item, index) => (
@@ -428,20 +386,14 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="pf-section pf-faq-section" id="faq" aria-labelledby="faq-title">
-          <div className="container pf-faq-layout">
-            <div className="pf-faq-intro">
-              <span className="pf-kicker">Sebelum Anda mulai</span>
-              <h2 id="faq-title">Pertanyaan yang paling sering muncul.</h2>
-              <p>
-                Belum menemukan jawaban yang dicari? Tim kami dapat membantu
-                menentukan langkah pertama yang paling sesuai.
-              </p>
-              <a href="mailto:halo@profas.id?subject=Konsultasi%20Program%20PROFAS" className="pf-text-link">
-                Bicara dengan tim PROFAS <ArrowRight aria-hidden="true" />
-              </a>
+        <section className="pf-home-section pf-home-faq" id="faq" aria-labelledby="faq-title">
+          <div className="container">
+            <div className="pf-home-heading pf-home-heading-centered">
+              <span className="pf-home-pill">Pertanyaan umum</span>
+              <h2 id="faq-title">Yang perlu Anda tahu sebelum mulai.</h2>
+              <p>Jawaban singkat untuk membantu Anda memilih langkah berikutnya.</p>
             </div>
-            <div className="pf-faq-list">
+            <div className="pf-faq-list pf-home-faq-list">
               {faqItems.map(([question, answer], index) => (
                 <details key={question}>
                   <summary>
@@ -453,26 +405,32 @@ export default async function Home() {
                 </details>
               ))}
             </div>
+            <div className="pf-home-faq-contact">
+              <span>Masih punya pertanyaan?</span>
+              <a href="mailto:halo@profas.id?subject=Konsultasi%20Program%20PROFAS">
+                Bicara dengan tim PROFAS <ArrowRight aria-hidden="true" />
+              </a>
+            </div>
           </div>
         </section>
 
-        <section className="pf-cta-section" aria-labelledby="cta-title">
+        <section className="pf-home-cta-section" aria-labelledby="cta-title">
           <div className="container">
-            <div className="pf-cta-panel">
+            <div className="pf-home-cta">
               <div>
-                <span className="pf-kicker">Langkah pertama</span>
-                <h2 id="cta-title">Pilih satu tantangan. Mulai dari sana.</h2>
+                <span className="pf-home-pill">Langkah pertama</span>
+                <h2 id="cta-title">Mulai dari satu tantangan nyata.</h2>
+                <p>
+                  Temukan program yang paling dekat dengan pekerjaan Anda dan
+                  bangun ritme belajar yang bisa dijaga.
+                </p>
               </div>
-              <p>
-                Temukan program yang dekat dengan ruang kerja Anda, lalu bangun
-                ritme belajar yang bisa dijaga.
-              </p>
-              <div>
-                <Link href="/daftar" className="pf-button pf-button-light">
-                  Buat akun <ArrowRight aria-hidden="true" />
+              <div className="pf-home-cta-actions">
+                <Link href="/daftar" className="pf-home-button pf-home-button-light">
+                  Mulai belajar <ArrowRight aria-hidden="true" />
                 </Link>
-                <Link href="/masuk" className="pf-button pf-button-ghost">
-                  Masuk dashboard
+                <Link href="/program" className="pf-home-button pf-home-button-ghost">
+                  Lihat program
                 </Link>
               </div>
             </div>

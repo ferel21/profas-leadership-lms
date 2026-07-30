@@ -17,7 +17,6 @@ const config = [
       "skills/**",
       "automation/**",
       "node_modules/**",
-      "prisma/dev.db*",
       "next-env.d.ts",
       "*.js",
       "scripts/**",

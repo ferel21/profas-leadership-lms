@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { Role, Persona } from "@prisma/client";
 import { rateLimit } from "@/services/rate-limit";
+import bcrypt from "bcryptjs";
 
 const userLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Data pengguna tidak valid." }, { status: 400 });
     }
 
-    const { name, email, role = "STUDENT", persona = null, authProvider = "GOOGLE" } = body;
+    const { name, email, role = "STUDENT", persona = null, authProvider = "GOOGLE", password } = body;
 
     if (!name || typeof name !== "string" || !email || typeof email !== "string") {
       return NextResponse.json({ message: "Nama dan email wajib diisi." }, { status: 400 });
@@ -76,12 +77,26 @@ export async function POST(request: Request) {
 
     const validRole = Object.values(Role).includes(role as Role) ? (role as Role) : Role.STUDENT;
     const validPersona = typeof persona === "string" && Object.values(Persona).includes(persona as Persona) ? (persona as Persona) : null;
+    const validAuthProvider = typeof authProvider === "string" ? authProvider.trim().toUpperCase() : "";
+    if (validAuthProvider !== "GOOGLE" && validAuthProvider !== "LOCAL") {
+      return NextResponse.json({ message: "Metode login tidak valid." }, { status: 400 });
+    }
+
+    if (validAuthProvider === "LOCAL" && (typeof password !== "string" || password.length < 8 || password.length > 128)) {
+      return NextResponse.json({ message: "Kata sandi akun lokal wajib berisi 8–128 karakter." }, { status: 400 });
+    }
 
     const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
 
     if (existingUser) {
       return NextResponse.json({ message: "Email pengguna sudah terdaftar di sistem." }, { status: 409 });
     }
+
+    // Hash before opening the database transaction so the pool connection is
+    // not held while bcrypt performs its CPU-intensive work.
+    const passwordHash = validAuthProvider === "LOCAL"
+      ? await bcrypt.hash(password as string, 10)
+      : null;
 
     const newUser = await prisma.$transaction(async (tx) => {
       const createdUser = await tx.user.create({
@@ -90,8 +105,8 @@ export async function POST(request: Request) {
           email: cleanEmail,
           role: validRole,
           persona: validPersona,
-          authProvider: typeof authProvider === "string" ? authProvider.slice(0, 50) : "GOOGLE",
-          passwordHash: "",
+          authProvider: validAuthProvider,
+          passwordHash,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=2a6ba7&color=fff`
         }
       });
@@ -100,7 +115,12 @@ export async function POST(request: Request) {
         data: {
           userId: user.id,
           action: "CREATE_USER",
-          metadata: JSON.stringify({ createdUserId: createdUser.id, email: createdUser.email, role: createdUser.role })
+          metadata: JSON.stringify({
+            createdUserId: createdUser.id,
+            email: createdUser.email,
+            role: createdUser.role,
+            authProvider: createdUser.authProvider,
+          })
         }
       });
 
@@ -168,6 +188,14 @@ export async function PATCH(request: Request) {
       }
       if (targetUser.role === "SUPER_ADMIN" && userId !== user.id && newRole !== "SUPER_ADMIN") {
         return NextResponse.json({ message: "Anda tidak berhak mengubah atau menurunkan Super Admin lain." }, { status: 403 });
+      }
+      if (targetUser.role === "MENTOR" && newRole !== "MENTOR") {
+        const managedCourseCount = await prisma.course.count({ where: { mentorId: userId } });
+        if (managedCourseCount > 0) {
+          return NextResponse.json({
+            message: `Pindahkan ${managedCourseCount} program yang masih dikelola pengguna ini sebelum mengubah role Mentor.`
+          }, { status: 409 });
+        }
       }
       updateData.role = newRole as Role;
     }
@@ -243,12 +271,27 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const targetUser = await prisma.user.findUnique({ where: { id: cleanId } });
+    const targetUser = await prisma.user.findUnique({
+      where: { id: cleanId },
+      include: {
+        _count: { select: { mentoredCourses: true, payments: true } }
+      }
+    });
     if (!targetUser) {
       return NextResponse.json({ message: "Pengguna tidak ditemukan." }, { status: 404 });
     }
     if (targetUser.role === "SUPER_ADMIN") {
       return NextResponse.json({ message: "Anda tidak dapat menghapus akun Super Admin lain secara langsung." }, { status: 403 });
+    }
+    if (targetUser._count.mentoredCourses > 0) {
+      return NextResponse.json({
+        message: `Akun masih mengelola ${targetUser._count.mentoredCourses} program. Pindahkan program tersebut sebelum menghapus akun.`
+      }, { status: 409 });
+    }
+    if (targetUser._count.payments > 0) {
+      return NextResponse.json({
+        message: "Akun memiliki riwayat pembayaran dan tidak dapat dihapus permanen. Pertahankan akun untuk integritas audit."
+      }, { status: 409 });
     }
 
     await prisma.$transaction(async (tx) => {

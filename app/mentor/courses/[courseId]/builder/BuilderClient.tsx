@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Edit2, Trash2, GripVertical, FileText, PlayCircle, Folder, ChevronRight, ChevronDown, Save, Link2, HelpCircle, Loader2, Sparkles, FileUp, X } from "lucide-react";
 import { useLocalBackup } from "@/hooks/useLocalBackup";
 import type { NodeType } from "@/types/course";
+import { uploadFileDirectly } from "@/utils/direct-upload";
 
 export type CourseNode = {
   id: string;
@@ -161,7 +162,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
   const flattenNodes = (list: CourseNode[], parentId: string | null = null): Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null, durationMin: number, content: string | null, description: string | null, fileUrl: string | null, fileName: string | null, fileSize: number | null }> => {
     let result: Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null, durationMin: number, content: string | null, description: string | null, fileUrl: string | null, fileName: string | null, fileSize: number | null }> = [];
     list.forEach((n, idx) => {
-      // MASTER SKILL: Enforce strict sequential order (0, 1, 2...) to prevent SQLite unique constraint collision
+      // Enforce strict sequential order (0, 1, 2...) to prevent unique-constraint collisions.
       n.order = idx;
       n.parentId = parentId;
       result.push({
@@ -333,16 +334,27 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
                   setSaving(true);
                   try {
                     const flat = flattenNodes(nodes);
-                    await fetch(`/api/courses/${course.id}/nodes`, {
+                    const response = await fetch(`/api/courses/${course.id}/nodes`, {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ nodes: flat, deletedIds })
                     });
-                  } catch (e) {
-                    console.error("Auto-save before edit error:", e);
+                    if (!response.ok) {
+                      const errorBody = await response.json().catch(() => ({}));
+                      const message = typeof errorBody.message === "string"
+                        ? errorBody.message
+                        : "Kurikulum gagal disimpan.";
+                      alert(`${message} Editor belum dibuka agar perubahan Anda tidak hilang.`);
+                      return;
+                    }
+
+                    setDeletedIds([]);
+                    window.location.href = `/mentor/courses/${course.id}/assessments/${node.assessmentId || node.id}/edit`;
+                  } catch (error: unknown) {
+                    const message = error instanceof Error ? error.message : "Koneksi jaringan gagal.";
+                    alert(`Kurikulum gagal disimpan: ${message} Editor belum dibuka agar perubahan Anda tidak hilang.`);
                   } finally {
                     setSaving(false);
-                    window.location.href = `/mentor/courses/${course.id}/assessments/${node.assessmentId || node.id}/edit`;
                   }
                 }} 
                 className="btn btn-ghost btn-small hover-lift" 
@@ -562,26 +574,35 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
     if (file) {
       setUploading(true);
       try {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("courseId", courseId);
-        formData.append("lessonId", initialNode?.id || parentId || "new_node");
-        formData.append("description", description || title);
-        formData.append("linkUrl", link || "");
-
-        const res = await fetch("/api/materials/upload", {
-          method: "POST",
-          body: formData
+        const lessonId = initialNode?.id || parentId || "new_node";
+        const direct = await uploadFileDirectly(file, {
+          purpose: "material",
+          courseId,
+          lessonId,
+          description: description || title,
+          deferNodeCommit: true,
         });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          alert(`Gagal mengunggah materi: ${errData.message || res.statusText}`);
-          setUploading(false);
-          return;
+        let data: { fileUrl: string; fileName: string; fileSize: number };
+        if (direct.mode === "local") {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("courseId", courseId);
+          formData.append("lessonId", lessonId);
+          formData.append("description", description || title);
+          formData.append("deferNodeCommit", "true");
+          const response = await fetch("/api/materials/upload", {
+            method: "POST",
+            body: formData
+          });
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({})) as { message?: string };
+            throw new Error(errData.message || response.statusText);
+          }
+          data = await response.json() as { fileUrl: string; fileName: string; fileSize: number };
+        } else {
+          data = direct;
         }
 
-        const data = await res.json();
         onSave(title, type, {
           fileUrl: data.fileUrl,
           fileName: data.fileName || file.name,

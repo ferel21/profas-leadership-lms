@@ -97,12 +97,21 @@ export async function POST(request: Request) {
       });
 
       if (user.role === "STUDENT") {
-        await tx.xPLog.create({
-          data: {
+        await tx.xPLog.upsert({
+          where: {
+            userId_source_sourceId: {
+              userId: user.id,
+              source: "PARTICIPATE_DISCUSSION",
+              sourceId: targetId,
+            },
+          },
+          update: {},
+          create: {
             userId: user.id,
             points: 5,
-            source: "PARTICIPATE_DISCUSSION"
-          }
+            source: "PARTICIPATE_DISCUSSION",
+            sourceId: targetId,
+          },
         });
       }
 
@@ -143,6 +152,18 @@ export async function DELETE(request: Request) {
 
     await prisma.$transaction(async (tx) => {
       await tx.discussionPost.delete({ where: { id } });
+      const remainingPosts = await tx.discussionPost.count({
+        where: { userId: post.userId, nodeId: post.nodeId },
+      });
+      if (remainingPosts === 0) {
+        await tx.xPLog.deleteMany({
+          where: {
+            userId: post.userId,
+            source: "PARTICIPATE_DISCUSSION",
+            sourceId: post.nodeId,
+          },
+        });
+      }
       await tx.activityLog.create({
         data: { userId: user.id, action: "DELETE_DISCUSSION_POST", metadata: JSON.stringify({ postId: id, nodeId: post.nodeId }) }
       });

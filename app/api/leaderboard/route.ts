@@ -3,10 +3,16 @@ import { prisma } from "@/services/prisma";
 import { Persona } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/services/rate-limit";
+import { getCurrentUser } from "@/services/auth";
 
 const leaderboardLimiter = rateLimit({ limit: 60, windowMs: 60 * 1000 });
 
 export async function GET(request: Request) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return NextResponse.json({ message: "Silakan masuk untuk melihat papan peringkat." }, { status: 401 });
+  }
+
   const ipCheck = leaderboardLimiter.check(request);
   if (!ipCheck.success) {
     return NextResponse.json({ message: "Terlalu banyak permintaan papan peringkat. Silakan tunggu 1 menit." }, { status: 429 });
@@ -35,33 +41,45 @@ export async function GET(request: Request) {
 
   const users = await prisma.user.findMany({
     where: { role: "STUDENT", ...(parsed.data ? { persona: parsed.data } : {}) },
-    take: 200,
     select: {
       id: true,
       name: true,
       persona: true,
-      avatar: true,
-      xpLogs: { where: xpLogsWhere, select: { points: true } },
       userBadges: {
-        include: {
+        select: {
           badge: {
-            select: { id: true, name: true, description: true, imageUrl: true }
+            select: { id: true, name: true }
           }
         }
       }
     }
   });
 
+  const totals = users.length
+    ? await prisma.xPLog.groupBy({
+        by: ["userId"],
+        where: {
+          userId: { in: users.map(user => user.id) },
+          ...xpLogsWhere
+        },
+        _sum: { points: true }
+      })
+    : [];
+  const xpByUser = new Map(totals.map(total => [total.userId, total._sum.points ?? 0]));
+
   const ranking = users.map(u => ({
     id: u.id,
     name: u.name,
     persona: u.persona,
-    avatar: u.avatar,
-    xp: u.xpLogs.reduce((a, x) => a + x.points, 0),
+    xp: xpByUser.get(u.id) ?? 0,
     badges: u.userBadges.map(ub => ub.badge)
-  })).sort((a, b) => b.xp - a.xp).slice(0, 100);
+  })).sort((a, b) =>
+    (b.xp - a.xp)
+    || a.name.localeCompare(b.name, "id-ID")
+    || a.id.localeCompare(b.id)
+  );
 
   return NextResponse.json(ranking, {
-    headers: { "Cache-Control": "public, max-age=60, s-maxage=60" }
+    headers: { "Cache-Control": "private, max-age=60" }
   });
 }

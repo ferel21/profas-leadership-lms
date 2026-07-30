@@ -28,24 +28,33 @@ const errors = [];
 const warnings = [];
 
 const value = key => (process.env[key] || "").trim().replace(/^['"]|['"]$/g, "");
+const isTruthy = input => ["1", "true", "yes"].includes(input.toLowerCase());
 const isCiOrBuildDummy = () => process.env.CI === "true" || value("DATABASE_URL").includes("build:build@127.0.0.1") || value("NODE_ENV") === "test";
+const isVercel = () => isTruthy(value("VERCEL"));
+const objectStorageEnabled = isVercel() || isTruthy(value("SUPABASE_STORAGE_ENABLED"));
+const vercelAppUrl = () => {
+  const host = value("VERCEL_PROJECT_PRODUCTION_URL") || value("VERCEL_URL");
+  if (!host) return "";
+  return /^https?:\/\//i.test(host) ? host : `https://${host}`;
+};
 const isPlaceholder = input => {
   if (!input) return true;
   if (/^(ganti|change[-_ ]?me|replace[-_ ]?me|your[-_ ]|example|secret[-_ ]?here|sk-ant-ganti)/i.test(input)) return true;
+  if (/\[(?:password|region|project|host|user|secret|token)\]/i.test(input)) return true;
   if (production && !isCiOrBuildDummy() && /(change-in-production|build-only|ganti-dengan-secret|secret-here|placeholder)/i.test(input)) return true;
   return false;
 };
 
 function required(key, { minLength, message } = {}) {
   let input = value(key);
-  if (!input && key === "NEXT_PUBLIC_APP_URL") input = value("NEXT_PUBLIC_BASE_URL") || value("NEXTAUTH_URL");
+  if (!input && key === "NEXT_PUBLIC_APP_URL") input = vercelAppUrl();
   if (!input && key === "PRIVATE_UPLOAD_DIR") input = path.resolve(process.cwd(), ".data", "uploads");
-  if (!input || isPlaceholder(input)) {
-    if (production && !isCiOrBuildDummy()) {
-      errors.push(`${key} wajib diisi dengan nilai produksi yang nyata (bukan placeholder / kosong).`);
-    } else if (!input) {
-      errors.push(`${key} wajib diisi.`);
-    }
+  if (!input) {
+    errors.push(`${key} wajib diisi.`);
+    return "";
+  }
+  if (isPlaceholder(input)) {
+    errors.push(`${key} wajib diisi dengan nilai nyata, bukan placeholder.`);
     return "";
   }
   if (minLength && input.length < minLength) {
@@ -78,32 +87,26 @@ if (production && process.env.NODE_ENV && process.env.NODE_ENV !== "production")
 
 const databaseUrl = required("DATABASE_URL");
 const directUrl = required("DIRECT_URL");
-if (production && databaseUrl && !/^postgres(?:ql)?:\/\//i.test(databaseUrl)) {
-  errors.push("DATABASE_URL production harus menggunakan PostgreSQL; database tidak dipindahkan oleh image ini.");
+if (databaseUrl && !/^postgres(?:ql)?:\/\//i.test(databaseUrl)) {
+  errors.push("DATABASE_URL harus menggunakan PostgreSQL sesuai provider Prisma.");
 }
-if (production && directUrl && !/^postgres(?:ql)?:\/\//i.test(directUrl)) {
-  errors.push("DIRECT_URL production harus menggunakan PostgreSQL direct connection.");
+if (directUrl && !/^postgres(?:ql)?:\/\//i.test(directUrl)) {
+  errors.push("DIRECT_URL harus menggunakan PostgreSQL direct connection.");
 }
 
 required("JWT_SECRET", { minLength: 32 });
-const nextAuthSecret = value("NEXTAUTH_SECRET");
-if (nextAuthSecret && (isPlaceholder(nextAuthSecret) || nextAuthSecret.length < 32)) {
-  errors.push("NEXTAUTH_SECRET jika diisi minimal harus 32 karakter dan bukan placeholder.");
-}
 
 if (production) {
-  urlValue("NEXTAUTH_URL", { requireHttps: true });
   urlValue("NEXT_PUBLIC_APP_URL", { requireHttps: true });
 } else {
-  urlValue("NEXTAUTH_URL");
   urlValue("NEXT_PUBLIC_APP_URL");
 }
 
-const uploadDir = required("PRIVATE_UPLOAD_DIR");
-if (production && uploadDir && !path.isAbsolute(uploadDir)) {
+const uploadDir = objectStorageEnabled ? value("PRIVATE_UPLOAD_DIR") : required("PRIVATE_UPLOAD_DIR");
+if (!objectStorageEnabled && production && uploadDir && !path.isAbsolute(uploadDir)) {
   errors.push("PRIVATE_UPLOAD_DIR production harus berupa path absolut pada volume persistent.");
 }
-if (uploadDir && /(?:^|[\\/])public[\\/]uploads(?:$|[\\/])/i.test(uploadDir)) {
+if (!objectStorageEnabled && uploadDir && /(?:^|[\\/])public[\\/]uploads(?:$|[\\/])/i.test(uploadDir)) {
   errors.push("PRIVATE_UPLOAD_DIR tidak boleh berada di public/uploads karena dapat bypass authorization.");
 }
 
@@ -120,6 +123,69 @@ const googleId = value("GOOGLE_CLIENT_ID");
 const googleSecret = value("GOOGLE_CLIENT_SECRET");
 if (Boolean(googleId) !== Boolean(googleSecret)) {
   errors.push("GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET harus diisi berpasangan.");
+}
+if (production && !isCiOrBuildDummy() && [googleId, googleSecret].some(input => input && isPlaceholder(input))) {
+  errors.push("Kredensial Google OAuth tidak boleh memakai placeholder pada production.");
+}
+
+const aiConfigKeys = [
+  "PHI3_API_KEY",
+  "PHI3_BASE_URL",
+  "PHI3_MODEL",
+  "OPENAI_API_KEY",
+  "OPENAI_BASE_URL",
+  "OPENAI_MODEL",
+];
+for (const key of aiConfigKeys) {
+  const input = value(key);
+  if (input && isPlaceholder(input)) {
+    const message = `${key} berisi placeholder; kosongkan untuk fallback lokal atau isi dengan konfigurasi provider nyata.`;
+    if (production && !isCiOrBuildDummy()) errors.push(message);
+    else warnings.push(message);
+  }
+}
+for (const key of ["PHI3_BASE_URL", "OPENAI_BASE_URL"]) {
+  const input = value(key);
+  if (!input || isPlaceholder(input)) continue;
+  try {
+    const parsed = new URL(input);
+    if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("unsupported protocol");
+  } catch {
+    errors.push(`${key} harus berupa URL HTTP(S) absolut yang valid.`);
+  }
+}
+if (value("PHI3_API_KEY") && value("OPENAI_API_KEY")) {
+  warnings.push("PHI3_API_KEY dan OPENAI_API_KEY sama-sama terisi; runtime akan memprioritaskan konfigurasi PHI3_*.");
+}
+
+const storageUrl = value("SUPABASE_URL");
+const storageServiceKey = value("SUPABASE_SERVICE_ROLE_KEY");
+const storageBucket = value("SUPABASE_STORAGE_BUCKET") || "lms-private";
+if (objectStorageEnabled) {
+  if (!storageUrl || isPlaceholder(storageUrl)) {
+    errors.push("SUPABASE_URL wajib diisi saat Supabase Storage aktif.");
+  } else {
+    try {
+      const parsed = new URL(storageUrl);
+      const localEndpoint = ["localhost", "127.0.0.1", "::1"].includes(parsed.hostname);
+      if (parsed.protocol !== "https:" && !localEndpoint) {
+        errors.push("SUPABASE_URL wajib menggunakan HTTPS kecuali untuk endpoint local.");
+      }
+    } catch {
+      errors.push("SUPABASE_URL harus berupa URL absolut yang valid.");
+    }
+  }
+  if (!storageServiceKey || isPlaceholder(storageServiceKey)) {
+    errors.push("SUPABASE_SERVICE_ROLE_KEY wajib diisi saat Supabase Storage aktif.");
+  }
+  if (!/^[a-zA-Z0-9._-]{1,100}$/.test(storageBucket)) {
+    errors.push("SUPABASE_STORAGE_BUCKET hanya boleh berisi huruf, angka, titik, garis bawah, atau tanda hubung (maksimal 100 karakter).");
+  }
+} else if (storageUrl || storageServiceKey) {
+  warnings.push("Kredensial Supabase Storage terisi tetapi tidak aktif pada non-Vercel; set SUPABASE_STORAGE_ENABLED=true jika memang ingin menggunakannya.");
+}
+if (objectStorageEnabled && uploadDir) {
+  warnings.push("PRIVATE_UPLOAD_DIR diabaikan saat Supabase Storage aktif.");
 }
 
 for (const [key, input] of Object.entries(process.env)) {

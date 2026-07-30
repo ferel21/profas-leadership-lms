@@ -171,6 +171,8 @@ model AssessmentAttempt {
   score        Int             @default(0)
   passed       Boolean         @default(false)
   feedback     String?
+  startedAt    DateTime        @default(now())
+  expiresAt    DateTime?
   submittedAt  DateTime        @default(now())
   gradedAt     DateTime?
   assessment   Assessment      @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
@@ -178,6 +180,7 @@ model AssessmentAttempt {
   answers      AttemptAnswer[]
 
   @@index([userId, passed, assessmentId])
+  @@index([userId, assessmentId, status])
   @@index([assessmentId, submittedAt])
 }
 
@@ -316,6 +319,9 @@ model CalendarEvent {
   attendanceRecords AttendanceRecord[]
   course            Course?            @relation(fields: [courseId], references: [id], onDelete: Cascade)
   attendees         EventAttendee[]
+
+  @@index([courseId, startTime])
+  @@index([startTime])
 }
 
 model EventAttendee {
@@ -327,6 +333,7 @@ model EventAttendee {
   user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, userId])
+  @@index([userId])
 }
 
 model AttendanceRecord {
@@ -365,6 +372,7 @@ model UserBadge {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, badgeId])
+  @@index([badgeId])
 }
 
 model ActivityLog {
@@ -376,6 +384,7 @@ model ActivityLog {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, action, createdAt])
+  @@index([action, createdAt])
 }
 
 model SystemSetting {

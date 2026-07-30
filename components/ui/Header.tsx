@@ -1,6 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Compass, LogIn } from "lucide-react";
+import { ArrowRight, LogIn } from "lucide-react";
 import { getCurrentUser } from "@/services/auth";
 import { initials } from "@/utils";
 import { Logo } from "./Logo";
@@ -9,8 +8,7 @@ import { MobileMenu } from "./MobileMenu";
 const navigation = [
   { href: "/program", label: "Program", prefetch: true },
   { href: "/#cara-belajar", label: "Cara belajar" },
-  { href: "/#tentang", label: "Tentang" },
-  { href: "/#insight", label: "Ruang kerja" },
+  { href: "/#platform", label: "Platform" },
   { href: "/#faq", label: "FAQ" },
 ];
 
@@ -22,9 +20,6 @@ export async function Header() {
       <div className="container nav-wrap pf-header__inner">
         <div className="pf-header__identity">
           <Logo />
-          <span className="pf-header__compass" aria-hidden="true">
-            <Compass size={17} strokeWidth={1.8} />
-          </span>
         </div>
 
         <nav className="desktop-nav pf-header__nav" aria-label="Navigasi utama">
@@ -50,7 +45,8 @@ export async function Header() {
             >
               <span className={`pf-header__avatar ${user.avatar ? "has-avatar" : ""}`}>
                 {user.avatar ? (
-                  <Image src={user.avatar} alt="" width={33} height={33} />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={user.avatar} alt="" width={33} height={33} />
                 ) : (
                   initials(user.name)
                 )}

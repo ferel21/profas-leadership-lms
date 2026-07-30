@@ -8,16 +8,20 @@ import { GradingClient } from "./GradingClient";
 
 export default async function GradingPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR") redirect("/masuk");
+  if (!user) redirect("/masuk");
+  if (user.role !== "MENTOR" && user.role !== "SUPER_ADMIN") redirect("/dashboard");
 
   const { id } = await params;
 
   const attempt = await prisma.assessmentAttempt.findUnique({
     where: { id },
     include: {
-      user: true,
+      user: { select: { id: true, name: true, email: true } },
       assessment: {
-        include: { course: true }
+        include: {
+          course: true,
+          questions: { orderBy: { order: "asc" } }
+        }
       },
       answers: {
         include: { question: true }
@@ -25,7 +29,7 @@ export default async function GradingPage({ params }: { params: Promise<{ id: st
     }
   });
 
-  if (!attempt || attempt.assessment.course.mentorId !== user.id) {
+  if (!attempt || (user.role !== "SUPER_ADMIN" && attempt.assessment.course.mentorId !== user.id)) {
     redirect("/mentor/evaluasi");
   }
 

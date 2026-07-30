@@ -1,6 +1,17 @@
 import { PrismaClient, AssessmentType, NodeType, CourseLevel, EnrollmentStatus, Persona, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+const runningOnVercel = ["1", "true", "yes"].includes((process.env.VERCEL ?? "").trim().toLowerCase());
+const productionSeedRequested =
+  process.env.NODE_ENV === "production" ||
+  process.env.VERCEL_ENV === "production" ||
+  runningOnVercel;
+if (productionSeedRequested && process.env.ALLOW_PRODUCTION_SEED !== "true") {
+  throw new Error(
+    "Seed production diblokir. Gunakan database development/staging, atau set ALLOW_PRODUCTION_SEED=true hanya setelah backup dan persetujuan eksplisit."
+  );
+}
+
 const prisma = new PrismaClient();
 
 const courses = [

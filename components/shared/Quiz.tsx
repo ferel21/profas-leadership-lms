@@ -4,19 +4,43 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, LoaderCircle, RotateCcw, Trophy, XCircle, UploadCloud } from "lucide-react";
+import { uploadFileDirectly } from "@/utils/direct-upload";
 
 type Question = { id: string; prompt: string; options: string | null; type: string; order: number };
 type QuizResult = { 
   score: number; passed: boolean; correct: number; total: number; feedback: string; 
   needsManualGrading?: boolean; status?: string;
-  questions?: { id: string; prompt: string; options: string; correctAnswer: string; explanation?: string; type: string }[] 
+  questions?: { id: string; prompt: string; options: string | null; correctAnswer: string | null; explanation?: string | null; type: string }[]
 };
+type StartAttemptResult = {
+  attemptId: string;
+  startedAt: string;
+  expiresAt: string;
+  resumed?: boolean;
+  message?: string;
+};
+
+function parseQuestionOptions(value: string | null | undefined) {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) && parsed.every(option => typeof option === "string")
+      ? parsed as string[]
+      : [];
+  } catch {
+    return [];
+  }
+}
 
 export function Quiz({ assessment }: { assessment: { id: string; title: string; timeLimitMin: number; passingScore: number; course: { slug: string; title: string }; questions: Question[] } }) {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [files, setFiles] = useState<Record<string, File>>({});
-  const [seconds, setSeconds] = useState(assessment.timeLimitMin * 60);
+  const [attemptId, setAttemptId] = useState("");
+  const [expiresAtMs, setExpiresAtMs] = useState<number | null>(null);
+  const [seconds, setSeconds] = useState(0);
+  const [starting, setStarting] = useState(true);
+  const [attemptClosed, setAttemptClosed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<QuizResult | null>(null);
@@ -24,22 +48,117 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
   const submitting = useRef(false);
   const timeoutSubmitted = useRef(false);
 
+  const startAttempt = useCallback(async (resetState = false, signal?: AbortSignal) => {
+    if (resetState) {
+      submitting.current = false;
+      timeoutSubmitted.current = false;
+      setResult(null);
+      setShowReview(false);
+      setAnswers({});
+      setFiles({});
+      setCurrent(0);
+      setAttemptId("");
+      setExpiresAtMs(null);
+      setSeconds(0);
+      setAttemptClosed(false);
+    }
+
+    setStarting(true);
+    setError("");
+    try {
+      const response = await fetch("/api/assessments/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assessmentId: assessment.id }),
+        cache: "no-store",
+        signal,
+      });
+      const data = await response.json().catch(() => null) as StartAttemptResult | null;
+      if (!response.ok || !data?.attemptId || !data.expiresAt) {
+        setError(data?.message ?? "Sesi evaluasi belum dapat dimulai. Silakan coba lagi.");
+        return;
+      }
+
+      const serverExpiresAt = Date.parse(data.expiresAt);
+      if (!Number.isFinite(serverExpiresAt)) {
+        setError("Batas waktu evaluasi dari server tidak valid.");
+        return;
+      }
+
+      setAttemptId(data.attemptId);
+      setExpiresAtMs(serverExpiresAt);
+      setSeconds(Math.max(0, Math.ceil((serverExpiresAt - Date.now()) / 1000)));
+    } catch (startError) {
+      if (startError instanceof DOMException && startError.name === "AbortError") return;
+      setError("Koneksi bermasalah. Sesi evaluasi belum dapat dimulai.");
+    } finally {
+      if (!signal?.aborted) setStarting(false);
+    }
+  }, [assessment.id]);
+
   const submit = useCallback(async () => {
     if (submitting.current) return;
-    submitting.current = true; setLoading(true); setError("");
+    if (!attemptId) {
+      setError("Sesi evaluasi belum siap. Mulai ulang sesi sebelum mengirim jawaban.");
+      setAttemptClosed(true);
+      return;
+    }
+
+    submitting.current = true;
+    setLoading(true);
+    setError("");
     try {
       const formData = new FormData();
       formData.append("assessmentId", assessment.id);
+      formData.append("attemptId", attemptId);
       
       const cleanAnswers: Record<string, any> = {};
       for (const [qId, val] of Object.entries(answers)) {
-        if (files[qId]) {
-           formData.append(`file_${qId}`, files[qId]);
-           cleanAnswers[qId] = { fileUrl: true };
-        } else if (typeof val === 'string') {
+        if (!files[qId] && typeof val === 'string') {
            cleanAnswers[qId] = val;
+        } else if (!files[qId]) {
+           cleanAnswers[qId] = val;
+        }
+      }
+
+      const fileEntries = Object.entries(files);
+      if (fileEntries.length > 0) {
+        const [firstQuestionId, firstFile] = fileEntries[0];
+        const firstUpload = await uploadFileDirectly(firstFile, {
+          purpose: "assignment",
+          assessmentId: assessment.id,
+          attemptId,
+          questionId: firstQuestionId,
+        });
+
+        if (firstUpload.mode === "local") {
+          for (const [questionId, file] of fileEntries) {
+            formData.append(`file_${questionId}`, file);
+            cleanAnswers[questionId] = { fileUrl: true };
+          }
         } else {
-           cleanAnswers[qId] = val;
+          const remainingUploads = await Promise.all(fileEntries.slice(1).map(async ([questionId, file]) => {
+            const upload = await uploadFileDirectly(file, {
+              purpose: "assignment",
+              assessmentId: assessment.id,
+              attemptId,
+              questionId,
+            });
+            if (upload.mode !== "supabase") {
+              throw new Error("Mode penyimpanan berubah selama unggahan. Silakan kirim ulang.");
+            }
+            return [questionId, upload] as const;
+          }));
+          const completedUploads = [[firstQuestionId, firstUpload] as const, ...remainingUploads];
+          for (const [questionId, upload] of completedUploads) {
+            if (!upload.uploadToken) {
+              throw new Error("Verifikasi unggahan tidak lengkap. Silakan unggah ulang berkas.");
+            }
+            cleanAnswers[questionId] = {
+              fileUrl: upload.fileUrl,
+              uploadToken: upload.uploadToken,
+            };
+          }
         }
       }
       formData.append("answers", JSON.stringify(cleanAnswers));
@@ -48,23 +167,104 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
         method: "POST",
         body: formData // Using FormData for possible file uploads
       });
-      const data = await response.json().catch(() => null) as (QuizResult & { message?: string }) | null;
-      if (!response.ok || !data) { setError(data?.message ?? "Evaluasi belum dapat dikirim. Coba lagi."); setLoading(false); submitting.current = false; return }
-      setResult(data); setLoading(false);
-    } catch { setError("Koneksi bermasalah. Evaluasi belum dikirim."); setLoading(false); submitting.current = false }
-  }, [answers, files, assessment.id]);
+      const data = await response.json().catch(() => null) as (QuizResult & { message?: string; code?: string }) | null;
+      if (!response.ok || !data) {
+        setError(data?.message ?? "Evaluasi belum dapat dikirim. Coba lagi.");
+        setAttemptClosed(
+          response.status === 410
+          || data?.code === "ATTEMPT_EXPIRED"
+          || data?.code === "ATTEMPT_NOT_ACTIVE",
+        );
+        return;
+      }
+      setResult(data);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Koneksi bermasalah. Evaluasi belum dikirim.");
+    } finally {
+      setLoading(false);
+      submitting.current = false;
+    }
+  }, [answers, files, assessment.id, attemptId]);
 
-  useEffect(() => { if (result || loading || seconds <= 0) return; const timer = window.setInterval(() => setSeconds(value => Math.max(0, value - 1)), 1000); return () => window.clearInterval(timer) }, [result, loading, seconds]);
-  useEffect(() => { if (seconds === 0 && !result && !loading && !timeoutSubmitted.current) { timeoutSubmitted.current = true; void submit() } }, [seconds, result, loading, submit]);
+  useEffect(() => {
+    const controller = new AbortController();
+    void startAttempt(false, controller.signal);
+    return () => controller.abort();
+  }, [startAttempt]);
 
-  function retry() { submitting.current = false; timeoutSubmitted.current = false; setResult(null); setShowReview(false); setAnswers({}); setFiles({}); setCurrent(0); setSeconds(assessment.timeLimitMin * 60); setError("") }
+  useEffect(() => {
+    if (expiresAtMs === null || result || attemptClosed) return;
+    const updateRemainingTime = () => {
+      setSeconds(Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 1000)));
+    };
+    updateRemainingTime();
+    const timer = window.setInterval(updateRemainingTime, 250);
+    return () => window.clearInterval(timer);
+  }, [attemptClosed, expiresAtMs, result]);
+
+  useEffect(() => {
+    if (
+      seconds === 0
+      && attemptId
+      && expiresAtMs !== null
+      && !result
+      && !starting
+      && !loading
+      && !attemptClosed
+      && !timeoutSubmitted.current
+    ) {
+      timeoutSubmitted.current = true;
+      void submit();
+    }
+  }, [attemptClosed, attemptId, expiresAtMs, seconds, result, starting, loading, submit]);
+
+  function retry() {
+    void startAttempt(true);
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, questionId: string) => {
     if (e.target.files && e.target.files[0]) {
-      setFiles({ ...files, [questionId]: e.target.files[0] });
+      const selected = e.target.files[0];
+      if (selected.size > 20 * 1024 * 1024) {
+        setError("Ukuran berkas evaluasi maksimal 20MB.");
+        e.target.value = "";
+        return;
+      }
+      setError("");
+      setFiles({ ...files, [questionId]: selected });
       setAnswers({ ...answers, [questionId]: { fileUrl: true } });
     }
   };
+
+  if (starting && !attemptId) {
+    return (
+      <main className="quiz-result pf-quiz-result is-pending" aria-busy="true">
+        <LoaderCircle className="spin" aria-hidden="true" />
+        <p className="pf-quiz-eyebrow">Menyiapkan sesi evaluasi</p>
+        <h1>{assessment.title}</h1>
+        <p className="pf-quiz-feedback">Batas waktu sedang disinkronkan dengan server.</p>
+      </main>
+    );
+  }
+
+  if (!attemptId || expiresAtMs === null) {
+    return (
+      <main className="quiz-result pf-quiz-result is-failed" aria-labelledby="quiz-start-error">
+        <XCircle className="pf-quiz-result-mark failed" aria-hidden="true" />
+        <p className="pf-quiz-eyebrow">Sesi belum dimulai</p>
+        <h1 id="quiz-start-error">{assessment.title}</h1>
+        <p className="pf-quiz-feedback">{error || "Sesi evaluasi belum tersedia."}</p>
+        <div className="result-actions pf-quiz-result-actions">
+          <button type="button" onClick={retry} className="btn btn-primary">
+            <RotateCcw aria-hidden="true" /> Coba mulai lagi
+          </button>
+          <Link href={`/belajar/${assessment.course.slug}`} className="btn btn-outline">
+            Kembali ke kelas
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   if (result && !showReview) return (
     <main className={`quiz-result pf-quiz-result ${result.passed ? "is-passed" : result.needsManualGrading ? "is-pending" : "is-failed"}`} aria-labelledby="quiz-result-title">
@@ -127,7 +327,7 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
     <main className="review-list">
       {result.questions.map((q, index) => {
         const isMultiple = q.type === 'MULTIPLE_CHOICE' || q.type === 'TRUE_FALSE';
-        const opts = isMultiple ? JSON.parse(q.options || "[]") as string[] : [];
+        const opts = isMultiple ? parseQuestionOptions(q.options) : [];
         const userAns = answers[q.id];
         const isCorrect = String(userAns) === String(q.correctAnswer);
         return <article key={q.id} className={`review-card pf-quiz-review-card ${isCorrect ? "correct" : "incorrect"}`}>
@@ -165,7 +365,7 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
 
   const question = assessment.questions[current];
   const isMultiple = question.type === 'MULTIPLE_CHOICE' || question.type === 'TRUE_FALSE';
-  const options = isMultiple ? JSON.parse(question.options || "[]") as string[] : [];
+  const options = isMultiple ? parseQuestionOptions(question.options) : [];
 
   return <div className="quiz-page pf-quiz-page">
     <header className="glass pf-quiz-header">
@@ -244,10 +444,16 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
             <UploadCloud aria-hidden="true" />
             <div>
               <strong>Unggah berkas jawaban</strong>
-              <p>Format yang disarankan: PDF, DOCX, atau ZIP.</p>
+              <p>PDF, DOC/DOCX, PPT/PPTX, gambar, atau TXT · Maks. 20MB.</p>
             </div>
             <label htmlFor={`file-${question.id}`} className="btn btn-outline pf-quiz-upload-action">Pilih berkas</label>
-            <input className="pf-quiz-file-input" id={`file-${question.id}`} type="file" onChange={(e) => handleFileChange(e, question.id)} />
+            <input
+              className="pf-quiz-file-input"
+              id={`file-${question.id}`}
+              type="file"
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.txt"
+              onChange={(e) => handleFileChange(e, question.id)}
+            />
             {files[question.id] && <p className="pf-quiz-selected-file" aria-live="polite">Berkas terpilih: {files[question.id].name}</p>}
           </div>
         )}
@@ -255,18 +461,24 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
       </article>
       {error && <div className="quiz-error pf-quiz-error" role="alert">
         <p>{error}</p>
-        <button type="button" className="btn btn-outline btn-small" onClick={() => void submit()}>Kirim ulang</button>
+        <button
+          type="button"
+          className="btn btn-outline btn-small"
+          onClick={attemptClosed ? retry : () => void submit()}
+        >
+          {attemptClosed ? "Mulai percobaan baru" : "Kirim ulang"}
+        </button>
       </div>}
       <footer className="glass pf-quiz-footer">
-        <button type="button" className="btn btn-outline" disabled={current === 0 || loading} onClick={() => setCurrent(current - 1)}>
+        <button type="button" className="btn btn-outline" disabled={current === 0 || loading || attemptClosed} onClick={() => setCurrent(current - 1)}>
           <ArrowLeft aria-hidden="true" /> Sebelumnya
         </button>
         <small aria-live="polite">{Object.keys(answers).length} dari {assessment.questions.length} terjawab</small>
         {current < assessment.questions.length - 1
-          ? <button type="button" className="btn btn-primary" disabled={loading} onClick={() => setCurrent(current + 1)}>
+          ? <button type="button" className="btn btn-primary" disabled={loading || attemptClosed} onClick={() => setCurrent(current + 1)}>
               Berikutnya <ArrowRight aria-hidden="true" />
             </button>
-          : <button type="button" className="btn btn-primary" disabled={Object.keys(answers).length < assessment.questions.length || loading} onClick={() => void submit()}>
+          : <button type="button" className="btn btn-primary" disabled={Object.keys(answers).length < assessment.questions.length || loading || attemptClosed} onClick={() => void submit()}>
               {loading ? <><LoaderCircle className="spin" aria-hidden="true" /> Mengirim</> : <>Kirim jawaban <ArrowRight aria-hidden="true" /></>}
             </button>}
       </footer>

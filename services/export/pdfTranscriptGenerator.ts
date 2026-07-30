@@ -30,12 +30,12 @@ export interface TranscriptOptions {
 export function generateAcademicTranscriptPDF({
   studentName,
   studentEmail,
-  organization = "Profesional & Kepemimpinan Eksekutif",
+  organization,
   role,
   totalXP,
   courses,
   badgesCount,
-  attendanceRatePercent = 98,
+  attendanceRatePercent,
   issuedDate = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }),
 }: TranscriptOptions): void {
   const doc = new jsPDF({
@@ -46,6 +46,9 @@ export function generateAcademicTranscriptPDF({
 
   const width = doc.internal.pageSize.getWidth();
   const height = doc.internal.pageSize.getHeight();
+  const attendanceLabel = typeof attendanceRatePercent === "number" && Number.isFinite(attendanceRatePercent)
+    ? `${Math.round(attendanceRatePercent)}%`
+    : "Belum tersedia";
 
   // Background dan bingkai
   doc.setFillColor(255, 255, 255);
@@ -91,7 +94,7 @@ export function generateAcademicTranscriptPDF({
   doc.setFont("helvetica", "normal");
   doc.text(studentName.toUpperCase(), 62, 54);
   doc.text(studentEmail, 62, 62);
-  doc.text(organization || "Profesional Mandiri", 62, 70);
+  doc.text(organization?.trim() || "Belum tersedia", 62, 70);
 
   // Right column stats inside profile box
   const rightX = width / 2 + 15;
@@ -105,7 +108,7 @@ export function generateAcademicTranscriptPDF({
   doc.setFont("helvetica", "bold");
   doc.text(`${role} (${badgesCount} Badge)`, rightX + 44, 54);
   doc.text(`${totalXP.toLocaleString("id-ID")} XP`, rightX + 44, 62);
-  doc.text(`${attendanceRatePercent}% (Sangat Aktif)`, rightX + 44, 70);
+  doc.text(attendanceLabel, rightX + 44, 70);
 
   // Table Header for Courses
   let currentY = 88;

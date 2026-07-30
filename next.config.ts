@@ -13,6 +13,19 @@ export default function nextConfig(phase: string): NextConfig {
     distDir: phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next",
     experimental: { optimizePackageImports: ["lucide-react"] },
     eslint: { ignoreDuringBuilds: true },
+    async redirects() {
+      return [
+        { source: "/kuis/:id", destination: "/evaluasi/:id", permanent: true },
+        { source: "/api/kuis/submit", destination: "/api/assessments/submit", permanent: true },
+        { source: "/mentor", destination: "/dashboard", permanent: false },
+        { source: "/dashboard/evaluasi", destination: "/mentor/evaluasi", permanent: false },
+        {
+          source: "/dashboard/evaluasi/:attemptId",
+          destination: "/mentor/evaluasi/:attemptId",
+          permanent: false,
+        },
+      ];
+    },
     async headers() {
       return [
         {

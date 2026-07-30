@@ -27,7 +27,7 @@ npm run smoke
 
 - `npm run lint:fix` menjalankan ESLint dengan `--fix` untuk memperbaiki isu mekanis (formatting, unused import, dll) tanpa mengubah logika.
 - `npm run dup:check` menjalankan [jscpd](https://github.com/kucherenko/jscpd) (konfigurasi di `.jscpd.json`) terhadap `app/`, `components/`, `services/`, `utils/`, `hooks/`, `context/`, `types/`, dan `constants/`, dengan ambang batas duplikasi 3%.
-- Template workflow [`quality.workflow.yml`](../deploy/ci/quality.workflow.yml) menjalankan typecheck → autofix (di-commit balik ke branch PR) → lint → duplicate-code check pada setiap PR ke `main`. Salin ke `.github/workflows/quality.yml` setelah token/repository memiliki permission `workflow` (sama seperti `vps-deploy.workflow.yml`, lihat `docs/VPS-DEPLOYMENT-RUNBOOK.md`). Error nyata (type error, lint error, duplikasi di atas ambang batas) tetap memblokir merge — pipeline ini tidak pernah mengubah logika program secara otomatis.
+- Workflow canonical [`.github/workflows/quality.yml`](../.github/workflows/quality.yml) menjalankan typecheck → autofix (di-commit balik ke branch PR) → lint → duplicate-code check pada setiap PR ke `main`. Error nyata (type error, lint error, duplikasi di atas ambang batas) tetap memblokir merge — pipeline ini tidak pernah mengubah logika program secara otomatis. Deployment VPS terpisah dan hanya dapat dijalankan manual melalui `workflow_dispatch`.
 
 Budget saat baseline ini dibuat:
 

@@ -42,6 +42,13 @@ export async function PATCH(request: Request) {
     }
 
     const { name, username, email, phone, headline, bio, organization, location, persona } = result.data;
+    const isGoogleAccount = user.authProvider.toUpperCase() === "GOOGLE";
+    if (isGoogleAccount && email !== user.email.toLowerCase()) {
+      return NextResponse.json({
+        error: "Email akun Google dikelola oleh Google dan tidak dapat diubah dari LMS.",
+        fieldErrors: { email: ["Gunakan email Google yang terhubung dengan akun ini."] },
+      }, { status: 400 });
+    }
 
     const updatedUser = await prisma.$transaction(async tx => {
       const updated = await tx.user.update({
@@ -49,7 +56,7 @@ export async function PATCH(request: Request) {
         data: {
           name,
           username,
-          email,
+          email: isGoogleAccount ? user.email : email,
           phone: phone || null,
           headline: headline || null,
           bio: bio || null,

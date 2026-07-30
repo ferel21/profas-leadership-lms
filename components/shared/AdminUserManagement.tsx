@@ -30,11 +30,27 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState("STUDENT");
   const [newProvider, setNewProvider] = useState("GOOGLE");
+  const [newPassword, setNewPassword] = useState("");
   const [creating, setCreating] = useState(false);
+
+  const openAddModal = () => {
+    setMessage(null);
+    setNewPassword("");
+    setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setNewPassword("");
+  };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newEmail.trim()) return;
+    if (newProvider === "LOCAL" && (newPassword.length < 8 || newPassword.length > 128)) {
+      setMessage({ type: "error", text: "Kata sandi akun lokal wajib berisi 8–128 karakter." });
+      return;
+    }
     setCreating(true);
     setMessage(null);
 
@@ -42,7 +58,13 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       const res = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName, email: newEmail, role: newRole, authProvider: newProvider })
+        body: JSON.stringify({
+          name: newName,
+          email: newEmail,
+          role: newRole,
+          authProvider: newProvider,
+          ...(newProvider === "LOCAL" ? { password: newPassword } : {}),
+        })
       });
 
       const data = await res.json();
@@ -54,8 +76,9 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       };
 
       setUsers(prev => [newUser, ...prev]);
-      setMessage({ type: "success", text: `Akun ${data.user.name} (${data.user.email}) berhasil ditambahkan dan didaftarkan ke kelas!` });
-      setShowAddModal(false);
+      const loginMethod = data.user.authProvider === "LOCAL" ? "email dan kata sandi" : "Google";
+      setMessage({ type: "success", text: `Akun ${data.user.name} (${data.user.email}) berhasil dibuat. Pengguna dapat masuk melalui ${loginMethod}.` });
+      closeAddModal();
       setNewName("");
       setNewEmail("");
       router.refresh();
@@ -101,7 +124,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
   };
 
   const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus akun ${userName || "pengguna ini"}? Semua progres dan data terkait akan dihapus permanen.`)) return;
+    if (!confirm(`Hapus akun ${userName || "pengguna ini"}? Data belajar yang terkait akan dihapus permanen. Akun yang masih memiliki program atau pembayaran akan ditolak oleh sistem.`)) return;
 
     setLoadingId(userId);
     setMessage(null);
@@ -148,7 +171,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
             />
           </div>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={openAddModal}
             className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-sm shadow-md hover:shadow-lg transition shrink-0 hover-lift"
           >
             <UserPlus size={16} className="shrink-0" />
@@ -163,7 +186,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-add-user-title"
-          onKeyDown={(e) => { if (e.key === "Escape") setShowAddModal(false); }}
+          onKeyDown={(e) => { if (e.key === "Escape") closeAddModal(); }}
         >
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
@@ -171,34 +194,42 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                 <UserPlus size={20} className="text-teal-600" />
                 <span>Tambah / Sinkron Akun</span>
               </h3>
-              <button onClick={() => setShowAddModal(false)} aria-label="Tutup modal" className="text-slate-400 hover:text-slate-600 transition">
+              <button onClick={closeAddModal} aria-label="Tutup modal" className="text-slate-400 hover:text-slate-600 transition">
                 <X size={20} />
               </button>
             </div>
             <p className="text-xs text-slate-500 mb-5 leading-relaxed">
-              Masukkan nama dan alamat email akun agar terdaftar di sistem dan langsung memiliki akses ke kurikulum LMS.
+              Buat akun dan tentukan metode masuknya. Pendaftaran ke program dikelola secara terpisah.
             </p>
+            {message?.type === "error" && (
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-semibold mb-4" role="alert">
+                {message.text}
+              </div>
+            )}
             <form onSubmit={handleCreateUser} className="flex flex-col gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                <label htmlFor="admin-new-user-name" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
                 <input
+                  id="admin-new-user-name"
                   type="text" required placeholder="Contoh: Keyra Ferel / Nadia Pratama"
                   value={newName} onChange={e => setNewName(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Alamat Email</label>
+                <label htmlFor="admin-new-user-email" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Alamat Email</label>
                 <input
+                  id="admin-new-user-email"
                   type="email" required placeholder="email.anda@gmail.com"
                   value={newEmail} onChange={e => setNewEmail(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Peran (Role)</label>
+                  <label htmlFor="admin-new-user-role" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Peran (Role)</label>
                   <select
+                    id="admin-new-user-role"
                     value={newRole} onChange={e => setNewRole(e.target.value)}
                     className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
                   >
@@ -208,9 +239,14 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Metode Login</label>
+                  <label htmlFor="admin-new-user-provider" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Metode Login</label>
                   <select
-                    value={newProvider} onChange={e => setNewProvider(e.target.value)}
+                    id="admin-new-user-provider"
+                    value={newProvider}
+                    onChange={e => {
+                      setNewProvider(e.target.value);
+                      setNewPassword("");
+                    }}
                     className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
                   >
                     <option value="GOOGLE">Google OAuth</option>
@@ -218,9 +254,29 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                   </select>
                 </div>
               </div>
+              {newProvider === "LOCAL" && (
+                <div>
+                  <label htmlFor="admin-new-user-password" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Kata Sandi Awal
+                  </label>
+                  <input
+                    id="admin-new-user-password"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    minLength={8}
+                    maxLength={128}
+                    placeholder="Minimal 8 karakter"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">Bagikan kata sandi awal ini kepada pengguna melalui kanal yang aman.</p>
+                </div>
+              )}
               <div className="flex justify-end gap-2.5 mt-4 pt-3 border-t border-slate-100">
                 <button
-                  type="button" onClick={() => setShowAddModal(false)}
+                  type="button" onClick={closeAddModal}
                   className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition"
                 >
                   Batal

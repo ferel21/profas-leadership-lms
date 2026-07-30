@@ -47,7 +47,11 @@ export async function GET(
   }
 
   const attempt = await prisma.assessmentAttempt.findFirst({
-    where: { userId: user.id, assessmentId: resolvedAssessmentId },
+    where: {
+      userId: user.id,
+      assessmentId: resolvedAssessmentId,
+      status: { not: "IN_PROGRESS" },
+    },
     orderBy: { submittedAt: "desc" },
     select: {
       id: true,

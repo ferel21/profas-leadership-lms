@@ -3,28 +3,65 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { finalizeCourseCompletion } from "@/services/completion";
-import fs from 'fs';
+import { mkdir, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { getWritableUploadRoots, resolveUploadPath } from "@/services/upload-storage";
 import { validateFileMagicBytes } from "@/services/file-security";
 import { rateLimit } from "@/services/rate-limit";
+import { syncAssessmentAchievement } from "@/services/assessment-achievement";
+import { getObjectStorageMode } from "@/services/object-storage";
+import { validateUploadMetadata } from "@/services/upload-policy";
+import { verifyCommittedAssignmentTicket } from "@/services/upload-tickets";
 
 const submitLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
+const SUBMISSION_GRACE_MS = 10_000;
 
-const MAX_SUBMISSION_FILE_SIZE = 20 * 1024 * 1024;
-const SUBMISSION_FILE_TYPES: Record<string, string> = {
-  "application/pdf": ".pdf",
-  "image/jpeg": ".jpg",
-  "image/png": ".png",
-  "image/webp": ".webp",
-  "text/plain": ".txt",
-  "application/msword": ".doc",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
-  "application/vnd.ms-powerpoint": ".ppt",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
-};
+function parseChoiceOptions(value: string | null) {
+  if (!value) return null;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed) || !parsed.every(option => typeof option === "string" && option.trim())) {
+      return null;
+    }
+    return parsed as string[];
+  } catch {
+    return null;
+  }
+}
+
+function normalizeChoiceIndex(value: unknown, optionsLength: number) {
+  const answer = typeof value === "number"
+    ? String(value)
+    : typeof value === "string"
+      ? value.trim()
+      : "";
+
+  if (!/^(0|[1-9]\d*)$/.test(answer)) return null;
+  const index = Number(answer);
+  return Number.isSafeInteger(index) && index < optionsLength ? String(index) : null;
+}
+
+function normalizeAssignmentFileUrl(value: unknown) {
+  if (typeof value !== "string") return null;
+  const candidate = value.trim();
+  if (!candidate || candidate.length > 2048) return null;
+
+  const localPrefix = "/api/uploads/assignments/";
+  if (candidate.startsWith(localPrefix)) {
+    const pathSegments = candidate.slice(localPrefix.length).split("/");
+    const hasSafePath = pathSegments.length > 0 && pathSegments.every(segment => (
+      segment !== "."
+      && segment !== ".."
+      && /^[A-Za-z0-9._-]+$/.test(segment)
+    ));
+    return hasSafePath ? candidate : null;
+  }
+
+  return null;
+}
 
 export async function POST(request: Request) {
+  const submissionReceivedAt = new Date();
   const ipCheck = submitLimiter.check(request);
   if (!ipCheck.success) {
     return NextResponse.json({ message: "Terlalu banyak pengumpulan tugas/kuis. Silakan tunggu 1 menit." }, { status: 429 });
@@ -36,6 +73,7 @@ export async function POST(request: Request) {
   try {
     const contentType = request.headers.get('content-type') || '';
     let assessmentId = '';
+    let attemptId = '';
     let answers: Record<string, any> = {};
     const pendingFiles: Array<{ questionId: string; file: File }> = [];
 
@@ -43,6 +81,8 @@ export async function POST(request: Request) {
       const formData = await request.formData();
       const assessmentValue = formData.get('assessmentId');
       assessmentId = typeof assessmentValue === "string" ? assessmentValue.trim() : "";
+      const attemptValue = formData.get("attemptId");
+      attemptId = typeof attemptValue === "string" ? attemptValue.trim() : "";
       
       const answersValue = formData.get('answers');
       if (typeof answersValue === "string" && answersValue.trim()) {
@@ -70,8 +110,9 @@ export async function POST(request: Request) {
         }
       }
     } else {
-      const json = await request.json() as { assessmentId?: unknown; answers?: unknown };
+      const json = await request.json() as { assessmentId?: unknown; attemptId?: unknown; answers?: unknown };
       assessmentId = typeof json.assessmentId === "string" ? json.assessmentId.trim() : "";
+      attemptId = typeof json.attemptId === "string" ? json.attemptId.trim() : "";
       if (json.answers !== undefined) {
         if (!json.answers || typeof json.answers !== "object" || Array.isArray(json.answers)) {
           return NextResponse.json({ message: "Jawaban evaluasi tidak valid." }, { status: 400 });
@@ -80,7 +121,7 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!assessmentId) {
+    if (!assessmentId || !attemptId) {
       return NextResponse.json({ message: "Jawaban evaluasi tidak valid." }, { status: 400 });
     }
 
@@ -90,20 +131,157 @@ export async function POST(request: Request) {
     });
 
     if (!assessment || !assessment.course.published) return NextResponse.json({ message: "Asesmen tidak ditemukan." }, { status: 404 });
+    if (assessment.questions.length === 0) {
+      return NextResponse.json({ message: "Asesmen belum memiliki soal yang dapat dikerjakan." }, { status: 409 });
+    }
 
     const enrollment = await prisma.enrollment.findUnique({
       where: { userId_courseId: { userId: user.id, courseId: assessment.course.id } },
       select: { id: true }
     });
 
-    if (!enrollment) return NextResponse.json({ message: "Anda belum terdaftar di program ini." }, { status: 403 });
+    if (!enrollment) {
+      return NextResponse.json({ message: "Anda belum terdaftar di program ini." }, { status: 403 });
+    }
+
+    const now = submissionReceivedAt;
+    const attemptSession = await prisma.assessmentAttempt.findFirst({
+      where: {
+        id: attemptId,
+        userId: user.id,
+        assessmentId,
+      },
+      select: {
+        id: true,
+        expiresAt: true,
+        status: true,
+        score: true,
+        passed: true,
+        feedback: true,
+        answers: {
+          select: {
+            questionId: true,
+            score: true,
+          },
+        },
+      },
+    });
+    if (!attemptSession) {
+      return NextResponse.json(
+        { code: "ATTEMPT_NOT_ACTIVE", message: "Sesi evaluasi tidak aktif." },
+        { status: 409 },
+      );
+    }
+
+    if (attemptSession.status !== "IN_PROGRESS") {
+      const needsManualGrading = attemptSession.status === "PENDING_GRADE"
+        || attemptSession.status === "SUBMITTED";
+      const scoreByQuestion = new Map(
+        attemptSession.answers.map(answer => [answer.questionId, answer.score]),
+      );
+      const correct = assessment.questions.filter(question => (
+        (
+          question.type === "MULTIPLE_CHOICE"
+          || question.type === "TRUE_FALSE"
+          || question.type === "SHORT_ANSWER"
+        )
+        && scoreByQuestion.get(question.id) === question.points
+      )).length;
+      const hasManualQuestions = assessment.questions.some(question => (
+        question.type === "ESSAY" || question.type === "FILE_UPLOAD"
+      ));
+      const certificate = attemptSession.passed && assessment.type !== "PRETEST"
+        ? await prisma.certificate.findUnique({
+            where: {
+              userId_courseId: {
+                userId: user.id,
+                courseId: assessment.course.id,
+              },
+            },
+            select: { uniqueNumber: true },
+          })
+        : null;
+
+      return NextResponse.json({
+        attemptId: attemptSession.id,
+        score: attemptSession.score,
+        passed: attemptSession.passed,
+        needsManualGrading,
+        status: attemptSession.status,
+        correct,
+        total: assessment.questions.length,
+        passingScore: assessment.passingScore,
+        certificateNumber: certificate?.uniqueNumber ?? null,
+        feedback: attemptSession.feedback ?? (
+          needsManualGrading
+            ? "Tugas berhasil dikirim dan menunggu penilaian mentor."
+            : "Evaluasi telah selesai."
+        ),
+        questions: needsManualGrading || hasManualQuestions
+          ? undefined
+          : assessment.questions.map(question => ({
+              id: question.id,
+              prompt: question.prompt,
+              options: question.options,
+              correctAnswer: question.correctAnswer,
+              explanation: question.explanation,
+              type: question.type,
+            })),
+      });
+    }
+
+    if (
+      (
+        assessment.deadline
+        && assessment.deadline.getTime() + SUBMISSION_GRACE_MS < now.getTime()
+      )
+      || !attemptSession.expiresAt
+      || attemptSession.expiresAt.getTime() + SUBMISSION_GRACE_MS < now.getTime()
+    ) {
+      await prisma.assessmentAttempt.updateMany({
+        where: { id: attemptId, status: "IN_PROGRESS" },
+        data: {
+          status: "GRADED",
+          score: 0,
+          passed: false,
+          feedback: "Waktu pengerjaan evaluasi telah berakhir.",
+          submittedAt: now,
+          gradedAt: now,
+        },
+      });
+      return NextResponse.json(
+        { code: "ATTEMPT_EXPIRED", message: "Waktu pengerjaan evaluasi telah berakhir." },
+        { status: 410 },
+      );
+    }
 
     const validQuestionIds = new Set(assessment.questions.map(q => q.id));
     const questionById = new Map(assessment.questions.map(question => [question.id, question]));
     const submittedQuestionIds = Object.keys(answers);
     const hasInvalidQuestionId = submittedQuestionIds.some(id => !validQuestionIds.has(id));
-    if (hasInvalidQuestionId && assessment.questions.length > 0) {
+    if (hasInvalidQuestionId) {
       return NextResponse.json({ message: "ID pertanyaan dalam jawaban tidak valid." }, { status: 400 });
+    }
+
+    for (const question of assessment.questions) {
+      if (question.type !== "MULTIPLE_CHOICE" && question.type !== "TRUE_FALSE") continue;
+
+      const options = parseChoiceOptions(question.options);
+      const correctIndex = options ? normalizeChoiceIndex(question.correctAnswer, options.length) : null;
+      if (!options || options.length < 2 || correctIndex === null) {
+        console.error("[ASSESSMENT_CONFIGURATION_ERROR]", { assessmentId, questionId: question.id });
+        return NextResponse.json({ message: "Konfigurasi soal evaluasi tidak valid. Hubungi mentor." }, { status: 409 });
+      }
+
+      const submittedAnswer = answers[question.id];
+      if (
+        submittedAnswer !== undefined
+        && submittedAnswer !== null
+        && submittedAnswer !== ""
+        && normalizeChoiceIndex(submittedAnswer, options.length) === null
+      ) {
+        return NextResponse.json({ message: "Indeks pilihan jawaban tidak valid." }, { status: 400 });
+      }
     }
 
     for (const pending of pendingFiles) {
@@ -111,30 +289,49 @@ export async function POST(request: Request) {
       if (!question || question.type !== "FILE_UPLOAD") {
         return NextResponse.json({ message: "Berkas hanya boleh dikirim untuk pertanyaan unggah berkas yang valid." }, { status: 400 });
       }
-      if (pending.file.size > MAX_SUBMISSION_FILE_SIZE) {
-        return NextResponse.json({ message: "Ukuran berkas evaluasi maksimal 20MB." }, { status: 400 });
+      const validation = validateUploadMetadata({
+        purpose: "assignment",
+        fileName: pending.file.name,
+        fileSize: pending.file.size,
+        mimeType: pending.file.type,
+      });
+      if (!validation.ok) return NextResponse.json({ message: validation.message }, { status: 400 });
+    }
+
+    if (pendingFiles.length > 0) {
+      const storage = getObjectStorageMode();
+      if (storage.mode === "supabase") {
+        return NextResponse.json({ message: "Unggahan evaluasi di Vercel harus menggunakan alur unggahan langsung." }, { status: 409 });
       }
-      if (!SUBMISSION_FILE_TYPES[pending.file.type]) {
-        return NextResponse.json({ message: "Format berkas evaluasi tidak didukung." }, { status: 400 });
+      if (storage.mode === "unavailable") {
+        return NextResponse.json({ message: storage.message }, { status: 503 });
       }
     }
 
     // Simpan dengan nama acak dan ekstensi dari MIME type yang diizinkan.
     // ID dari request tidak pernah dipakai sebagai bagian path filesystem.
+    const serverStoredFileUrls = new Set<string>();
     for (const pending of pendingFiles) {
-      const fileName = `${randomUUID()}${SUBMISSION_FILE_TYPES[pending.file.type]}`;
+      const validation = validateUploadMetadata({
+        purpose: "assignment",
+        fileName: pending.file.name,
+        fileSize: pending.file.size,
+        mimeType: pending.file.type,
+      });
+      if (!validation.ok) return NextResponse.json({ message: validation.message }, { status: 400 });
+      const fileName = `${randomUUID()}${validation.value.descriptor.extension}`;
       const buffer = Buffer.from(await pending.file.arrayBuffer());
 
-      if (!validateFileMagicBytes(buffer, pending.file.type)) {
+      if (!validateFileMagicBytes(buffer, validation.value.mimeType)) {
         return NextResponse.json({ message: "Format isi berkas evaluasi tidak sesuai dengan jenis MIME (Magic Byte Validation failed)." }, { status: 400 });
       }
 
       let stored = false;
       for (const root of getWritableUploadRoots()) {
         try {
-          const uploadsDir = resolveUploadPath(root, ["assignments"]);
-          if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-          fs.writeFileSync(resolveUploadPath(root, ["assignments", fileName]), buffer);
+          const segments = ["assignments", attemptId, pending.questionId];
+          await mkdir(resolveUploadPath(root, segments), { recursive: true });
+          await writeFile(resolveUploadPath(root, [...segments, fileName]), buffer);
           stored = true;
           break;
         } catch {
@@ -147,10 +344,48 @@ export async function POST(request: Request) {
       const answerObject = existingAnswer && typeof existingAnswer === "object" && !Array.isArray(existingAnswer)
         ? existingAnswer as Record<string, unknown>
         : {};
+      const fileUrl = `/api/uploads/assignments/${attemptId}/${pending.questionId}/${fileName}`;
       answers[pending.questionId] = {
         ...answerObject,
-        fileUrl: `/api/uploads/assignments/${fileName}`,
+        fileUrl,
       };
+      serverStoredFileUrls.add(fileUrl);
+    }
+
+    const verifiedAssignmentFiles = new Map<string, string>();
+    for (const question of assessment.questions) {
+      if (question.type !== "FILE_UPLOAD") continue;
+      const submitted = answers[question.id];
+      if (!submitted || typeof submitted !== "object" || Array.isArray(submitted)) continue;
+      const record = submitted as Record<string, unknown>;
+      const fileUrl = normalizeAssignmentFileUrl(record.fileUrl);
+      if (!record.fileUrl) continue;
+      if (!fileUrl) {
+        return NextResponse.json({ message: "Referensi berkas evaluasi tidak valid." }, { status: 400 });
+      }
+      if (serverStoredFileUrls.has(fileUrl)) {
+        verifiedAssignmentFiles.set(question.id, fileUrl);
+        continue;
+      }
+      if (typeof record.uploadToken !== "string") {
+        return NextResponse.json({ message: "Token verifikasi berkas evaluasi diperlukan." }, { status: 400 });
+      }
+      try {
+        const upload = await verifyCommittedAssignmentTicket(record.uploadToken);
+        const expectedUrl = `/api/uploads/${upload.objectPath}`;
+        if (
+          upload.userId !== user.id ||
+          upload.assessmentId !== assessmentId ||
+          upload.attemptId !== attemptId ||
+          upload.questionId !== question.id ||
+          expectedUrl !== fileUrl
+        ) {
+          return NextResponse.json({ message: "Token berkas evaluasi tidak sesuai dengan sesi." }, { status: 403 });
+        }
+        verifiedAssignmentFiles.set(question.id, fileUrl);
+      } catch {
+        return NextResponse.json({ message: "Token berkas evaluasi tidak valid atau telah kedaluwarsa." }, { status: 401 });
+      }
     }
 
     let correct = 0;
@@ -168,15 +403,16 @@ export async function POST(request: Request) {
       let questionScore = 0;
 
       if (q.type === 'MULTIPLE_CHOICE' || q.type === 'TRUE_FALSE') {
-        const userAnsStr = userAns == null ? "" : String(userAns).trim();
-        const correctAnsStr = q.correctAnswer == null ? "" : String(q.correctAnswer).trim();
-        const isCorrect = userAnsStr !== "" && userAnsStr === correctAnsStr;
+        const options = parseChoiceOptions(q.options);
+        const userAnsStr = options ? normalizeChoiceIndex(userAns, options.length) : null;
+        const correctAnsStr = options ? normalizeChoiceIndex(q.correctAnswer, options.length) : null;
+        const isCorrect = userAnsStr !== null && correctAnsStr !== null && userAnsStr === correctAnsStr;
         if (isCorrect) {
           correct++;
           questionScore = q.points;
           totalScore += q.points;
         }
-        answerText = userAnsStr.replace(/<[^>]*>?/gm, "").slice(0, 2000);
+        answerText = userAnsStr;
       } else if (q.type === 'SHORT_ANSWER') {
         const userAnsStr = userAns == null ? "" : String(userAns).trim().toLowerCase();
         const correctAnsStr = q.correctAnswer == null ? "" : String(q.correctAnswer).trim().toLowerCase();
@@ -193,8 +429,7 @@ export async function POST(request: Request) {
         answerText = rawEssay.replace(/<[^>]*>?/gm, "").slice(0, 20000);
       } else if (q.type === 'FILE_UPLOAD') {
         needsManualGrading = true;
-        const rawUrl = typeof userAns === 'object' && userAns !== null ? String(userAns.fileUrl || "") : "";
-        fileUrl = rawUrl && (rawUrl.startsWith('/api/uploads/assignments/') || rawUrl.startsWith('https://')) ? rawUrl.slice(0, 500) : null;
+        fileUrl = verifiedAssignmentFiles.get(q.id) ?? null;
       }
 
       attemptAnswers.push({
@@ -217,64 +452,55 @@ export async function POST(request: Request) {
           : "Tinjau kembali materi inti, lalu coba sekali lagi.");
 
     const attempt = await prisma.$transaction(async (tx) => {
-      const createdAttempt = await tx.assessmentAttempt.create({
-        data: {
+      const claimed = await tx.assessmentAttempt.updateMany({
+        where: {
+          id: attemptId,
           userId: user.id,
           assessmentId,
-          score: needsManualGrading ? 0 : normalizedScore, // wait for grading if needed
-          passed: passed,
-          status: status,
+          status: "IN_PROGRESS",
+          expiresAt: {
+            gte: new Date(now.getTime() - SUBMISSION_GRACE_MS),
+          },
+        },
+        data: {
+          score: needsManualGrading ? 0 : normalizedScore,
+          passed,
+          status,
           feedback,
-          answers: {
-            create: attemptAnswers
-          }
-        }
+          submittedAt: now,
+          gradedAt: needsManualGrading ? null : now,
+        },
       });
+      if (claimed.count !== 1) {
+        throw new Error("ASSESSMENT_ATTEMPT_ALREADY_SUBMITTED");
+      }
+      if (attemptAnswers.length > 0) {
+        await tx.attemptAnswer.createMany({
+          data: attemptAnswers.map(answer => ({ attemptId, ...answer })),
+        });
+      }
 
       await tx.activityLog.create({
         data: { userId: user.id, action: "SUBMIT_ASSESSMENT", metadata: JSON.stringify({ assessmentId, score: normalizedScore, passed, needsManualGrading }) }
       });
 
-      if (passed && assessment.type !== "PRETEST" && !needsManualGrading) {
-        const points = assessment.type === "FINAL" ? 50 : 20 + (normalizedScore >= 90 ? 10 : 0);
-        const existingXp = await tx.xPLog.findUnique({
-          where: { userId_source_sourceId: { userId: user.id, source: `${assessment.type}_PASSED`, sourceId: assessment.id } }
+      if (!needsManualGrading) {
+        await syncAssessmentAchievement(tx, {
+          userId: user.id,
+          assessmentId,
+          courseId: assessment.course.id,
+          assessmentType: assessment.type,
+          completedAt: now,
         });
-        if (!existingXp) {
-          await tx.xPLog.create({
-            data: { userId: user.id, points, source: `${assessment.type}_PASSED`, sourceId: assessment.id }
-          });
-        }
       }
 
-      // MASTER SKILL: Tandai modul Kuis / Tugas sebagai selesai di NodeProgress agar progres kelas bisa mencapai 100%!
-      if (passed || needsManualGrading) {
-        const node = await tx.courseNode.findFirst({ where: { OR: [{ id: assessmentId }, { assessmentId: assessmentId }], courseId: assessment.course.id } });
-        if (node) {
-          const existingProgress = await tx.nodeProgress.findUnique({
-            where: { userId_nodeId: { userId: user.id, nodeId: node.id } }
-          });
-          if (existingProgress) {
-            await tx.nodeProgress.update({
-              where: { id: existingProgress.id },
-              data: { completedAt: new Date() }
-            });
-          } else {
-            await tx.nodeProgress.create({
-              data: { userId: user.id, nodeId: node.id, completedAt: new Date() }
-            });
-          }
-        }
-      }
-
-      return createdAttempt;
+      return tx.assessmentAttempt.findUniqueOrThrow({ where: { id: attemptId } });
     });
 
-    const completion = (passed && assessment.type !== "PRETEST" && !needsManualGrading) ? await finalizeCourseCompletion(user.id, assessment.course.id) : null;
+    const completion = (!needsManualGrading && assessment.type !== "PRETEST")
+      ? await finalizeCourseCompletion(user.id, assessment.course.id)
+      : null;
     
-    // Convert to old format for response compatibility
-    const reviewQuestions = assessment.questions.map(q => ({ id: q.id, prompt: q.prompt, options: q.options, correctAnswer: q.correctAnswer, explanation: q.explanation, type: q.type }));
-
     return NextResponse.json({
       attemptId: attempt.id,
       score: needsManualGrading ? 0 : normalizedScore,
@@ -286,9 +512,24 @@ export async function POST(request: Request) {
       passingScore: assessment.passingScore,
       certificateNumber: completion?.certificateNumber ?? null,
       feedback,
-      questions: reviewQuestions
+      questions: needsManualGrading
+        ? undefined
+        : assessment.questions.map(question => ({
+            id: question.id,
+            prompt: question.prompt,
+            options: question.options,
+            correctAnswer: question.correctAnswer,
+            explanation: question.explanation,
+            type: question.type,
+          })),
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "ASSESSMENT_ATTEMPT_ALREADY_SUBMITTED") {
+      return NextResponse.json(
+        { code: "ATTEMPT_NOT_ACTIVE", message: "Evaluasi ini sudah dikirim." },
+        { status: 409 },
+      );
+    }
     console.error("[ASSESSMENT_SUBMIT_ERROR]", error);
     return NextResponse.json({ message: "Gagal memproses evaluasi." }, { status: 500 });
   }

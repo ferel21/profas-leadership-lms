@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Plus, Upload, Loader2, X, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ExportReportsButton } from "@/components/shared/ExportReportsButton";
+import { uploadFileDirectly } from "@/utils/direct-upload";
 
 type CourseOption = {
   id: string;
@@ -82,19 +83,33 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
     setError("");
 
     try {
-      const formData = new FormData();
-      formData.append("lessonId", selectedLessonId);
-      formData.append("description", matTitle);
-      if (matLink) formData.append("linkUrl", matLink);
-      if (matFile) formData.append("file", matFile);
-
-      const res = await fetch("/api/materials/upload", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal mengunggah materi");
+      if (matFile) {
+        const direct = await uploadFileDirectly(matFile, {
+          purpose: "material",
+          courseId: selectedCourseId,
+          lessonId: selectedLessonId,
+          description: matTitle,
+        });
+        if (direct.mode === "local") {
+          const formData = new FormData();
+          formData.append("courseId", selectedCourseId);
+          formData.append("lessonId", selectedLessonId);
+          formData.append("description", matTitle);
+          formData.append("file", matFile);
+          const response = await fetch("/api/materials/upload", { method: "POST", body: formData });
+          const data = await response.json().catch(() => null) as { message?: string } | null;
+          if (!response.ok) throw new Error(data?.message || "Gagal mengunggah materi");
+        }
+      } else {
+        const formData = new FormData();
+        formData.append("courseId", selectedCourseId);
+        formData.append("lessonId", selectedLessonId);
+        formData.append("description", matTitle);
+        if (matLink) formData.append("linkUrl", matLink);
+        const response = await fetch("/api/materials/upload", { method: "POST", body: formData });
+        const data = await response.json().catch(() => null) as { message?: string } | null;
+        if (!response.ok) throw new Error(data?.message || "Gagal menambahkan materi");
+      }
 
       setShowUploadModal(false);
       setMatTitle("");
@@ -130,7 +145,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
         <span>Upload Materi Cepat</span>
       </button>
 
-      <ExportReportsButton label="Ekspor Rekap Nilai (.xlsx)" className="font-bold shrink-0" />
+      <ExportReportsButton label="Ekspor Rekap Nilai (.xlsx)" className="font-bold shrink-0" loadLatest />
 
       {showCreateModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -180,7 +195,6 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                     <option value="BASIC">Dasar (BASIC)</option>
                     <option value="INTERMEDIATE">Menengah (INTERMEDIATE)</option>
                     <option value="ADVANCED">Lanjutan (ADVANCED)</option>
-                    <option value="EXECUTIVE">Eksekutif (EXECUTIVE)</option>
                   </select>
                 </div>
               </div>

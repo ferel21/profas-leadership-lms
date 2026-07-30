@@ -1,4 +1,4 @@
-import { AttendanceStatus, Role } from "@prisma/client";
+import { AttendanceStatus, EnrollmentStatus, Prisma, Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/services/auth";
@@ -32,7 +32,10 @@ export async function GET() {
 
   let eventWhere = {};
   if (user.role === Role.STUDENT) {
-    const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id }, select: { courseId: true } });
+    const enrollments = await prisma.enrollment.findMany({
+      where: { userId: user.id, status: EnrollmentStatus.ACTIVE },
+      select: { courseId: true }
+    });
     eventWhere = { OR: [{ courseId: null }, { courseId: { in: enrollments.map(item => item.courseId) } }] };
   } else if (user.role === Role.MENTOR) {
     eventWhere = { course: { mentorId: user.id } };
@@ -41,17 +44,41 @@ export async function GET() {
   const events = await prisma.calendarEvent.findMany({
     where: { ...eventWhere, startTime: range },
     select: {
-      id: true, title: true, startTime: true, endTime: true, attendanceEnabled: true,
+      id: true, courseId: true, title: true, startTime: true, endTime: true, attendanceEnabled: true,
       attendanceOpenAt: true, attendanceCloseAt: true,
-      course: { select: { title: true } },
+      course: {
+        select: {
+          title: true,
+          enrollments: {
+            where: {
+              status: EnrollmentStatus.ACTIVE,
+              user: { role: Role.STUDENT }
+            },
+            select: { userId: true }
+          }
+        }
+      },
       attendanceRecords: user.role === Role.STUDENT
-        ? { where: { userId: user.id }, select: { status: true, checkedInAt: true } }
-        : { select: { status: true, checkedInAt: true, user: { select: { id: true, name: true, email: true } } } },
+        ? { where: { userId: user.id }, select: { userId: true, status: true, checkedInAt: true } }
+        : { select: { userId: true, status: true, checkedInAt: true, user: { select: { id: true, name: true, email: true } } } },
     },
     orderBy: { startTime: "desc" },
   });
 
-  return NextResponse.json({ events, serverTime: now });
+  const scopedEvents = events.map(event => {
+    const activeParticipantIds = new Set(event.course?.enrollments.map(enrollment => enrollment.userId) ?? []);
+    const attendanceRecords = user.role !== Role.STUDENT && event.courseId
+      ? event.attendanceRecords.filter(record => activeParticipantIds.has(record.userId))
+      : event.attendanceRecords;
+
+    return {
+      ...event,
+      course: event.course ? { title: event.course.title } : null,
+      attendanceRecords
+    };
+  });
+
+  return NextResponse.json({ events: scopedEvents, serverTime: now });
 }
 
 export async function POST(request: Request) {
@@ -74,7 +101,13 @@ export async function POST(request: Request) {
         select: {
           mentorId: true,
           title: true,
-          enrollments: { where: { user: { role: Role.STUDENT } }, select: { userId: true } },
+          enrollments: {
+            where: {
+              status: EnrollmentStatus.ACTIVE,
+              user: { role: Role.STUDENT }
+            },
+            select: { userId: true }
+          },
         },
       },
     },
@@ -101,6 +134,24 @@ export async function POST(request: Request) {
     const lateAfter = new Date(event.startTime.getTime() + 15 * 60 * 1000);
     const status = now > lateAfter ? AttendanceStatus.LATE : AttendanceStatus.PRESENT;
     const record = await prisma.$transaction(async tx => {
+      await tx.$queryRaw(Prisma.sql`
+        SELECT "id" FROM "CalendarEvent"
+        WHERE "id" = ${event.id}
+        FOR UPDATE
+      `);
+      const lockedEvent = await tx.calendarEvent.findUnique({
+        where: { id: event.id },
+        select: { attendanceEnabled: true, attendanceOpenAt: true, attendanceCloseAt: true },
+      });
+      if (
+        !lockedEvent?.attendanceEnabled ||
+        !lockedEvent.attendanceOpenAt ||
+        !lockedEvent.attendanceCloseAt ||
+        now < lockedEvent.attendanceOpenAt ||
+        now > lockedEvent.attendanceCloseAt
+      ) {
+        throw new Error("ATTENDANCE_WINDOW_CLOSED");
+      }
       const existing = await tx.attendanceRecord.findUnique({
         where: { eventId_userId: { eventId: event.id, userId: user.id } }
       });
@@ -119,7 +170,13 @@ export async function POST(request: Request) {
         data: { userId: user.id, action: "ATTENDANCE_CHECK_IN", metadata: JSON.stringify({ eventId: event.id, status }) },
       });
       return attendance;
+    }).catch(error => {
+      if (error instanceof Error && error.message === "ATTENDANCE_WINDOW_CLOSED") return null;
+      throw error;
     });
+    if (!record) {
+      return NextResponse.json({ error: "Sesi absensi belum dibuka atau sudah ditutup." }, { status: 409 });
+    }
     return NextResponse.json({ record, message: status === AttendanceStatus.LATE ? "Absensi tercatat sebagai terlambat." : "Kehadiran berhasil dicatat." });
   }
 
@@ -158,24 +215,23 @@ export async function POST(request: Request) {
       ? event.course.enrollments.map(item => item.userId)
       : (await prisma.user.findMany({ where: { role: Role.STUDENT }, select: { id: true } })).map(item => item.id);
     await prisma.$transaction(async tx => {
+      await tx.$queryRaw(Prisma.sql`
+        SELECT "id" FROM "CalendarEvent"
+        WHERE "id" = ${event.id}
+        FOR UPDATE
+      `);
       await tx.calendarEvent.update({ where: { id: event.id }, data: { attendanceCloseAt: now } });
-      if (expectedUserIds.length) {
-        const existing = await tx.attendanceRecord.findMany({
-          where: { eventId: event.id, userId: { in: expectedUserIds } },
-          select: { userId: true }
-        });
-        const existingSet = new Set(existing.map(item => item.userId));
-        const missingUserIds = expectedUserIds.filter(userId => !existingSet.has(userId));
-        if (missingUserIds.length > 0) {
-          await tx.attendanceRecord.createMany({
-            data: missingUserIds.map(userId => ({
+      for (let offset = 0; offset < expectedUserIds.length; offset += 500) {
+        const participantBatch = expectedUserIds.slice(offset, offset + 500);
+        await tx.attendanceRecord.createMany({
+          data: participantBatch.map(userId => ({
               eventId: event.id,
               userId,
               status: AttendanceStatus.ABSENT,
               source: "SYSTEM"
-            }))
-          });
-        }
+          })),
+          skipDuplicates: true,
+        });
       }
       await tx.activityLog.create({ data: { userId: user.id, action: "ATTENDANCE_CLOSE", metadata: JSON.stringify({ eventId: event.id }) } });
     });

@@ -34,7 +34,12 @@ export async function POST(request: Request) {
       return NextResponse.json(existing);
     }
 
-    if (course.price > 0) {
+    // Payment processing is optional for this internal LMS. Deployments that
+    // have a real, verified payment workflow can explicitly enable the gate;
+    // otherwise published programs remain usable instead of advertising an
+    // enrollment button that can never succeed.
+    const requireVerifiedPayment = process.env.REQUIRE_VERIFIED_PAYMENT === "true";
+    if (requireVerifiedPayment && course.price > 0) {
       const paidPayment = await prisma.payment.findFirst({
         where: { userId: user.id, courseId: course.id, status: "PAID" },
         select: { id: true },
@@ -61,7 +66,11 @@ export async function POST(request: Request) {
             data: {
               userId: user.id,
               action: "ENROLL_COURSE",
-              metadata: JSON.stringify({ courseId, courseSlug: course.slug })
+              metadata: JSON.stringify({
+                courseId,
+                courseSlug: course.slug,
+                accessMode: requireVerifiedPayment ? "VERIFIED_PAYMENT" : "MEMBER_ACCESS",
+              })
             }
           });
         }

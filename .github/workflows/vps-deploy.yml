@@ -1,20 +1,9 @@
-# Template workflow — copy to .github/workflows/vps-deploy.yml once the
-# GitHub token/repository has the `workflow` permission (see
-# docs/VPS-DEPLOYMENT-RUNBOOK.md, section 5).
-#
-# Runs the quality gate on every PR into main and on push to main; only a
-# push to main goes on to deploy. This is the single canonical VPS deploy
-# workflow — it previously overlapped with deploy/ci/production.workflow.yml,
-# which has been removed in favor of this more defensive version (explicit
-# StrictHostKeyChecking, pre-flight secret validation, no third-party SSH
-# action, release-SHA verification on the target host).
+# Manual-only VPS release workflow. Pull requests are validated by
+# .github/workflows/quality.yml; production deployment requires an explicit
+# workflow_dispatch action from an authorized operator.
 name: VPS production deployment
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -38,8 +27,6 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1' }}
       DIRECT_URL: ${{ secrets.DIRECT_URL || 'postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1' }}
       JWT_SECRET: ci-only-jwt-secret-012345678901234567890123456789
-      NEXTAUTH_SECRET: ci-only-nextauth-secret-012345678901234567890
-      NEXTAUTH_URL: https://ci.invalid
       NEXT_PUBLIC_APP_URL: https://ci.invalid
       PRIVATE_UPLOAD_DIR: /app/.data/uploads
       HEALTHCHECK_TOKEN: ci-only-health-token-012345678901234567890
@@ -50,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -70,7 +57,6 @@ jobs:
   deploy:
     name: Deploy to VPS
     needs: quality
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
     steps:

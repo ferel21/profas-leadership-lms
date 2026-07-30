@@ -47,7 +47,7 @@ export function AttendanceClient({ role, events, serverNow }: { role: string; ev
   const attended = events.filter(event => event.records.some(record => record.status === "PRESENT" || record.status === "LATE")).length;
   const presentRecords = events.flatMap(event => event.records).filter(record => record.status === "PRESENT" || record.status === "LATE").length;
   const expectedRecords = events.reduce((sum, event) => sum + event.participants.length, 0);
-  const openSessions = events.filter(event => isOpen(event, currentTime)).length;
+  const openSessions = events.filter(event => getSessionState(event, currentTime) === "open").length;
 
   useEffect(() => {
     const timer = window.setInterval(() => setCurrentTime(new Date().toISOString()), 30_000);
@@ -94,7 +94,8 @@ export function AttendanceClient({ role, events, serverNow }: { role: string; ev
     <div className="attendance-list">
       {events.length === 0 && <div className="attendance-empty data-card"><CalendarDays /><h2>Belum ada agenda</h2><p>Agenda course pada rentang 30 hari akan muncul di sini.</p></div>}
       {events.map(event => {
-        const open = isOpen(event, currentTime);
+        const sessionState = getSessionState(event, currentTime);
+        const open = sessionState === "open";
         const myRecord = isStudent ? event.records[0] : undefined;
         return <article className={`attendance-card data-card ${open ? "is-open" : ""}`} key={event.id}>
           <header className="attendance-card-head">
@@ -104,7 +105,13 @@ export function AttendanceClient({ role, events, serverNow }: { role: string; ev
               <h2>{event.title}</h2>
               <p><Clock3 /> {dateTime(event.startTime)} – {time(event.endTime)}</p>
             </div>
-            <span className={`session-state ${open ? "open" : "closed"}`}>{open ? <><i /> Dibuka</> : <><LockKeyhole /> Ditutup</>}</span>
+            <span className={`session-state ${open ? "open" : "closed"}`}>
+              {open
+                ? <><i /> Dibuka</>
+                : sessionState === "not-opened"
+                  ? <><Clock3 /> Belum dibuka</>
+                  : <><LockKeyhole /> Selesai</>}
+            </span>
           </header>
 
           {isStudent ? <div className="student-attendance-action">
@@ -114,7 +121,15 @@ export function AttendanceClient({ role, events, serverNow }: { role: string; ev
               {myRecord?.checkedInAt && <small>Tercatat {dateTime(myRecord.checkedInAt)}</small>}
             </div>
             <button className="btn btn-primary" disabled={!open || !!myRecord || busy === event.id} onClick={() => act({ action: "check_in", eventId: event.id }, event.id)}>
-              {busy === event.id ? <><LoaderCircle className="spin" /> Mencatat...</> : myRecord ? <><CheckCircle2 /> Sudah tercatat</> : <><UserCheck /> Absen sekarang</>}
+              {busy === event.id
+                ? <><LoaderCircle className="spin" /> Mencatat...</>
+                : myRecord
+                  ? <><CheckCircle2 /> Sudah tercatat</>
+                  : open
+                    ? <><UserCheck /> Absen sekarang</>
+                    : sessionState === "not-opened"
+                      ? <><Clock3 /> Belum dibuka</>
+                      : <><LockKeyhole /> Sesi selesai</>}
             </button>
           </div> : <>
             <div className="attendance-manager-bar">
@@ -158,10 +173,21 @@ function Metric({ icon, label, value, detail, tone }: { icon: React.ReactNode; l
   return <article className="attendance-metric data-card"><span className={tone}>{icon}</span><div><small>{label}</small><b>{value}</b><p>{detail}</p></div></article>;
 }
 
-function isOpen(event: AttendanceEvent, nowValue: string) {
-  if (!event.attendanceEnabled || !event.attendanceOpenAt || !event.attendanceCloseAt) return false;
+type SessionState = "not-opened" | "open" | "closed";
+
+function getSessionState(event: AttendanceEvent, nowValue: string): SessionState {
   const now = new Date(nowValue).getTime();
-  return now >= new Date(event.attendanceOpenAt).getTime() && now <= new Date(event.attendanceCloseAt).getTime();
+  const eventEnded = now > new Date(event.endTime).getTime();
+
+  if (!event.attendanceEnabled || !event.attendanceOpenAt || !event.attendanceCloseAt) {
+    return eventEnded ? "closed" : "not-opened";
+  }
+
+  const opensAt = new Date(event.attendanceOpenAt).getTime();
+  const closesAt = new Date(event.attendanceCloseAt).getTime();
+  if (now < opensAt) return "not-opened";
+  if (now > closesAt) return "closed";
+  return "open";
 }
 
 const formatter = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Makassar", ...options });

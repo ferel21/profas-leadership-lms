@@ -5,71 +5,183 @@ import { prisma } from "@/services/prisma";
 import { BarChart3, TrendingUp, Users, Activity, Clock } from "lucide-react";
 import { ExportDeckButton } from "@/components/shared/ExportDeckButton";
 import { ExportTranscriptButton } from "@/components/shared/ExportTranscriptButton";
+import {
+  activityMetadataBelongsToMentorScope,
+  buildMentorActivityWhere,
+  buildMentorAnalyticsScope,
+} from "@/services/mentor-analytics-scope";
+
+const DISPLAY_TIME_ZONE = "Asia/Makassar";
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+const dateKeyFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: DISPLAY_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+});
+
+const dayLabelFormatter = new Intl.DateTimeFormat("id-ID", {
+  timeZone: DISPLAY_TIME_ZONE,
+  weekday: "short"
+});
+
+function startOfMakassarDay(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: DISPLAY_TIME_ZONE,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric"
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find(item => item.type === type)?.value ?? 0);
+
+  return new Date(Date.UTC(part("year"), part("month") - 1, part("day")) - (8 * 60 * 60 * 1000));
+}
 
 export default async function AnalyticsDashboardPage() {
   const user = await getCurrentUser();
   if (!user || user.role === "STUDENT") redirect("/dashboard");
 
-  // Fetch stats based on role
+  const isMentor = user.role === "MENTOR";
+  const mentorScope = buildMentorAnalyticsScope(isMentor
+    ? await prisma.course.findMany({
+        where: { mentorId: user.id },
+        select: {
+          id: true,
+          nodes: { select: { id: true } },
+          assessments: { select: { id: true } },
+          calendarEvents: { select: { id: true } },
+          enrollments: {
+            where: { user: { role: "STUDENT" } },
+            select: { userId: true },
+          },
+        },
+      })
+    : []);
+  const participantIds = mentorScope.participantIds;
+
+  const today = startOfMakassarDay(new Date());
+  const weekStart = new Date(today.getTime() - (6 * ONE_DAY_MS));
+
+  const profileStatsPromise = prisma.user.findUnique({
+    where: { id: user.id },
+    select: {
+      organization: true,
+      xpLogs: { select: { points: true } },
+      userBadges: { select: { id: true } },
+      attendances: { select: { status: true } },
+      enrollments: {
+        select: {
+          progressPercent: true,
+          status: true,
+          completedAt: true,
+          course: {
+            select: { title: true, category: true, level: true }
+          }
+        }
+      }
+    }
+  });
+
+  type TopAction = { action: string; _count: { id: number } };
   let totalStudents = 0;
-  let activeToday = 0;
   let totalActivityEvents = 0;
-  let topActions: { action: string, _count: { id: number } }[] = [];
+  let activeToday = 0;
+  let topActions: TopAction[] = [];
+  let weeklyLogs: Array<{ createdAt: Date }> = [];
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  if (user.role === "MENTOR") {
-    // Mentors only see stats related to their courses/students
-    const mentoredCourses = await prisma.course.findMany({ where: { mentorId: user.id }, select: { id: true } });
-    const courseIds = mentoredCourses.map(c => c.id);
-    
-    totalStudents = await prisma.enrollment.count({ where: { courseId: { in: courseIds } } });
-    
-    // Using activity logs for global metric approximation
-    // (In a full scale app, we'd filter logs by course-specific metadata)
-    totalActivityEvents = await prisma.activityLog.count();
-    activeToday = await prisma.activityLog.groupBy({ by: ['userId'], where: { createdAt: { gte: today } } }).then(res => res.length).catch(() => 1);
-    try {
-      const raw = await prisma.activityLog.groupBy({ by: ['action'], _count: { id: true }, orderBy: { _count: { id: 'desc' } }, take: 5 });
-      topActions = raw.map(r => ({ action: r.action || "Aksi Sistem", _count: { id: r._count.id } }));
-    } catch {
-      topActions = [
-        { action: "Selesai Membaca Modul Kepemimpinan", _count: { id: 18 } },
-        { action: "Menjawab Asesmen & Studi Kasus", _count: { id: 14 } },
-        { action: "Konsultasi AI Leadership Tutor", _count: { id: 12 } },
-        { action: "Bergabung ke Forum Diskusi", _count: { id: 8 } },
-        { action: "Mengakses Video Materi Lengkap", _count: { id: 5 } }
-      ];
+  if (isMentor) {
+    const candidateLogs = await prisma.activityLog.findMany({
+      where: buildMentorActivityWhere(mentorScope),
+      select: {
+        userId: true,
+        action: true,
+        metadata: true,
+        createdAt: true,
+      },
+    });
+    const scopedLogs = candidateLogs.filter(log => (
+      activityMetadataBelongsToMentorScope(log.metadata, mentorScope)
+    ));
+    const actionCounts = new Map<string, number>();
+    for (const log of scopedLogs) {
+      actionCounts.set(log.action, (actionCounts.get(log.action) ?? 0) + 1);
     }
 
+    totalStudents = participantIds.length;
+    totalActivityEvents = scopedLogs.length;
+    activeToday = new Set(
+      scopedLogs
+        .filter(log => log.createdAt >= today)
+        .map(log => log.userId),
+    ).size;
+    topActions = Array.from(actionCounts, ([action, count]) => ({
+      action,
+      _count: { id: count },
+    }))
+      .sort((left, right) => right._count.id - left._count.id)
+      .slice(0, 5);
+    weeklyLogs = scopedLogs
+      .filter(log => log.createdAt >= weekStart)
+      .map(log => ({ createdAt: log.createdAt }));
   } else {
-    // Admins see platform-wide stats
-    totalStudents = await prisma.user.count({ where: { role: "STUDENT" } });
-    totalActivityEvents = await prisma.activityLog.count();
-    activeToday = await prisma.activityLog.groupBy({ by: ['userId'], where: { createdAt: { gte: today } } }).then(res => res.length).catch(() => 1);
-    try {
-      const raw = await prisma.activityLog.groupBy({ by: ['action'], _count: { id: true }, orderBy: { _count: { id: 'desc' } }, take: 5 });
-      topActions = raw.map(r => ({ action: r.action || "Aksi Sistem", _count: { id: r._count.id } }));
-    } catch {
-      topActions = [
-        { action: "Selesai Membaca Modul Kepemimpinan", _count: { id: 18 } },
-        { action: "Menjawab Asesmen & Studi Kasus", _count: { id: 14 } },
-        { action: "Konsultasi AI Leadership Tutor", _count: { id: 12 } },
-        { action: "Bergabung ke Forum Diskusi", _count: { id: 8 } },
-        { action: "Mengakses Video Materi Lengkap", _count: { id: 5 } }
-      ];
-    }
+    const [
+      platformStudentCount,
+      platformActivityCount,
+      activeTodayRows,
+      platformTopActions,
+      platformWeeklyLogs,
+    ] = await Promise.all([
+      prisma.user.count({ where: { role: "STUDENT" } }),
+      prisma.activityLog.count(),
+      prisma.activityLog.groupBy({
+        by: ["userId"],
+        where: { createdAt: { gte: today } },
+      }),
+      prisma.activityLog.groupBy({
+        by: ["action"],
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+        take: 5,
+      }),
+      prisma.activityLog.findMany({
+        where: { createdAt: { gte: weekStart } },
+        select: { createdAt: true },
+      }),
+    ]);
+
+    totalStudents = platformStudentCount;
+    totalActivityEvents = platformActivityCount;
+    activeToday = activeTodayRows.length;
+    topActions = platformTopActions;
+    weeklyLogs = platformWeeklyLogs;
   }
-  if (topActions.length === 0) {
-    topActions = [
-      { action: "Selesai Membaca Modul Kepemimpinan", _count: { id: 18 } },
-      { action: "Menjawab Asesmen & Studi Kasus", _count: { id: 14 } },
-      { action: "Konsultasi AI Leadership Tutor", _count: { id: 12 } },
-      { action: "Bergabung ke Forum Diskusi", _count: { id: 8 } },
-      { action: "Mengakses Video Materi Lengkap", _count: { id: 5 } }
-    ];
-  }
+
+  const profileStats = await profileStatsPromise;
+  const weeklyCounts = new Map<string, number>();
+  weeklyLogs.forEach(log => {
+    const key = dateKeyFormatter.format(log.createdAt);
+    weeklyCounts.set(key, (weeklyCounts.get(key) ?? 0) + 1);
+  });
+  const weeklyActivity = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(weekStart.getTime() + (index * ONE_DAY_MS));
+    const key = dateKeyFormatter.format(date);
+    return {
+      key,
+      day: dayLabelFormatter.format(date),
+      count: weeklyCounts.get(key) ?? 0
+    };
+  });
+  const maxWeeklyCount = Math.max(...weeklyActivity.map(item => item.count), 1);
+
+  const transcriptTotalXP = profileStats?.xpLogs.reduce((total, log) => total + log.points, 0) ?? 0;
+  const attendedSessions = profileStats?.attendances.filter(record =>
+    record.status === "PRESENT" || record.status === "LATE"
+  ).length ?? 0;
+  const attendanceRate = profileStats?.attendances.length
+    ? Math.round((attendedSessions / profileStats.attendances.length) * 100)
+    : 0;
 
   // Fetch course details for Executive Deck Export
   const firstCourse = await prisma.course.findFirst({
@@ -99,34 +211,35 @@ export default async function AnalyticsDashboardPage() {
           {firstCourse && (
             <ExportDeckButton
               courseTitle={firstCourse.title}
-              category={firstCourse.category || "Executive Leadership"}
-              level={firstCourse.level || "ADVANCED"}
+              category={firstCourse.category}
+              level={firstCourse.level}
               mentorName={firstCourse.mentor.name}
-              durationHours={firstCourse.durationHours || 24}
+              durationHours={firstCourse.durationHours}
               modules={firstCourse.nodes.map(n => ({
                 title: n.title,
                 type: n.type,
                 durationMin: n.durationMin,
                 description: n.description || undefined
               }))}
-              outcomes={firstCourse.outcomes || "Menguasai kepemimpinan strategis dan resolusi konflik eksekutif."}
+              outcomes={firstCourse.outcomes}
             />
           )}
           <ExportTranscriptButton
             studentName={`${user.name} (${user.role})`}
             studentEmail={user.email}
-            organization="PROFAS Leadership OS"
+            organization={profileStats?.organization ?? undefined}
             role={user.role}
-            totalXP={1450}
-            courses={firstCourse ? [{
-              title: firstCourse.title,
-              category: firstCourse.category || "Strategic Leadership",
-              level: firstCourse.level || "ADVANCED",
-              progressPercent: 100,
-              status: "COMPLETED"
-            }] : []}
-            badgesCount={5}
-            attendanceRatePercent={96}
+            totalXP={transcriptTotalXP}
+            courses={(profileStats?.enrollments ?? []).map(enrollment => ({
+              title: enrollment.course.title,
+              category: enrollment.course.category,
+              level: enrollment.course.level,
+              progressPercent: enrollment.progressPercent,
+              status: enrollment.status,
+              completedAt: enrollment.completedAt?.toISOString()
+            }))}
+            badgesCount={profileStats?.userBadges.length ?? 0}
+            attendanceRatePercent={attendanceRate}
           />
         </div>
       </div>
@@ -157,7 +270,7 @@ export default async function AnalyticsDashboardPage() {
             <BarChart3 size={26} />
           </div>
           <div>
-            <small className="analytics-metric-label">Total Event Log</small>
+            <small className="analytics-metric-label">{isMentor ? "Aktivitas Peserta" : "Total Event Log"}</small>
             <h2 className="analytics-metric-value">{totalActivityEvents.toLocaleString("id-ID")}</h2>
           </div>
         </article>
@@ -167,34 +280,34 @@ export default async function AnalyticsDashboardPage() {
         <div className="analytics-chart-card hover-lift">
           <div className="analytics-chart-header">
             <h2 className="analytics-chart-title">
-              <TrendingUp size={20} className="text-primary" /> Tren Aktivitas Sistem Mingguan
+              <TrendingUp size={20} className="text-primary" /> {isMentor ? "Aktivitas Peserta 7 Hari Terakhir" : "Aktivitas Sistem 7 Hari Terakhir"}
             </h2>
-            <span className="analytics-realtime-badge">Real-time</span>
+            <span className="analytics-realtime-badge">Data aktual</span>
           </div>
           <div className="analytics-bars-container">
-            {[
-              { day: "Sen", val: 40 },
-              { day: "Sel", val: 70 },
-              { day: "Rab", val: 45 },
-              { day: "Kam", val: 90 },
-              { day: "Jum", val: 65 },
-              { day: "Sab", val: 80 },
-              { day: "Min", val: 100 }
-            ].map((item, i) => (
-              <div key={i} className="analytics-bar-col">
-                <span className={`analytics-bar-pct ${item.val === 100 ? "text-primary" : "text-muted"}`}>{item.val}%</span>
+            {weeklyActivity.map(item => {
+              const isPeak = item.count > 0 && item.count === maxWeeklyCount;
+              const height = item.count > 0
+                ? `${Math.max(8, Math.round((item.count / maxWeeklyCount) * 100))}%`
+                : "2px";
+
+              return (
+              <div key={item.key} className="analytics-bar-col">
+                <span className={`analytics-bar-pct ${isPeak ? "text-primary" : "text-muted"}`}>{item.count}</span>
                 <div 
                   className="analytics-bar-fill"
+                  aria-label={`${item.count} aktivitas pada ${item.day}`}
                   style={{ 
-                    height: `${item.val}%`,
-                    background: item.val === 100 ? "linear-gradient(180deg, #2a6ba7, #1e5a8f)" : "linear-gradient(180deg, #60a5fa, #2a6ba7)",
-                    opacity: item.val === 100 ? 1 : 0.75,
-                    boxShadow: item.val === 100 ? "0 6px 16px rgba(42,107,167,0.3)" : "none"
+                    height,
+                    background: isPeak ? "linear-gradient(180deg, #2a6ba7, #1e5a8f)" : "linear-gradient(180deg, #60a5fa, #2a6ba7)",
+                    opacity: isPeak ? 1 : 0.75,
+                    boxShadow: isPeak ? "0 6px 16px rgba(42,107,167,0.3)" : "none"
                   }} 
                 />
                 <span className="analytics-bar-label">{item.day}</span>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

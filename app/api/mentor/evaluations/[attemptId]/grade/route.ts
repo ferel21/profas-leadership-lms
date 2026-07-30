@@ -3,6 +3,7 @@ import { prisma } from '@/services/prisma';
 import { getCurrentUser } from '@/services/auth';
 import { rateLimit } from '@/services/rate-limit';
 import { finalizeCourseCompletion } from '@/services/completion';
+import { syncAssessmentAchievement } from '@/services/assessment-achievement';
 
 const gradeLimiter = rateLimit({ limit: 60, windowMs: 60 * 1000 });
 
@@ -14,8 +15,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
 
   try {
     const user = await getCurrentUser();
-    if (!user || (user.role !== 'MENTOR' && user.role !== 'SUPER_ADMIN')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user) return NextResponse.json({ error: 'Silakan masuk.' }, { status: 401 });
+    if (user.role !== 'MENTOR' && user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 });
     }
 
     const { attemptId } = await params;
@@ -36,6 +38,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
 
     if (!attempt || (user.role !== 'SUPER_ADMIN' && attempt.assessment.course.mentorId !== user.id)) {
       return NextResponse.json({ error: 'Attempt not found or unauthorized' }, { status: 404 });
+    }
+    if (attempt.status === 'IN_PROGRESS') {
+      return NextResponse.json(
+        { error: 'Evaluasi belum dikirim oleh peserta dan belum dapat dinilai.' },
+        { status: 409 },
+      );
     }
 
     const questionMap = new Map(attempt.assessment.questions.map(q => [q.id, q]));
@@ -105,58 +113,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
         }
       });
 
-      // If passed, award XP and mark completion
-      if (serverPassed && !attempt.passed) {
-        const existingXp = await tx.xPLog.findUnique({
-          where: {
-            userId_source_sourceId: {
-              userId: attempt.userId,
-              source: 'ASSESSMENT',
-              sourceId: attempt.assessmentId
-            }
-          }
-        });
-        if (!existingXp) {
-          await tx.xPLog.create({
-            data: {
-              userId: attempt.userId,
-              points: 50,
-              source: 'ASSESSMENT',
-              sourceId: attempt.assessmentId
-            }
-          });
-        }
-
-        // Find node that has this assessment
-        const node = await tx.courseNode.findFirst({
-          where: { OR: [{ id: attempt.assessmentId }, { assessmentId: attempt.assessmentId }], courseId: attempt.assessment.course.id }
-        });
-
-        if (node) {
-          const existingProgress = await tx.nodeProgress.findUnique({
-            where: {
-              userId_nodeId: {
-                userId: attempt.userId,
-                nodeId: node.id
-              }
-            }
-          });
-          if (existingProgress) {
-            await tx.nodeProgress.update({
-              where: { id: existingProgress.id },
-              data: { completedAt: new Date() }
-            });
-          } else {
-            await tx.nodeProgress.create({
-              data: {
-                userId: attempt.userId,
-                nodeId: node.id,
-                completedAt: new Date()
-              }
-            });
-          }
-        }
-      }
+      await syncAssessmentAchievement(tx, {
+        userId: attempt.userId,
+        assessmentId: attempt.assessmentId,
+        courseId: attempt.assessment.course.id,
+        assessmentType: attempt.assessment.type,
+      });
 
       await tx.activityLog.create({
         data: {
@@ -169,15 +131,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ attempt
       return savedAttempt;
     });
 
-    if (updatedAttempt.passed && attempt.assessment.type !== 'PRETEST') {
+    if (attempt.assessment.type !== 'PRETEST') {
       await finalizeCourseCompletion(attempt.userId, attempt.assessment.course.id).catch(() => null);
     }
 
     return NextResponse.json(updatedAttempt);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal memproses penilaian";
     console.error('Error grading attempt:', error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Gagal memproses penilaian." }, { status: 500 });
   }
 }
 
@@ -189,8 +150,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ attemptI
 
   try {
     const user = await getCurrentUser();
-    if (!user || (user.role !== 'MENTOR' && user.role !== 'SUPER_ADMIN')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user) return NextResponse.json({ error: 'Silakan masuk.' }, { status: 401 });
+    if (user.role !== 'MENTOR' && user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 });
     }
 
     const { attemptId } = await params;

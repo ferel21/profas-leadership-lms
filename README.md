@@ -24,7 +24,7 @@ Platform LMS (*Learning Management System*) full-stack berstandar produksi yang 
 - **Eksplorasi Katalog & Pendaftaran**: Memilih program kepemimpinan sesuai persona (*Entrepreneur, Academic, Organization, Cooperative*).
 - **Course Player Interaktif**: Menonton video materi, membaca modul teks/PDF, serta mengunduh berkas lampiran.
 - **Sistem Progres & XP Otomatis**: Progres dihitung akurat di sisi server (*server-authoritative*) setiap kali materi selesai.
-- **Asisten AI Leadership**: Tutor kontekstual menggunakan Claude melalui SDK Anthropic resmi jika `ANTHROPIC_API_KEY` tersedia, dengan fallback lokal agar alur belajar tetap bisa dipakai.
+- **Asisten AI Leadership**: Tutor kontekstual memakai OpenAI SDK dengan endpoint Phi-3/OpenAI-compatible jika konfigurasi `PHI3_*` atau `OPENAI_*` tersedia, dengan fallback lokal agar alur belajar tetap bisa dipakai.
 - **🎉 Animasi Penyelesaian & Auto-Redirect**:
   - Setelah menyelesaikan materi, peserta menerima perayaan animasi (*confetti & badge scale-in*).
   - Sistem otomatis mengarahkan kembali ke dasbor atau materi berikutnya.
@@ -39,13 +39,12 @@ Platform LMS (*Learning Management System*) full-stack berstandar produksi yang 
 | **`STUDENT` (Peserta)** | Mengikuti kelas, menonton/membaca materi, mengerjakan evaluasi, mengumpulkan XP, dan mengunduh sertifikat kelulusan. | `peserta@profas.id` | `profas123` |
 | **`MENTOR` (Mentor)** | Mengelola program yang diampu, menyusun modul, mengunggah materi pelajaran dengan cepat, dan menilai tugas peserta. | `mentor@profas.id` | `profas123` |
 | **`SUPER_ADMIN` (Admin)** | Memiliki akses penuh ke seluruh analitik LMS, kelola role pengguna, moderasi program, dan konfigurasi sistem. | `admin@profas.id` | `profas123` |
-| **`INSTITUSI` (Admin Institusi)** | Memantau perkembangan kohort atau kelompok belajar dari organisasi tertentu. | `institusi@profas.id` | `profas123` |
 
 ---
 
 ## 🛠️ 3. Cara Install (Instalasi Lokal)
 
-Pastikan Anda memiliki **Node.js (v18 atau lebih baru)** dan **npm** terinstal di sistem Anda.
+Pastikan Anda memiliki **Node.js 22.x** dan **npm** terinstal di sistem Anda.
 
 ```bash
 # 1. Kloning repositori proyek
@@ -64,8 +63,11 @@ npm install
 # 1. Salin konfigurasi environment
 cp .env.example .env
 
-# 2. Inisialisasi database SQLite lokal & isi data seed demo
-npm run setup
+# 2. Isi DATABASE_URL dan DIRECT_URL dengan PostgreSQL development/staging
+#    Jangan pernah memakai database production untuk seed demo.
+npx prisma generate
+npm run db:push
+npm run db:seed
 
 # 3. Jalankan server pengembangan
 npm run dev
@@ -110,20 +112,22 @@ Jangan menjalankan `prisma db push`, `prisma migrate`, atau `npm run db:seed` se
 
 ## ☁️ 7. Cara Deploy ke Vercel (Production Deployment)
 
-Proyek ini telah dikonfigurasi 100% kompatibel dengan arsitektur serverless **Vercel**.
+Build dan route serverless aplikasi kompatibel dengan **Vercel**, menggunakan PostgreSQL eksternal dan bucket private Supabase Storage untuk upload. Pada Vercel, aplikasi tidak melakukan fallback ke `/tmp`; upload akan mengembalikan status 503 jika object storage belum dikonfigurasi agar sistem tidak berpura-pura menyimpan berkas secara persisten.
 
 ### Langkah-langkah Deployment:
 1. Hubungkan repositori GitHub ini ke dasbor Vercel Anda (**New Project -> Import Git Repository**).
 2. Pada bagian **Environment Variables** di Vercel, tambahkan seluruh variabel sesuai `.env.example`:
-   - `DATABASE_URL`: Gunakan koneksi database PostgreSQL / Supabase produksi (contoh: `postgresql://...`). *Catatan: Jangan gunakan SQLite lokal (`file:./dev.db`) di Vercel karena filesystem serverless bersifat ephemeral/sementara.*
-   - `JWT_SECRET` & `NEXTAUTH_SECRET`: Isi dengan string rahasia acak minimal 32 karakter.
-   - `NEXTAUTH_URL` & `NEXT_PUBLIC_APP_URL`: Isi dengan domain produksi Anda (contoh: `https://profas-leadership-lms.vercel.app`).
-   - `PRIVATE_UPLOAD_DIR`: Untuk deployment dengan persistent volume, gunakan direktori private seperti `/app/.data/uploads`; jangan mount upload baru ke `/app/public/uploads`.
+   - `DATABASE_URL` dan `DIRECT_URL`: Gunakan koneksi PostgreSQL pooled dan direct. SQLite tidak didukung oleh provider Prisma saat ini.
+   - `JWT_SECRET`: Isi dengan string rahasia acak minimal 32 karakter.
+   - `NEXT_PUBLIC_APP_URL`: Isi dengan domain produksi Anda (contoh: `https://profas-leadership-lms.vercel.app`). Jika tidak diisi, runtime OAuth dapat memakai hostname resmi yang diberikan Vercel.
    - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: Kredensial OAuth 2.0 dari Google Cloud Console.
-   - `ANTHROPIC_API_KEY`: Opsional untuk mengaktifkan tutor Claude di course player. Key ini hanya dipakai di server dan tidak boleh diawali `NEXT_PUBLIC_`.
+   - `PHI3_API_KEY`/`PHI3_BASE_URL`/`PHI3_MODEL` atau `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL`: Opsional untuk tutor AI. Tanpa provider, aplikasi memakai fallback lokal.
+   - `SUPABASE_URL` dan `SUPABASE_SERVICE_ROLE_KEY`: Wajib pada Vercel untuk bucket upload private. Key service-role harus tetap server-only.
+   - `SUPABASE_STORAGE_BUCKET`: Opsional, default `lms-private`. Bucket dibuat private secara otomatis bila belum ada.
+   - `PRIVATE_UPLOAD_DIR`: Hanya untuk local/VPS/container; gunakan path pada volume persistent. Non-Vercel dapat memilih Supabase Storage dengan `SUPABASE_STORAGE_ENABLED=true`.
 3. Klik **Deploy**.
 4. **PENTING (Google OAuth Callback)**: Pastikan Anda telah menambahkan URL callback produksi di Google Cloud Console:
-   - `https://profas-leadership-lms.vercel.app/api/auth/google/callback`
+   - `https://profas-leadership-lms.vercel.app/api/auth/callback/google`
 
 ---
 
@@ -148,10 +152,10 @@ Untuk memastikan sistem berjalan sempurna di lingkungan baru, lakukan pengujian 
 
 - **`v2.0.0` (Production Readiness & Master Skills Overhaul)**:
   - ✨ *Feat*: Penambahan fitur pembuatan program baru oleh Mentor dan Admin secara langsung dari dasbor (`app/api/mentor/courses`).
-  - ✨ *Feat*: Fitur Upload Materi Cepat (*Quick Material Upload*) mendukung tautan video/drive dan berkas PDF/Doc (`components/MentorCourseActions`).
-  - ✨ *Feat*: Antarmuka Manajemen Pengguna & Role Access Control (*RAC*) di dasbor Super Admin (`app/api/admin/users` & `components/AdminUserManagement`).
+  - ✨ *Feat*: Fitur Upload Materi Cepat (*Quick Material Upload*) mendukung tautan video/drive dan berkas PDF/Doc (`components/shared/MentorCourseActions.tsx`).
+  - ✨ *Feat*: Antarmuka Manajemen Pengguna & Role Access Control (*RAC*) di dasbor Super Admin (`app/api/admin/users` & `components/shared/AdminUserManagement.tsx`).
   - 🛡️ *Security*: Penguncian mutlak callback Google OAuth ke domain resmi Vercel untuk mencegah *redirect_uri_mismatch*.
-  - ⚡ *Perf*: Fallback sertifikat dinamis untuk isolasi multi-instance `/tmp` SQLite di lingkungan serverless Vercel.
+  - 🗄️ *Data*: PostgreSQL eksternal menjadi satu-satunya provider database Prisma untuk deployment lokal maupun production.
   - 🎨 *UI/UX*: Perbaikan tipografi sistem (*Inter/Outfit*) dan pembersihan properti CSS shorthand yang kedaluwarsa.
   - 📜 *Docs*: Pembaruan kompas teknis (`soul.md`), `.env.example`, dan `README.md` berstandar 12 Master Skills Antigravity.
 

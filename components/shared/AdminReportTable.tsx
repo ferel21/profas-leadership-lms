@@ -32,6 +32,14 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
   });
 
   const courses = Array.from(new Set(safeData.map(d => d.course || "Program Umum")));
+  const exportStudents = filtered.map(row => ({
+    name: row.name || "Tanpa Nama",
+    email: row.email || "-",
+    courseTitle: row.course || "Program Umum",
+    role: "STUDENT",
+    status: row.status || "ACTIVE",
+    ...(row.score !== null && row.score !== undefined ? { score: row.score } : {}),
+  }));
 
   const handleExport = async () => {
     try {
@@ -48,7 +56,7 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
       }));
 
       const totalPeserta = filtered.length;
-      const totalLulus = filtered.filter(r => r.status === "LULUS").length;
+      const totalLulus = filtered.filter(r => r.status === "COMPLETED" || r.status === "LULUS").length;
       const rasioLulus = totalPeserta > 0 ? ((totalLulus / totalPeserta) * 100).toFixed(1) + "%" : "0%";
       const rataProgres = totalPeserta > 0 ? (filtered.reduce((a, b) => a + (b.progress || 0), 0) / totalPeserta).toFixed(1) + "%" : "0%";
       
@@ -60,29 +68,31 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
         { "Indikator Kinerja Utama (KPI)": "Tanggal Ekspor Laporan", "Nilai": new Date().toLocaleDateString("id-ID") }
       ];
 
-      // exceljs is ~900 KB uncompressed and is only needed once an admin
-      // actually clicks export, so it is fetched here rather than shipped with
-      // the dashboard bundle to every visitor.
-      const [{ default: ExcelJS }, { downloadExcelWorkbook }] = await Promise.all([
-        import("exceljs"),
-        import("@/services/export/xlsxExport"),
-      ]);
-      const workbook = new ExcelJS.Workbook();
-      const detailSheet = workbook.addWorksheet("Data Detail Peserta");
-      detailSheet.columns = Object.keys(detailData[0] ?? {
-        "No": 0, "Nama Lengkap": "", "Email": "", "Program Kepemimpinan": "",
-        "Progres (%)": 0, "Nilai Rata-rata": "", "Status Kelulusan": "", "Tanggal Daftar": "",
-      }).map((header, index) => ({ header, key: header, width: [6, 28, 28, 32, 14, 16, 18, 20][index] ?? 18 }));
-      detailSheet.addRows(detailData);
-      const kpiSheet = workbook.addWorksheet("Ringkasan KPI");
-      kpiSheet.columns = [{ header: "Indikator Kinerja Utama (KPI)", key: "indicator", width: 35 }, { header: "Nilai", key: "value", width: 25 }];
-      kpiSheet.addRows(kpiData.map(row => ({ indicator: row["Indikator Kinerja Utama (KPI)"], value: row.Nilai })));
-      for (const sheet of [detailSheet, kpiSheet]) {
-        sheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
-        sheet.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1E5A8F" } };
-        sheet.views = [{ state: "frozen", ySplit: 1 }];
-      }
-      await downloadExcelWorkbook(workbook, `Laporan_LMS_PROFAS_${new Date().toISOString().split("T")[0]}.xlsx`);
+      const { downloadExcelWorkbook } = await import("@/services/export/xlsxExport");
+      const detailHeaders = [
+        "No",
+        "Nama Lengkap",
+        "Email",
+        "Program Kepemimpinan",
+        "Progres (%)",
+        "Nilai Rata-rata",
+        "Status Kelulusan",
+        "Tanggal Daftar",
+      ];
+      downloadExcelWorkbook([
+        {
+          name: "Data Detail Peserta",
+          headers: detailHeaders,
+          rows: detailData.map(row => detailHeaders.map(header => row[header as keyof typeof row])),
+          widths: [6, 28, 28, 32, 14, 16, 18, 20],
+        },
+        {
+          name: "Ringkasan KPI",
+          headers: ["Indikator Kinerja Utama (KPI)", "Nilai"],
+          rows: kpiData.map(row => [row["Indikator Kinerja Utama (KPI)"], row.Nilai]),
+          widths: [35, 25],
+        },
+      ], `Laporan_LMS_PROFAS_${new Date().toISOString().split("T")[0]}.xlsx`);
     } catch (err) {
       console.error("Gagal mengekspor file:", err);
     } finally {
@@ -106,7 +116,11 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
             <FileSpreadsheet size={18} className="shrink-0" />
             <span>{exporting ? "Mengekspor..." : "Ekspor Excel (.xlsx)"}</span>
           </button>
-          <ExportReportsButton label="Ekspor Multi-Sheet Executive (.xlsx)" className="font-semibold text-sm" />
+          <ExportReportsButton
+            label="Ekspor Multi-Sheet Executive (.xlsx)"
+            students={exportStudents}
+            className="font-semibold text-sm"
+          />
         </div>
       </div>
 

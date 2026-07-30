@@ -6,8 +6,8 @@ import { prisma } from "@/services/prisma";
 import Link from "next/link";
 import {
   BookOpen, UsersRound, Award, ChevronRight, Activity, TrendingUp,
-  Target, Clock, Star, ArrowUpRight, ArrowRight, GraduationCap,
-  BookMarked, PieChart, Play
+  Clock, ArrowRight, GraduationCap, BookMarked, Play, FileCheck2,
+  CalendarDays, ClipboardCheck, BarChart3, MessageSquare, ShieldCheck
 } from "lucide-react";
 import Image from "next/image";
 import type { ReportRow } from "@/components/shared/AdminReportTable";
@@ -22,65 +22,6 @@ export const dynamic = "force-dynamic";
 
 const average = (arr: number[]) => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
 
-// ─── Komponen Metric Card Premium ────────────────────────────────────────────
-function StatCard({
-  label, value, desc, icon: Icon, gradient, trend
-}: {
-  label: string; value: string | number; desc: string;
-  icon: React.ElementType; gradient: string; trend?: string;
-}) {
-  return (
-    <div className="stat-card-clean">
-      <div className="stat-card-header">
-        <div className="stat-card-icon" style={{ background: gradient }}>
-          <Icon size={22} color="#fff" />
-        </div>
-        {trend && (
-          <span className="stat-card-trend">
-            <ArrowUpRight size={12} /> {trend}
-          </span>
-        )}
-      </div>
-      <div>
-        <div className="stat-card-value">
-          {value}
-        </div>
-        <div className="stat-card-label">
-          {label}
-        </div>
-        <div className="stat-card-desc">
-          {desc}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SectionTitle({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
-  return (
-    <div className="section-title-clean flex items-center justify-between">
-      <div>
-        <h2>{title}</h2>
-        {subtitle && <p>{subtitle}</p>}
-      </div>
-      {action}
-    </div>
-  );
-}
-
-function EmptyCard({ text, icon: Icon }: { text: string; icon?: React.ElementType }) {
-  return (
-    <div className="empty-card-clean">
-      {Icon && (
-        <div className="empty-card-icon">
-          <Icon size={24} strokeWidth={1.5} />
-        </div>
-      )}
-      <p className="m-0">{text}</p>
-    </div>
-  );
-}
-
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/masuk");
@@ -89,25 +30,23 @@ export default async function DashboardPage() {
   // STUDENT DASHBOARD
   // ═══════════════════════════════════════════════════════════
   if (user.role === "STUDENT") {
-    const [initialEnrollments, certificates] = await Promise.all([
-      prisma.enrollment.findMany({
-        where: { userId: user.id },
-        include: {
-          course: {
-            select: {
-              id: true, slug: true, title: true, shortDescription: true, category: true, level: true, price: true, durationHours: true, rating: true, studentsCount: true, image: true,
-              nodes: { where: { type: { not: "FOLDER" } }, select: { id: true } }
-            }
+    const initialEnrollments = await prisma.enrollment.findMany({
+      where: { userId: user.id },
+      include: {
+        course: {
+          select: {
+            id: true, slug: true, title: true, shortDescription: true, category: true, level: true, price: true, durationHours: true, rating: true, studentsCount: true, image: true,
+            nodes: { where: { type: { not: "FOLDER" } }, select: { id: true } }
           }
-        },
-        orderBy: { enrolledAt: "desc" }
-      }),
-      prisma.certificate.findMany({
-        where: { userId: user.id },
-        include: { course: { select: { id: true, title: true, slug: true, image: true } } },
-        orderBy: { issuedAt: "desc" }
-      })
-    ]);
+        }
+      },
+      orderBy: { enrolledAt: "desc" }
+    });
+    const certificates = await prisma.certificate.findMany({
+      where: { userId: user.id },
+      include: { course: { select: { id: true, title: true, slug: true, image: true } } },
+      orderBy: { issuedAt: "desc" }
+    });
     // Enrollment adalah entitlement peserta. Jangan auto-enroll semua course
     // yang dipublish: dashboard harus mencerminkan paket/program yang dibeli.
     const enrollments = initialEnrollments;
@@ -268,102 +207,131 @@ export default async function DashboardPage() {
   // MENTOR DASHBOARD
   // ═══════════════════════════════════════════════════════════
   if (user.role === "MENTOR") {
-    const [courses, pendingGradeCount] = await Promise.all([
-      prisma.course.findMany({
-        where: { mentorId: user.id },
-        include: { enrollments: true, nodes: { select: { id: true, type: true, title: true } } }
-      }),
-      prisma.assessmentAttempt.count({
-        where: { assessment: { course: { mentorId: user.id } }, status: "PENDING_GRADE" }
-      })
-    ]);
+    const courses = await prisma.course.findMany({
+      where: { mentorId: user.id },
+      include: {
+        enrollments: { select: { userId: true, progressPercent: true } },
+        nodes: { select: { id: true, type: true, title: true } },
+      },
+      orderBy: [{ published: "desc" }, { createdAt: "desc" }],
+    });
+    const pendingGradeCount = await prisma.assessmentAttempt.count({
+      where: { assessment: { course: { mentorId: user.id } }, status: "PENDING_GRADE" }
+    });
 
     const courseOptions = courses.map(c => ({
       id: c.id, title: c.title,
       nodes: c.nodes.map(n => ({ id: n.id, title: n.title, type: n.type }))
     }));
 
-    const totalStudents = courses.reduce((a, c) => a + c.enrollments.length, 0);
+    const totalStudents = new Set(courses.flatMap(course => course.enrollments.map(enrollment => enrollment.userId))).size;
+    const activeCourses = courses.filter(course => course.published);
+    const averageStudentProgress = average(courses.flatMap(course => course.enrollments.map(enrollment => enrollment.progressPercent)));
+    const mentorQuickLinks = [
+      { href: "/mentor/evaluasi", label: "Evaluasi", description: "Nilai tugas peserta", icon: FileCheck2 },
+      { href: "/dashboard/peserta", label: "Peserta", description: "Pantau progres belajar", icon: UsersRound },
+      { href: "/kalender", label: "Kalender", description: "Atur agenda program", icon: CalendarDays },
+      { href: "/absensi", label: "Absensi", description: "Kelola kehadiran", icon: ClipboardCheck },
+      { href: "/dashboard/analitik", label: "Analitik", description: "Baca aktivitas program", icon: BarChart3 },
+      { href: "/peringkat", label: "Peringkat", description: "Lihat capaian peserta", icon: Award },
+      { href: "/forum", label: "Komunitas", description: "Dampingi diskusi", icon: MessageSquare },
+    ];
 
     return (
       <DashboardChrome user={user}>
-        {/* Hero Mentor */}
-        <div className="hero-banner-mentor">
-          <p style={{ margin: "0 0 4px", fontSize: "0.8rem", opacity: 0.8, fontWeight: 600, letterSpacing: "0.5px" }}>DASHBOARD MENTOR</p>
-          <h1 className="hero-banner-title">{user.name}</h1>
-          <p className="hero-banner-subtitle">Kelola materi, evaluasi tugas, dan pantau progres peserta Anda.</p>
-        </div>
+        <div className="pf-role-dashboard pf-mentor-dashboard">
+          <header className="pf-role-intro">
+            <span>Workspace mentor</span>
+            <h1>Halo, {user.name.split(" ")[0]}.</h1>
+            <p>Kelola program, dampingi peserta, dan selesaikan pekerjaan yang membutuhkan perhatian Anda.</p>
+          </header>
 
-        <div className="responsive-stat-grid">
-          <StatCard label="Program Aktif" value={courses.length} desc="Program berjalan" icon={BookOpen} gradient="linear-gradient(135deg, #3b82f6, #60a5fa)" />
-          <StatCard label="Total Peserta" value={totalStudents} desc="Dalam semua program" icon={UsersRound} gradient="linear-gradient(135deg, #8b5cf6, #a78bfa)" />
-          <StatCard label="Tugas Menunggu" value={pendingGradeCount} desc="Perlu dinilai" icon={Clock} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" />
-          <StatCard label="Rating" value="4.8" desc="Rata-rata ulasan peserta" icon={Star} gradient="linear-gradient(135deg, #10b981, #34d399)" trend="Baik" />
-        </div>
-
-        <div style={{ marginBottom: "1.5rem" }}>
-          <MentorCourseActions courses={courseOptions} />
-        </div>
-
-        <div className="responsive-main-grid">
-          <div className="dash-card-clean" id="program">
-            <SectionTitle title="Kurikulum & Program" subtitle="Kelola struktur materi Anda" />
-            <div className="dash-enroll-list">
-              {courses.map(course => (
-                <div key={course.id} className="dash-mentor-course-item hover-lift">
-                  <div className="dash-mentor-course-thumb">
-                    <Image src={course.image} fill alt={course.title} sizes="80px" style={{ objectFit: "cover" }} />
-                  </div>
-                  <div className="dash-mentor-course-info">
-                    <span className="dash-mentor-course-cat">{course.category}</span>
-                    <h3 className="dash-mentor-course-title">{course.title}</h3>
-                    <p className="dash-mentor-course-meta">
-                      {course.nodes.filter(n => n.type === "FOLDER").length} modul • {course.enrollments.length} peserta
-                    </p>
-                  </div>
-                  <Link href={`/mentor/courses/${course.id}/builder`} className="dash-mentor-btn">
-                    Buka Builder
-                  </Link>
-                </div>
-              ))}
-              {courses.length === 0 && <EmptyCard text="Belum ada program yang dibuat." icon={BookOpen} />}
+          <section className="pf-role-focus" aria-labelledby="mentor-focus-title">
+            <div className="pf-role-focus-copy">
+              <span className="pf-role-kicker">Prioritas hari ini</span>
+              <Clock aria-hidden="true" />
+              <h2 id="mentor-focus-title">
+                {pendingGradeCount > 0
+                  ? `${pendingGradeCount} evaluasi menunggu penilaian.`
+                  : "Semua evaluasi sudah tertangani."}
+              </h2>
+              <p>
+                {pendingGradeCount > 0
+                  ? "Berikan umpan balik tepat waktu agar peserta dapat melanjutkan progres belajarnya."
+                  : "Anda dapat meninjau aktivitas peserta atau menyiapkan materi berikutnya."}
+              </p>
+              <Link href="/mentor/evaluasi" className="pf-role-focus-action">
+                Buka evaluasi <ArrowRight aria-hidden="true" />
+              </Link>
             </div>
-          </div>
+            <dl className="pf-role-focus-metrics">
+              <div><dt>Program aktif</dt><dd>{activeCourses.length}</dd></div>
+              <div><dt>Peserta unik</dt><dd>{totalStudents}</dd></div>
+              <div><dt>Rata-rata progres</dt><dd>{averageStudentProgress}%</dd></div>
+            </dl>
+          </section>
 
-          <div className="dash-sidebar-col">
-            <div className="dash-card-clean">
-              <SectionTitle title="Aksi Cepat" subtitle="Pintu akses fitur pengajaran" />
-              <div className="dash-quick-list">
-                {[
-                  { href: "/dashboard/evaluasi", label: "Periksa Tugas & Evaluasi", icon: ClipboardIcon, color: "#3b82f6" },
-                  { href: "/dashboard/peserta", label: "Pantau Progres Peserta", icon: UsersRound, color: "#8b5cf6" },
-                  { href: "/forum", label: "Forum & Komunitas Belajar", icon: MessageIcon, color: "#2a6ba7" },
-                ].map(({ href, label, icon: Icon, color }) => (
-                  <Link key={href} href={href} className="dash-quick-item hover-lift">
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div className="dash-quick-icon" style={{ background: `${color}18` }}>
-                        <Icon size={15} color={color} />
-                      </div>
-                      {label}
-                    </div>
-                    <ChevronRight size={15} color="#94a3b8" />
+          <section className="pf-role-section pf-role-actions-section" id="program" aria-labelledby="mentor-program-actions">
+            <header className="pf-role-section-heading">
+              <div>
+                <span>Program & materi</span>
+                <h2 id="mentor-program-actions">Kelola ruang belajar</h2>
+                <p>Buat program baru, unggah materi, atau ekspor rekap penilaian.</p>
+              </div>
+            </header>
+            <MentorCourseActions courses={courseOptions} />
+          </section>
+
+          <div className="pf-role-content-grid">
+            <section className="pf-role-section" aria-labelledby="mentor-course-list">
+              <header className="pf-role-section-heading">
+                <div>
+                  <span>Kurikulum</span>
+                  <h2 id="mentor-course-list">Program Anda</h2>
+                </div>
+                <small>{courses.length} program</small>
+              </header>
+              {courses.length > 0 ? (
+                <div className="pf-role-course-list">
+                  {courses.map(course => (
+                    <Link href={`/mentor/courses/${course.id}/builder`} key={course.id} className="pf-role-course-row">
+                      <span className="pf-role-course-thumb">
+                        <Image src={course.image} fill alt="" sizes="64px" />
+                      </span>
+                      <span className="pf-role-course-copy">
+                        <small>{course.category} · {course.published ? "Terbit" : "Draf"}</small>
+                        <strong>{course.title}</strong>
+                        <span>{course.nodes.filter(node => node.type === "FOLDER").length} modul · {course.enrollments.length} peserta</span>
+                      </span>
+                      <ChevronRight aria-hidden="true" />
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="pf-role-empty">
+                  <BookOpen aria-hidden="true" />
+                  <p>Belum ada program. Gunakan tombol di atas untuk membuat program pertama.</p>
+                </div>
+              )}
+            </section>
+
+            <aside className="pf-role-section" aria-labelledby="mentor-shortcuts">
+              <header className="pf-role-section-heading">
+                <div>
+                  <span>Navigasi</span>
+                  <h2 id="mentor-shortcuts">Akses cepat</h2>
+                </div>
+              </header>
+              <div className="pf-role-shortcut-list">
+                {mentorQuickLinks.map(({ href, label, description, icon: Icon }) => (
+                  <Link href={href} key={href} className="pf-role-shortcut">
+                    <Icon aria-hidden="true" />
+                    <span><strong>{label}</strong><small>{description}</small></span>
+                    <ChevronRight aria-hidden="true" />
                   </Link>
                 ))}
               </div>
-            </div>
-            <div className="dash-tip-card-blue">
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-                <div className="dash-tip-icon">
-                  <Target size={18} color="#fef08a" />
-                </div>
-                <div>
-                  <p style={{ margin: "0 0 4px", fontSize: "0.8rem", fontWeight: 700 }}>Tips Pengajaran Berdampak</p>
-                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.85, lineHeight: 1.5 }}>
-                    Berikan umpan balik yang konstruktif dan tepat waktu pada tugas peserta untuk meningkatkan retensi belajar mereka.
-                  </p>
-                </div>
-              </div>
-            </div>
+            </aside>
           </div>
         </div>
       </DashboardChrome>
@@ -373,126 +341,158 @@ export default async function DashboardPage() {
   // ═══════════════════════════════════════════════════════════
   // SUPER ADMIN DASHBOARD
   // ═══════════════════════════════════════════════════════════
-  // Pooler Supabase production memakai connection_limit=1. Jalankan seluruh
-  // query read admin dalam satu transaksi agar tidak membuat tujuh checkout
-  // koneksi paralel yang berisiko P2024 di serverless.
-  const [userCount, courseCount, certificateCount, enrollmentCount, roleCounts, allEnrollments, allUsersList, allCoursesList] = await prisma.$transaction([
-    prisma.user.count(),
-    prisma.course.count({ where: { published: true } }),
-    prisma.certificate.count(),
-    prisma.enrollment.count(),
-    prisma.user.groupBy({ by: ["role"], orderBy: { role: "asc" }, _count: { _all: true } }),
-    prisma.enrollment.findMany({
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        course: { select: { id: true, title: true } }
-      }
-    }),
-    prisma.user.findMany({
-      select: {
-        id: true, name: true, email: true, role: true, authProvider: true, createdAt: true,
-        _count: { select: { enrollments: true, certificates: true, mentoredCourses: true } }
-      },
-      orderBy: { createdAt: "desc" }
-    }),
-    prisma.course.findMany({
-      include: { nodes: { select: { id: true, type: true, title: true } } }
-    })
-  ]);
+  // These independent reads deliberately run sequentially. Holding the
+  // pooler's only connection inside one long transaction starves sidebar and
+  // navigation requests; releasing it after each query keeps the workspace
+  // responsive under serverless concurrency.
+  const userCount = await prisma.user.count();
+  const courseCount = await prisma.course.count({ where: { published: true } });
+  const certificateCount = await prisma.certificate.count();
+  const enrollmentCount = await prisma.enrollment.count();
+  const roleCounts = await prisma.user.groupBy({
+    by: ["role"],
+    orderBy: { role: "asc" },
+    _count: { _all: true },
+  });
+  const allEnrollments = await prisma.enrollment.findMany({
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      course: { select: { id: true, title: true } }
+    }
+  });
+  const allUsersList = await prisma.user.findMany({
+    select: {
+      id: true, name: true, email: true, role: true, authProvider: true, createdAt: true,
+      _count: { select: { enrollments: true, certificates: true, mentoredCourses: true } }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+  const allCoursesList = await prisma.course.findMany({
+    include: { nodes: { select: { id: true, type: true, title: true } } }
+  });
 
   const reportData: ReportRow[] = allEnrollments.map(e => ({
     id: e.id, name: e.user.name, email: e.user.email,
     course: e.course.title, progress: e.progressPercent,
-    score: e.progressPercent > 0 ? Math.round(e.progressPercent * 0.9) : null,
+    score: null,
     status: e.status, enrolledAt: e.enrolledAt.toISOString()
   }));
 
-  const activeStudentsCount = reportData.filter(r => r.progress > 0 && r.status !== "COMPLETED").length;
+  const activeStudentsCount = new Set(
+    allEnrollments
+      .filter(enrollment => enrollment.progressPercent > 0 && enrollment.status !== "COMPLETED")
+      .map(enrollment => enrollment.user.id)
+  ).size;
   const avgProgress = average(reportData.map(r => r.progress));
-  const graduationRate = enrollmentCount > 0 ? Math.round((certificateCount / enrollmentCount) * 100) : 0;
+  const graduationRate = enrollmentCount > 0 ? Math.min(100, Math.round((certificateCount / enrollmentCount) * 100)) : 0;
+  const adminQuickLinks = [
+    { href: "#admin-user-mgmt", label: "Pengguna", description: "Kelola akun dan peran", icon: UsersRound },
+    { href: "#program", label: "Program", description: "Buat dan atur kurikulum", icon: BookOpen },
+    { href: "#broadcast-mgmt", label: "Siaran", description: "Kirim pengumuman", icon: MessageSquare },
+    { href: "/kalender", label: "Kalender", description: "Atur agenda platform", icon: CalendarDays },
+    { href: "/absensi", label: "Absensi", description: "Pantau kehadiran", icon: ClipboardCheck },
+    { href: "/dashboard/analitik", label: "Analitik", description: "Tinjau data aktivitas", icon: BarChart3 },
+    { href: "/peringkat", label: "Peringkat", description: "Lihat capaian peserta", icon: Award },
+    { href: "/forum", label: "Komunitas", description: "Moderasi diskusi", icon: MessageSquare },
+  ];
 
   return (
     <DashboardChrome user={user}>
-      {/* Hero Admin */}
-      <div className="hero-banner-admin">
-        <div className="hero-banner-title" style={{ fontSize: "1.6rem" }}>
-          Analytics & Control Center
-        </div>
-        <p className="hero-banner-subtitle">
-          Pemantauan menyeluruh seluruh operasi LMS PROFAS Leadership.
-        </p>
-      </div>
+      <div className="pf-role-dashboard pf-admin-dashboard">
+        <header className="pf-role-intro">
+          <span>Kontrol platform</span>
+          <h1>Operasional LMS dalam satu ruang.</h1>
+          <p>Pantau kesehatan pembelajaran dan buka alat pengelolaan tanpa berpindah-pindah dashboard.</p>
+        </header>
 
-      {/* ── 4 KPI Cards ── */}
-      <div className="responsive-stat-grid">
-        <StatCard label="Total Pengguna" value={userCount} desc="Akun terdaftar" icon={UsersRound} gradient="linear-gradient(135deg, #6d28d9, #7c3aed)" trend="+12%" />
-        <StatCard label="Peserta Aktif" value={activeStudentsCount} desc="Sedang aktif belajar" icon={Activity} gradient="linear-gradient(135deg, #2a6ba7, #1e5a8f)" trend="Live" />
-        <StatCard label="Program Terbit" value={courseCount} desc="Dapat diakses peserta" icon={BookOpen} gradient="linear-gradient(135deg, #3b82f6, #60a5fa)" />
-        <StatCard label="Sertifikat Terbit" value={certificateCount} desc="Terverifikasi publik" icon={Award} gradient="linear-gradient(135deg, #f59e0b, #fbbf24)" trend={`${graduationRate}%`} />
-      </div>
+        <section className="pf-role-focus pf-admin-focus" aria-labelledby="admin-focus-title">
+          <div className="pf-role-focus-copy">
+            <span className="pf-role-kicker">Status platform</span>
+            <ShieldCheck aria-hidden="true" />
+            <h2 id="admin-focus-title">{activeStudentsCount} peserta sedang aktif belajar.</h2>
+            <p>{courseCount} program telah terbit dengan rata-rata progres {avgProgress}% di seluruh pendaftaran.</p>
+            <Link href="#admin-user-mgmt" className="pf-role-focus-action">
+              Kelola pengguna <ArrowRight aria-hidden="true" />
+            </Link>
+          </div>
+          <dl className="pf-role-focus-metrics">
+            <div><dt>Akun terdaftar</dt><dd>{userCount}</dd></div>
+            <div><dt>Pendaftaran</dt><dd>{enrollmentCount}</dd></div>
+            <div><dt>Sertifikat</dt><dd>{certificateCount}</dd></div>
+          </dl>
+        </section>
 
-      {/* ── Analytics & Admin Control System ── */}
-      <SuperAdminAnalyticsPanel
-        roleCounts={roleCounts.map(item => ({
-          role: item.role,
-          total: typeof item._count === "object" ? item._count._all ?? 0 : 0
-        }))}
-        userCount={userCount}
-        courseCount={courseCount}
-        certificateCount={certificateCount}
-        activeStudentsCount={activeStudentsCount}
-        avgProgress={avgProgress}
-        graduationRate={graduationRate}
-        enrollmentCount={enrollmentCount}
-      />
-
-      {/* Performa Platform */}
-      <div className="dash-chart-card mb-6">
-        <SectionTitle title="Performa Platform & Pembelajaran" subtitle="Ringkasan data kemajuan belajar seluruh peserta" />
-        <div className="dash-perf-list mt-4">
-          {[
-            { label: "Rata-rata Progres Belajar", value: `${avgProgress}%`, pct: avgProgress, color: "#2a6ba7", icon: TrendingUp },
-            { label: "Tingkat Kelulusan Alumni", value: `${graduationRate}%`, pct: graduationRate, color: "#8b5cf6", icon: GraduationCap },
-            { label: "Total Pendaftaran Kelas", value: enrollmentCount, pct: Math.min(100, enrollmentCount * 2), color: "#3b82f6", icon: BookMarked },
-          ].map(({ label, value, pct, color, icon: Icon }) => (
-            <div key={label}>
-              <div className="dash-perf-item-hdr">
-                <div className="dash-perf-item-title">
-                  <div className="dash-perf-icon-box" style={{ background: `${color}18` }}>
-                    <Icon size={14} color={color} />
-                  </div>
-                  <span className="dash-perf-lbl">{label}</span>
-                </div>
-                <span className="dash-perf-val">{value}</span>
-              </div>
-              <div className="dash-perf-track">
-                <div className="dash-perf-fill" style={{ width: `${pct}%`, background: color }} />
-              </div>
+        <section className="pf-role-section" aria-labelledby="admin-shortcuts">
+          <header className="pf-role-section-heading">
+            <div>
+              <span>Operasional</span>
+              <h2 id="admin-shortcuts">Akses cepat</h2>
+              <p>Semua fungsi lama tetap tersedia dan dikelompokkan berdasarkan pekerjaan.</p>
             </div>
-          ))}
-        </div>
+          </header>
+          <div className="pf-admin-shortcut-grid">
+            {adminQuickLinks.map(({ href, label, description, icon: Icon }) => (
+              <Link href={href} key={href} className="pf-role-shortcut">
+                <Icon aria-hidden="true" />
+                <span><strong>{label}</strong><small>{description}</small></span>
+                <ChevronRight aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="pf-role-section pf-admin-insight-section" aria-labelledby="platform-insight-title">
+          <header className="pf-role-section-heading">
+            <div>
+              <span>Data platform</span>
+              <h2 id="platform-insight-title">Distribusi & laporan</h2>
+              <p>Ringkasan berdasarkan akun, pendaftaran, progres, dan sertifikat yang tersimpan.</p>
+            </div>
+          </header>
+          <dl className="pf-admin-signal-row">
+            <div><TrendingUp aria-hidden="true" /><dt>Rata-rata progres</dt><dd>{avgProgress}%</dd></div>
+            <div><GraduationCap aria-hidden="true" /><dt>Tingkat sertifikasi</dt><dd>{graduationRate}%</dd></div>
+            <div><BookMarked aria-hidden="true" /><dt>Total pendaftaran</dt><dd>{enrollmentCount}</dd></div>
+            <div><Activity aria-hidden="true" /><dt>Peserta aktif</dt><dd>{activeStudentsCount}</dd></div>
+          </dl>
+          <SuperAdminAnalyticsPanel
+            roleCounts={roleCounts.map(item => ({
+              role: item.role,
+              total: typeof item._count === "object" ? item._count._all ?? 0 : 0
+            }))}
+            userCount={userCount}
+            courseCount={courseCount}
+            certificateCount={certificateCount}
+            activeStudentsCount={activeStudentsCount}
+            avgProgress={avgProgress}
+            graduationRate={graduationRate}
+            enrollmentCount={enrollmentCount}
+          />
+        </section>
+
+        <section className="pf-role-section pf-role-actions-section" id="program" aria-labelledby="admin-program-title">
+          <header className="pf-role-section-heading">
+            <div>
+              <span>Program & materi</span>
+              <h2 id="admin-program-title">Kelola katalog pembelajaran</h2>
+              <p>Buat program, unggah materi, dan buka course builder.</p>
+            </div>
+          </header>
+          <MentorCourseActions courses={allCoursesList.map(c => ({ id: c.id, title: c.title, nodes: c.nodes }))} />
+        </section>
+
+        <section className="pf-admin-tool-slot" id="broadcast-mgmt" aria-label="Pengelolaan siaran">
+          <BroadcastManager courses={allCoursesList.map(c => ({ id: c.id, title: c.title }))} />
+        </section>
+
+        <section className="pf-admin-tool-slot" id="admin-user-mgmt" aria-label="Pengelolaan pengguna">
+          <AdminUserManagement initialUsers={allUsersList.map(u => ({ ...u, createdAt: u.createdAt.toISOString() }))} />
+        </section>
+
+        <section className="pf-admin-tool-slot" id="reports" aria-label="Laporan pembelajaran">
+          <AdminReportTable data={reportData} />
+        </section>
       </div>
-
-      <div style={{ marginBottom: "1.5rem" }}>
-        <MentorCourseActions courses={allCoursesList.map(c => ({ id: c.id, title: c.title, nodes: c.nodes }))} />
-      </div>
-
-      {/* Broadcast Manager */}
-      <BroadcastManager courses={allCoursesList.map(c => ({ id: c.id, title: c.title }))} />
-
-      {/* Admin User & Role Management */}
-      <AdminUserManagement initialUsers={allUsersList.map(u => ({ ...u, createdAt: u.createdAt.toISOString() }))} />
-
-      {/* Report Table */}
-      <AdminReportTable data={reportData} />
     </DashboardChrome>
   );
-}
-
-// ── Placeholder icons untuk komponen lokal ─────────────────────────────────
-function ClipboardIcon({ size, color }: { size?: number; color?: string }) {
-  return <Activity size={size} color={color} />;
-}
-function MessageIcon({ size, color }: { size?: number; color?: string }) {
-  return <PieChart size={size} color={color} />;
 }

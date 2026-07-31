@@ -2562,6 +2562,13 @@ html body .dashboard-fresh .forum-empty-box { min-height: 180px; border: 1px das
 html body .dashboard-fresh .forum-thread-avatar { color: #1e5a8f !important; background: #eff6ff !important; }
 html body .dashboard-fresh .forum-thread-replies { color: #52616d; font-size: .78rem; }
 
+@media (max-width: 768px) {
+  html body .dashboard-fresh .forum-card-head { flex-direction: column !important; align-items: stretch !important; gap: 14px !important; padding: 16px !important; }
+  html body .dashboard-fresh .forum-search-box { max-width: 100% !important; width: 100% !important; }
+  html body .dashboard-fresh .forum-thread-row { align-items: flex-start; }
+  html body .dashboard-fresh .forum-thread-replies { display: none; }
+}
+
 /* --- Timeline unique classes --- */
 html body .dashboard-fresh .timeline-container { max-width: 920px; }
 html body .dashboard-fresh .timeline-content .content-inner { padding: 18px 20px !important; border: 1px solid #e5e7eb !important; border-radius: 16px !important; background: #fff !important; box-shadow: 0 12px 32px rgba(42, 107, 167, 0.06) !important; }

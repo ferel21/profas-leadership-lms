@@ -51,6 +51,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/validate-env.mjs ./scripts/validate-env.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/deploy/vps/docker-entrypoint.sh ./docker-entrypoint.sh
 
@@ -58,8 +59,8 @@ USER nextjs
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget -qO- http://localhost:3000/api/health || exit 1
+HEALTHCHECK --interval=15s --timeout=10s --start-period=45s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
 
 ENTRYPOINT ["/bin/sh", "/app/docker-entrypoint.sh"]
 CMD ["node", "server.js"]

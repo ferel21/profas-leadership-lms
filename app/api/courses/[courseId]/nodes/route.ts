@@ -11,6 +11,7 @@ type CurriculumNodeInput = {
   id: string;
   parentId: string | null;
   assessmentId: string | null;
+  assessmentType: string | null;
   title: string;
   type: NodeType;
   order: number;
@@ -79,6 +80,9 @@ function parseCurriculumNodes(rawNodes: unknown[]): CurriculumNodeInput[] {
     const assessmentId = typeof node.assessmentId === "string" && node.assessmentId.trim()
       ? node.assessmentId.trim()
       : null;
+    const assessmentType = typeof node.assessmentType === "string" && node.assessmentType.trim()
+      ? node.assessmentType.trim()
+      : null;
 
     if (parentId === id || (parentId && parentId.length > 191)) {
       throw new CurriculumValidationError("Relasi induk node kurikulum tidak valid.");
@@ -92,6 +96,7 @@ function parseCurriculumNodes(rawNodes: unknown[]): CurriculumNodeInput[] {
       id,
       parentId,
       assessmentId,
+      assessmentType,
       title: title.replace(/<[^>]*>?/gm, "").trim().slice(0, 150) || "Bab Materi",
       type: type as NodeType,
       order: order as number,
@@ -257,12 +262,17 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
             throw new CurriculumValidationError("Evaluasi berasal dari program lain dan tidak dapat digunakan.");
           }
 
+          let finalAssType = node.type === NodeType.QUIZ ? "MODULE" : "FINAL";
+          if (node.type === NodeType.QUIZ && node.assessmentType && ["PRETEST", "POSTTEST", "MODULE", "FINAL"].includes(node.assessmentType)) {
+            finalAssType = node.assessmentType;
+          }
+
           if (existingAssessment) {
             await tx.assessment.updateMany({
               where: { id: assessmentId, courseId },
               data: {
                 title: node.title,
-                type: node.type === NodeType.QUIZ ? "MODULE" : "FINAL",
+                type: finalAssType as any,
                 isAssignment: node.type === NodeType.ASSIGNMENT
               }
             });
@@ -272,7 +282,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
                 id: assessmentId,
                 courseId,
                 title: node.title,
-                type: node.type === NodeType.QUIZ ? "MODULE" : "FINAL",
+                type: finalAssType as any,
                 isAssignment: node.type === NodeType.ASSIGNMENT
               }
             });

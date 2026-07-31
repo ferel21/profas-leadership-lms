@@ -49,16 +49,17 @@ export async function GET(request: Request) {
 
       const attemptRows = await tx.assessmentAttempt.findMany({
         where: {
-          status: AttemptStatus.GRADED,
+          status: { in: [AttemptStatus.GRADED, AttemptStatus.SUBMITTED] },
           userId: { in: Array.from(new Set(enrollmentRows.map(item => item.userId))) },
           assessment: {
             courseId: { in: Array.from(new Set(enrollmentRows.map(item => item.courseId))) },
           },
         },
+        orderBy: { submittedAt: "desc" },
         select: {
           userId: true,
           score: true,
-          assessment: { select: { courseId: true } },
+          assessment: { select: { courseId: true, type: true } },
         },
       });
 
@@ -66,21 +67,31 @@ export async function GET(request: Request) {
     });
 
     const scoreBuckets = new Map<string, { total: number; count: number }>();
+    const pretestMap = new Map<string, number>(); // key: userId:courseId
+    const posttestMap = new Map<string, number>(); // key: userId:courseId
     for (const attempt of attempts) {
       const key = `${attempt.userId}:${attempt.assessment.courseId}`;
+      const type = attempt.assessment.type;
+      // Average score tracking
       const bucket = scoreBuckets.get(key) ?? { total: 0, count: 0 };
       bucket.total += attempt.score;
       bucket.count += 1;
       scoreBuckets.set(key, bucket);
+      // Pre/post tracking (first seen = most recent due to orderBy desc)
+      if (type === "PRETEST" && !pretestMap.has(key)) pretestMap.set(key, attempt.score);
+      if (type === "POSTTEST" && !posttestMap.has(key)) posttestMap.set(key, attempt.score);
     }
 
     const rows = enrollments.map(e => ({
       id: e.id,
+      userId: e.userId,
       name: sanitizeSpreadsheetText(e.user.name),
       email: sanitizeSpreadsheetText(e.user.email),
       course: sanitizeSpreadsheetText(e.course.title),
       progress: e.progressPercent,
       score: averageScore(scoreBuckets.get(`${e.userId}:${e.courseId}`)),
+      pretestScore: pretestMap.get(`${e.userId}:${e.courseId}`) ?? null,
+      posttestScore: posttestMap.get(`${e.userId}:${e.courseId}`) ?? null,
       status: e.status,
       enrolledAt: e.enrolledAt.toISOString()
     }));
@@ -97,3 +108,5 @@ export async function GET(request: Request) {
 function averageScore(bucket: { total: number; count: number } | undefined) {
   return bucket && bucket.count > 0 ? Math.round(bucket.total / bucket.count) : null;
 }
+
+

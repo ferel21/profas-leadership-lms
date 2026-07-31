@@ -13,6 +13,7 @@ import Image from "next/image";
 import type { ReportRow } from "@/components/shared/AdminReportTable";
 
 const AdminReportTable = nextDynamic(() => import("@/components/shared/AdminReportTable").then(module => module.AdminReportTable));
+const PrePostTestComparison = nextDynamic(() => import("@/components/shared/PrePostTestComparison").then(module => module.PrePostTestComparison));
 const MentorCourseActions = nextDynamic(() => import("@/components/shared/MentorCourseActions").then(module => module.MentorCourseActions));
 const AdminUserManagement = nextDynamic(() => import("@/components/shared/AdminUserManagement").then(module => module.AdminUserManagement));
 const BroadcastManager = nextDynamic(() => import("@/components/shared/BroadcastManager").then(module => module.BroadcastManager));
@@ -47,6 +48,20 @@ export default async function DashboardPage() {
       include: { course: { select: { id: true, title: true, slug: true, image: true } } },
       orderBy: { issuedAt: "desc" }
     });
+    
+    // Ambil nilai pre-test dan post-test untuk dashboard statistik
+    const attempts = await prisma.assessmentAttempt.findMany({
+      where: { 
+        userId: user.id,
+        status: { in: ["GRADED", "SUBMITTED"] },
+        assessment: { type: { in: ["PRETEST", "POSTTEST", "FINAL"] } }
+      },
+      include: {
+        assessment: { select: { courseId: true, title: true, type: true } }
+      },
+      orderBy: { submittedAt: "desc" }
+    });
+
     // Enrollment adalah entitlement peserta. Jangan auto-enroll semua course
     // yang dipublish: dashboard harus mencerminkan paket/program yang dibeli.
     const enrollments = initialEnrollments;
@@ -198,6 +213,9 @@ export default async function DashboardPage() {
               </div>
             </section>
           </div>
+
+          <PrePostTestComparison attempts={attempts} />
+
         </div>
       </DashboardChrome>
     );
@@ -372,10 +390,17 @@ export default async function DashboardPage() {
   });
 
   const reportData: ReportRow[] = allEnrollments.map(e => ({
-    id: e.id, name: e.user.name, email: e.user.email,
-    course: e.course.title, progress: e.progressPercent,
+    id: e.id, 
+    userId: e.user.id,
+    name: e.user.name, 
+    email: e.user.email,
+    course: e.course.title, 
+    progress: e.progressPercent,
     score: null,
-    status: e.status, enrolledAt: e.enrolledAt.toISOString()
+    pretestScore: null,
+    posttestScore: null,
+    status: e.status, 
+    enrolledAt: e.enrolledAt.toISOString()
   }));
 
   const activeStudentsCount = new Set(

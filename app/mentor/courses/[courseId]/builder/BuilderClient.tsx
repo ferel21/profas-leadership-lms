@@ -21,6 +21,7 @@ export type CourseNode = {
   children: CourseNode[];
   isNew?: boolean;
   assessmentId?: string | null;
+  assessmentType?: string | null;
 };
 
 function typeIcon(type: NodeType) {
@@ -551,6 +552,7 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
   const [file, setFile] = useState<File | null>(null);
   const [link, setLink] = useState(initialNode?.fileUrl || initialNode?.content || "");
   const [description, setDescription] = useState(initialNode?.description || initialNode?.content || "");
+  const [assessmentType, setAssessmentType] = useState<string>(initialNode?.assessmentType || "MODULE");
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
@@ -631,7 +633,8 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
         fileName: initialNode?.fileName || formattedUrl || title,
         fileSize: initialNode?.fileSize || 0,
         content: formattedUrl || description || title,
-        description: description || formattedUrl || title
+        description: description || formattedUrl || title,
+        assessmentType: (type as string) === "QUIZ" ? assessmentType : null
       });
     }
   };
@@ -649,9 +652,21 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
           <option value="VIDEO">🎬 Video Pembelajaran (.mp4 / link video)</option>
           <option value="PDF">Dokumen Modul / Bacaan (.pdf)</option>
           <option value="LINK">Tautan Luar (Web / Google Drive / Zoom)</option>
-          <option value="QUIZ">❓ Kuis / Evaluasi Pre-Test</option>
+          <option value="QUIZ">❓ Kuis / Evaluasi (Pre-Test, Post-Test, dll)</option>
           <option value="ASSIGNMENT">📝 Tugas Praktik Action Plan</option>
         </select>
+
+        {type === "QUIZ" && (
+          <>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: '#475569' }}>Tipe Kuis / Evaluasi</label>
+            <select className="form-input" value={assessmentType} onChange={(e) => setAssessmentType(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', marginBottom: '1.2rem', fontWeight: 600 }}>
+              <option value="PRETEST">🔵 Pre-Test (Evaluasi Awal)</option>
+              <option value="MODULE">📄 Kuis Modul Biasa</option>
+              <option value="POSTTEST">🟢 Post-Test (Evaluasi Akhir)</option>
+              <option value="FINAL">🏆 Ujian Final</option>
+            </select>
+          </>
+        )}
 
         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: '#475569' }}>Judul Materi</label>
         <input 

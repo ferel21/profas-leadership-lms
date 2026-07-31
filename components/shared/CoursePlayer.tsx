@@ -322,7 +322,20 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
             </details>
           );
         }
-        const badgeText = node.type === "QUIZ" ? "Kuis • " : node.type === "ASSIGNMENT" ? "Tugas • " : "";
+        function getAssessmentBadgeLabel(node: CourseNode): string {
+          // Find matching assessment to get its type
+          const assessment = course.assessments.find(a => a.id === node.assessmentId || a.id === node.id);
+          if (!assessment) return node.type === "QUIZ" ? "Kuis • " : node.type === "ASSIGNMENT" ? "Tugas • " : "";
+          switch (assessment.type) {
+            case "PRETEST": return "Pre-Test • ";
+            case "POSTTEST": return "Post-Test • ";
+            case "FINAL": return "Ujian Final • ";
+            default: return "Kuis • ";
+          }
+        }
+        const badgeText = node.type === "QUIZ" || node.type === "ASSIGNMENT"
+          ? (node.type === "QUIZ" ? getAssessmentBadgeLabel(node) : "Tugas • ")
+          : "";
         return (
           <button type="button" key={node.id} onClick={() => selectLesson(node.id)} className={node.id === current?.id ? "active" : ""} aria-current={node.id === current?.id ? "page" : undefined} aria-label={`${node.title}${done.has(node.id) ? ", selesai" : ", belum selesai"}`}>
             {done.has(node.id) ? <CheckCircle2 aria-hidden="true" /> : typeIcon(node.type)}
@@ -425,23 +438,60 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <div className="player-pulse-circle">
                 {current.type === "QUIZ" ? <Award size={44} /> : <FileCheck size={44} />}
               </div>
-              <span className="eyebrow-teal">
-                {current.type === "QUIZ" ? "EVALUASI & KUIS PEMAHAMAN" : "TUGAS EKSEKUTIF & STUDI KASUS"}
+              <span className="eyebrow-teal" style={{
+                color: (() => {
+                  const assessment = course.assessments.find(a => a.id === current.assessmentId || a.id === current.id);
+                  if (!assessment) return undefined;
+                  if (assessment.type === "PRETEST") return "#2563eb";
+                  if (assessment.type === "POSTTEST") return "#059669";
+                  if (assessment.type === "FINAL") return "#d97706";
+                  return undefined;
+                })()
+              }}>
+                {(() => {
+                  const assessment = course.assessments.find(a => a.id === current.assessmentId || a.id === current.id);
+                  if (!assessment) return current.type === "QUIZ" ? "EVALUASI & KUIS PEMAHAMAN" : "TUGAS EKSEKUTIF & STUDI KASUS";
+                  switch (assessment.type) {
+                    case "PRETEST": return "🔵 PRE-TEST — TES AWAL";
+                    case "POSTTEST": return "🟢 POST-TEST — TES AKHIR";
+                    case "FINAL": return "🏆 UJIAN FINAL";
+                    default: return "EVALUASI & KUIS PEMAHAMAN";
+                  }
+                })()}
               </span>
               <h1 className="player-title-xl">
                 {current.title}
               </h1>
               <p className="player-desc-lead">
-                {current.content || (current.type === "QUIZ" 
-                  ? "Uji tingkat pemahaman strategi dan konsep kepemimpinan Anda pada modul ini. Klik tombol di bawah untuk memulai kuis interaktif." 
-                  : "Selesaikan instruksi tugas eksekutif ini untuk memvalidasi penerapan kepemimpinan Anda di lapangan nyata.")}
+                {current.content || (() => {
+                  const assessment = course.assessments.find(a => a.id === current.assessmentId || a.id === current.id);
+                  if (!assessment) return current.type === "QUIZ"
+                    ? "Uji tingkat pemahaman strategi dan konsep kepemimpinan Anda pada modul ini."
+                    : "Selesaikan instruksi tugas eksekutif ini untuk memvalidasi penerapan kepemimpinan Anda di lapangan nyata.";
+                  switch (assessment.type) {
+                    case "PRETEST": return "Selesaikan tes awal ini sebelum memulai pembelajaran. Hasilnya akan dibandingkan dengan Post-Test untuk mengukur peningkatan Anda.";
+                    case "POSTTEST": return "Tes akhir program ini akan dibandingkan dengan hasil Pre-Test Anda untuk menunjukkan seberapa jauh peningkatan yang telah Anda capai.";
+                    case "FINAL": return "Ujian final ini menentukan kelulusan Anda dari program. Pastikan Anda telah menyelesaikan seluruh modul sebelum mengerjakan.";
+                    default: return "Uji tingkat pemahaman strategi dan konsep kepemimpinan Anda pada modul ini. Klik tombol di bawah untuk memulai kuis interaktif.";
+                  }
+                })()}
               </p>
               <div className="player-actions-row">
                 <Link 
                   href={`/evaluasi/${current.assessmentId || current.id}`} 
                   className="player-btn-quiz"
                 >
-                  <Play fill="currentColor" size={22} /> Mulai {current.type === "QUIZ" ? "Mengerjakan Kuis" : "Mengerjakan Tugas"}
+                  <Play fill="currentColor" size={22} /> Mulai {(() => {
+                    const assessment = course.assessments.find(a => a.id === current.assessmentId || a.id === current.id);
+                    if (current.type === "ASSIGNMENT") return "Mengerjakan Tugas";
+                    if (!assessment) return "Mengerjakan Kuis";
+                    switch (assessment.type) {
+                      case "PRETEST": return "Pre-Test";
+                      case "POSTTEST": return "Post-Test";
+                      case "FINAL": return "Ujian Final";
+                      default: return "Mengerjakan Kuis";
+                    }
+                  })()}
                 </Link>
               </div>
               <div className="player-meta-badges">

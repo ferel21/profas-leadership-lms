@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, FileSpreadsheet } from "lucide-react";
+import { Search, Filter, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
 import { formatDate } from "@/utils";
 import { ExportReportsButton } from "@/components/shared/ExportReportsButton";
 
 export type ReportRow = {
   id: string;
+  userId: string;
   name: string;
   email: string;
   course: string;
   progress: number;
   score: number | null;
+  pretestScore: number | null;
+  posttestScore: number | null;
   status: string;
   enrolledAt: string;
 };
@@ -20,6 +23,7 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
   const [search, setSearch] = useState("");
   const [filterCourse, setFilterCourse] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null);
 
   const safeData = data || [];
   const filtered = safeData.filter(r => {
@@ -100,6 +104,23 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
     }
   };
 
+  const handleExportStudentPdf = async (row: ReportRow) => {
+    if (downloadingPdfId) return;
+    setDownloadingPdfId(row.userId);
+    try {
+      const res = await fetch(`/api/admin/reports/student?userId=${row.userId}`);
+      if (!res.ok) throw new Error("Gagal mengambil data peserta");
+      const studentData = await res.json();
+      const { generateStudentProgressPDF } = await import("@/services/export/pdfGenerator");
+      generateStudentProgressPDF(studentData);
+    } catch (err) {
+      console.error("Gagal generate PDF:", err);
+      alert("Gagal membuat PDF laporan peserta.");
+    } finally {
+      setDownloadingPdfId(null);
+    }
+  };
+
   return (
     <div className="data-card mt-8 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-[0_10px_30px_-10px_rgba(13,148,136,0.08)]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
@@ -158,8 +179,11 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
               <th className="py-3.5 px-4">Peserta</th>
               <th className="py-3.5 px-4">Program Kepemimpinan</th>
               <th className="py-3.5 px-4">Status</th>
-              <th className="py-3.5 px-4 w-48">Progres</th>
-              <th className="py-3.5 px-4 text-center">Skor Akhir</th>
+              <th className="py-3.5 px-4 w-40">Progres</th>
+              <th className="py-3.5 px-4 text-center">Pre-Test</th>
+              <th className="py-3.5 px-4 text-center">Post-Test</th>
+              <th className="py-3.5 px-4 text-center">Skor Final</th>
+              <th className="py-3.5 px-4 text-center">PDF</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
@@ -196,14 +220,43 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
                     <span className="text-xs font-bold text-slate-700 w-10 text-right">{row.progress || 0}%</span>
                   </div>
                 </td>
+                <td className="py-3.5 px-4 text-center font-bold text-slate-700">
+                  {row.pretestScore !== null && row.pretestScore !== undefined
+                    ? <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">{row.pretestScore}</span>
+                    : <span className="text-slate-300 text-xs">—</span>}
+                </td>
+                <td className="py-3.5 px-4 text-center font-bold text-slate-700">
+                  {row.posttestScore !== null && row.posttestScore !== undefined
+                    ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                        {row.posttestScore}
+                        {row.pretestScore !== null && row.posttestScore > row.pretestScore && (
+                          <span className="text-emerald-600">↑</span>
+                        )}
+                      </span>
+                    )
+                    : <span className="text-slate-300 text-xs">—</span>}
+                </td>
                 <td className="py-3.5 px-4 text-center font-extrabold text-slate-800">
                   {row.score !== null && row.score !== undefined ? `${row.score} / 100` : "-"}
+                </td>
+                <td className="py-3.5 px-4 text-center">
+                  <button
+                    onClick={() => handleExportStudentPdf(row)}
+                    disabled={!!downloadingPdfId}
+                    title={`Unduh PDF Laporan ${row.name}`}
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#eff6ff] hover:bg-[#2a6ba7] text-[#2a6ba7] hover:text-white border border-[#2a6ba7]/30 hover:border-[#2a6ba7] transition disabled:opacity-40"
+                  >
+                    {downloadingPdfId === row.userId
+                      ? <Loader2 size={14} className="animate-spin" />
+                      : <FileText size={14} />}
+                  </button>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-slate-400 bg-slate-50/30">
+                <td colSpan={8} className="py-12 text-center text-slate-400 bg-slate-50/30">
                   <p className="font-medium text-slate-500">Tidak ada data peserta yang sesuai filter.</p>
                   <p className="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci pencarian atau filter program di atas.</p>
                 </td>

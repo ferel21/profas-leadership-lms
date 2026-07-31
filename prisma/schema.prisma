@@ -422,6 +422,7 @@ enum CourseLevel {
 
 enum AssessmentType {
   PRETEST
+  POSTTEST
   MODULE
   FINAL
 }

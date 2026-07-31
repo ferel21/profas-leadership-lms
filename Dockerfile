@@ -1,10 +1,12 @@
 FROM node:22-alpine AS base
 
 # Step 1: Dependencies
+# Force NODE_ENV=development so npm ci installs devDependencies (tailwindcss, etc.)
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
+ENV NODE_ENV=development
 RUN npm ci
 
 # Step 2: Builder
@@ -12,11 +14,11 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 # Build-time placeholders keep Prisma/Next compilation independent from the
 # real database and secrets. Runtime values are validated by the entrypoint.
-ARG NEXT_PUBLIC_APP_URL=https://profas-leadership-lms.vercel.app
+ARG NEXT_PUBLIC_APP_URL=https://profasleadership.tech
 ENV DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1" \
     DIRECT_URL="postgresql://build:build@127.0.0.1:5432/build?connect_timeout=1" \
     JWT_SECRET="build-only-secret-012345678901234567890123456789" \
@@ -30,10 +32,10 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

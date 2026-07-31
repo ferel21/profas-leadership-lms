@@ -137,6 +137,13 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
             <FileSpreadsheet size={18} className="shrink-0" />
             <span>{exporting ? "Mengekspor..." : "Ekspor Excel (.xlsx)"}</span>
           </button>
+          <button
+            onClick={() => window.open('/api/admin/reports/export', '_blank')}
+            className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#0ea5e9]/30 hover:border-[#0ea5e9] bg-[#f0f9ff] hover:bg-[#0ea5e9] text-[#0369a1] hover:text-white font-semibold text-sm transition"
+          >
+            <FileText size={18} className="shrink-0" />
+            <span>Ekspor Semua (CSV)</span>
+          </button>
           <ExportReportsButton
             label="Ekspor Multi-Sheet Executive (.xlsx)"
             students={exportStudents}

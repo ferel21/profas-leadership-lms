@@ -207,7 +207,7 @@ export default async function DashboardPage() {
                       </Link>
                     </>
                   ) : (
-                    <p>Tersedia setelah program selesai.</p>
+                    <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Tersedia setelah semua materi selesai dan memenuhi batas lulus (Passing Grade).</p>
                   )}
                 </div>
               </div>
@@ -255,6 +255,20 @@ export default async function DashboardPage() {
       { href: "/forum", label: "Komunitas", description: "Dampingi diskusi", icon: MessageSquare },
     ];
 
+    const mentorAttempts = await prisma.assessmentAttempt.findMany({
+      where: {
+        assessment: { course: { mentorId: user.id } },
+        status: { in: ["GRADED", "SUBMITTED"] }
+      },
+      select: { score: true, assessment: { select: { type: true } } }
+    });
+    
+    const preScores = mentorAttempts.filter(a => a.assessment.type === "PRETEST").map(a => a.score);
+    const postScores = mentorAttempts.filter(a => a.assessment.type === "POSTTEST").map(a => a.score);
+    const avgPre = preScores.length > 0 ? average(preScores) : 0;
+    const avgPost = postScores.length > 0 ? average(postScores) : 0;
+    const improvement = (avgPre > 0 || avgPost > 0) ? (avgPost - avgPre) : 0;
+
     return (
       <DashboardChrome user={user}>
         <div className="pf-role-dashboard pf-mentor-dashboard">
@@ -286,6 +300,12 @@ export default async function DashboardPage() {
               <div><dt>Program aktif</dt><dd>{activeCourses.length}</dd></div>
               <div><dt>Peserta unik</dt><dd>{totalStudents}</dd></div>
               <div><dt>Rata-rata progres</dt><dd>{averageStudentProgress}%</dd></div>
+              <div>
+                <dt>Agregat Peningkatan</dt>
+                <dd className={improvement > 0 ? "text-emerald-600 font-bold" : ""}>
+                  {improvement > 0 ? `+${improvement} Poin` : `${improvement} Poin`}
+                </dd>
+              </div>
             </dl>
           </section>
 

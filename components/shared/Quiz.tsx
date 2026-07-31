@@ -375,6 +375,11 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
       <div className="pf-quiz-title">
         <small>{assessment.course.title}</small>
         <strong>{assessment.title}</strong>
+        {assessment.passingScore > 0 && (
+          <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginTop: '4px' }}>
+            Batas Kelulusan: {assessment.passingScore}
+          </span>
+        )}
       </div>
       <span className={`pf-quiz-timer ${seconds <= 60 ? "time-warning" : ""}`} role="timer" aria-label={`Sisa waktu ${Math.floor(seconds / 60)} menit ${seconds % 60} detik`}>
         <Clock3 aria-hidden="true" />

@@ -2563,6 +2563,12 @@ html body .dashboard-fresh .forum-thread-avatar { color: #1e5a8f !important; bac
 html body .dashboard-fresh .forum-thread-replies { color: #52616d; font-size: .78rem; }
 
 @media (max-width: 768px) {
+  html body .dashboard-fresh .dash-focus-grid,
+  html body .dashboard-fresh .dash-roadmap-grid,
+  html body .dashboard-fresh .dash-sidebar-col,
+  html body .dashboard-fresh .analytics-chart-grid,
+  html body .dashboard-fresh .forum-grid-layout,
+  html body .dashboard-fresh .calendar-grid-layout { grid-template-columns: 1fr !important; }
   html body .dashboard-fresh .forum-card-head { flex-direction: column !important; align-items: stretch !important; gap: 14px !important; padding: 16px !important; }
   html body .dashboard-fresh .forum-search-box { max-width: 100% !important; width: 100% !important; }
   html body .dashboard-fresh .forum-thread-row { align-items: flex-start; }

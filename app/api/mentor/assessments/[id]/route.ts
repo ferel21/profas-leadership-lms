@@ -205,7 +205,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     });
 
     revalidatePath(`/evaluasi/${assessmentId}`);
-    revalidatePath(`/kuis/${assessmentId}`);
     revalidatePath(`/belajar/${assessment.course.slug}`);
     revalidatePath(`/belajar/${assessment.courseId}`);
     revalidatePath('/dashboard');

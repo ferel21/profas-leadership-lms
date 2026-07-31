@@ -671,6 +671,8 @@ html body .demo-box { border-color: var(--ws-line) !important; border-radius: 14
   html body .dashboard-fresh .data-card,
   html body .dashboard-fresh .dash-card-clean,
   html body .dashboard-fresh .dash-roadmap-box { padding: 18px !important; border-radius: 18px !important; }
+  html body .dashboard-fresh .forum-card-head { flex-direction: column !important; align-items: stretch !important; gap: 14px !important; padding: 16px !important; }
+  html body .dashboard-fresh .forum-search-box { max-width: 100% !important; width: 100% !important; }
   html body .dashboard-fresh .forum-thread-row { align-items: flex-start; }
   html body .dashboard-fresh .forum-thread-replies { display: none; }
   html body .lesson-stage,

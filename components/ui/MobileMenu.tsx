@@ -1,6 +1,7 @@
 "use client";
 
 import { type KeyboardEvent as ReactKeyboardEvent, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -23,7 +24,12 @@ const navigation = [
 
 export function MobileMenu({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -66,6 +72,82 @@ export function MobileMenu({ signedIn }: { signedIn: boolean }) {
     }
   };
 
+  const menuContent = open && mounted ? (
+    <div
+      id="pf-mobile-navigation"
+      className="mobile-menu pf-mobile-menu"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigasi utama"
+      onKeyDown={handleDialogKeyDown}
+    >
+      <div className="pf-mobile-menu__header">
+        <Logo />
+        <button
+          type="button"
+          className="pf-mobile-menu__close"
+          onClick={close}
+          aria-label="Tutup menu"
+          autoFocus
+        >
+          <X aria-hidden="true" />
+        </button>
+      </div>
+
+      <section className="pf-mobile-menu__body">
+        <p className="pf-mobile-menu__eyebrow">
+          <Compass size={15} aria-hidden="true" />
+          Jalur kepemimpinan
+        </p>
+        <nav className="pf-mobile-menu__nav" aria-label="Menu utama">
+          {navigation.map(item => {
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch={item.prefetch}
+                onClick={navigate}
+              >
+                <span className="pf-mobile-menu__nav-icon" aria-hidden="true">
+                  <Icon size={19} strokeWidth={1.8} />
+                </span>
+                <span>{item.label}</span>
+                <ArrowRight
+                  className="pf-mobile-menu__nav-arrow"
+                  size={17}
+                  aria-hidden="true"
+                />
+              </Link>
+            );
+          })}
+        </nav>
+      </section>
+
+      <Link
+        href={signedIn ? "/dashboard" : "/daftar"}
+        prefetch={true}
+        onClick={navigate}
+        className="btn btn-primary pf-mobile-menu__cta"
+      >
+        <span>{signedIn ? "Buka Dashboard" : "Mulai Belajar"}</span>
+        <ArrowRight size={18} aria-hidden="true" />
+      </Link>
+      {!signedIn && (
+        <Link
+          href="/masuk"
+          prefetch={true}
+          onClick={navigate}
+          className="mobile-login pf-mobile-menu__login"
+        >
+          <LogIn size={16} aria-hidden="true" />
+          <span>Sudah punya akun? Masuk</span>
+        </Link>
+      )}
+    </div>
+  ) : null;
+
   return (
     <>
       <button
@@ -81,81 +163,7 @@ export function MobileMenu({ signedIn }: { signedIn: boolean }) {
         <span className="pf-menu-trigger__label">Menu</span>
       </button>
 
-      {open && (
-        <div
-          id="pf-mobile-navigation"
-          className="mobile-menu pf-mobile-menu"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigasi utama"
-          onKeyDown={handleDialogKeyDown}
-        >
-          <div className="pf-mobile-menu__header">
-            <Logo />
-            <button
-              type="button"
-              className="pf-mobile-menu__close"
-              onClick={close}
-              aria-label="Tutup menu"
-              autoFocus
-            >
-              <X aria-hidden="true" />
-            </button>
-          </div>
-
-          <section className="pf-mobile-menu__body">
-            <p className="pf-mobile-menu__eyebrow">
-              <Compass size={15} aria-hidden="true" />
-              Jalur kepemimpinan
-            </p>
-            <nav className="pf-mobile-menu__nav" aria-label="Menu utama">
-              {navigation.map(item => {
-                const Icon = item.icon;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    prefetch={item.prefetch}
-                    onClick={navigate}
-                  >
-                    <span className="pf-mobile-menu__nav-icon" aria-hidden="true">
-                      <Icon size={19} strokeWidth={1.8} />
-                    </span>
-                    <span>{item.label}</span>
-                    <ArrowRight
-                      className="pf-mobile-menu__nav-arrow"
-                      size={17}
-                      aria-hidden="true"
-                    />
-                  </Link>
-                );
-              })}
-            </nav>
-          </section>
-
-          <Link
-            href={signedIn ? "/dashboard" : "/daftar"}
-            prefetch={true}
-            onClick={navigate}
-            className="btn btn-primary pf-mobile-menu__cta"
-          >
-            <span>{signedIn ? "Buka Dashboard" : "Mulai Belajar"}</span>
-            <ArrowRight size={18} aria-hidden="true" />
-          </Link>
-          {!signedIn && (
-            <Link
-              href="/masuk"
-              prefetch={true}
-              onClick={navigate}
-              className="mobile-login pf-mobile-menu__login"
-            >
-              <LogIn size={16} aria-hidden="true" />
-              <span>Sudah punya akun? Masuk</span>
-            </Link>
-          )}
-        </div>
-      )}
+      {menuContent && createPortal(menuContent, document.body)}
     </>
   );
 }

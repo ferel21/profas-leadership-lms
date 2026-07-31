@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { AlertCircle, Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, Clock3, Download, FileText, Film, Image as ImageIcon, Link2, LoaderCircle, Menu, MessageSquare, Play, Send, X, Folder, FileCheck, FileCode, RefreshCw } from "lucide-react";
 import { initials } from "@/utils";
@@ -92,6 +92,27 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
   const [assessmentLoadError, setAssessmentLoadError] = useState("");
   const [assessmentRefreshToken, setAssessmentRefreshToken] = useState(0);
   const [mediaError, setMediaError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [maxWatched, setMaxWatched] = useState(0);
+
+  useEffect(() => {
+    setMaxWatched(0);
+  }, [currentId]);
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current && !videoRef.current.seeking) {
+      if (videoRef.current.currentTime > maxWatched) {
+        setMaxWatched(videoRef.current.currentTime);
+      }
+    }
+  };
+
+  const handleSeeking = () => {
+    if (done.has(currentId)) return;
+    if (videoRef.current && videoRef.current.currentTime > maxWatched + 2) {
+      videoRef.current.currentTime = maxWatched;
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined" && currentId) {
@@ -374,11 +395,14 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                       <button type="button" onClick={() => setMediaError(false)}><RefreshCw size={15} /> Coba lagi</button>
                     </div>
                   ) : <video
+                    ref={videoRef}
                     controls
                     controlsList="nodownload"
                     src={current.fileUrl || current.content || ""}
                     className="player-video-inner"
                     onError={() => setMediaError(true)}
+                    onTimeUpdate={handleTimeUpdate}
+                    onSeeking={handleSeeking}
                   />
                 ) : (
                   <>

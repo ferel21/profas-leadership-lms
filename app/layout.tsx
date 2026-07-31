@@ -5,7 +5,6 @@ import { GlobalLeafStagger } from "@/components/ui/GlobalLeafStagger";
 import { WebVitalsReporter } from "@/components/ui/WebVitalsReporter";
 import "@/styles/typography.css";
 import "@/styles/design-system.css";
-import "@/styles/lms-fresh.css";
 import "@/styles/master.css";
 import "@/styles/profas-reframe.css";
 

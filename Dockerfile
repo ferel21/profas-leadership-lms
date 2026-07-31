@@ -58,5 +58,8 @@ USER nextjs
 
 EXPOSE 3000
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget -qO- http://localhost:3000/api/health || exit 1
+
 ENTRYPOINT ["/bin/sh", "/app/docker-entrypoint.sh"]
 CMD ["node", "server.js"]

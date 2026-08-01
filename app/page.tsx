@@ -271,19 +271,38 @@ export default function Home() {
         {/* ── PAKET UTAMA: PROFAS LEADERSHIP ── */}
         <section className="pf-home-section pf-home-programs" aria-labelledby="program-title">
           <div className="container">
-            <div className="pf-home-heading pf-home-heading-split">
-              <div>
-                <span className="pf-home-pill">1 Paket · 3 Modul</span>
-                <h2 id="program-title">PROFAS LEADERSHIP (Rp499.000)</h2>
-              </div>
-              <Link href="/program/profas-leadership" className="pf-home-button pf-home-button-secondary">
-                Lihat detail paket <ArrowRight aria-hidden="true" />
-              </Link>
+            <div className="pf-home-heading pf-home-heading-centered">
+              <span className="pf-home-pill">Satu paket lengkap</span>
+              <h2 id="program-title">PROFAS LEADERSHIP</h2>
+              <p>
+                Tiga pilar kepemimpinan dalam satu paket pembelajaran terstruktur,
+                dipandu langsung oleh akademisi dan praktisi berpengalaman.
+              </p>
             </div>
             <div className="course-grid pf-course-grid pf-home-course-grid">
               {profasModules.map((mod) => (
-                <CourseCard key={mod.id} course={mod} />
+                <CourseCard key={mod.id} course={mod} isModule={true} />
               ))}
+            </div>
+            
+            <div className="pf-package-footer" style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', backgroundColor: 'var(--pf-surface-alt, #f8fafc)', borderRadius: '1rem', border: '1px solid var(--pf-border, #e2e8f0)' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.25rem' }}>Mulai perjalanan kepemimpinan Anda</h3>
+                <p style={{ color: 'var(--pf-text-muted, #64748b)', fontSize: '0.95rem' }}>Akses 3 modul lengkap, sesi diskusi, dan sertifikat kelulusan.</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div className="pf-package-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  <small style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--pf-text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Investasi</small>
+                  <strong style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--pf-primary, #0f172a)' }}>Rp499.000</strong>
+                </div>
+                <Link
+                  href="/program/profas-leadership"
+                  className="pf-home-button pf-home-button-primary"
+                >
+                  Ambil Paket Ini
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              </div>
             </div>
           </div>
         </section>

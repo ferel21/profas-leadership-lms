@@ -14,9 +14,10 @@ import { formatRupiah } from "@/utils";
 
 type CourseCardProps = {
   course: { slug: string; title: string; shortDescription: string; category: string; level: string; price: number; durationHours: number; rating: number; studentsCount: number; image: string; mentor?: { name: string } };
+  isModule?: boolean;
 };
 
-export const CourseCard = memo(function CourseCard({ course }: CourseCardProps) {
+export const CourseCard = memo(function CourseCard({ course, isModule = false }: CourseCardProps) {
   const levels: Record<string, string> = { BASIC: "Dasar", INTERMEDIATE: "Menengah", ADVANCED: "Lanjutan" };
   const isMasterclass = course.level === "ADVANCED" || course.price > 1000000;
   const isTopRated = course.rating >= 4.8;
@@ -28,7 +29,7 @@ export const CourseCard = memo(function CourseCard({ course }: CourseCardProps) 
       className="course-card course-card-enterprise hover-lift pf-course-card"
       data-level={course.level.toLowerCase()}
     >
-      {isMasterclass && (
+      {!isModule && isMasterclass && (
         <div className="pro-course-ribbon pf-course-card__ribbon">
           <Crown size={12} aria-hidden="true" />
           <span>MASTERCLASS</span>
@@ -95,42 +96,51 @@ export const CourseCard = memo(function CourseCard({ course }: CourseCardProps) 
           </div>
         )}
 
-        <dl className="pf-course-card__facts">
-          <div>
-            <dt className="sr-only">Durasi</dt>
-            <dd>
-              <Clock3 size={15} aria-hidden="true" />
-              <span>{course.durationHours} jam</span>
-            </dd>
-          </div>
-          <div>
-            <dt className="sr-only">Peserta</dt>
-            <dd>
-              <Users size={15} aria-hidden="true" />
-              <span>{course.studentsCount.toLocaleString("id-ID")}</span>
-            </dd>
-          </div>
-          <div>
-            <dt className="sr-only">Rating</dt>
-            <dd>
-              <Star size={15} fill="currentColor" aria-hidden="true" />
-              <span>{course.rating}</span>
-            </dd>
-          </div>
-        </dl>
+        {!isModule && (
+          <dl className="pf-course-card__facts">
+            <div>
+              <dt className="sr-only">Durasi</dt>
+              <dd>
+                <Clock3 size={15} aria-hidden="true" />
+                <span>{course.durationHours} jam</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="sr-only">Peserta</dt>
+              <dd>
+                <Users size={15} aria-hidden="true" />
+                <span>{course.studentsCount.toLocaleString("id-ID")}</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="sr-only">Rating</dt>
+              <dd>
+                <Star size={15} fill="currentColor" aria-hidden="true" />
+                <span>{course.rating}</span>
+              </dd>
+            </div>
+          </dl>
+        )}
 
         <footer className="pf-course-card__footer">
-          <div className="pf-course-card__price">
-            <small>Mulai dari</small>
-            <strong>{formatRupiah(course.price)}</strong>
-          </div>
+          {!isModule ? (
+            <div className="pf-course-card__price">
+              <small>Mulai dari</small>
+              <strong>{formatRupiah(course.price)}</strong>
+            </div>
+          ) : (
+            <div className="pf-course-card__price">
+              <small>Bagian dari paket</small>
+              <strong style={{ fontSize: '0.95rem' }}>PROFAS LEADERSHIP</strong>
+            </div>
+          )}
           <Link
             href={`/program/${course.slug}`}
             prefetch={false}
             className="pf-course-card__link"
             aria-label={`Lihat ${course.title}`}
           >
-            <span>Lihat program</span>
+            <span>Lihat {isModule ? 'modul' : 'program'}</span>
             <ArrowUpRight size={20} aria-hidden="true" />
           </Link>
         </footer>

@@ -30,3 +30,5 @@ next-env.d.ts
 # individual filenames and extensions.
 /_*
 /probe*
+.github/workflows/build-apk.yml
+.github/workflows_backup/

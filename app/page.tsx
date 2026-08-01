@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { unstable_cache } from "next/cache";
 import {
   ArrowRight,
   Award,
@@ -17,25 +16,8 @@ import {
   Target,
   Users2,
 } from "lucide-react";
-import { prisma } from "@/services/prisma";
 import { Header } from "@/components/ui/Header";
 import { Footer } from "@/components/ui/Footer";
-import { CourseCard } from "@/components/ui/CourseCard";
-
-type FeaturedCourse = {
-  id: string;
-  slug: string;
-  title: string;
-  shortDescription: string;
-  category: string;
-  level: string;
-  price: number;
-  durationHours: number;
-  rating: number;
-  studentsCount: number;
-  image: string;
-  mentor?: { name: string };
-};
 
 const journey = [
   {
@@ -106,6 +88,27 @@ const rolePaths = [
   },
 ] as const;
 
+const packageModules = [
+  {
+    number: "01",
+    title: "LEADERSHIP",
+    mentor: "Prof. Dr. Muhammad Asdar, S.E., M.Si.",
+    description: "Membangun fondasi kepemimpinan yang adaptif, situasional, dan berdampak.",
+  },
+  {
+    number: "02",
+    title: "PERSONAL GROWTH",
+    mentor: "Prof. Dr. Firman Menne, S.E., M.Si., Ak., CA., CTA, ACPA",
+    description: "Membangun mindset bertumbuh, resiliensi, dan kebiasaan produktif.",
+  },
+  {
+    number: "03",
+    title: "BUSINESS & ENTREPRENEURSHIP",
+    mentor: "Bahrul Ulum Ilham, S.Pd., M.M., Ph.D.",
+    description: "Merancang strategi bisnis, eksekusi, dan pertumbuhan berkelanjutan.",
+  },
+] as const;
+
 const faqItems = [
   [
     "Apakah PROFAS cocok untuk pemimpin yang baru mulai?",
@@ -129,35 +132,7 @@ const faqItems = [
   ],
 ] as const;
 
-const getFeaturedCoursesCached = unstable_cache(
-  async (): Promise<FeaturedCourse[]> => {
-    const courses = await prisma.course.findMany({
-      where: { published: true, featured: true },
-      include: { mentor: { select: { name: true } } },
-      take: 3,
-    });
-
-    return courses.map(course => ({
-      ...course,
-      mentor: course.mentor ? { name: course.mentor.name } : undefined,
-    }));
-  },
-  ["home-featured-courses-v3"],
-  { revalidate: 60, tags: ["courses", "featured-courses"] },
-);
-
-async function getFeaturedCourses(): Promise<FeaturedCourse[]> {
-  try {
-    return await getFeaturedCoursesCached();
-  } catch (error) {
-    console.warn("[HOME_FEATURED_COURSES_FALLBACK]", error);
-    return [];
-  }
-}
-
-export default async function Home() {
-  const courses = await getFeaturedCourses();
-
+export default function Home() {
   return (
     <div className="pf-public-page pf-home">
       <a className="pf-skip-link" href="#main-content">
@@ -241,7 +216,7 @@ export default async function Home() {
           <div className="container pf-home-stats">
             <div><strong>2.500+</strong><span>Alumni bertumbuh</span></div>
             <div><strong>4,9/5</strong><span>Pengalaman belajar</span></div>
-            <div><strong>3</strong><span>Ruang kerja berbasis peran</span></div>
+            <div><strong>3</strong><span>Modul dari 3 profesor</span></div>
             <div><strong>Fleksibel</strong><span>Belajar sesuai ritme Anda</span></div>
           </div>
         </section>
@@ -268,31 +243,60 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* ── PAKET UTAMA: PROFAS LEADERSHIP ── */}
         <section className="pf-home-section pf-home-programs" aria-labelledby="program-title">
           <div className="container">
-            <div className="pf-home-heading pf-home-heading-split">
-              <div>
-                <span className="pf-home-pill">Program pilihan</span>
-                <h2 id="program-title">Mulai dari tantangan yang sedang Anda hadapi.</h2>
-              </div>
-              <Link href="/program" className="pf-home-button pf-home-button-secondary">
-                Semua program <ArrowRight aria-hidden="true" />
-              </Link>
+            <div className="pf-home-heading pf-home-heading-centered">
+              <span className="pf-home-pill">Satu paket lengkap</span>
+              <h2 id="program-title">PROFAS LEADERSHIP</h2>
+              <p>
+                Tiga pilar kepemimpinan dalam satu paket pembelajaran terstruktur,
+                dipandu langsung oleh akademisi dan praktisi berpengalaman.
+              </p>
             </div>
-            {courses.length > 0 ? (
-              <div className="course-grid pf-course-grid pf-home-course-grid">
-                {courses.map(course => <CourseCard key={course.id} course={course} />)}
-              </div>
-            ) : (
-              <div className="pf-home-empty-state">
-                <BookOpen aria-hidden="true" />
-                <div>
-                  <h3>Temukan program yang tepat untuk Anda</h3>
-                  <p>Buka katalog untuk melihat seluruh jalur belajar yang tersedia.</p>
+
+            <div className="pf-package-showcase">
+              <div className="pf-package-card">
+                <div className="pf-package-header">
+                  <div className="pf-package-badge">1 PAKET · 3 MODUL</div>
+                  <h3>PROFAS LEADERSHIP</h3>
+                  <p>
+                    Program intensif yang memadukan kepemimpinan, pertumbuhan diri,
+                    dan kewirausahaan dalam satu paket terstruktur.
+                  </p>
                 </div>
-                <Link href="/program">Buka katalog <ChevronRight aria-hidden="true" /></Link>
+
+                <div className="pf-package-modules">
+                  {packageModules.map((mod) => (
+                    <article key={mod.number} className="pf-package-module">
+                      <span className="pf-package-module-number">{mod.number}</span>
+                      <div className="pf-package-module-content">
+                        <h4>{mod.title}</h4>
+                        <p className="pf-package-module-desc">{mod.description}</p>
+                        <p className="pf-package-module-mentor">
+                          <ShieldCheck aria-hidden="true" />
+                          {mod.mentor}
+                        </p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="pf-package-footer">
+                  <div className="pf-package-price">
+                    <small>Investasi</small>
+                    <strong>Rp499.000</strong>
+                  </div>
+                  <Link
+                    href="/program/profas-leadership"
+                    className="pf-home-button pf-home-button-primary"
+                  >
+                    Lihat program
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </section>
 
@@ -374,10 +378,10 @@ export default async function Home() {
                 <div className="pf-preview-content">
                   <div>
                     <small>LANJUTKAN BELAJAR</small>
-                    <h3>Komunikasi yang menggerakkan</h3>
-                    <p>Modul 2 · Percakapan sulit</p>
+                    <h3>PROFAS LEADERSHIP</h3>
+                    <p>Modul 1 · Leadership</p>
                     <div className="pf-preview-progress"><i /></div>
-                    <span>67% selesai</span>
+                    <span>45% selesai</span>
                   </div>
                   <button type="button" tabIndex={-1} aria-hidden="true"><Play fill="currentColor" /></button>
                 </div>

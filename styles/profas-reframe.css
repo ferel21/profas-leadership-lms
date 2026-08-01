@@ -13081,3 +13081,483 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PACKAGE SHOWCASE — Landing Page (1 paket, 3 modul)
+   ═══════════════════════════════════════════════════════════════ */
+
+.pf-package-showcase {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pf-package-card {
+  background: var(--surface-glass, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pf-package-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.pf-package-header {
+  padding: 2rem 2rem 1.5rem;
+  text-align: center;
+}
+
+.pf-package-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent, #a78bfa);
+  background: var(--accent-faint, rgba(167, 139, 250, 0.1));
+  padding: 0.35em 1em;
+  border-radius: 100px;
+  margin-bottom: 1rem;
+}
+
+.pf-package-header h3 {
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary, #f0f0f5);
+  margin: 0 0 0.5rem;
+}
+
+.pf-package-header p {
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.pf-package-modules {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.pf-package-module {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.25rem 2rem;
+  background: var(--surface-card, rgba(15, 15, 25, 0.8));
+  transition: background 0.2s ease;
+}
+
+.pf-package-module:hover {
+  background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+}
+
+.pf-package-module-number {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent, #a78bfa);
+  background: var(--accent-faint, rgba(167, 139, 250, 0.1));
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pf-package-module-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pf-package-module-content h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary, #f0f0f5);
+  margin: 0 0 0.3rem;
+  letter-spacing: -0.01em;
+}
+
+.pf-package-module-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #9ca3af);
+  line-height: 1.5;
+  margin: 0 0 0.4rem;
+}
+
+.pf-package-module-mentor {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--accent, #a78bfa);
+  font-weight: 500;
+}
+
+.pf-package-module-mentor svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.pf-package-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pf-package-price small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-tertiary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.pf-package-price strong {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary, #f0f0f5);
+  letter-spacing: -0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PACKAGE DETAIL — Catalog Page (/program)
+   ═══════════════════════════════════════════════════════════════ */
+
+.pf-catalog-package {
+  padding: 4rem 0;
+}
+
+.pf-package-detail {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.pf-package-detail-info {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.pf-package-detail-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent, #a78bfa);
+  background: var(--accent-faint, rgba(167, 139, 250, 0.1));
+  padding: 0.4em 1.2em;
+  border-radius: 100px;
+  margin-bottom: 1rem;
+}
+
+.pf-package-detail-info h2 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary, #f0f0f5);
+  margin: 0 0 0.75rem;
+}
+
+.pf-package-detail-info > p {
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+}
+
+.pf-package-detail-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.pf-package-detail-stats > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.pf-package-detail-stats svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent, #a78bfa);
+}
+
+.pf-package-detail-stats b {
+  color: var(--text-primary, #f0f0f5);
+  font-weight: 700;
+}
+
+.pf-package-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.pf-package-module-card {
+  background: var(--surface-glass, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+}
+
+.pf-package-module-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  border-color: var(--accent, rgba(167, 139, 250, 0.3));
+}
+
+.pf-package-module-card-number {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent, #a78bfa);
+  background: var(--accent-faint, rgba(167, 139, 250, 0.1));
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.pf-package-module-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #f0f0f5);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.pf-package-module-card > p {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #9ca3af);
+  line-height: 1.55;
+  margin: 0 0 0.75rem;
+}
+
+.pf-package-module-card-mentor {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--accent, #a78bfa);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.pf-package-module-card-mentor svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pf-package-detail-cta {
+  text-align: center;
+  padding: 2rem;
+  background: var(--surface-glass, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.pf-package-detail-price small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-tertiary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.pf-package-detail-price strong {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary, #f0f0f5);
+  letter-spacing: -0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CURRICULUM MENTOR — Course Detail Page
+   ═══════════════════════════════════════════════════════════════ */
+
+.pf-curriculum-mentor {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--accent, #a78bfa);
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.pf-curriculum-mentor svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MENTOR PANEL — Course Detail Sidebar (3 mentors)
+   ═══════════════════════════════════════════════════════════════ */
+
+.pf-mentor-panel {
+  position: sticky;
+  top: 100px;
+  background: var(--surface-glass, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pf-mentor-panel .pf-mentor-note-index {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent, #a78bfa);
+}
+
+.pf-mentor-panel-item {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.pf-mentor-panel-item:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pf-mentor-panel-item .pf-mentor-note-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent, #a78bfa);
+  background: var(--accent-faint, rgba(167, 139, 250, 0.12));
+  margin-bottom: 0.5rem;
+}
+
+.pf-mentor-panel-item p {
+  font-size: 0.7rem;
+  color: var(--text-tertiary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin: 0 0 0.15rem;
+}
+
+.pf-mentor-panel-item h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary, #f0f0f5);
+  margin: 0 0 0.15rem;
+  line-height: 1.3;
+}
+
+.pf-mentor-panel-item small {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.pf-mentor-panel blockquote {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #9ca3af);
+  font-style: italic;
+  line-height: 1.55;
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent-faint, rgba(167, 139, 250, 0.25));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE — Package Components
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .pf-package-header {
+    padding: 1.5rem 1.25rem 1.25rem;
+  }
+
+  .pf-package-module {
+    padding: 1rem 1.25rem;
+  }
+
+  .pf-package-footer {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.25rem;
+  }
+
+  .pf-package-footer .pf-home-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pf-package-modules-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-package-detail-stats {
+    gap: 1rem;
+  }
+
+  .pf-package-detail-cta {
+    padding: 1.25rem;
+  }
+
+  .pf-package-detail-price strong {
+    font-size: 1.4rem;
+  }
+
+  .pf-mentor-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 480px) {
+  .pf-package-module {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .pf-package-module-number {
+    margin-top: 0;
+  }
+}

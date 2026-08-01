@@ -37,6 +37,13 @@ function parseOutcomes(value: string): string[] {
     .filter(Boolean);
 }
 
+/* Extract mentor name from module description pattern: "... oleh NAME — ..." */
+function extractMentor(description: string | null): string | null {
+  if (!description) return null;
+  const match = description.match(/oleh (.+?) —/);
+  return match ? match[1] : null;
+}
+
 export default async function CourseDetail({
   params,
 }: {
@@ -98,6 +105,10 @@ export default async function CourseDetail({
         ? "Menengah"
         : "Lanjutan";
 
+  /* Determine primary mentor display name — for this single-package model,
+     the primary mentor is the course-level mentor (Prof. Asdar) */
+  const primaryMentor = course.mentor;
+
   return (
     <>
       <Header />
@@ -108,7 +119,7 @@ export default async function CourseDetail({
               <nav className="breadcrumbs pf-detail-breadcrumbs" aria-label="Jejak halaman">
                 <Link href="/program">Program</Link>
                 <ChevronRight aria-hidden="true" />
-                <span>{course.category}</span>
+                <span>{course.title}</span>
               </nav>
 
               <div className="pf-detail-meta">
@@ -135,11 +146,11 @@ export default async function CourseDetail({
               </div>
 
               <div className="mentor-inline pf-detail-mentor-inline">
-                <span aria-hidden="true">{initials(course.mentor.name)}</span>
+                <span aria-hidden="true">{initials(primaryMentor.name)}</span>
                 <div>
                   <small>Dipandu oleh praktisi</small>
-                  <b>{course.mentor.name}</b>
-                  <p>{course.mentor.headline}</p>
+                  <b>{primaryMentor.name}</b>
+                  <p>{primaryMentor.headline}</p>
                 </div>
               </div>
             </div>
@@ -159,8 +170,8 @@ export default async function CourseDetail({
                 </span>
               </div>
               <div className="enroll-body pf-enroll-body">
-                <small>Akses program</small>
-                <h2>{course.price > 0 ? "Termasuk akses anggota" : "Tanpa biaya"}</h2>
+                <small>Akses paket lengkap</small>
+                <h2>Rp499.000</h2>
                 <EnrollButton
                   courseId={course.id}
                   slug={course.slug}
@@ -231,13 +242,14 @@ export default async function CourseDetail({
                 <span>02 / Rute belajar</span>
                 <h2>Kurikulum program</h2>
                 <p className="curriculum-intro">
-                  Disusun bertahap agar konsep berubah menjadi praktik kepemimpinan nyata.
+                  Disusun dalam 3 modul oleh 3 profesor, agar konsep berubah menjadi praktik kepemimpinan nyata.
                 </p>
               </header>
 
               <div className="curriculum pf-curriculum">
                 {folders.map((folder, index) => {
                   const lessons = course.nodes.filter((node) => node.parentId === folder.id);
+                  const mentorName = extractMentor(folder.description);
                   return (
                     <details key={folder.id} open={index === 0}>
                       <summary>
@@ -246,7 +258,13 @@ export default async function CourseDetail({
                         </span>
                         <div>
                           <h3>{folder.title}</h3>
-                          <p>{folder.description}</p>
+                          {mentorName && (
+                            <p className="pf-curriculum-mentor">
+                              <ShieldCheck aria-hidden="true" />
+                              {mentorName}
+                            </p>
+                          )}
+                          <p>{folder.description?.replace(/^.+? — /, "") ?? ""}</p>
                           <small>
                             {lessons.length} materi ·{" "}
                             {lessons.reduce((total, lesson) => total + lesson.durationMin, 0)} menit
@@ -273,16 +291,25 @@ export default async function CourseDetail({
               </div>
             </article>
 
-            <aside className="mentor-detail pf-mentor-note" aria-label="Tentang mentor">
-              <span className="pf-mentor-note-index">Catatan mentor</span>
-              <div className="pf-mentor-note-avatar" aria-hidden="true">
-                {initials(course.mentor.name)}
-              </div>
-              <p>Mentor program</p>
-              <h2>{course.mentor.name}</h2>
-              <small>{course.mentor.headline}</small>
+            {/* ── Mentor Panel: Show all 3 mentors ── */}
+            <aside className="pf-mentor-panel" aria-label="Tim mentor">
+              <span className="pf-mentor-note-index">Tim Mentor</span>
+              {folders.map((folder, index) => {
+                const mentorName = extractMentor(folder.description);
+                if (!mentorName) return null;
+                return (
+                  <div key={folder.id} className="pf-mentor-panel-item">
+                    <div className="pf-mentor-note-avatar" aria-hidden="true">
+                      {initials(mentorName)}
+                    </div>
+                    <p>Mentor Modul {index + 1}</p>
+                    <h3>{mentorName}</h3>
+                    <small>{folder.title}</small>
+                  </div>
+                );
+              })}
               <blockquote>
-                “Strategi baru menjadi kepemimpinan ketika ia terlihat dalam keputusan dan perilaku tim.”
+                &ldquo;Strategi baru menjadi kepemimpinan ketika ia terlihat dalam keputusan dan perilaku tim.&rdquo;
               </blockquote>
             </aside>
           </div>

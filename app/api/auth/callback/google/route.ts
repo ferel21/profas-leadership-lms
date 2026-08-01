@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
   const fail = (reason: string) => {
     const response = NextResponse.redirect(`${origin}/masuk?error=${encodeURIComponent(reason)}`);
-    response.cookies.set("profas_oauth_state", "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 0, path: "/api/auth" });
+    response.cookies.set("profas_oauth_state", "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 0, path: "/" });
     return response;
   };
 
@@ -135,7 +135,7 @@ export async function GET(request: Request) {
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/"
     });
-    response.cookies.set("profas_oauth_state", "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 0, path: "/api/auth" });
+    response.cookies.set("profas_oauth_state", "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 0, path: "/" });
 
     return response;
   } catch (err: unknown) {

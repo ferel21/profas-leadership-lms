@@ -63,7 +63,7 @@ export function AuthForm({
           <span>Gagal Masuk / Otorisasi Google</span>
         </div>
         <div>
-          {reasonParam || error || "Terjadi kendala saat verifikasi akun Anda."}
+          {reasonParam || error || (errorParam ? `Terjadi kendala saat verifikasi akun Anda. (Kode: ${errorParam})` : "Terjadi kendala saat verifikasi akun Anda.")}
         </div>
         {errorParam === "token_exchange_failed" && (
           <div className="auth-alert-codebox">

@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     maxAge: 600,
-    path: "/api/auth",
+    path: "/",
   });
   return response;
 }

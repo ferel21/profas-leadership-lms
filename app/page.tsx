@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/ui/Header";
 import { Footer } from "@/components/ui/Footer";
+import { CourseCard } from "@/components/ui/CourseCard";
 
 const journey = [
   {
@@ -88,26 +89,50 @@ const rolePaths = [
   },
 ] as const;
 
-const packageModules = [
+const profasModules = [
   {
-    number: "01",
-    title: "LEADERSHIP",
-    mentor: "Prof. Dr. Muhammad Asdar, S.E., M.Si.",
-    description: "Membangun fondasi kepemimpinan yang adaptif, situasional, dan berdampak.",
+    id: "mod-1",
+    slug: "profas-leadership",
+    title: "Leadership",
+    shortDescription: "Membangun fondasi kepemimpinan yang adaptif, situasional, dan berdampak.",
+    category: "Modul 1",
+    level: "ADVANCED",
+    price: 499000,
+    durationHours: 12,
+    rating: 4.9,
+    studentsCount: 2500,
+    image: "/images/profas-leadership-hero.webp",
+    mentor: { name: "Prof. Dr. Muhammad Asdar, S.E., M.Si." },
   },
   {
-    number: "02",
-    title: "PERSONAL GROWTH",
-    mentor: "Prof. Dr. Firman Menne, S.E., M.Si., Ak., CA., CTA, ACPA",
-    description: "Membangun mindset bertumbuh, resiliensi, dan kebiasaan produktif.",
+    id: "mod-2",
+    slug: "profas-leadership",
+    title: "Personal Growth",
+    shortDescription: "Membangun mindset bertumbuh, resiliensi, dan kebiasaan produktif.",
+    category: "Modul 2",
+    level: "ADVANCED",
+    price: 499000,
+    durationHours: 10,
+    rating: 4.9,
+    studentsCount: 2500,
+    image: "/images/profas-leadership-hero.webp",
+    mentor: { name: "Prof. Dr. Firman Menne, S.E., M.Si., Ak., CA., CTA, ACPA" },
   },
   {
-    number: "03",
-    title: "BUSINESS & ENTREPRENEURSHIP",
-    mentor: "Bahrul Ulum Ilham, S.Pd., M.M., Ph.D.",
-    description: "Merancang strategi bisnis, eksekusi, dan pertumbuhan berkelanjutan.",
+    id: "mod-3",
+    slug: "profas-leadership",
+    title: "Business & Entrepreneurship",
+    shortDescription: "Merancang strategi bisnis, eksekusi, dan pertumbuhan berkelanjutan.",
+    category: "Modul 3",
+    level: "ADVANCED",
+    price: 499000,
+    durationHours: 14,
+    rating: 4.9,
+    studentsCount: 2500,
+    image: "/images/profas-leadership-hero.webp",
+    mentor: { name: "Bahrul Ulum Ilham, S.Pd., M.M., Ph.D." },
   },
-] as const;
+];
 
 const faqItems = [
   [
@@ -246,56 +271,19 @@ export default function Home() {
         {/* ── PAKET UTAMA: PROFAS LEADERSHIP ── */}
         <section className="pf-home-section pf-home-programs" aria-labelledby="program-title">
           <div className="container">
-            <div className="pf-home-heading pf-home-heading-centered">
-              <span className="pf-home-pill">Satu paket lengkap</span>
-              <h2 id="program-title">PROFAS LEADERSHIP</h2>
-              <p>
-                Tiga pilar kepemimpinan dalam satu paket pembelajaran terstruktur,
-                dipandu langsung oleh akademisi dan praktisi berpengalaman.
-              </p>
-            </div>
-
-            <div className="pf-package-showcase">
-              <div className="pf-package-card">
-                <div className="pf-package-header">
-                  <div className="pf-package-badge">1 PAKET · 3 MODUL</div>
-                  <h3>PROFAS LEADERSHIP</h3>
-                  <p>
-                    Program intensif yang memadukan kepemimpinan, pertumbuhan diri,
-                    dan kewirausahaan dalam satu paket terstruktur.
-                  </p>
-                </div>
-
-                <div className="pf-package-modules">
-                  {packageModules.map((mod) => (
-                    <article key={mod.number} className="pf-package-module">
-                      <span className="pf-package-module-number">{mod.number}</span>
-                      <div className="pf-package-module-content">
-                        <h4>{mod.title}</h4>
-                        <p className="pf-package-module-desc">{mod.description}</p>
-                        <p className="pf-package-module-mentor">
-                          <ShieldCheck aria-hidden="true" />
-                          {mod.mentor}
-                        </p>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-
-                <div className="pf-package-footer">
-                  <div className="pf-package-price">
-                    <small>Investasi</small>
-                    <strong>Rp499.000</strong>
-                  </div>
-                  <Link
-                    href="/program/profas-leadership"
-                    className="pf-home-button pf-home-button-primary"
-                  >
-                    Lihat program
-                    <ArrowRight aria-hidden="true" />
-                  </Link>
-                </div>
+            <div className="pf-home-heading pf-home-heading-split">
+              <div>
+                <span className="pf-home-pill">1 Paket · 3 Modul</span>
+                <h2 id="program-title">PROFAS LEADERSHIP (Rp499.000)</h2>
               </div>
+              <Link href="/program/profas-leadership" className="pf-home-button pf-home-button-secondary">
+                Lihat detail paket <ArrowRight aria-hidden="true" />
+              </Link>
+            </div>
+            <div className="course-grid pf-course-grid pf-home-course-grid">
+              {profasModules.map((mod) => (
+                <CourseCard key={mod.id} course={mod} />
+              ))}
             </div>
           </div>
         </section>

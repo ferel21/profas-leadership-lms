@@ -139,7 +139,10 @@ export async function GET(request: Request) {
 
     return response;
   } catch (err: unknown) {
-    console.error("[GOOGLE_AUTH_ERROR]", err instanceof Error ? err.message : "unknown error");
+    console.error("[GOOGLE_AUTH_ERROR]", err);
+    if (err && typeof err === 'object' && 'name' in err && typeof err.name === 'string' && err.name.includes("Prisma")) {
+      return fail("database_error");
+    }
     return fail("server_error");
   }
 }

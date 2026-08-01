@@ -301,7 +301,8 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
     return (
       <div key={node.id} style={{ marginLeft: level > 0 ? '24px' : '0', marginTop: '0.5rem' }}>
         <div 
-          draggable
+          data-draggable-row
+          draggable={false}
           onDragStart={(e) => handleDragStart(e, node.id)}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, node.parentId, node.order)}
@@ -317,7 +318,19 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <GripVertical size={18} style={{ color: 'var(--muted)', cursor: 'grab' }} />
+            <div 
+              style={{ display: 'flex', alignItems: 'center', cursor: 'grab', padding: '4px' }}
+              onMouseEnter={(e) => {
+                const row = e.currentTarget.closest('[data-draggable-row]');
+                if (row) row.setAttribute('draggable', 'true');
+              }}
+              onMouseLeave={(e) => {
+                const row = e.currentTarget.closest('[data-draggable-row]');
+                if (row) row.setAttribute('draggable', 'false');
+              }}
+            >
+              <GripVertical size={18} style={{ color: 'var(--muted)' }} />
+            </div>
             {isFolder ? (
               <button onClick={() => toggleExpand(node.id)} className="btn btn-ghost btn-small" style={{ padding: 4, height:'auto' }}>
                 {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}

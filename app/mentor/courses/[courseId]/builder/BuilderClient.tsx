@@ -331,7 +331,10 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             {(node.type === "QUIZ" || node.type === "ASSIGNMENT") ? (
               <button 
-                onClick={async () => {
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   setSaving(true);
                   try {
                     const flat = flattenNodes(nodes);
@@ -365,7 +368,10 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
               </button>
             ) : node.type !== "FOLDER" ? (
               <button 
-                onClick={() => {
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   setEditingNode(node);
                   setShowUploadModal(true);
                 }} 
@@ -375,7 +381,18 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
                 <Edit2 size={14}/> Edit Materi / Berkas
               </button>
             ) : null}
-            <button onClick={() => handleDelete(node.id)} className="btn btn-ghost btn-small hover-lift" style={{ color: 'var(--error)', padding: '6px' }}><Trash2 size={16}/></button>
+            <button 
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDelete(node.id);
+              }} 
+              className="btn btn-ghost btn-small hover-lift" 
+              style={{ color: 'var(--error)', padding: '6px' }}
+            >
+              <Trash2 size={16}/>
+            </button>
           </div>
         </div>
 

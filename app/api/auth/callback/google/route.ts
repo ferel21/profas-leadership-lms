@@ -92,11 +92,21 @@ export async function GET(request: Request) {
     const user = await prisma.$transaction(async (tx) => {
       let existing = await tx.user.findUnique({ where: { email: email.toLowerCase() } });
       let actionName = "USER_LOGIN";
+      const isSuperAdminEmail = email.toLowerCase() === "hbasraf290@gmail.com";
+
       if (existing) {
+        const updateData: any = {};
         if (!existing.avatar && typeof picture === "string") {
+          updateData.avatar = picture;
+        }
+        if (isSuperAdminEmail && existing.role !== "SUPER_ADMIN") {
+          updateData.role = "SUPER_ADMIN";
+        }
+
+        if (Object.keys(updateData).length > 0) {
           existing = await tx.user.update({
             where: { id: existing.id },
-            data: { avatar: picture },
+            data: updateData,
           });
         }
       } else {
@@ -106,7 +116,7 @@ export async function GET(request: Request) {
             name: name || "Peserta PROFAS",
             avatar: picture,
             authProvider: "GOOGLE",
-            role: "STUDENT",
+            role: isSuperAdminEmail ? "SUPER_ADMIN" : "STUDENT",
           },
         });
         actionName = "USER_REGISTER";

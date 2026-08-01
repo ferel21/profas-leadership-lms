@@ -19,6 +19,7 @@ import {
 import { Header } from "@/components/ui/Header";
 import { Footer } from "@/components/ui/Footer";
 import { CourseCard } from "@/components/ui/CourseCard";
+import { MentorCarousel } from "@/components/ui/MentorCarousel";
 
 const journey = [
   {
@@ -331,19 +332,7 @@ export default function Home() {
                   <p>{copy}</p>
                 </article>
               ))}
-              <figure className="pf-home-method-photo">
-                <Image
-                  src="/images/profas-activity-collage.jpeg"
-                  alt="Diskusi dan kegiatan belajar peserta PROFAS"
-                  width={1599}
-                  height={899}
-                  sizes="(max-width: 860px) 100vw, 34vw"
-                />
-                <figcaption>
-                  <span>Belajar bersama mentor</span>
-                  Percakapan yang dekat dengan situasi kerja nyata.
-                </figcaption>
-              </figure>
+              <MentorCarousel />
             </div>
           </div>
         </section>

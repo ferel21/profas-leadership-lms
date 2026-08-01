@@ -296,7 +296,7 @@ export default function Home() {
                   <strong style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--pf-primary, #0f172a)' }}>Rp499.000</strong>
                 </div>
                 <Link
-                  href="/program/profas-leadership"
+                  href="/daftar"
                   className="pf-home-button pf-home-button-primary"
                 >
                   Ambil Paket Ini

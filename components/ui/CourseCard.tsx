@@ -134,15 +134,17 @@ export const CourseCard = memo(function CourseCard({ course, isModule = false }:
               <strong style={{ fontSize: '0.95rem' }}>PROFAS LEADERSHIP</strong>
             </div>
           )}
-          <Link
-            href={`/program/${course.slug}`}
-            prefetch={false}
-            className="pf-course-card__link"
-            aria-label={`Lihat ${course.title}`}
-          >
-            <span>Lihat {isModule ? 'modul' : 'program'}</span>
-            <ArrowUpRight size={20} aria-hidden="true" />
-          </Link>
+          {!isModule && (
+            <Link
+              href={`/program/${course.slug}`}
+              prefetch={false}
+              className="pf-course-card__link"
+              aria-label={`Lihat ${course.title}`}
+            >
+              <span>Lihat program</span>
+              <ArrowUpRight size={20} aria-hidden="true" />
+            </Link>
+          )}
         </footer>
       </div>
     </article>

@@ -55,6 +55,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_module
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/validate-env.mjs ./scripts/validate-env.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/deploy/vps/docker-entrypoint.sh ./docker-entrypoint.sh
 
+# Install prisma globally so we can run migrations at runtime
+RUN npm install -g prisma@6.19.3
+
 USER nextjs
 
 EXPOSE 3000

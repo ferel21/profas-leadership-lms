@@ -3,9 +3,9 @@ set -eu
 
 node /app/scripts/validate-env.mjs --production
 
-if [ -f "/app/node_modules/prisma/build/index.js" ]; then
+if command -v prisma >/dev/null 2>&1; then
   echo "Syncing database schema with Prisma..."
-  node /app/node_modules/prisma/build/index.js db push --skip-generate --accept-data-loss || echo "Prisma db push warning: skipping auto-sync"
+  prisma db push --skip-generate --accept-data-loss || echo "Prisma db push warning: skipping auto-sync"
 fi
 
 exec "$@"

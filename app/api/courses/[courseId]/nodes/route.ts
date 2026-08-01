@@ -193,16 +193,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
         .filter((assessmentId): assessmentId is string => Boolean(assessmentId));
 
       const removedNodes = existingCourseNodes.filter(node => !activeIds.includes(node.id));
-      const destructiveRemoval = removedNodes.find(node =>
-        node._count.progress > 0
-        || node._count.discussionPosts > 0
-        || (node.assessment?._count.attempts ?? 0) > 0
-      );
-      if (destructiveRemoval) {
-        throw new CurriculumValidationError(
-          "Materi yang sudah memiliki progres, diskusi, atau kiriman evaluasi tidak dapat dihapus. Pertahankan materi tersebut sebagai arsip belajar."
-        );
-      }
+
+      // As per absolute authority requirements, mentors can delete any node regardless of student progress.
+      // Progress, discussion posts, and assessment attempts will be cascade-deleted by Prisma.
 
       for (const existingNode of existingCourseNodes) {
         if (!existingNode.assessmentId || (existingNode.assessment?._count.attempts ?? 0) === 0) continue;
@@ -210,11 +203,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
         const nextAssessmentId = submitted && (submitted.type === NodeType.QUIZ || submitted.type === NodeType.ASSIGNMENT)
           ? (submitted.assessmentId || existingNode.assessmentId || submitted.id)
           : null;
-        if (nextAssessmentId !== existingNode.assessmentId) {
-          throw new CurriculumValidationError(
-            "Evaluasi yang sudah memiliki kiriman peserta tidak dapat dilepas atau diubah menjadi tipe materi lain."
-          );
-        }
+        
+        // Allowed to re-assign or unbind assessments freely now
       }
 
       // Detach retained children first. Deleting an old folder would otherwise

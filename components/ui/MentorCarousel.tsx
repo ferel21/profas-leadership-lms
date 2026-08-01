@@ -94,7 +94,7 @@ export function MentorCarousel() {
   return (
     <figure 
       className="pf-home-method-photo" 
-      style={{ overflow: 'hidden', position: 'relative' }}
+      style={{ overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={onTouchStartHandler}
@@ -108,6 +108,7 @@ export function MentorCarousel() {
           transform: `translateX(-${(currentIndex * 100) / speakers.length}%)`,
           transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
           height: '100%',
+          flex: 1,
           willChange: 'transform'
         }}
       >

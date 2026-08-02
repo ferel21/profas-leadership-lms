@@ -254,10 +254,28 @@ export function CohortManager({ courses, initialCohorts }: { courses: CourseOpti
         <form className="pf-cohort-create-panel" onSubmit={createCohort}>
           <div className="pf-cohort-panel-heading"><Plus aria-hidden="true" /><div><h2>Kohort baru</h2><p>Kode dibuat otomatis dan hanya ditampilkan satu kali.</p></div></div>
           <div className="pf-cohort-form-grid">
+            <label>
+              <span>Jenis peruntukan</span>
+              <select
+                value={createForm.capacity === "1" ? "INDIVIDUAL" : "BATCH"}
+                onChange={(event) => {
+                  const isIndividual = event.target.value === "INDIVIDUAL";
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    capacity: isIndividual ? "1" : "30",
+                    name: isIndividual ? (prev.name || "Akses Mandiri Perorangan") : (prev.name === "Akses Mandiri Perorangan" ? "" : prev.name),
+                    organization: isIndividual ? (prev.organization || "Peserta Individual") : (prev.organization === "Peserta Individual" ? "" : prev.organization),
+                  }));
+                }}
+              >
+                <option value="BATCH">👥 Batch / Kelompok (Banyak Peserta)</option>
+                <option value="INDIVIDUAL">👤 Perorangan / Individual (1 Peserta)</option>
+              </select>
+            </label>
             <label><span>Program</span><select required value={createForm.courseId} onChange={(event) => setCreateForm({ ...createForm, courseId: event.target.value })}>{courses.map((course) => <option value={course.id} key={course.id}>{course.title}{course.published ? "" : " (Draf)"}</option>)}</select></label>
-            <label><span>Nama kohort</span><input required minLength={3} maxLength={120} value={createForm.name} onChange={(event) => setCreateForm({ ...createForm, name: event.target.value })} placeholder="Leadership Batch 01" /></label>
+            <label><span>Nama kohort</span><input required minLength={3} maxLength={120} value={createForm.name} onChange={(event) => setCreateForm({ ...createForm, name: event.target.value })} placeholder={createForm.capacity === "1" ? "Akses Mandiri (Nama Peserta)" : "Leadership Batch 01"} /></label>
             <label><span>Organisasi <small>opsional</small></span><input maxLength={120} value={createForm.organization} onChange={(event) => setCreateForm({ ...createForm, organization: event.target.value })} placeholder="Nama organisasi" /></label>
-            <label><span>Kapasitas</span><input required type="number" min={1} max={10000} value={createForm.capacity} onChange={(event) => setCreateForm({ ...createForm, capacity: event.target.value })} /></label>
+            <label><span>Kapasitas</span><input required type="number" min={1} max={10000} value={createForm.capacity} onChange={(event) => setCreateForm({ ...createForm, capacity: event.target.value })} readOnly={createForm.capacity === "1"} /></label>
             <label><span>Mulai akses</span><input required type="datetime-local" value={createForm.startsAt} onChange={(event) => setCreateForm({ ...createForm, startsAt: event.target.value })} /></label>
             <label><span>Akhir akses</span><input required type="datetime-local" value={createForm.endsAt} onChange={(event) => setCreateForm({ ...createForm, endsAt: event.target.value })} /></label>
           </div>

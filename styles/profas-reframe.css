@@ -4,6 +4,22 @@
 :root {
   --pf-canvas: #f4f6f1;
   --pf-app: #f9fafb;
+  /* Shared public canvas: the landing hero is the source of truth for
+     the blue/green atmosphere and square grid used across public routes. */
+  --pf-public-canvas: #fbfcfe;
+  --pf-public-grid-size: 28px;
+  --pf-public-background:
+    radial-gradient(circle at 73% 20%, rgba(42, 107, 167, 0.12), transparent 29%),
+    radial-gradient(circle at 90% 78%, rgba(51, 146, 93, 0.13), transparent 25%),
+    linear-gradient(rgba(42, 107, 167, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42, 107, 167, 0.04) 1px, transparent 1px),
+    var(--pf-public-canvas);
+  --pf-public-background-size:
+    auto,
+    auto,
+    var(--pf-public-grid-size) var(--pf-public-grid-size),
+    var(--pf-public-grid-size) var(--pf-public-grid-size),
+    auto;
   --pf-surface: #ffffff;
   --pf-ink: #101519;
   --pf-body: #4b5563;
@@ -1717,7 +1733,8 @@ a {
   display: grid !important;
   grid-template-columns: minmax(420px, 46vw) minmax(0, 1fr) !important;
   color: var(--pf-ink);
-  background: var(--pf-canvas) !important;
+  background: var(--pf-public-background) !important;
+  background-size: var(--pf-public-background-size) !important;
 }
 
 .pf-auth-page *,
@@ -1871,10 +1888,7 @@ a {
   justify-content: flex-start !important;
   padding: 0 clamp(28px, 6vw, 96px) 72px !important;
   overflow: visible !important;
-  background:
-    linear-gradient(rgba(42, 107, 167, 0.035) 1px, transparent 1px),
-    var(--pf-canvas) !important;
-  background-size: 100% 34px !important;
+  background: transparent !important;
 }
 
 .pf-auth-panel-header {
@@ -2266,7 +2280,8 @@ a {
 @media (max-width: 840px) {
   .pf-auth-page.auth-page {
     display: block !important;
-    background: var(--pf-canvas) !important;
+    background: var(--pf-public-background) !important;
+    background-size: var(--pf-public-background-size) !important;
   }
 
   .pf-auth-story.auth-visual {
@@ -7338,7 +7353,8 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
   min-height: 100vh;
   overflow: clip;
   color: var(--pf-ink);
-  background: var(--pf-surface) !important;
+  background: var(--pf-public-background) !important;
+  background-size: var(--pf-public-background-size) !important;
 }
 
 .pf-detail-page *,
@@ -7352,11 +7368,7 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
   min-height: 720px;
   padding: 72px 0 86px !important;
   overflow: visible;
-  background:
-    linear-gradient(rgba(42, 107, 167, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(42, 107, 167, 0.055) 1px, transparent 1px),
-    var(--pf-canvas) !important;
-  background-size: 42px 42px !important;
+  background: transparent !important;
 }
 
 .pf-detail-hero::after {
@@ -7721,7 +7733,7 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
 
 .pf-detail-content.detail-content {
   padding: 112px 0 124px !important;
-  background: var(--pf-surface) !important;
+  background: transparent !important;
 }
 
 .pf-detail-main.detail-main {
@@ -11802,13 +11814,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 .pf-home-hero {
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 73% 20%, rgba(42, 107, 167, 0.12), transparent 29%),
-    radial-gradient(circle at 90% 78%, rgba(51, 146, 93, 0.13), transparent 25%),
-    linear-gradient(rgba(42, 107, 167, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(42, 107, 167, 0.04) 1px, transparent 1px),
-    #fbfcfe;
-  background-size: auto, auto, 28px 28px, 28px 28px, auto;
+  background: var(--pf-public-background);
+  background-size: var(--pf-public-background-size);
 }
 
 .pf-home-hero-layout {

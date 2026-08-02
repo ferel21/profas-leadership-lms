@@ -12964,64 +12964,78 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
 /* The reference uses a white information-rich footer. Keep it quiet and
    readable instead of introducing another dark visual block. */
-.pf-home .pf-footer.footer {
+.pf-home .pf-footer.footer,
+.pf-public-page .pf-footer.footer {
   padding-top: 72px !important;
-  color: var(--pf-home-body) !important;
-  border-top: 1px solid var(--pf-home-line);
+  color: var(--pf-home-body, #334155) !important;
+  border-top: 1px solid var(--pf-home-line, #e2e8f0);
   background: #ffffff !important;
   background-image: none !important;
 }
 
-.pf-home .pf-footer__brand .logo-image {
+.pf-home .pf-footer__brand .logo-image,
+.pf-public-page .pf-footer__brand .logo-image {
   filter: none;
 }
 
-.pf-home .pf-footer__compass {
-  color: var(--pf-home-blue);
-  border-color: var(--pf-home-line);
+.pf-home .pf-footer__compass,
+.pf-public-page .pf-footer__compass {
+  color: var(--pf-home-blue, #4f46e5);
+  border-color: var(--pf-home-line, #e2e8f0);
 }
 
 .pf-home .pf-footer__brand > p,
 .pf-home .pf-footer__column > a,
-.pf-home .pf-footer__contact-column .footer-contact {
-  color: var(--pf-home-body) !important;
+.pf-home .pf-footer__contact-column .footer-contact,
+.pf-public-page .pf-footer__brand > p,
+.pf-public-page .pf-footer__column > a,
+.pf-public-page .pf-footer__contact-column .footer-contact {
+  color: var(--pf-home-body, #334155) !important;
   font-size: 0.8rem !important;
 }
 
-.pf-home .pf-footer__column h2 {
-  color: var(--pf-home-ink) !important;
+.pf-home .pf-footer__column h2,
+.pf-public-page .pf-footer__column h2 {
+  color: var(--pf-home-ink, #0f172a) !important;
   font-size: 0.76rem !important;
 }
 
-.pf-home .pf-footer__column > a:hover {
-  color: var(--pf-home-blue) !important;
+.pf-home .pf-footer__column > a:hover,
+.pf-public-page .pf-footer__column > a:hover {
+  color: var(--pf-home-blue, #4f46e5) !important;
 }
 
-.pf-home .pf-footer__socials a {
-  color: var(--pf-home-blue) !important;
-  border-color: var(--pf-home-line) !important;
-  background: var(--pf-home-canvas) !important;
+.pf-home .pf-footer__socials a,
+.pf-public-page .pf-footer__socials a {
+  color: var(--pf-home-blue, #4f46e5) !important;
+  border-color: var(--pf-home-line, #e2e8f0) !important;
+  background: var(--pf-home-canvas, #f8fafc) !important;
 }
 
-.pf-home .pf-footer__socials a:hover {
+.pf-home .pf-footer__socials a:hover,
+.pf-public-page .pf-footer__socials a:hover {
   color: #ffffff !important;
-  border-color: var(--pf-home-blue) !important;
-  background: var(--pf-home-blue) !important;
+  border-color: var(--pf-home-blue, #4f46e5) !important;
+  background: var(--pf-home-blue, #4f46e5) !important;
 }
 
-.pf-home .pf-footer__contact-column .footer-contact svg {
-  color: var(--pf-home-blue) !important;
+.pf-home .pf-footer__contact-column .footer-contact svg,
+.pf-public-page .pf-footer__contact-column .footer-contact svg {
+  color: var(--pf-home-blue, #4f46e5) !important;
 }
 
-.pf-home .pf-footer__bottom.footer-bottom {
+.pf-home .pf-footer__bottom.footer-bottom,
+.pf-public-page .pf-footer__bottom.footer-bottom {
   min-height: 78px;
   color: #718096 !important;
-  border-color: var(--pf-home-line) !important;
+  border-color: var(--pf-home-line, #e2e8f0) !important;
   font-size: 0.72rem !important;
 }
 
 .pf-home .pf-footer__bottom.footer-bottom p,
-.pf-home .pf-footer__bottom.footer-bottom span {
+.pf-home .pf-footer__bottom.footer-bottom span,
+.pf-public-page .pf-footer__bottom.footer-bottom p,
+.pf-public-page .pf-footer__bottom.footer-bottom span {
   color: #526175 !important;
 }
 

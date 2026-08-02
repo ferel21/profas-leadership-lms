@@ -214,17 +214,17 @@ export default async function MentorPesertaPage({
                   </td>
                   <td>
                     <div className="progress-line m-0 w-[120px]">
-                      <i><em className={s.avgProgress === 100 ? "bg-emerald-500" : ""} style={{ width: `${s.avgProgress}%` }} /></i>
-                      <b className={s.avgProgress === 100 ? "text-emerald-500 font-bold" : ""}>{s.avgProgress}%</b>
+                      <i><em className={s.avgProgress === 100 ? "bg-brand-green" : ""} style={{ width: `${s.avgProgress}%` }} /></i>
+                      <b className={s.avgProgress === 100 ? "text-brand-green-dark font-bold" : ""}>{s.avgProgress}%</b>
                     </div>
                   </td>
                   <td>
-                    <span className="flex items-center gap-1 text-amber-500 font-bold">
+                    <span className="flex items-center gap-1 text-brand-green-dark font-bold">
                       <Trophy size={14} /> {s.totalXp}
                     </span>
                   </td>
                   <td>
-                    <span className={`flex items-center gap-1 text-sm ${s.lastActiveAt ? "text-emerald-600" : "text-slate-500"}`}>
+                    <span className={`flex items-center gap-1 text-sm ${s.lastActiveAt ? "text-brand-green-dark" : "text-slate-500"}`}>
                       <Activity size={14} /> {formatRelativeTime(s.lastActiveAt)}
                     </span>
                   </td>

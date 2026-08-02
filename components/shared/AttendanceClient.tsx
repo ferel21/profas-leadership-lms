@@ -79,11 +79,11 @@ export function AttendanceClient({ role, events, serverNow }: { role: string; ev
       {isStudent ? <>
         <Metric icon={<UserCheck />} label="Kehadiran" value={attended} detail={`dari ${events.length} agenda`} tone="green" />
         <Metric icon={<Play />} label="Sesi dibuka" value={openSessions} detail="dapat diisi sekarang" tone="blue" />
-        <Metric icon={<CalendarDays />} label="Total agenda" value={events.length} detail="30 hari terakhir & berikutnya" tone="orange" />
+        <Metric icon={<CalendarDays />} label="Total agenda" value={events.length} detail="30 hari terakhir & berikutnya" tone="blue" />
       </> : <>
         <Metric icon={<ClipboardCheck />} label="Sesi absensi" value={events.filter(event => event.attendanceEnabled).length} detail={`dari ${events.length} agenda`} tone="blue" />
         <Metric icon={<Play />} label="Sedang dibuka" value={openSessions} detail="sesi aktif saat ini" tone="green" />
-        <Metric icon={<UsersRound />} label="Tercatat hadir" value={presentRecords} detail={`dari ${expectedRecords} peserta terjadwal`} tone="orange" />
+        <Metric icon={<UsersRound />} label="Tercatat hadir" value={presentRecords} detail={`dari ${expectedRecords} peserta terjadwal`} tone="blue" />
       </>}
     </div>
 

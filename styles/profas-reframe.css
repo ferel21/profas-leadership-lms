@@ -14,18 +14,22 @@
   --pf-primary-dark: #1e5a8f;
   --pf-deep: #173f73;
   --pf-primary-soft: #eff6ff;
-  --pf-gold: #f3b444;
-  --pf-success: #22c55e;
-  --pf-error: #ef4444;
+  --pf-secondary: #33925d;
+  --pf-secondary-dark: #246e48;
+  --pf-secondary-soft: #eaf6ef;
+  --pf-success: #246e48;
+  --pf-error: #b42318;
+  /* Compatibility alias for older selectors; the rendered hue is PROFAS green. */
+  --pf-gold: var(--pf-secondary);
   --pf-radius-sm: 10px;
   --pf-radius-md: 16px;
   --pf-radius-lg: 26px;
   --pf-shadow-sm: 0 1px 2px rgba(16, 21, 25, 0.04);
   --pf-shadow-md: 0 18px 48px rgba(23, 63, 115, 0.10);
   --pf-shadow-focus: 0 0 0 4px rgba(42, 107, 167, 0.16);
-  --pf-font-body: var(--font-inter), "Inter", sans-serif;
-  --pf-font-display: var(--font-fraunces), Georgia, serif;
-  --pf-font-ui: var(--font-space), var(--font-inter), sans-serif;
+  --pf-font-body: var(--font-sf);
+  --pf-font-display: var(--font-sf);
+  --pf-font-ui: var(--font-sf);
   --pf-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -56,7 +60,7 @@ a {
 
 ::selection {
   color: var(--pf-ink);
-  background: rgba(243, 180, 68, 0.48);
+  background: rgba(51, 146, 93, 0.24);
 }
 
 :where(a, button, input, textarea, select, summary):focus-visible {
@@ -103,7 +107,7 @@ a {
 .pf-kicker > span {
   width: 24px;
   height: 2px;
-  background: var(--pf-gold);
+  background: var(--pf-secondary);
 }
 
 .pf-button {
@@ -3281,10 +3285,10 @@ html body .player-footer .complete-btn:hover {
   align-items: center;
   gap: 5px;
   padding: 0 9px;
-  color: #7c4b00;
-  border: 1px solid rgba(243, 180, 68, 0.36);
+  color: #246e48;
+  border: 1px solid rgba(51, 146, 93, 0.36);
   border-radius: 999px;
-  background: #fff8e8;
+  background: #eaf6ef;
   font-family: var(--pf-font-ui);
   font-size: 0.56rem;
   font-weight: 650;
@@ -4124,8 +4128,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-role-focus {
   border: 1px solid rgba(0, 52, 102, 0.2);
   border-radius: 18px 52px 18px 18px;
   background:
-    radial-gradient(circle at 92% 6%, rgba(243, 180, 68, 0.18), transparent 21%),
-    linear-gradient(140deg, #2a6ba7 0%, #003466 72%);
+    radial-gradient(circle at 92% 6%, rgba(51, 146, 93, 0.18), transparent 21%),
+    linear-gradient(140deg, #2a6ba7 0%, #173f73 72%);
   box-shadow: 0 18px 42px rgba(0, 52, 102, 0.12);
 }
 
@@ -4148,7 +4152,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-role-focus-copy > svg {
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-role-kicker {
-  color: #f3b444;
+  color: #33925d;
   font-family: var(--pf-font-ui);
   font-size: 0.65rem;
   font-weight: 700;
@@ -4183,7 +4187,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-role-focus-action {
   gap: 9px;
   margin-top: 24px;
   padding: 0 17px;
-  color: #003466;
+  color: #173f73;
   border: 1px solid #ffffff;
   border-radius: 10px;
   background: #ffffff;
@@ -4193,8 +4197,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-role-focus-action {
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-role-focus-action:hover {
-  border-color: #f3b444;
-  background: #f3b444;
+  border-color: #33925d;
+  background: #33925d;
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-role-focus-action svg {
@@ -4556,8 +4560,8 @@ html body .dashboard-fresh.pf-workspace-minimal .btn-primary {
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .btn-primary:hover {
-  border-color: #003466 !important;
-  background: #003466 !important;
+  border-color: #173f73 !important;
+  background: #173f73 !important;
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .mentor-table thead th {
@@ -5582,9 +5586,9 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
 
 .pf-workspace-main .dash-enroll-status.done,
 .pf-workspace-main .status-correct {
-  color: #166534 !important;
-  border-color: rgba(34, 197, 94, 0.2) !important;
-  background: #f0fdf4 !important;
+  color: #246e48 !important;
+  border-color: rgba(51, 146, 93, 0.2) !important;
+  background: #eaf6ef !important;
 }
 
 .pf-workspace-main .dash-cert-mini,
@@ -6460,9 +6464,9 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
 }
 
 .pf-course-card__quality.master {
-  color: #7c4b00 !important;
-  border-color: rgba(243, 180, 68, 0.35) !important;
-  background: #fff8e8 !important;
+  color: #246e48 !important;
+  border-color: rgba(51, 146, 93, 0.35) !important;
+  background: #eaf6ef !important;
 }
 
 .pf-course-card__title {
@@ -8231,8 +8235,8 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
 }
 
 .al-page .verification-result.is-valid {
-  color: #126b3b !important;
-  border: 1px solid rgba(34, 197, 94, 0.24) !important;
+  color: #246e48 !important;
+  border: 1px solid rgba(51, 146, 93, 0.24) !important;
   background: #f0fbf4 !important;
 }
 
@@ -8510,9 +8514,9 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
   right: -46px;
   width: 150px;
   height: 150px;
-  border: 1px solid rgba(243, 180, 68, 0.42);
+  border: 1px solid rgba(51, 146, 93, 0.42);
   border-radius: 50%;
-  box-shadow: 0 0 0 18px rgba(243, 180, 68, 0.08), 0 0 0 36px rgba(243, 180, 68, 0.04);
+  box-shadow: 0 0 0 18px rgba(51, 146, 93, 0.08), 0 0 0 36px rgba(51, 146, 93, 0.04);
 }
 
 .pf-catalog-route-heading {
@@ -8758,9 +8762,9 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
   display: grid !important;
   place-items: center;
   color: var(--pf-deep) !important;
-  border: 1px solid rgba(243, 180, 68, 0.72);
+  border: 1px solid rgba(51, 146, 93, 0.72);
   border-radius: 50% !important;
-  background: rgba(243, 180, 68, 0.18) !important;
+  background: rgba(51, 146, 93, 0.18) !important;
 }
 
 .cert-brand > span svg {
@@ -8859,10 +8863,10 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
   place-items: center;
   align-content: center;
   gap: 2px;
-  color: #875900;
-  border: 1px solid rgba(243, 180, 68, 0.75);
+  color: #246e48;
+  border: 1px solid rgba(51, 146, 93, 0.75);
   border-radius: 50%;
-  background: rgba(243, 180, 68, 0.13);
+  background: rgba(51, 146, 93, 0.13);
 }
 
 .cert-verification-seal svg {
@@ -8871,7 +8875,7 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
 }
 
 .cert-verification-seal small {
-  color: #875900 !important;
+  color: #246e48 !important;
   font-size: 0.42rem !important;
   font-weight: 750;
 }
@@ -8960,8 +8964,8 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
 }
 
 .cert-action-primary.is-success {
-  border-color: #23814b !important;
-  background: #23814b !important;
+  border-color: #246e48 !important;
+  background: #246e48 !important;
 }
 
 .cert-verify-link {
@@ -9583,7 +9587,7 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
 }
 
 .pf-quiz-review-card .status-correct {
-  color: #197244;
+  color: #246e48;
 }
 
 .pf-quiz-review-card .status-incorrect {
@@ -9624,8 +9628,8 @@ html body .dashboard-fresh.pf-workspace-minimal .mentor-table tbody td {
 }
 
 .pf-quiz-review-card .review-opt.is-correct {
-  color: #126b3b;
-  border-color: rgba(34, 197, 94, 0.28);
+  color: #246e48;
+  border-color: rgba(51, 146, 93, 0.28);
   background: #f0fbf4;
 }
 
@@ -10530,8 +10534,8 @@ html body .overall-progress > small {
    ========================================================================== */
 
 html body .dashboard-fresh.pf-workspace-minimal {
-  --pf-learner-navy: #003466;
-  --pf-learner-success: #00c758;
+  --pf-learner-navy: #173f73;
+  --pf-learner-success: #33925d;
   min-height: 100dvh;
   color: #101519;
   border-top: 5px solid var(--pf-learner-navy);
@@ -10621,7 +10625,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-workspace-sidebar nav .pf-wo
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-workspace-sidebar nav .pf-workspace-nav-link:hover {
-  color: #003466 !important;
+  color: #173f73 !important;
   border-color: #e5e7eb !important;
   background: #f9fafb !important;
   transform: none;
@@ -10690,7 +10694,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-workspace-sidebar-footer but
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-workspace-sidebar-close {
-  color: #003466 !important;
+  color: #173f73 !important;
   background: #f3f4f6 !important;
 }
 
@@ -10747,7 +10751,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-workspace-action {
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-workspace-action:hover {
-  color: #003466 !important;
+  color: #173f73 !important;
   border-color: rgba(42, 107, 167, 0.32) !important;
   background: #eff6ff !important;
 }
@@ -10786,7 +10790,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-workspace-user-avatar {
   place-items: center;
   flex: 0 0 38px;
   overflow: hidden;
-  color: #003466;
+  color: #173f73;
   border: 1px solid rgba(42, 107, 167, 0.2);
   border-radius: 50%;
   background: #eff6ff;
@@ -10939,8 +10943,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-resume-action {
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-student-resume-action:hover {
-  border-color: #003466;
-  background: #003466;
+  border-color: #173f73;
+  background: #173f73;
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-student-resume-action svg {
@@ -10959,7 +10963,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-resume-visual {
   border-radius: 12px 44px 12px 12px;
   background:
     radial-gradient(circle at 86% 14%, rgba(255, 255, 255, 0.12), transparent 22%),
-    linear-gradient(140deg, #2a6ba7 0%, #003466 100%);
+    linear-gradient(140deg, #2a6ba7 0%, #173f73 100%);
   text-decoration: none;
 }
 
@@ -10993,7 +10997,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-play {
   display: grid;
   place-items: center;
   padding-left: 3px;
-  color: #003466;
+  color: #173f73;
   border-radius: 50%;
   background: #ffffff;
   box-shadow: 0 16px 36px rgba(0, 24, 48, 0.2);
@@ -11227,7 +11231,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-summary-stats dt {
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-student-summary-stats dd {
   margin: 0;
-  color: #003466;
+  color: #173f73;
   font-family: var(--pf-font-ui);
   font-size: 1.35rem;
   font-weight: 700;
@@ -11247,9 +11251,9 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate > span {
   height: 42px;
   display: grid;
   place-items: center;
-  color: #003466;
+  color: #173f73;
   border-radius: 11px;
-  background: #f3b444;
+  background: #33925d;
 }
 
 html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate > span svg {
@@ -11291,7 +11295,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   min-height: 100dvh;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
-  border-top: 5px solid #003466;
+  border-top: 5px solid #173f73;
   background: #f9fafb;
 }
 
@@ -11437,7 +11441,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
   html body .dashboard-fresh.pf-workspace-minimal .pf-workspace-menu-trigger {
     display: grid !important;
-    color: #003466 !important;
+    color: #173f73 !important;
     border-color: #e5e7eb !important;
     background: #ffffff !important;
   }
@@ -11609,8 +11613,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   --pf-home-blue: #2a6ba7;
   --pf-home-blue-dark: #173f73;
   --pf-home-blue-soft: #eaf4ff;
-  --pf-home-gold: #f3b444;
-  --pf-home-green: #16b967;
+  --pf-home-gold: #33925d;
+  --pf-home-green: #33925d;
   --pf-home-canvas: #f7f9fc;
   --pf-home-line: #e7edf3;
   --pf-home-shadow: 0 20px 50px rgba(23, 63, 115, 0.1);
@@ -11709,7 +11713,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   height: 8px;
   border-radius: 50%;
   background: var(--pf-home-green);
-  box-shadow: 0 0 0 4px rgba(22, 185, 103, 0.12);
+  box-shadow: 0 0 0 4px rgba(51, 146, 93, 0.12);
 }
 
 .pf-home-button {
@@ -11719,7 +11723,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   justify-content: center;
   gap: 10px;
   padding: 0 22px;
-  color: var(--pf-home-ink);
+  color: var(--pf-home-ink, var(--pf-deep));
   border: 1px solid transparent;
   border-radius: 14px;
   font-family: var(--pf-font-ui);
@@ -11751,36 +11755,36 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
 .pf-home-button-primary {
   color: #ffffff;
-  background: var(--pf-home-blue);
+  background: var(--pf-primary);
   box-shadow: 0 12px 28px rgba(42, 107, 167, 0.2);
 }
 
 .pf-home-button-primary:hover {
   color: #ffffff;
-  background: var(--pf-home-blue-dark);
+  background: var(--pf-primary-dark);
   box-shadow: 0 16px 34px rgba(42, 107, 167, 0.25);
 }
 
 .pf-home-button-secondary {
-  color: var(--pf-home-blue-dark);
+  color: var(--pf-home-blue-dark, var(--pf-primary-dark));
   border-color: rgba(42, 107, 167, 0.22);
   background: #ffffff;
 }
 
 .pf-home-button-secondary:hover {
-  color: var(--pf-home-blue-dark);
+  color: var(--pf-home-blue-dark, var(--pf-primary-dark));
   border-color: rgba(42, 107, 167, 0.42);
-  background: var(--pf-home-blue-soft);
+  background: var(--pf-home-blue-soft, var(--pf-primary-soft));
 }
 
 .pf-home-button-light {
-  color: var(--pf-home-blue-dark);
+  color: var(--pf-home-blue-dark, var(--pf-primary-dark));
   background: #ffffff;
 }
 
 .pf-home-button-light:hover {
   color: var(--pf-home-blue-dark);
-  background: #f4f9ff;
+  background: #eff6ff;
 }
 
 .pf-home-button-ghost {
@@ -11800,7 +11804,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   overflow: hidden;
   background:
     radial-gradient(circle at 73% 20%, rgba(42, 107, 167, 0.12), transparent 29%),
-    radial-gradient(circle at 90% 78%, rgba(243, 180, 68, 0.13), transparent 25%),
+    radial-gradient(circle at 90% 78%, rgba(51, 146, 93, 0.13), transparent 25%),
     linear-gradient(rgba(42, 107, 167, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(42, 107, 167, 0.04) 1px, transparent 1px),
     #fbfcfe;
@@ -12075,7 +12079,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 }
 
 .pf-home-stats > div:nth-child(even) strong {
-  color: #9a5d00;
+  color: #246e48;
 }
 
 .pf-home-stats span {
@@ -12182,13 +12186,13 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 }
 
 .pf-home-benefit-card:nth-child(2) > span {
-  color: #8a5a00;
-  background: #fff5dc;
+  color: #246e48;
+  background: #eaf6ef;
 }
 
 .pf-home-benefit-card:nth-child(3) > span {
-  color: #0f8e52;
-  background: #e9fbf2;
+  color: #33925d;
+  background: #eaf6ef;
 }
 
 .pf-home-benefit-card svg {
@@ -12313,7 +12317,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   border-color: transparent;
   background:
     radial-gradient(circle at 88% 100%, rgba(255, 255, 255, 0.12), transparent 28%),
-    #2f79c4;
+    #2a6ba7;
 }
 
 .pf-home-method-card.is-step-2 {
@@ -12444,7 +12448,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   min-height: 310px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 76% 15%, rgba(243, 180, 68, 0.26) 0 48px, transparent 49px),
+    radial-gradient(circle at 76% 15%, rgba(51, 146, 93, 0.26) 0 48px, transparent 49px),
     linear-gradient(145deg, #f5f9fd 0%, #dcecf9 100%);
 }
 
@@ -12556,7 +12560,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   height: 5px;
   border-radius: 50%;
   background: var(--pf-home-gold);
-  box-shadow: 0 0 0 3px rgba(243, 180, 68, 0.16);
+  box-shadow: 0 0 0 3px rgba(51, 146, 93, 0.16);
 }
 
 .pf-mentor-carousel__topbar {
@@ -12911,7 +12915,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   color: #ffffff;
   border-radius: 30px;
   background:
-    radial-gradient(circle at 92% 14%, rgba(243, 180, 68, 0.95) 0 74px, transparent 75px),
+    radial-gradient(circle at 92% 14%, rgba(51, 146, 93, 0.95) 0 74px, transparent 75px),
     var(--pf-home-blue);
 }
 
@@ -12980,7 +12984,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
 .pf-home .pf-footer__compass,
 .pf-public-page .pf-footer__compass {
-  color: var(--pf-home-blue, #4f46e5);
+  color: var(--pf-home-blue, #2a6ba7);
   border-color: var(--pf-home-line, #e2e8f0);
 }
 
@@ -13002,12 +13006,12 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
 .pf-home .pf-footer__column > a:hover,
 .pf-public-page .pf-footer__column > a:hover {
-  color: var(--pf-home-blue, #4f46e5) !important;
+  color: var(--pf-home-blue, #2a6ba7) !important;
 }
 
 .pf-home .pf-footer__socials a,
 .pf-public-page .pf-footer__socials a {
-  color: var(--pf-home-blue, #4f46e5) !important;
+  color: var(--pf-home-blue, #2a6ba7) !important;
   border-color: var(--pf-home-line, #e2e8f0) !important;
   background: var(--pf-home-canvas, #f8fafc) !important;
 }
@@ -13015,13 +13019,13 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 .pf-home .pf-footer__socials a:hover,
 .pf-public-page .pf-footer__socials a:hover {
   color: #ffffff !important;
-  border-color: var(--pf-home-blue, #4f46e5) !important;
-  background: var(--pf-home-blue, #4f46e5) !important;
+  border-color: var(--pf-home-blue, #2a6ba7) !important;
+  background: var(--pf-home-blue, #2a6ba7) !important;
 }
 
 .pf-home .pf-footer__contact-column .footer-contact svg,
 .pf-public-page .pf-footer__contact-column .footer-contact svg {
-  color: var(--pf-home-blue, #4f46e5) !important;
+  color: var(--pf-home-blue, #2a6ba7) !important;
 }
 
 .pf-home .pf-footer__bottom.footer-bottom,
@@ -13411,7 +13415,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
     padding: 36px 24px;
     border-radius: 22px;
     background:
-      radial-gradient(circle at 105% 4%, rgba(243, 180, 68, 0.95) 0 54px, transparent 55px),
+      radial-gradient(circle at 105% 4%, rgba(51, 146, 93, 0.95) 0 54px, transparent 55px),
       var(--pf-home-blue);
   }
 
@@ -13472,8 +13476,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent, #a78bfa);
-  background: var(--accent-faint, rgba(167, 139, 250, 0.1));
+  color: var(--accent, #33925d);
+  background: var(--accent-faint, rgba(51, 146, 93, 0.1));
   padding: 0.35em 1em;
   border-radius: 100px;
   margin-bottom: 1rem;
@@ -13519,8 +13523,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--accent, #a78bfa);
-  background: var(--accent-faint, rgba(167, 139, 250, 0.1));
+  color: var(--accent, #33925d);
+  background: var(--accent-faint, rgba(51, 146, 93, 0.1));
   min-width: 32px;
   height: 32px;
   display: flex;
@@ -13556,7 +13560,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.78rem;
-  color: var(--accent, #a78bfa);
+  color: var(--accent, #33925d);
   font-weight: 500;
 }
 
@@ -13616,12 +13620,12 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #4f46e5;
-  background: #e0e7ff;
+  color: #2a6ba7;
+  background: #eff6ff;
   padding: 0.45em 1.25em;
   border-radius: 100px;
   margin-bottom: 1.25rem;
-  border: 1px solid #c7d2fe;
+  border: 1px solid #eff6ff;
 }
 
 .pf-package-detail-info h2 {
@@ -13663,7 +13667,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 .pf-package-detail-stats svg {
   width: 18px;
   height: 18px;
-  color: #4f46e5;
+  color: #2a6ba7;
 }
 
 .pf-package-detail-stats b {
@@ -13690,16 +13694,16 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
 .pf-package-module-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px -4px rgba(79, 70, 229, 0.15);
-  border-color: #6366f1;
+  box-shadow: 0 12px 30px -4px rgba(42, 107, 167, 0.16);
+  border-color: #1e5a8f;
 }
 
 .pf-package-module-card-number {
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.1em;
-  color: #4f46e5;
-  background: #e0e7ff;
+  color: #2a6ba7;
+  background: #eff6ff;
   width: 32px;
   height: 32px;
   display: flex;
@@ -13729,13 +13733,13 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   align-items: flex-start;
   gap: 0.4rem;
   font-size: 0.8rem;
-  color: #4338ca;
+  color: #1e5a8f;
   font-weight: 600;
   line-height: 1.4;
-  background: #f5f3ff;
+  background: #eaf6ef;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  border: 1px solid #ddd6fe;
+  border: 1px solid #cfe8d9;
 }
 
 .pf-package-module-card-mentor svg {
@@ -13743,7 +13747,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   height: 15px;
   flex-shrink: 0;
   margin-top: 2px;
-  color: #6366f1;
+  color: #1e5a8f;
 }
 
 .pf-package-detail-cta {
@@ -13785,7 +13789,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.78rem;
-  color: var(--accent, #a78bfa);
+  color: var(--accent, #33925d);
   font-weight: 600;
   margin: 0 0 0.25rem;
 }
@@ -13817,7 +13821,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--accent, #a78bfa);
+  color: var(--accent, #33925d);
 }
 
 .pf-mentor-panel-item {
@@ -13839,8 +13843,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   justify-content: center;
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--accent, #a78bfa);
-  background: var(--accent-faint, rgba(167, 139, 250, 0.12));
+  color: var(--accent, #33925d);
+  background: var(--accent-faint, rgba(51, 146, 93, 0.12));
   margin-bottom: 0.5rem;
 }
 
@@ -13873,7 +13877,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   line-height: 1.55;
   margin: 0;
   padding-left: 1rem;
-  border-left: 2px solid var(--accent-faint, rgba(167, 139, 250, 0.25));
+  border-left: 2px solid var(--accent-faint, rgba(51, 146, 93, 0.25));
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -13957,7 +13961,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 .pf-cohort-panel-heading + span {
   display: block;
   margin-bottom: 0.45rem;
-  color: #6d5bd0;
+  color: #2a6ba7;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -13987,22 +13991,22 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
-  border: 1px solid #6d5bd0;
+  border: 1px solid #2a6ba7;
   border-radius: 12px;
   padding: 0.72rem 1rem;
-  background: #6d5bd0;
+  background: #2a6ba7;
   color: #fff;
   font-size: 0.84rem;
   font-weight: 750;
-  box-shadow: 0 10px 25px rgba(109, 91, 208, 0.18);
+  box-shadow: 0 10px 25px rgba(42, 107, 167, 0.18);
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
 .pf-cohort-primary-action:hover,
 .pf-cohort-empty button:hover {
   transform: translateY(-1px);
-  background: #5f4fc2;
-  box-shadow: 0 14px 30px rgba(109, 91, 208, 0.24);
+  background: #1e5a8f;
+  box-shadow: 0 14px 30px rgba(42, 107, 167, 0.24);
 }
 
 .pf-cohort-primary-action svg,
@@ -14022,11 +14026,11 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   align-items: center;
   gap: 0.65rem;
   margin: 0 0 1rem;
-  border: 1px solid #b8e4d2;
+  border: 1px solid #cfe8d9;
   border-radius: 12px;
   padding: 0.8rem 1rem;
   background: #f0fbf7;
-  color: #16684f;
+  color: #246e48;
   font-size: 0.84rem;
   line-height: 1.5;
 }
@@ -14045,10 +14049,10 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
 .pf-cohort-create-panel {
   margin-bottom: 1.25rem;
-  border: 1px solid #ddd9f5;
+  border: 1px solid #e2e8f0;
   border-radius: 18px;
   padding: 1.25rem;
-  background: linear-gradient(145deg, #fff 0%, #faf9ff 100%);
+  background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
   box-shadow: 0 16px 45px rgba(26, 35, 57, 0.07);
 }
 
@@ -14064,8 +14068,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   height: 36px;
   border-radius: 11px;
   padding: 9px;
-  background: #eeeafd;
-  color: #6d5bd0;
+  background: #eff6ff;
+  color: #2a6ba7;
 }
 
 .pf-cohort-panel-heading h2,
@@ -14127,8 +14131,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 .pf-cohort-form-grid input:focus,
 .pf-cohort-form-grid select:focus,
 .pf-cohort-member-form > input:focus {
-  border-color: #8b79e7;
-  box-shadow: 0 0 0 3px rgba(109, 91, 208, 0.11);
+  border-color: #2a6ba7;
+  box-shadow: 0 0 0 3px rgba(42, 107, 167, 0.11);
 }
 
 .pf-cohort-form-actions {
@@ -14158,8 +14162,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
 .pf-cohort-form-actions button[type="submit"],
 .pf-cohort-member-form > button {
-  border-color: #6d5bd0;
-  background: #6d5bd0;
+  border-color: #2a6ba7;
+  background: #2a6ba7;
   color: #fff;
 }
 
@@ -14245,13 +14249,13 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 
 .pf-cohort-list > button:hover,
 .pf-cohort-list > button.is-selected {
-  border-color: #ddd8f6;
+  border-color: #eff6ff;
   background: #fff;
   box-shadow: 0 8px 20px rgba(40, 49, 73, 0.06);
 }
 
 .pf-cohort-list > button.is-selected {
-  border-left: 3px solid #6d5bd0;
+  border-left: 3px solid #2a6ba7;
 }
 
 .pf-cohort-list > button > strong {
@@ -14298,8 +14302,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   align-items: center;
   border-radius: 999px;
   padding: 0.25rem 0.48rem;
-  background: #eeeafd;
-  color: #6653c7;
+  background: #eff6ff;
+  color: #1e5a8f;
   font-size: 0.61rem;
   font-weight: 850;
   letter-spacing: 0.05em;
@@ -14307,8 +14311,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 }
 
 .pf-cohort-status.is-active {
-  background: #e9f8f1;
-  color: #187453;
+  background: #eaf6ef;
+  color: #246e48;
 }
 
 .pf-cohort-status.is-closed {
@@ -14405,15 +14409,15 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 }
 
 .pf-cohort-metrics dd.is-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-sf);
   letter-spacing: 0.06em;
 }
 
 .pf-cohort-access-panel {
-  border: 1px solid #ddd8f6;
+  border: 1px solid #eff6ff;
   border-radius: 15px;
   padding: 1rem;
-  background: linear-gradient(135deg, #faf9ff 0%, #f5f8ff 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
 }
 
 .pf-cohort-access-panel > div:first-child {
@@ -14427,8 +14431,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   height: 36px;
   border-radius: 10px;
   padding: 8px;
-  background: #e8e3fc;
-  color: #6653c7;
+  background: #eaf6ef;
+  color: #1e5a8f;
 }
 
 .pf-cohort-access-panel > div:first-child span,
@@ -14455,22 +14459,22 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   justify-content: space-between;
   gap: 1rem;
   margin-top: 0.85rem;
-  border: 1px dashed #b9afea;
+  border: 1px dashed #33925d;
   border-radius: 11px;
   padding: 0.6rem 0.7rem 0.6rem 0.9rem;
   background: #fff;
 }
 
 .pf-cohort-code-reveal code {
-  color: #4f3daf;
+  color: #1e5a8f;
   font-size: clamp(0.92rem, 2vw, 1.15rem);
   font-weight: 850;
   letter-spacing: 0.12em;
 }
 
 .pf-cohort-code-reveal button {
-  border-color: #d8d1f7;
-  color: #5a49ba;
+  border-color: #eff6ff;
+  color: #1e5a8f;
 }
 
 .pf-cohort-access-actions {
@@ -14481,8 +14485,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 }
 
 .pf-cohort-access-actions button:first-child {
-  border-color: #6d5bd0;
-  background: #6d5bd0;
+  border-color: #2a6ba7;
+  background: #2a6ba7;
   color: #fff;
 }
 
@@ -14533,7 +14537,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
 }
 
 .pf-cohort-transfer-check input {
-  accent-color: #6d5bd0;
+  accent-color: #2a6ba7;
 }
 
 .pf-cohort-member-list {
@@ -14566,8 +14570,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   height: 36px;
   place-items: center;
   border-radius: 10px;
-  background: #eeeafd;
-  color: #6653c7;
+  background: #eff6ff;
+  color: #1e5a8f;
   font-size: 0.67rem;
   font-weight: 850;
 }
@@ -14615,7 +14619,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #6d5bd0;
+  background: #2a6ba7;
 }
 
 .pf-cohort-member-progress b,
@@ -14672,8 +14676,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-student-certificate p {
   margin-bottom: 1rem;
   border-radius: 15px;
   padding: 12px;
-  background: #eeeafd;
-  color: #6d5bd0;
+  background: #eff6ff;
+  color: #2a6ba7;
 }
 
 .pf-cohort-empty h2,
@@ -14699,10 +14703,10 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
   grid-template-columns: 48px minmax(220px, 1fr) minmax(300px, 0.9fr);
   align-items: center;
   gap: 1rem;
-  border: 1px solid #ddd8f6;
+  border: 1px solid #eff6ff;
   border-radius: 16px;
   padding: 1rem 1.1rem;
-  background: linear-gradient(120deg, #fcfbff 0%, #f7f9ff 100%);
+  background: linear-gradient(120deg, #ffffff 0%, #f8fafc 100%);
   box-shadow: 0 10px 30px rgba(44, 51, 74, 0.05);
 }
 
@@ -14712,8 +14716,8 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
   height: 46px;
   place-items: center;
   border-radius: 14px;
-  background: #e9e4fc;
-  color: #6653c7;
+  background: #eaf6ef;
+  color: #1e5a8f;
 }
 
 .pf-cohort-join-icon svg {
@@ -14729,7 +14733,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
 }
 
 .pf-cohort-join-copy > span {
-  color: #6d5bd0;
+  color: #2a6ba7;
   font-size: 0.65rem;
   font-weight: 850;
   letter-spacing: 0.1em;
@@ -14763,26 +14767,26 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
   padding: 0.65rem 0.8rem;
   outline: none;
   background: #fff;
-  color: #3f337f;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #173f73;
+  font-family: var(--font-sf);
   font-size: 0.82rem;
   font-weight: 750;
   letter-spacing: 0.07em;
 }
 
 .pf-cohort-code-form input:focus {
-  border-color: #8b79e7;
-  box-shadow: 0 0 0 3px rgba(109, 91, 208, 0.11);
+  border-color: #2a6ba7;
+  box-shadow: 0 0 0 3px rgba(42, 107, 167, 0.11);
 }
 
 .pf-cohort-code-form button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid #6d5bd0;
+  border: 1px solid #2a6ba7;
   border-radius: 10px;
   padding: 0.6rem 0.75rem;
-  background: #6d5bd0;
+  background: #2a6ba7;
   color: #fff;
   font-size: 0.74rem;
   font-weight: 800;
@@ -14809,7 +14813,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  color: #17694f;
+  color: #246e48;
 }
 
 .pf-cohort-feedback.is-success > svg {
@@ -14828,7 +14832,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
   margin-left: auto;
   border: 0;
   background: transparent;
-  color: #17694f;
+  color: #246e48;
   font-size: 0.7rem;
   font-weight: 800;
 }
@@ -14856,7 +14860,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
   height: 35px;
   border-radius: 10px;
   padding: 8px;
-  background: #edf4ff;
+  background: #eff6ff;
   color: #4a70ad;
 }
 
@@ -14924,7 +14928,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
 
 .pf-inline-code-enroll > label svg {
   width: 15px;
-  color: #6d5bd0;
+  color: #2a6ba7;
 }
 
 .pf-inline-code-enroll > div {
@@ -14940,16 +14944,16 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
   border-radius: 10px;
   padding: 0.72rem 0.75rem;
   outline: none;
-  color: #3f337f;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #173f73;
+  font-family: var(--font-sf);
   font-size: 0.78rem;
   font-weight: 750;
   letter-spacing: 0.06em;
 }
 
 .pf-inline-code-enroll input:focus {
-  border-color: #8b79e7;
-  box-shadow: 0 0 0 3px rgba(109, 91, 208, 0.11);
+  border-color: #2a6ba7;
+  box-shadow: 0 0 0 3px rgba(42, 107, 167, 0.11);
 }
 
 .pf-inline-code-enroll .enroll-button {
@@ -14960,7 +14964,7 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
 
 .pf-enroll-manual-note {
   margin: 0.65rem 0 0;
-  border-left: 2px solid #b9afea;
+  border-left: 2px solid #33925d;
   padding-left: 0.65rem;
   color: #727b8d;
   font-size: 0.7rem;
@@ -15146,5 +15150,443 @@ html body .dashboard-fresh.pf-workspace-minimal .pf-cohort-join-card {
   .pf-cohort-feedback.is-success {
     align-items: flex-start;
     flex-wrap: wrap;
+  }
+}
+
+/* ==========================================================================
+   CANONICAL PUBLIC BRAND SURFACES
+   Keep these final declarations self-contained so every public route shares
+   the same footer, package CTA, and mentor presentation.
+   ========================================================================== */
+
+.pf-home .pf-footer.footer,
+.pf-public-page .pf-footer.footer,
+body .pf-footer.footer {
+  padding: 72px 0 0 !important;
+  color: var(--pf-body) !important;
+  border-top: 1px solid rgba(42, 107, 167, 0.16) !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  background-size: auto !important;
+}
+
+.pf-footer__grid.footer-grid {
+  width: min(1200px, calc(100% - 48px));
+  grid-template-columns: minmax(260px, 1.35fr) repeat(3, minmax(145px, 0.65fr)) !important;
+  gap: clamp(32px, 5vw, 72px) !important;
+  padding-bottom: 64px;
+}
+
+.pf-footer__brand .logo-image,
+.pf-home .pf-footer__brand .logo-image,
+.pf-public-page .pf-footer__brand .logo-image {
+  filter: none !important;
+}
+
+.pf-footer__compass,
+.pf-home .pf-footer__compass,
+.pf-public-page .pf-footer__compass {
+  color: var(--pf-secondary) !important;
+  border-color: rgba(42, 107, 167, 0.16) !important;
+}
+
+.pf-footer__brand > p,
+.pf-home .pf-footer__brand > p,
+.pf-public-page .pf-footer__brand > p {
+  color: var(--pf-body) !important;
+  font-size: 0.82rem !important;
+}
+
+.pf-footer__column h2,
+.pf-home .pf-footer__column h2,
+.pf-public-page .pf-footer__column h2 {
+  color: var(--pf-deep) !important;
+  font-size: 0.74rem !important;
+}
+
+.pf-footer__column > a,
+.pf-footer__contact-column .footer-contact,
+.pf-home .pf-footer__column > a,
+.pf-home .pf-footer__contact-column .footer-contact,
+.pf-public-page .pf-footer__column > a,
+.pf-public-page .pf-footer__contact-column .footer-contact {
+  color: var(--pf-body) !important;
+  font-size: 0.78rem !important;
+}
+
+.pf-footer__column > a:hover,
+.pf-home .pf-footer__column > a:hover,
+.pf-public-page .pf-footer__column > a:hover {
+  color: var(--pf-primary) !important;
+}
+
+.pf-footer__contact-column .footer-contact svg,
+.pf-home .pf-footer__contact-column .footer-contact svg,
+.pf-public-page .pf-footer__contact-column .footer-contact svg {
+  color: var(--pf-secondary) !important;
+}
+
+.pf-footer__socials a,
+.pf-home .pf-footer__socials a,
+.pf-public-page .pf-footer__socials a {
+  color: var(--pf-primary) !important;
+  border-color: rgba(42, 107, 167, 0.18) !important;
+  background: var(--pf-primary-soft) !important;
+}
+
+.pf-footer__socials a:hover,
+.pf-home .pf-footer__socials a:hover,
+.pf-public-page .pf-footer__socials a:hover {
+  color: #ffffff !important;
+  border-color: var(--pf-primary) !important;
+  background: var(--pf-primary) !important;
+}
+
+.pf-footer__bottom.footer-bottom,
+.pf-home .pf-footer__bottom.footer-bottom,
+.pf-public-page .pf-footer__bottom.footer-bottom {
+  width: min(1200px, calc(100% - 48px));
+  min-height: 78px;
+  color: var(--pf-muted) !important;
+  border-color: rgba(42, 107, 167, 0.14) !important;
+  font-size: 0.72rem !important;
+}
+
+.pf-footer__bottom.footer-bottom p,
+.pf-footer__bottom.footer-bottom span,
+.pf-home .pf-footer__bottom.footer-bottom p,
+.pf-home .pf-footer__bottom.footer-bottom span,
+.pf-public-page .pf-footer__bottom.footer-bottom p,
+.pf-public-page .pf-footer__bottom.footer-bottom span {
+  color: var(--pf-muted) !important;
+}
+
+.pf-package-card {
+  overflow: hidden;
+  border: 1px solid rgba(42, 107, 167, 0.16);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 18px 48px rgba(23, 63, 115, 0.08);
+}
+
+.pf-package-card:hover {
+  box-shadow: 0 22px 54px rgba(23, 63, 115, 0.13);
+}
+
+.pf-package-badge,
+.pf-package-module-number {
+  color: var(--pf-secondary-dark);
+  background: var(--pf-secondary-soft);
+}
+
+.pf-package-header h3,
+.pf-package-module-content h4 {
+  color: var(--pf-deep);
+}
+
+.pf-package-header p,
+.pf-package-module-desc {
+  color: var(--pf-body);
+}
+
+.pf-package-modules {
+  gap: 0;
+  background: #ffffff;
+}
+
+.pf-package-module {
+  border-top: 1px solid rgba(42, 107, 167, 0.12);
+  background: #ffffff;
+}
+
+.pf-package-module:hover {
+  background: var(--pf-primary-soft);
+}
+
+.pf-package-module-mentor {
+  color: var(--pf-secondary-dark);
+}
+
+.pf-package-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(24px, 5vw, 64px);
+  margin-top: 32px;
+  padding: clamp(24px, 4vw, 38px);
+  border: 1px solid rgba(42, 107, 167, 0.16);
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--pf-primary-soft), #ffffff 72%);
+  box-shadow: 0 16px 44px rgba(23, 63, 115, 0.08);
+}
+
+.pf-package-footer__copy {
+  min-width: 0;
+}
+
+.pf-package-footer__title {
+  margin: 0;
+  color: var(--pf-deep);
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  letter-spacing: -0.025em;
+}
+
+.pf-package-footer__description {
+  max-width: 560px;
+  margin: 8px 0 0;
+  color: var(--pf-body);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.pf-package-footer__offer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 22px;
+}
+
+.pf-package-price {
+  min-width: max-content;
+}
+
+.pf-package-price__label,
+.pf-package-price small {
+  color: var(--pf-secondary-dark);
+}
+
+.pf-package-price__value,
+.pf-package-price strong {
+  color: var(--pf-deep);
+}
+
+.pf-package-footer__cta,
+.pf-package-detail-cta .pf-home-button-primary {
+  min-width: 210px;
+  min-height: 52px;
+}
+
+.pf-package-detail-badge {
+  color: var(--pf-secondary-dark);
+  border-color: rgba(51, 146, 93, 0.22);
+  background: var(--pf-secondary-soft);
+}
+
+.pf-package-detail-stats > div {
+  border-color: rgba(42, 107, 167, 0.14);
+  box-shadow: 0 6px 18px rgba(23, 63, 115, 0.05);
+}
+
+.pf-package-detail-stats svg {
+  color: var(--pf-primary);
+}
+
+.pf-package-detail-stats > div:nth-child(2) svg {
+  color: var(--pf-secondary);
+}
+
+.pf-package-module-card {
+  border-color: rgba(42, 107, 167, 0.15);
+  box-shadow: 0 8px 24px rgba(23, 63, 115, 0.06);
+}
+
+.pf-package-module-card:hover {
+  border-color: rgba(42, 107, 167, 0.44);
+  box-shadow: 0 14px 34px rgba(23, 63, 115, 0.12);
+}
+
+.pf-package-module-card-number {
+  color: var(--pf-primary-dark);
+  background: var(--pf-primary-soft);
+}
+
+.pf-package-module-card-mentor {
+  color: var(--pf-secondary-dark);
+  border-color: rgba(51, 146, 93, 0.2);
+  background: var(--pf-secondary-soft);
+}
+
+.pf-package-module-card-mentor svg {
+  color: var(--pf-secondary);
+}
+
+.pf-package-detail-cta {
+  border-color: rgba(42, 107, 167, 0.18);
+  background: linear-gradient(135deg, var(--pf-primary-soft), #ffffff 78%);
+  box-shadow: 0 16px 38px rgba(23, 63, 115, 0.08);
+}
+
+.pf-package-detail-price small {
+  color: var(--pf-secondary-dark);
+}
+
+.pf-package-detail-price strong {
+  color: var(--pf-deep);
+}
+
+.pf-detail-mentor-avatar,
+.pf-mentor-panel-item .pf-mentor-note-avatar {
+  overflow: hidden;
+  border: 1px solid rgba(42, 107, 167, 0.18);
+  background: var(--pf-primary-soft);
+}
+
+.pf-detail-mentor-avatar .pf-mentor-portrait,
+.pf-mentor-panel-item .pf-mentor-portrait {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.pf-mentor-panel {
+  position: sticky;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  color: var(--pf-body);
+  border: 1px solid rgba(42, 107, 167, 0.18);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 46px rgba(23, 63, 115, 0.09);
+}
+
+.pf-mentor-panel .pf-mentor-note-index {
+  color: var(--pf-primary-dark);
+}
+
+.pf-mentor-panel-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: 14px;
+  align-items: center;
+  padding: 0 0 18px;
+  border-bottom: 1px solid rgba(42, 107, 167, 0.12);
+}
+
+.pf-mentor-panel-item:last-of-type {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.pf-mentor-panel-item .pf-mentor-note-avatar {
+  width: 64px;
+  height: 64px;
+  grid-column: 1;
+  grid-row: 1 / 4;
+  margin: 0;
+  border-radius: 14px;
+  color: var(--pf-primary-dark);
+}
+
+.pf-mentor-panel-item p,
+.pf-mentor-panel-item h3,
+.pf-mentor-panel-item small {
+  min-width: 0;
+  grid-column: 2;
+  overflow-wrap: anywhere;
+}
+
+.pf-mentor-panel-item p {
+  margin: 0 0 3px;
+  color: var(--pf-secondary-dark);
+}
+
+.pf-mentor-panel-item h3 {
+  margin: 0 0 3px;
+  color: var(--pf-deep);
+  font-size: 0.84rem;
+}
+
+.pf-mentor-panel-item small {
+  color: var(--pf-body);
+  line-height: 1.45;
+}
+
+.pf-mentor-panel blockquote {
+  margin: 2px 0 0;
+  padding: 14px 16px;
+  color: var(--pf-deep);
+  border-left: 3px solid var(--pf-secondary);
+  border-radius: 0 12px 12px 0;
+  background: var(--pf-primary-soft);
+  font-style: normal;
+}
+
+@media (max-width: 980px) {
+  .pf-footer__grid.footer-grid {
+    grid-template-columns: minmax(260px, 1.2fr) repeat(2, minmax(160px, 0.8fr)) !important;
+  }
+
+  .pf-footer__contact-column {
+    grid-column: 2 / -1;
+  }
+
+  .pf-mentor-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .pf-package-footer {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+
+  .pf-package-footer__offer {
+    justify-content: space-between;
+  }
+
+  .pf-package-footer__cta,
+  .pf-package-detail-cta .pf-home-button-primary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .pf-home .pf-footer.footer,
+  .pf-public-page .pf-footer.footer,
+  body .pf-footer.footer {
+    padding-top: 52px !important;
+  }
+
+  .pf-footer__grid.footer-grid {
+    width: min(100% - 32px, 1200px);
+    grid-template-columns: 1fr !important;
+    gap: 34px !important;
+    padding-bottom: 44px;
+  }
+
+  .pf-footer__contact-column {
+    grid-column: auto;
+  }
+
+  .pf-footer__bottom.footer-bottom,
+  .pf-home .pf-footer__bottom.footer-bottom,
+  .pf-public-page .pf-footer__bottom.footer-bottom {
+    width: min(100% - 32px, 1200px);
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    padding-block: 20px !important;
+  }
+
+  .pf-package-footer__offer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pf-package-price {
+    min-width: 0;
+  }
+
+  .pf-mentor-panel {
+    padding: 20px;
   }
 }

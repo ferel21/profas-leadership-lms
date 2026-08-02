@@ -43,8 +43,8 @@ type PanelTab = "summary" | "verification" | "export";
 
 const roleMeta: Record<string, { label: string; color: string }> = {
   STUDENT: { label: "Peserta", color: "#2a6ba7" },
-  MENTOR: { label: "Mentor", color: "#f3b444" },
-  SUPER_ADMIN: { label: "Super Admin", color: "#003466" },
+  MENTOR: { label: "Mentor", color: "#33925d" },
+  SUPER_ADMIN: { label: "Super Admin", color: "#173f73" },
 };
 
 export function SuperAdminAnalyticsPanel({
@@ -143,7 +143,7 @@ export function SuperAdminAnalyticsPanel({
       <header className="flex flex-col gap-4 border-b border-slate-200 pb-5 mb-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1e5a8f]">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-blue-soft text-brand-blue-dark">
               <BarChart3 size={18} aria-hidden="true" />
             </span>
             <h2 id="admin-data-panel-title" className="m-0 text-lg font-bold text-slate-900">
@@ -196,7 +196,7 @@ export function SuperAdminAnalyticsPanel({
             <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="m-0 flex items-center gap-2 text-sm font-bold text-slate-900">
-                  <Users size={17} className="text-[#2a6ba7]" aria-hidden="true" />
+                  <Users size={17} className="text-brand-blue" aria-hidden="true" />
                   Distribusi role
                 </h3>
                 <p className="m-0 mt-1 text-xs text-slate-500">
@@ -244,7 +244,7 @@ export function SuperAdminAnalyticsPanel({
         <div id="admin-data-verification" role="tabpanel" className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
             <h3 className="m-0 flex items-center gap-2 text-sm font-bold text-slate-900">
-              <ShieldCheck size={18} className="text-[#2a6ba7]" aria-hidden="true" />
+              <ShieldCheck size={18} className="text-brand-blue" aria-hidden="true" />
               Periksa nomor sertifikat
             </h3>
             <p className="m-0 mt-1 text-xs text-slate-500">
@@ -263,7 +263,7 @@ export function SuperAdminAnalyticsPanel({
                   }}
                   maxLength={80}
                   placeholder="Contoh: PROFAS-2026-XXXX"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-[#2a6ba7] focus:bg-white"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-brand-blue focus:bg-white"
                   required
                 />
               </label>
@@ -280,8 +280,8 @@ export function SuperAdminAnalyticsPanel({
               <div
                 className={`mt-4 flex items-start gap-3 rounded-xl border p-4 text-sm ${
                   certResult.valid
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-rose-200 bg-rose-50 text-rose-800"
+                    ? "border-brand-green/30 bg-brand-green-soft text-brand-green-dark"
+                    : "border-brand-critical/30 bg-brand-critical-soft text-brand-critical"
                 }`}
                 role="status"
               >
@@ -305,7 +305,7 @@ export function SuperAdminAnalyticsPanel({
             <p className="mt-2 text-xs leading-relaxed text-slate-500">
               Jumlah sertifikat yang saat ini tersimpan pada platform.
             </p>
-            <a href="/verifikasi" target="_blank" rel="noreferrer" className="mt-4 inline-flex text-xs font-bold text-[#1e5a8f] hover:underline">
+            <a href="/verifikasi" target="_blank" rel="noreferrer" className="mt-4 inline-flex text-xs font-bold text-brand-blue-dark hover:underline">
               Buka portal verifikasi publik
             </a>
           </aside>
@@ -351,7 +351,7 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
-        active ? "bg-[#2a6ba7] text-white shadow-sm" : "text-slate-600 hover:bg-white hover:text-slate-900"
+        active ? "bg-brand-blue text-white shadow-sm" : "text-slate-600 hover:bg-white hover:text-slate-900"
       }`}
     >
       {children}
@@ -382,7 +382,7 @@ function ExportCard({
   return (
     <article className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5">
       <div>
-        <FileSpreadsheet size={20} className="text-[#2a6ba7]" aria-hidden="true" />
+        <FileSpreadsheet size={20} className="text-brand-blue" aria-hidden="true" />
         <h3 className="m-0 mt-3 text-sm font-bold text-slate-900">{title}</h3>
         <p className="m-0 mt-1 text-xs leading-relaxed text-slate-500">{description}</p>
       </div>

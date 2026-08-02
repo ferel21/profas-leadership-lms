@@ -41,8 +41,8 @@ export default function CertificateVerificationPage() {
         </section>
         <section className="pf-section" aria-label="Langkah berikutnya" style={{ background: 'var(--pf-deep)', color: '#fff', textAlign: 'center', padding: '64px 0' }}>
           <div className="container">
-            <h2 style={{ fontSize: '2rem', margin: '0 0 24px', fontFamily: 'var(--pf-font-display)', fontWeight: 600 }}>Ingin membangun rekam kepemimpinan Anda sendiri?</h2>
-            <Link href="/program" className="pf-button pf-button-primary" style={{ background: 'var(--pf-gold)', color: 'var(--pf-deep)' }}>
+            <h2 style={{ fontSize: '2rem', margin: '0 0 24px', fontWeight: 600 }}>Ingin membangun rekam kepemimpinan Anda sendiri?</h2>
+            <Link href="/program" className="pf-button pf-button-primary" style={{ background: 'var(--pf-secondary-dark)', color: '#fff' }}>
               Jelajahi program PROFAS <ArrowRight aria-hidden="true" />
             </Link>
           </div>

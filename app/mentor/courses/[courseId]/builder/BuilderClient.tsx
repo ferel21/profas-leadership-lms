@@ -6,6 +6,15 @@ import { useLocalBackup } from "@/hooks/useLocalBackup";
 import type { NodeType } from "@/types/course";
 import { uploadFileDirectly } from "@/utils/direct-upload";
 
+const BRAND_COLORS = {
+  blue: "#2A6BA7",
+  blueDark: "#1E5A8F",
+  blueSoft: "#EFF6FF",
+  green: "#33925D",
+  greenDark: "#246E48",
+  greenSoft: "#EAF6EF",
+} as const;
+
 export type CourseNode = {
   id: string;
   parentId: string | null;
@@ -26,26 +35,26 @@ export type CourseNode = {
 
 function typeIcon(type: NodeType) {
   switch (type) {
-    case "FOLDER": return <Folder size={16} style={{ color: 'var(--teal)' }} />;
-    case "VIDEO": return <PlayCircle size={16} style={{ color: '#3b82f6' }} />;
-    case "PDF": return <FileText size={16} style={{ color: '#ef4444' }} />;
-    case "LINK": return <Link2 size={16} style={{ color: '#8b5cf6' }} />;
-    case "QUIZ": return <HelpCircle size={16} style={{ color: '#f59e0b' }} />;
-    default: return <FileText size={16} style={{ color: 'var(--teal)' }} />;
+    case "FOLDER": return <Folder size={16} style={{ color: BRAND_COLORS.blue }} />;
+    case "VIDEO": return <PlayCircle size={16} style={{ color: BRAND_COLORS.blue }} />;
+    case "PDF": return <FileText size={16} style={{ color: BRAND_COLORS.blueDark }} />;
+    case "LINK": return <Link2 size={16} style={{ color: BRAND_COLORS.blue }} />;
+    case "QUIZ": return <HelpCircle size={16} style={{ color: BRAND_COLORS.green }} />;
+    default: return <FileText size={16} style={{ color: BRAND_COLORS.green }} />;
   }
 }
 
 function typeBadge(type: NodeType) {
   const colors: Record<NodeType, { bg: string; text: string }> = {
-    FOLDER: { bg: "#e0f2fe", text: "#0369a1" },
-    VIDEO: { bg: "#dbeafe", text: "#1d4ed8" },
-    PDF: { bg: "#fee2e2", text: "#b91c1c" },
-    DOCUMENT: { bg: "#fef3c7", text: "#b45309" },
-    IMAGE: { bg: "#dcfce7", text: "#15803d" },
-    LINK: { bg: "#f3e8ff", text: "#6b21a8" },
-    QUIZ: { bg: "#ffedd5", text: "#c2410c" },
-    ASSIGNMENT: { bg: "#e0e7ff", text: "#4338ca" },
-    TEXT: { bg: "#ccfbf1", text: "#0f766e" }
+    FOLDER: { bg: BRAND_COLORS.blueSoft, text: BRAND_COLORS.blueDark },
+    VIDEO: { bg: BRAND_COLORS.blueSoft, text: BRAND_COLORS.blue },
+    PDF: { bg: BRAND_COLORS.blueSoft, text: BRAND_COLORS.blueDark },
+    DOCUMENT: { bg: BRAND_COLORS.blueSoft, text: BRAND_COLORS.blueDark },
+    IMAGE: { bg: BRAND_COLORS.greenSoft, text: BRAND_COLORS.greenDark },
+    LINK: { bg: BRAND_COLORS.blueSoft, text: BRAND_COLORS.blue },
+    QUIZ: { bg: BRAND_COLORS.greenSoft, text: BRAND_COLORS.greenDark },
+    ASSIGNMENT: { bg: BRAND_COLORS.greenSoft, text: BRAND_COLORS.greenDark },
+    TEXT: { bg: BRAND_COLORS.greenSoft, text: BRAND_COLORS.greenDark }
   };
   const c = colors[type] || { bg: "#f1f5f9", text: "#475569" };
   return <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "12px", background: c.bg, color: c.text, letterSpacing: "0.5px" }}>{type}</span>;
@@ -309,8 +318,8 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
           className="hover-lift glass" 
           style={{ 
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-            padding: '14px 18px', background: isFolder ? 'rgba(13, 148, 136, 0.08)' : 'rgba(255, 255, 255, 0.85)', 
-            borderRadius: '12px', border: isFolder ? '1px solid var(--teal)' : '1px solid var(--line)', 
+            padding: '14px 18px', background: isFolder ? BRAND_COLORS.blueSoft : 'rgba(255, 255, 255, 0.85)',
+            borderRadius: '12px', border: isFolder ? `1px solid ${BRAND_COLORS.blue}` : '1px solid var(--line)',
             marginBottom: '0.5rem',
             opacity: draggedNodeId === node.id ? 0.4 : 1,
             transition: 'all 0.2s',
@@ -339,7 +348,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
             {typeIcon(node.type)}
             <span style={{ fontSize: '15px', fontWeight: isFolder ? 700 : 500, color: 'var(--ink)' }}>{node.title}</span>
             {!isFolder && typeBadge(node.type)}
-            {node.isNew && <span style={{fontSize:'10px', background:'var(--teal)', color:'white', padding:'2px 8px', borderRadius:'10px', fontWeight:700}}>BARU</span>}
+            {node.isNew && <span style={{fontSize:'10px', background: BRAND_COLORS.green, color:'white', padding:'2px 8px', borderRadius:'10px', fontWeight:700}}>BARU</span>}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             {(node.type === "QUIZ" || node.type === "ASSIGNMENT") ? (
@@ -375,7 +384,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
                   }
                 }} 
                 className="btn btn-ghost btn-small hover-lift" 
-                style={{ color: '#0369a1', background: '#e0f2fe', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ color: BRAND_COLORS.blueDark, background: BRAND_COLORS.blueSoft, borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 <Edit2 size={14}/> Edit Soal / Tugas
               </button>
@@ -389,7 +398,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
                   setShowUploadModal(true);
                 }} 
                 className="btn btn-ghost btn-small hover-lift" 
-                style={{ color: '#0f766e', background: '#ccfbf1', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ color: BRAND_COLORS.greenDark, background: BRAND_COLORS.greenSoft, borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 <Edit2 size={14}/> Edit Materi / Berkas
               </button>
@@ -415,7 +424,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
             onDrop={(e) => handleDrop(e, node.id, node.children.length)}
             style={{ 
               minHeight: '45px', 
-              borderLeft: '2px dashed rgba(13, 148, 136, 0.4)',
+              borderLeft: '2px dashed rgba(42, 107, 167, 0.4)',
               marginLeft: '14px',
               paddingLeft: '14px',
               paddingBottom: '8px'
@@ -423,10 +432,10 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
           >
             {node.children.map(child => renderNode(child, level + 1))}
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-              <button onClick={() => { setActiveParentId(node.id); setShowUploadModal(true); }} className="btn btn-outline btn-small hover-lift" style={{ color: 'var(--teal-dark)', borderColor: 'var(--teal)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button onClick={() => { setActiveParentId(node.id); setShowUploadModal(true); }} className="btn btn-outline btn-small hover-lift" style={{ color: BRAND_COLORS.greenDark, borderColor: BRAND_COLORS.green, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FileUp size={14} /> Upload Materi / Bab Ini
               </button>
-              <button onClick={() => { setActiveParentId(node.id); setShowFolderModal(true); }} className="btn btn-ghost btn-small hover-lift" style={{ color: 'var(--teal-dark)' }}>
+              <button onClick={() => { setActiveParentId(node.id); setShowFolderModal(true); }} className="btn btn-ghost btn-small hover-lift" style={{ color: BRAND_COLORS.blueDark }}>
                 <Plus size={14} /> Subfolder
               </button>
             </div>
@@ -439,10 +448,10 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
   return (
     <div className="builder-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* AI Curriculum Generator Banner */}
-      <div style={{ background: "linear-gradient(135deg, #1e5a8f, #2a6ba7)", padding: "18px 24px", borderRadius: "16px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", boxShadow: "0 4px 12px rgba(42, 107, 167, 0.2)" }}>
+      <div style={{ background: "linear-gradient(135deg, #1E5A8F, #2A6BA7)", padding: "18px 24px", borderRadius: "16px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", boxShadow: "0 4px 12px rgba(42, 107, 167, 0.2)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
           <div style={{ background: "rgba(255, 255, 255, 0.2)", padding: "10px", borderRadius: "12px", display: "flex" }}>
-            <Sparkles size={24} style={{ color: "#fef08a" }} />
+            <Sparkles size={24} style={{ color: BRAND_COLORS.greenSoft }} />
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>Asisten Kurikulum AI (Claude AI Style)</h3>
@@ -452,9 +461,9 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
         <button
           onClick={() => setShowAiModal(true)}
           className="btn hover-lift"
-          style={{ background: "#fff", color: "#0f766e", fontWeight: 700, padding: "10px 20px", borderRadius: "10px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+          style={{ background: "#fff", color: BRAND_COLORS.greenDark, fontWeight: 700, padding: "10px 20px", borderRadius: "10px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
         >
-          <Sparkles size={16} style={{ color: "#f59e0b" }} /> Generate Kurikulum Otomatis
+          <Sparkles size={16} style={{ color: BRAND_COLORS.green }} /> Generate Kurikulum Otomatis
         </button>
       </div>
 
@@ -462,7 +471,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)', margin: 0 }}>Struktur Kurikulum & Materi</h2>
-            <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: '#dcfce7', color: '#15803d', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: BRAND_COLORS.greenSoft, color: BRAND_COLORS.greenDark, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
               💾 Auto-Backup Memori Browser Aktif
             </span>
           </div>
@@ -478,12 +487,12 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
                 }
               }}
               className="btn btn-outline hover-lift" 
-              style={{ padding: '10px 16px', borderRadius: '12px', fontWeight: 600, fontSize: '13px', borderColor: '#ef4444', color: '#ef4444' }}
+              style={{ padding: '10px 16px', borderRadius: '12px', fontWeight: 600, fontSize: '13px', borderColor: 'var(--error)', color: 'var(--error)' }}
             >
               🔄 Reset ke Data Server
             </button>
           )}
-          <button onClick={saveStructure} disabled={saving} className="btn btn-primary hover-lift" style={{ padding: '12px 24px', borderRadius: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--teal)' }}>
+          <button onClick={saveStructure} disabled={saving} className="btn btn-primary hover-lift" style={{ padding: '12px 24px', borderRadius: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', background: BRAND_COLORS.blue }}>
             {saving ? <Loader2 className="spin" size={18}/> : <Save size={18} />} Simpan Kurikulum Sekarang
           </button>
         </div>
@@ -492,12 +501,12 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
       <div 
         onDragOver={handleDragOver}
         onDrop={(e) => handleDrop(e, null, nodes.length)}
-        style={{ minHeight: '320px', border: '2px dashed var(--teal)', borderRadius: '16px', padding: '1.5rem', background: 'rgba(255,255,255,0.4)', transition: 'all 0.2s' }}
+        style={{ minHeight: '320px', border: `2px dashed ${BRAND_COLORS.blue}`, borderRadius: '16px', padding: '1.5rem', background: 'rgba(255,255,255,0.4)', transition: 'all 0.2s' }}
       >
         {nodes.map(n => renderNode(n))}
         {nodes.length === 0 && (
           <div style={{ color: 'var(--muted)', textAlign: 'center', margin: '4rem 0', display: 'flex', flexDirection:'column', alignItems:'center', gap:'1rem' }}>
-            <Folder size={56} style={{opacity:0.3, color: 'var(--teal)'}}/>
+            <Folder size={56} style={{opacity:0.3, color: BRAND_COLORS.blue}}/>
             <p style={{ fontSize: '1.1rem', fontWeight: 500 }}>Belum ada struktur kurikulum. Klik tombol di bawah atau gunakan AI Generator!</p>
           </div>
         )}
@@ -507,7 +516,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
         <button onClick={() => { setActiveParentId(null); setShowFolderModal(true); }} className="btn btn-primary glass hover-lift" style={{ padding: '14px 28px', borderRadius: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Folder size={18} /> Tambah Bab / Folder Utama
         </button>
-        <button onClick={() => { setActiveParentId(null); setShowUploadModal(true); }} className="btn btn-outline glass hover-lift" style={{ padding: '14px 28px', borderRadius: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', borderColor: 'var(--teal)', color: 'var(--teal)' }}>
+        <button onClick={() => { setActiveParentId(null); setShowUploadModal(true); }} className="btn btn-outline glass hover-lift" style={{ padding: '14px 28px', borderRadius: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', borderColor: BRAND_COLORS.green, color: BRAND_COLORS.greenDark }}>
           <FileUp size={18} /> Unggah Materi / Berkas Utama
         </button>
       </div>
@@ -524,7 +533,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
         <div className="completion-overlay fade-in" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
           <div className="data-card scale-in" style={{ width: '100%', maxWidth: '450px', padding: '2rem', borderRadius: '20px', background: '#fff' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
-              <Sparkles size={24} style={{ color: "#f59e0b" }} />
+              <Sparkles size={24} style={{ color: BRAND_COLORS.green }} />
               <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>AI Curriculum Generator</h3>
             </div>
             <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.2rem' }}>
@@ -540,7 +549,7 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
             />
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
               <button onClick={() => setShowAiModal(false)} disabled={aiLoading} className="btn btn-outline" style={{ borderRadius: '10px' }}>Batal</button>
-              <button onClick={handleAiGenerate} disabled={aiLoading} className="btn btn-primary" style={{ borderRadius: '10px', background: 'var(--teal)', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button onClick={handleAiGenerate} disabled={aiLoading} className="btn btn-primary" style={{ borderRadius: '10px', background: BRAND_COLORS.blue, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {aiLoading ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
                 {aiLoading ? "Menyusun Silabus..." : "Buat Kurikulum Sekarang"}
               </button>
@@ -569,7 +578,7 @@ function FolderModal({ onClose, onSave }: { onClose: () => void; onSave: (title:
         />
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
           <button onClick={onClose} className="btn btn-outline" style={{ borderRadius: '10px' }}>Batal</button>
-          <button onClick={() => title.trim() && onSave(title)} className="btn btn-primary" style={{ borderRadius: '10px', background: 'var(--teal)', color: '#fff' }}>Simpan</button>
+          <button onClick={() => title.trim() && onSave(title)} className="btn btn-primary" style={{ borderRadius: '10px', background: BRAND_COLORS.blue, color: '#fff' }}>Simpan</button>
         </div>
       </div>
     </div>
@@ -736,7 +745,7 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
               }}
               style={{ 
                 padding: '2rem', 
-                border: `2px dashed ${dragOver ? '#2a6ba7' : '#cbd5e1'}`, 
+                border: `2px dashed ${dragOver ? BRAND_COLORS.blue : '#cbd5e1'}`,
                 textAlign: 'center', 
                 borderRadius: '16px', 
                 marginBottom: '1.2rem',
@@ -752,15 +761,15 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
                 style={{ display: 'none' }}
                 onChange={e => setFile(e.target.files?.[0] || null)} 
               />
-              <FileUp size={36} style={{ color: file ? '#2a6ba7' : '#94a3b8', margin: '0 auto 10px' }} />
+              <FileUp size={36} style={{ color: file ? BRAND_COLORS.blue : '#94a3b8', margin: '0 auto 10px' }} />
               {file ? (
                 <div>
-                  <b style={{ color: '#2a6ba7', fontSize: '0.95rem', display: 'block' }}>{file.name}</b>
+                  <b style={{ color: BRAND_COLORS.blue, fontSize: '0.95rem', display: 'block' }}>{file.name}</b>
                   <small style={{ color: '#64748b' }}>{(file.size / (1024 * 1024)).toFixed(2)} MB • Klik untuk ganti berkas</small>
                 </div>
               ) : initialNode?.fileUrl ? (
                 <div>
-                  <b style={{ color: '#0f766e', fontSize: '0.95rem', display: 'block' }}>Berkas Tersimpan: {initialNode.fileName || "Berkas Materi"}</b>
+                  <b style={{ color: BRAND_COLORS.greenDark, fontSize: '0.95rem', display: 'block' }}>Berkas Tersimpan: {initialNode.fileName || "Berkas Materi"}</b>
                   <small style={{ color: '#64748b' }}>Klik atau tarik berkas baru ke sini jika ingin mengganti</small>
                 </div>
               ) : (
@@ -778,14 +787,14 @@ function UploadModal({ courseId, parentId, initialNode, onClose, onSave }: { cou
             )}
           </>
         ) : (
-          <div style={{ padding: '12px 16px', borderRadius: '10px', background: '#fffbeb', border: '1px solid #fde68a', color: '#b45309', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+          <div style={{ padding: '12px 16px', borderRadius: '10px', background: BRAND_COLORS.blueSoft, border: '1px solid rgba(42, 107, 167, 0.28)', color: BRAND_COLORS.blueDark, fontSize: '0.85rem', marginBottom: '1.5rem' }}>
             <b>Catatan Evaluasi:</b> Anda dapat mengatur butir soal kuis atau instruksi tugas praktik secara mendetail setelah menyimpan struktur kurikulum ini.
           </div>
         )}
 
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
           <button onClick={onClose} disabled={uploading} className="btn btn-outline" style={{ padding: '10px 20px', borderRadius: '10px', fontWeight: 600 }}>Batal</button>
-          <button onClick={handleSubmit} disabled={uploading} className="btn btn-primary" style={{ padding: '10px 24px', borderRadius: '10px', background: 'var(--teal)', color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button onClick={handleSubmit} disabled={uploading} className="btn btn-primary" style={{ padding: '10px 24px', borderRadius: '10px', background: BRAND_COLORS.blue, color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
             {uploading && <Loader2 size={16} className="spin" />}
             {uploading ? "Memproses..." : "Simpan Materi"}
           </button>

@@ -39,7 +39,7 @@ export default async function ForumThreadPage({ params }: { params: Promise<{ th
           <div className="flex gap-2 items-center mb-2">
             <span className="meta-badge type-lesson">{thread.category.name}</span>
             {thread.pinned && (
-              <span className="text-amber-500 flex items-center gap-1 text-sm font-bold">
+              <span className="text-brand-green-dark flex items-center gap-1 text-sm font-bold">
                 <Pin size={14} fill="currentColor"/> Pinned
               </span>
             )}

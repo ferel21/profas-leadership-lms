@@ -1,14 +1,14 @@
-# PROFAS Leadership — Tidal Editorial Design System
+# PROFAS Leadership — Brand and Interface System
 
 ## Direction
 
-A calm, asymmetric learning interface inspired by a well-lit architecture studio: bright neutral surfaces, charcoal ink, one measured royal blue accent, precise borders, and motion that feels tactile rather than theatrical.
+A calm, asymmetric learning interface built from bright neutral surfaces, precise borders, PROFAS royal blue, and the green from the PROFAS logo. These rules apply to every current screen and all future development.
 
 - Variance: 8 — split layouts and asymmetric grids keep the product from feeling templated.
 - Density: 4 — enough space for executive reading and enough structure for daily LMS work.
 - Motion: 6 — short transform/opacity transitions, reduced-motion support, no perpetual visual noise.
 
-## Tokens
+## Canonical brand tokens
 
 | Role | Value |
 | --- | --- |
@@ -17,12 +17,29 @@ A calm, asymmetric learning interface inspired by a well-lit architecture studio
 | Ink | `#1C2825` |
 | Body | `#586761` |
 | Line | `#DBE5DF` |
-| Accent | `#2A6BA7` |
-| Deep surface | `#173F73` |
+| Royal blue | `#2A6BA7` |
+| Royal blue dark | `#1E5A8F` |
+| Royal blue deep | `#173F73` |
+| Royal blue soft | `#EFF6FF` |
+| Logo green | `#33925D` |
+| Logo green dark | `#246E48` |
+| Logo green soft | `#EAF6EF` |
+| Critical red | Semantic error/destructive states only |
+
+Royal blue is the primary color for primary actions, active navigation, progress, focus, and key hierarchy. Logo green is secondary and supports success states, icons, badges, secondary actions, and restrained accents. Critical red is not a brand accent: it is reserved for errors, destructive actions, and urgent validation feedback.
+
+## Typography governance
+
+- San Francisco is the primary and only interface typeface. The canonical stack is `"SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif`.
+- Use `--font-sf` directly or one of its aliases: `--font-body`, `--font-display`, `--font-heading`, `--font-ui`, and `--font-mono`. Every alias resolves to the same stack, including code-like and certificate content.
+- Do not import web fonts or introduce display, serif, script, handwritten, or monospace families. Preserve hierarchy through the existing size, weight, line-height, spacing, and layout tokens.
+- Apple devices render the installed San Francisco face. Other platforms use their native system sans through the approved stack until licensed SF webfont assets are supplied.
 
 ## Rules
 
-- Use the royal blue accent for actions, active navigation, progress, and focus only.
+- Use royal blue for primary actions, active navigation, progress, focus, and key hierarchy.
+- Use logo green only as the secondary brand color for success, supporting actions, icons, badges, and restrained accents.
+- Keep neutral colors for surfaces, borders, and text. Do not introduce purple, indigo, violet, pink, cyan, amber, gold, orange, or decorative red.
 - Prefer border-top or divider grouping in dense dashboard areas; use cards only when elevation clarifies hierarchy.
 - Keep landing page heroes left-aligned and split-screen, with one clear primary CTA.
 - Keep all touch targets at least 44px and preserve keyboard focus styles.

@@ -123,7 +123,7 @@ export default async function MentorEvaluasiPage({
                   <tr key={attempt.id} className="hover-lift">
                     <td>
                       <div className="flex gap-3 items-center">
-                        <i className="w-8 h-8 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold not-italic">
+                        <i className="w-8 h-8 rounded-full bg-brand-green-soft text-brand-green-dark flex items-center justify-center font-bold not-italic">
                           {initials(attempt.user.name)}
                         </i>
                         <div className="flex flex-col">
@@ -144,7 +144,7 @@ export default async function MentorEvaluasiPage({
                           Beri Nilai
                         </Link>
                       ) : attempt.status === "GRADED" ? (
-                        <div className={`flex gap-2 items-center font-bold ${attempt.passed ? 'text-emerald-600' : 'text-red-600'}`}>
+                        <div className={`flex gap-2 items-center font-bold ${attempt.passed ? 'text-brand-green-dark' : 'text-brand-critical'}`}>
                           <span>{attempt.score}</span>
                           {attempt.passed ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
                           <Link href={`/mentor/evaluasi/${attempt.id}`} className="text-slate-400 hover:text-slate-600 ml-2" title="Lihat Detail">

@@ -21,11 +21,13 @@
   ========================================
 */
 :root {
-  /* Font Family (Injected via Next.js Font & MacBook System Font Stack) */
-  --font-inter: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: var(--font-inter);
-  --font-body: var(--font-inter);
-  --font-heading: var(--font-inter);
+  /* San Francisco is the sole PROFAS type system. */
+  --font-sf: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: var(--font-sf);
+  --font-display: var(--font-sf);
+  --font-heading: var(--font-sf);
+  --font-ui: var(--font-sf);
+  --font-mono: var(--font-sf);
   
   /* Font Sizes - Standardized Scale */
   --text-2xs: 0.75rem;    /* 12px (previously 6-8px) */

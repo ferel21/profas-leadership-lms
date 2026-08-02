@@ -224,7 +224,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
         {/* Header Modal */}
         <div className="px-6 py-5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/90 sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-sm shadow-teal-500/10">
+            <div className="w-10 h-10 rounded-2xl bg-[#2A6BA7]/15 border border-[#2A6BA7]/30 flex items-center justify-center text-[#EFF6FF] shadow-sm shadow-[#2A6BA7]/10">
               <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
             <div>
@@ -243,11 +243,11 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
               className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-700/50"
               title="Refresh Data Terkini dari Server"
             >
-              <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-teal-400" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-[#EFF6FF]" : ""}`} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-slate-800/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition-all border border-slate-700/50"
+              className="p-2 rounded-xl bg-slate-800/80 hover:bg-brand-blue/20 text-slate-400 hover:text-brand-blue-soft transition-all border border-slate-700/50"
               title="Tutup Modal"
             >
               <X className="w-4 h-4" />
@@ -260,8 +260,8 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
           {loadingData ? (
             <div className="py-16 flex flex-col items-center justify-center text-center space-y-4">
               <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-teal-500/20 border-t-teal-400 animate-spin" />
-                <Sparkles className="w-6 h-6 text-teal-400 absolute inset-0 m-auto animate-pulse" />
+                <div className="w-16 h-16 rounded-full border-4 border-[#2A6BA7]/20 border-t-[#EFF6FF] animate-spin" />
+                <Sparkles className="w-6 h-6 text-[#2A6BA7] absolute inset-0 m-auto animate-pulse" />
               </div>
               <div>
                 <p className="font-bold text-slate-200 text-base">Mengagregasi Data dari Database Server...</p>
@@ -275,13 +275,13 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
           ) : (
             <>
               {/* Top Quick Status Banner */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-teal-950/60 via-slate-900/80 to-slate-900/80 border border-teal-500/20 flex flex-wrap items-center justify-between gap-4">
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#246E48]/60 via-slate-900/80 to-slate-900/80 border border-[#33925D]/20 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                  <div className="p-3 rounded-xl bg-[#33925D]/10 text-[#EAF6EF] border border-[#33925D]/20">
                     <Users className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-teal-400 block">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#EAF6EF] block">
                       Status Hak Akses Aktif: {data.role}
                     </span>
                     <span className="text-sm font-bold text-white block">
@@ -298,7 +298,7 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     <select
                       value={selectedCourseIndex}
                       onChange={(e) => setSelectedCourseIndex(Number(e.target.value))}
-                      className="bg-slate-900 border border-slate-700 rounded-lg text-xs font-bold text-teal-300 px-2.5 py-1 focus:outline-none focus:border-teal-500"
+                      className="bg-slate-900 border border-slate-700 rounded-lg text-xs font-bold text-[#EAF6EF] px-2.5 py-1 focus:outline-none focus:border-[#2A6BA7]"
                     >
                       {data.courses.map((c: any, i: number) => (
                         <option key={c.id || i} value={i}>
@@ -313,17 +313,17 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
               {/* 4-Grid Export Skill Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 1. XLSX Card */}
-                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-teal-500/40 transition-all flex flex-col justify-between group shadow-lg">
+                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-[#33925D]/40 transition-all flex flex-col justify-between group shadow-lg">
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="p-3 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 group-hover:scale-105 transition-transform">
+                      <div className="p-3 rounded-xl bg-[#33925D]/10 text-[#33925D] border border-[#33925D]/20 group-hover:scale-105 transition-transform">
                         <FileSpreadsheet className="w-6 h-6" />
                       </div>
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-md bg-teal-500/15 text-teal-300 border border-teal-500/25">
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-md bg-[#33925D]/15 text-[#EAF6EF] border border-[#33925D]/25">
                         Skill: xlsx
                       </span>
                     </div>
-                    <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-teal-300 transition-colors">
+                    <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-[#EAF6EF] transition-colors">
                       Laporan Rekapitulasi Multi-Sheet (.xlsx)
                     </h3>
                     <p className="text-xs text-slate-400 leading-relaxed mb-4">
@@ -338,14 +338,14 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     disabled={downloadingXlsx}
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successXlsx
-                        ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                        : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white shadow-md"
+                        ? "bg-[#33925D]/20 border-[#33925D]/50 text-[#EAF6EF]"
+                        : "bg-gradient-to-r from-[#1E5A8F] to-[#2A6BA7] hover:from-[#2A6BA7] hover:to-[#1E5A8F] border-[#2A6BA7]/30 text-white shadow-md"
                     }`}
                   >
                     {downloadingXlsx ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : successXlsx ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-[#33925D]" />
                     ) : (
                       <Download className="w-4 h-4" />
                     )}
@@ -354,17 +354,17 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                 </div>
 
                 {/* 2. PDF Transcript Card */}
-                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between group shadow-lg">
+                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-[#33925D]/40 transition-all flex flex-col justify-between group shadow-lg">
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">
+                      <div className="p-3 rounded-xl bg-[#33925D]/10 text-[#33925D] border border-[#33925D]/20 group-hover:scale-105 transition-transform">
                         <Award className="w-6 h-6" />
                       </div>
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-md bg-[#33925D]/15 text-[#EAF6EF] border border-[#33925D]/25">
                         Skill: pdf & canvas-design
                       </span>
                     </div>
-                    <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-emerald-300 transition-colors">
+                    <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-[#EAF6EF] transition-colors">
                       Transkrip Akademik Resmi (.pdf)
                     </h3>
                     <p className="text-xs text-slate-400 leading-relaxed mb-4">
@@ -379,14 +379,14 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     disabled={downloadingPdf || data.role !== "STUDENT"}
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successPdf
-                        ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                        : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white shadow-md"
+                        ? "bg-[#33925D]/20 border-[#33925D]/50 text-[#EAF6EF]"
+                        : "bg-gradient-to-r from-[#1E5A8F] to-[#2A6BA7] hover:from-[#2A6BA7] hover:to-[#1E5A8F] border-[#2A6BA7]/30 text-white shadow-md"
                     }`}
                   >
                     {downloadingPdf ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : successPdf ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-[#33925D]" />
                     ) : (
                       <Download className="w-4 h-4" />
                     )}
@@ -395,17 +395,17 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                 </div>
 
                 {/* 3. PPTX / Presentation Card */}
-                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/40 transition-all flex flex-col justify-between group shadow-lg">
+                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-[#2A6BA7]/40 transition-all flex flex-col justify-between group shadow-lg">
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-105 transition-transform">
+                      <div className="p-3 rounded-xl bg-[#2A6BA7]/10 text-[#2A6BA7] border border-[#2A6BA7]/20 group-hover:scale-105 transition-transform">
                         <Presentation className="w-6 h-6" />
                       </div>
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-md bg-purple-500/15 text-purple-300 border border-purple-500/25">
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-md bg-[#2A6BA7]/15 text-[#EFF6FF] border border-[#2A6BA7]/25">
                         Skill: pptx
                       </span>
                     </div>
-                    <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-purple-300 transition-colors">
+                    <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-[#EFF6FF] transition-colors">
                       Executive Slide Deck Presentasi (16:9)
                     </h3>
                     <p className="text-xs text-slate-400 leading-relaxed mb-4">
@@ -418,14 +418,14 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     disabled={downloadingPptx}
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successPptx
-                        ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                        : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white shadow-md"
+                        ? "bg-[#33925D]/20 border-[#33925D]/50 text-[#EAF6EF]"
+                        : "bg-gradient-to-r from-[#1E5A8F] to-[#2A6BA7] hover:from-[#2A6BA7] hover:to-[#1E5A8F] border-[#2A6BA7]/30 text-white shadow-md"
                     }`}
                   >
                     {downloadingPptx ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : successPptx ? (
-                      <CheckCircle2 className="w-4 h-4 text-purple-400" />
+                      <CheckCircle2 className="w-4 h-4 text-[#33925D]" />
                     ) : (
                       <Download className="w-4 h-4" />
                     )}
@@ -434,17 +434,17 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                 </div>
 
                 {/* 4. DOCX Syllabus Card */}
-                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 transition-all flex flex-col justify-between group shadow-lg">
+                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-[#2A6BA7]/40 transition-all flex flex-col justify-between group shadow-lg">
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 group-hover:scale-105 transition-transform">
+                      <div className="p-3 rounded-xl bg-[#2A6BA7]/10 text-[#2A6BA7] border border-[#2A6BA7]/20 group-hover:scale-105 transition-transform">
                         <FileText className="w-6 h-6" />
                       </div>
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-md bg-blue-500/15 text-blue-300 border border-blue-500/25">
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-md bg-[#2A6BA7]/15 text-[#EFF6FF] border border-[#2A6BA7]/25">
                         Skill: docx & internal-comms
                       </span>
                     </div>
-                    <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-blue-300 transition-colors">
+                    <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-[#EFF6FF] transition-colors">
                       Silabus & Catatan Kurikulum Word (.docx)
                     </h3>
                     <p className="text-xs text-slate-400 leading-relaxed mb-4">
@@ -457,14 +457,14 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
                     disabled={downloadingDocx}
                     className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
                       successDocx
-                        ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                        : "bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] border-blue-500/30 text-white shadow-md"
+                        ? "bg-[#33925D]/20 border-[#33925D]/50 text-[#EAF6EF]"
+                        : "bg-gradient-to-r from-[#1E5A8F] to-[#2A6BA7] hover:from-[#2A6BA7] hover:to-[#1E5A8F] border-[#2A6BA7]/30 text-white shadow-md"
                     }`}
                   >
                     {downloadingDocx ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : successDocx ? (
-                      <CheckCircle2 className="w-4 h-4 text-blue-400" />
+                      <CheckCircle2 className="w-4 h-4 text-[#33925D]" />
                     ) : (
                       <Download className="w-4 h-4" />
                     )}
@@ -477,28 +477,28 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
               <div className="p-5 rounded-2xl bg-slate-900/50 border border-slate-800/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-teal-400" /> Preview Metrik Sistem yang Siap Diekspor
+                    <BarChart3 className="w-4 h-4 text-[#2A6BA7]" /> Preview Metrik Sistem yang Siap Diekspor
                   </h4>
-                  <span className="text-[11px] text-slate-400 font-mono">
+                  <span className="text-[11px] text-slate-400">
                     {data.courses?.length || 0} Program • {data.students?.length || 0} Baris Peserta
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
                     <span className="text-[10px] text-slate-400 font-medium block">Total Program</span>
-                    <span className="text-base font-extrabold text-teal-400">{data.courses?.length || 0}</span>
+                    <span className="text-base font-extrabold text-[#EFF6FF]">{data.courses?.length || 0}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
                     <span className="text-[10px] text-slate-400 font-medium block">Catatan Absensi</span>
-                    <span className="text-base font-extrabold text-emerald-400">{data.attendances?.length || 0}</span>
+                    <span className="text-base font-extrabold text-[#33925D]">{data.attendances?.length || 0}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
                     <span className="text-[10px] text-slate-400 font-medium block">Format Tersedia</span>
-                    <span className="text-base font-extrabold text-purple-400">4 Engine</span>
+                    <span className="text-base font-extrabold text-[#EFF6FF]">4 Engine</span>
                   </div>
                   <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
                     <span className="text-[10px] text-slate-400 font-medium block">Rekap XP</span>
-                    <span className="text-base font-extrabold text-blue-400">{data.xpLogs?.length || 0}</span>
+                    <span className="text-base font-extrabold text-[#33925D]">{data.xpLogs?.length || 0}</span>
                   </div>
                 </div>
               </div>
@@ -509,12 +509,12 @@ export function ExecutiveExportHubModal({ isOpen, onClose, initialRole = "STUDEN
         {/* Modal Footer */}
         <div className="px-6 py-4 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between">
           <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
-            <BookOpen className="w-3.5 h-3.5 text-teal-400" />
+            <BookOpen className="w-3.5 h-3.5 text-[#33925D]" />
             File dibuat dari data terbaru yang tersedia untuk hak akses akun ini.
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl font-bold text-xs bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white transition-all shadow-md"
+            className="px-5 py-2 rounded-xl font-bold text-xs bg-gradient-to-r from-[#1E5A8F] to-[#2A6BA7] hover:from-[#2A6BA7] hover:to-[#1E5A8F] text-white transition-all shadow-md"
           >
             Selesai & Tutup
           </button>

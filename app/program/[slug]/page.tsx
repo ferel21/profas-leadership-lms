@@ -16,6 +16,7 @@ import {
 import { EnrollButton } from "@/components/shared/EnrollButton";
 import { Footer } from "@/components/ui/Footer";
 import { Header } from "@/components/ui/Header";
+import { extractMentorName, findMentorProfile } from "@/constants/mentor-profiles";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
@@ -36,13 +37,6 @@ function parseOutcomes(value: string): string[] {
     .split(/\r?\n/)
     .map(item => item.trim())
     .filter(Boolean);
-}
-
-/* Extract mentor name from module description pattern: "... oleh NAME — ..." */
-function extractMentor(description: string | null): string | null {
-  if (!description) return null;
-  const match = description.match(/oleh (.+?) —/);
-  return match ? match[1] : null;
 }
 
 export default async function CourseDetail({
@@ -110,6 +104,7 @@ export default async function CourseDetail({
   /* Determine primary mentor display name — for this single-package model,
      the primary mentor is the course-level mentor (Prof. Asdar) */
   const primaryMentor = course.mentor;
+  const primaryMentorProfile = findMentorProfile(primaryMentor.name);
 
   return (
     <>
@@ -148,7 +143,20 @@ export default async function CourseDetail({
               </div>
 
               <div className="mentor-inline pf-detail-mentor-inline">
-                <span aria-hidden="true">{initials(primaryMentor.name)}</span>
+                <span className="pf-detail-mentor-avatar">
+                  {primaryMentorProfile ? (
+                    <Image
+                      className="pf-mentor-portrait"
+                      src={primaryMentorProfile.image}
+                      alt={primaryMentorProfile.imageAlt}
+                      width={64}
+                      height={64}
+                      sizes="64px"
+                    />
+                  ) : (
+                    <span aria-hidden="true">{initials(primaryMentor.name)}</span>
+                  )}
+                </span>
                 <div>
                   <small>Dipandu oleh praktisi</small>
                   <b>{primaryMentor.name}</b>
@@ -255,7 +263,7 @@ export default async function CourseDetail({
               <div className="curriculum pf-curriculum">
                 {folders.map((folder, index) => {
                   const lessons = course.nodes.filter((node) => node.parentId === folder.id);
-                  const mentorName = extractMentor(folder.description);
+                  const mentorName = extractMentorName(folder.description);
                   return (
                     <details key={folder.id} open={index === 0}>
                       <summary>
@@ -301,12 +309,24 @@ export default async function CourseDetail({
             <aside className="pf-mentor-panel" aria-label="Tim mentor">
               <span className="pf-mentor-note-index">Tim Mentor</span>
               {folders.map((folder, index) => {
-                const mentorName = extractMentor(folder.description);
+                const mentorName = extractMentorName(folder.description);
                 if (!mentorName) return null;
+                const mentorProfile = findMentorProfile(mentorName);
                 return (
                   <div key={folder.id} className="pf-mentor-panel-item">
-                    <div className="pf-mentor-note-avatar" aria-hidden="true">
-                      {initials(mentorName)}
+                    <div className="pf-mentor-note-avatar">
+                      {mentorProfile ? (
+                        <Image
+                          className="pf-mentor-portrait"
+                          src={mentorProfile.image}
+                          alt={mentorProfile.imageAlt}
+                          width={64}
+                          height={64}
+                          sizes="64px"
+                        />
+                      ) : (
+                        <span aria-hidden="true">{initials(mentorName)}</span>
+                      )}
                     </div>
                     <p>Mentor Modul {index + 1}</p>
                     <h3>{mentorName}</h3>

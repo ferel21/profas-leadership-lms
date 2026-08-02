@@ -122,7 +122,7 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
   };
 
   return (
-    <div className="data-card mt-8 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-[0_10px_30px_-10px_rgba(13,148,136,0.08)]">
+    <div className="data-card mt-8 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-lg shadow-brand-blue/5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Laporan Detail Peserta</h2>
@@ -132,14 +132,14 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
           <button
             onClick={handleExport}
             disabled={exporting || filtered.length === 0}
-            className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#2a6ba7]/30 hover:border-[#2a6ba7] bg-[#eff6ff] hover:bg-[#2a6ba7] text-[#1e5a8f] hover:text-white font-semibold text-sm transition disabled:opacity-50"
+            className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-brand-blue/30 hover:border-brand-blue bg-brand-blue-soft hover:bg-brand-blue text-brand-blue-dark hover:text-white font-semibold text-sm transition disabled:opacity-50"
           >
             <FileSpreadsheet size={18} className="shrink-0" />
             <span>{exporting ? "Mengekspor..." : "Ekspor Excel (.xlsx)"}</span>
           </button>
           <button
             onClick={() => window.open('/api/admin/reports/export', '_blank')}
-            className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#0ea5e9]/30 hover:border-[#0ea5e9] bg-[#f0f9ff] hover:bg-[#0ea5e9] text-[#0369a1] hover:text-white font-semibold text-sm transition"
+            className="btn btn-outline hover-lift flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-brand-green/30 hover:border-brand-green bg-brand-green-soft hover:bg-brand-green text-brand-green-dark hover:text-white font-semibold text-sm transition"
           >
             <FileText size={18} className="shrink-0" />
             <span>Ekspor Semua (CSV)</span>
@@ -161,7 +161,7 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
             aria-label="Cari nama peserta atau email"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white transition" 
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition"
           />
         </div>
         <div className="relative md:w-64">
@@ -170,7 +170,7 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
             value={filterCourse}
             onChange={(e) => setFilterCourse(e.target.value)}
             aria-label="Filter berdasarkan program kepemimpinan"
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition appearance-none cursor-pointer"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition appearance-none cursor-pointer"
           >
             <option value="">Semua Program ({safeData.length})</option>
             {courses.map(c => <option key={c} value={c}>{c}</option>)}
@@ -204,10 +204,10 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
                 <td className="py-3.5 px-4">
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold tracking-wide ${
                     row.status === "LULUS" || row.status === "COMPLETED"
-                      ? "bg-emerald-100 text-emerald-800 border border-emerald-200" 
+                      ? "bg-brand-green-soft text-brand-green-dark border border-brand-green/30"
                       : row.status === "IN_PROGRESS"
-                      ? "bg-sky-100 text-sky-800 border border-sky-200"
-                      : "bg-amber-100 text-amber-800 border border-amber-200"
+                      ? "bg-brand-blue-soft text-brand-blue-dark border border-brand-blue/30"
+                      : "bg-slate-100 text-slate-700 border border-slate-200"
                   }`}>
                     {row.status === "LULUS" || row.status === "COMPLETED" ? "LULUS" : row.status === "IN_PROGRESS" ? "BELAJAR" : row.status || "BELUM"}
                   </span>
@@ -222,23 +222,23 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
                       aria-valuemax={100}
                       aria-label={`Progres belajar ${row.name || "Peserta"}: ${row.progress || 0}%`}
                     >
-                      <div className="bg-gradient-to-r from-teal-500 to-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, Math.max(0, row.progress || 0))}%` }} />
+                      <div className="bg-gradient-to-r from-brand-blue-dark to-brand-blue h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, Math.max(0, row.progress || 0))}%` }} />
                     </div>
                     <span className="text-xs font-bold text-slate-700 w-10 text-right">{row.progress || 0}%</span>
                   </div>
                 </td>
                 <td className="py-3.5 px-4 text-center font-bold text-slate-700">
                   {row.pretestScore !== null && row.pretestScore !== undefined
-                    ? <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">{row.pretestScore}</span>
+                    ? <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-brand-blue-soft text-brand-blue-dark">{row.pretestScore}</span>
                     : <span className="text-slate-300 text-xs">—</span>}
                 </td>
                 <td className="py-3.5 px-4 text-center font-bold text-slate-700">
                   {row.posttestScore !== null && row.posttestScore !== undefined
                     ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-brand-green-soft text-brand-green-dark">
                         {row.posttestScore}
                         {row.pretestScore !== null && row.posttestScore > row.pretestScore && (
-                          <span className="text-emerald-600">↑</span>
+                          <span className="text-brand-green">↑</span>
                         )}
                       </span>
                     )
@@ -252,7 +252,7 @@ export function AdminReportTable({ data }: { data: ReportRow[] }) {
                     onClick={() => handleExportStudentPdf(row)}
                     disabled={!!downloadingPdfId}
                     title={`Unduh PDF Laporan ${row.name}`}
-                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#eff6ff] hover:bg-[#2a6ba7] text-[#2a6ba7] hover:text-white border border-[#2a6ba7]/30 hover:border-[#2a6ba7] transition disabled:opacity-40"
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-brand-blue-soft hover:bg-brand-blue text-brand-blue hover:text-white border border-brand-blue/30 hover:border-brand-blue transition disabled:opacity-40"
                   >
                     {downloadingPdfId === row.userId
                       ? <Loader2 size={14} className="animate-spin" />

@@ -11,47 +11,8 @@ import {
   type TouchEvent,
 } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { MENTOR_PROFILES } from "@/constants/mentor-profiles";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-
-interface Speaker {
-  name: string;
-  role: string;
-  credentials: string[];
-  image: string;
-}
-
-const speakers: Speaker[] = [
-  {
-    name: "Prof. Dr. Muhammad Asdar, S.E., M.Si.",
-    role: "Guru Besar Fakultas Ekonomi dan Bisnis Universitas Hasanuddin",
-    credentials: [
-      "Lulusan S1 hingga S3 di bidang ekonomi dan manajemen.",
-      "Anggota Dewan Profesor Universitas Hasanuddin periode 2022–2026.",
-      "Mantan Rektor Universitas Cokroaminoto Makassar.",
-    ],
-    image: "/images/mentor-1.png",
-  },
-  {
-    name: "Prof. Dr. Firman Menne, S.E., M.Si., Ak., CA., CTA, ACPA",
-    role: "Guru Besar Ilmu Akuntansi di Universitas Bosowa",
-    credentials: [
-      "Pernah menjabat berbagai posisi strategis, termasuk Wakil Rektor Universitas Bosowa.",
-      "Memiliki pengalaman riset internasional di Australia.",
-      "Penulis aktif berbagai buku referensi utama akuntansi syariah.",
-    ],
-    image: "/images/mentor-2.png",
-  },
-  {
-    name: "Bahrul Ulum Ilham, S.Pd., M.M., Ph.D.",
-    role: "Akademisi ITB Nobel Indonesia dan Koordinator Konsultan PLUT Sulawesi Selatan",
-    credentials: [
-      "Meraih gelar Ph.D. Manajemen dari Universiti Kuala Lumpur pada tahun 2025.",
-      "Ketua Umum DPN Asosiasi Business Development Services Indonesia (ABDSI) 2026–2030.",
-      "Asesor BNSP bidang UMKM dan Certified Trainer dari ILO.",
-    ],
-    image: "/images/mentor-3.png",
-  },
-];
 
 const AUTOPLAY_DELAY_MS = 7_000;
 const MIN_SWIPE_DISTANCE = 50;
@@ -66,15 +27,15 @@ export function MentorCarousel() {
   const prefersReducedMotion = useReducedMotion();
 
   const goToSlide = useCallback((index: number) => {
-    setCurrentIndex((index + speakers.length) % speakers.length);
+    setCurrentIndex((index + MENTOR_PROFILES.length) % MENTOR_PROFILES.length);
   }, []);
 
   const nextSlide = useCallback(() => {
-    setCurrentIndex((previous) => (previous + 1) % speakers.length);
+    setCurrentIndex((previous) => (previous + 1) % MENTOR_PROFILES.length);
   }, []);
 
   const previousSlide = useCallback(() => {
-    setCurrentIndex((previous) => (previous - 1 + speakers.length) % speakers.length);
+    setCurrentIndex((previous) => (previous - 1 + MENTOR_PROFILES.length) % MENTOR_PROFILES.length);
   }, []);
 
   const isAutoRotating = !prefersReducedMotion && !isPaused && !isHovered && !hasFocus;
@@ -130,12 +91,13 @@ export function MentorCarousel() {
 
     if (event.key === "End") {
       event.preventDefault();
-      goToSlide(speakers.length - 1);
+      goToSlide(MENTOR_PROFILES.length - 1);
     }
   };
 
   return (
     <section
+      id="mentor"
       className="pf-home-method-photo pf-mentor-carousel"
       role="region"
       aria-roledescription="carousel"
@@ -157,20 +119,20 @@ export function MentorCarousel() {
           className="pf-mentor-carousel__track"
           style={{ transform: `translate3d(-${currentIndex * 100}%, 0, 0)` }}
         >
-          {speakers.map((speaker, index) => (
+          {MENTOR_PROFILES.map((speaker, index) => (
             <figure
               className="pf-mentor-carousel__slide"
               key={speaker.name}
               role="group"
               aria-roledescription="slide"
-              aria-label={`${index + 1} dari ${speakers.length}: ${speaker.name}`}
+              aria-label={`${index + 1} dari ${MENTOR_PROFILES.length}: ${speaker.name}`}
               aria-hidden={index !== currentIndex}
             >
               <div className="pf-mentor-carousel__media">
                 <div className="pf-mentor-carousel__portrait">
                   <Image
                     src={speaker.image}
-                    alt={`Potret ${speaker.name}`}
+                    alt={speaker.imageAlt}
                     fill
                     priority={index === 0}
                     draggable={false}
@@ -196,7 +158,7 @@ export function MentorCarousel() {
 
       <div className="pf-mentor-carousel__topbar" aria-hidden="true">
         <span>Mentor pilihan</span>
-        <span>{String(currentIndex + 1).padStart(2, "0")} / {String(speakers.length).padStart(2, "0")}</span>
+        <span>{String(currentIndex + 1).padStart(2, "0")} / {String(MENTOR_PROFILES.length).padStart(2, "0")}</span>
       </div>
 
       <button
@@ -226,7 +188,7 @@ export function MentorCarousel() {
       </div>
 
       <div className="pf-mentor-carousel__pagination" aria-label="Pilih profil mentor">
-        {speakers.map((speaker, index) => (
+        {MENTOR_PROFILES.map((speaker, index) => (
           <button
             type="button"
             key={speaker.name}
@@ -241,7 +203,7 @@ export function MentorCarousel() {
       </div>
 
       <p className="pf-visually-hidden" aria-live="polite" aria-atomic="true">
-        Menampilkan profil {speakers[currentIndex].name}, mentor {currentIndex + 1} dari {speakers.length}.
+        Menampilkan profil {MENTOR_PROFILES[currentIndex].name}, mentor {currentIndex + 1} dari {MENTOR_PROFILES.length}.
       </p>
     </section>
   );

@@ -127,7 +127,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
     <div className="flex flex-wrap items-center gap-3">
       <button
         onClick={() => setShowCreateModal(true)}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-sm shadow-md hover:shadow-lg transition hover-lift shrink-0"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-blue-dark to-brand-blue hover:from-brand-blue hover:to-brand-blue-dark text-white font-bold text-sm shadow-md shadow-brand-blue/15 hover:shadow-lg transition hover-lift shrink-0"
       >
         <Plus size={18} className="shrink-0" />
         <span>Buat Program Baru</span>
@@ -139,9 +139,9 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
           setShowUploadModal(true);
         }}
         disabled={safeCourses.length === 0}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/90 border border-slate-200/80 hover:border-teal-600 text-slate-800 hover:text-teal-700 font-bold text-sm shadow-sm hover:shadow transition hover-lift disabled:opacity-50 shrink-0"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/90 border border-slate-200/80 hover:border-brand-green text-slate-800 hover:text-brand-green-dark font-bold text-sm shadow-sm hover:shadow transition hover-lift disabled:opacity-50 shrink-0"
       >
-        <Upload size={18} className="shrink-0 text-teal-600" />
+        <Upload size={18} className="shrink-0 text-brand-green" />
         <span>Upload Materi Cepat</span>
       </button>
 
@@ -152,7 +152,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
           <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <BookOpen size={20} className="text-teal-600" />
+                <BookOpen size={20} className="text-brand-blue" />
                 <span>Buat Program Kepemimpinan Baru</span>
               </h3>
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600 transition">
@@ -160,7 +160,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
               </button>
             </div>
 
-            {error && <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-semibold mb-4">{error}</div>}
+            {error && <div className="p-3 bg-brand-critical-soft border border-brand-critical/30 text-brand-critical rounded-xl text-xs font-semibold mb-4">{error}</div>}
 
             <form onSubmit={handleCreateCourse} className="flex flex-col gap-4">
               <div>
@@ -168,7 +168,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                 <input
                   type="text" required placeholder="Contoh: Strategic Leadership for C-Level"
                   value={title} onChange={e => setTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition"
                 />
               </div>
 
@@ -177,7 +177,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
                   <select
                     value={category} onChange={e => setCategory(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition cursor-pointer"
                   >
                     <option value="Kepemimpinan">Kepemimpinan</option>
                     <option value="Manajemen Strategis">Manajemen Strategis</option>
@@ -190,7 +190,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tingkat (Level)</label>
                   <select
                     value={level} onChange={e => setLevel(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition cursor-pointer"
                   >
                     <option value="BASIC">Dasar (BASIC)</option>
                     <option value="INTERMEDIATE">Menengah (INTERMEDIATE)</option>
@@ -204,7 +204,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                 <textarea
                   rows={2} required placeholder="Jelaskan ringkasan kurikulum dan dampak ke peserta..."
                   value={shortDescription} onChange={e => setShortDescription(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition resize-y"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition resize-y"
                 />
               </div>
 
@@ -213,14 +213,14 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Harga (Rp)</label>
                   <input
                     type="number" min="0" value={price} onChange={e => setPrice(e.target.value)} placeholder="0 untuk Gratis"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Durasi (Jam)</label>
                   <input
                     type="number" min="1" value={duration} onChange={e => setDuration(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition"
                   />
                 </div>
               </div>
@@ -234,7 +234,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                 </button>
                 <button
                   type="submit" disabled={loading}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-brand-blue-dark to-brand-blue hover:from-brand-blue hover:to-brand-blue-dark text-white font-bold text-xs shadow-md shadow-brand-blue/15 flex items-center gap-2 transition disabled:opacity-50"
                 >
                   {loading && <Loader2 size={14} className="animate-spin shrink-0" />}
                   <span>Buat & Buka Builder</span>
@@ -250,7 +250,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
           <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Upload size={20} className="text-teal-600" />
+                <Upload size={20} className="text-brand-green" />
                 <span>Upload Materi Cepat</span>
               </h3>
               <button onClick={() => setShowUploadModal(false)} className="text-slate-400 hover:text-slate-600 transition">
@@ -258,7 +258,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
               </button>
             </div>
 
-            {error && <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-semibold mb-4">{error}</div>}
+            {error && <div className="p-3 bg-brand-critical-soft border border-brand-critical/30 text-brand-critical rounded-xl text-xs font-semibold mb-4">{error}</div>}
 
             <form onSubmit={handleUploadMaterial} className="flex flex-col gap-4">
               <div>
@@ -269,7 +269,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                     setSelectedCourseId(e.target.value);
                     setSelectedLessonId("");
                   }}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition cursor-pointer"
                 >
                   {safeCourses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                 </select>
@@ -281,19 +281,19 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                   required
                   value={selectedLessonId}
                   onChange={e => setSelectedLessonId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition cursor-pointer"
                 >
                   <option value="">-- Pilih Modul / Folder --</option>
                   {folders.map(f => <option key={f.id} value={f.id}>{f.title}</option>)}
                 </select>
-                {folders.length === 0 && <small className="text-amber-600 text-xs block mt-1.5 font-medium">Program ini belum memiliki modul FOLDER. Buat modul melalui Course Builder terlebih dahulu.</small>}
+                {folders.length === 0 && <small className="text-brand-blue-dark text-xs block mt-1.5 font-medium">Program ini belum memiliki modul FOLDER. Buat modul melalui Course Builder terlebih dahulu.</small>}
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Judul Materi *</label>
                 <input
                   type="text" required value={matTitle} onChange={e => setMatTitle(e.target.value)} placeholder="Contoh: Slide Presentasi / Video Studi Kasus"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition"
                 />
               </div>
 
@@ -301,7 +301,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tautan Luar / Video URL (Opsi 1)</label>
                 <input
                   type="url" value={matLink} onChange={e => setMatLink(e.target.value)} placeholder="https://youtube.com/... atau https://drive.google.com/..."
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition"
                 />
                 <small className="text-slate-400 text-xs mt-1 block">Sangat disarankan untuk deployment serverless / Vercel agar tidak membebani penyimpanan sementara.</small>
               </div>
@@ -316,7 +316,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
 
               <div className="flex justify-end gap-2.5 mt-3 pt-3 border-t border-slate-100">
                 <button type="button" onClick={() => setShowUploadModal(false)} className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition">Batal</button>
-                <button type="submit" disabled={loading} className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50">
+                <button type="submit" disabled={loading} className="px-5 py-2 rounded-xl bg-gradient-to-r from-brand-blue-dark to-brand-blue hover:from-brand-blue hover:to-brand-blue-dark text-white font-bold text-xs shadow-md shadow-brand-blue/15 flex items-center gap-2 transition disabled:opacity-50">
                   {loading && <Loader2 size={14} className="animate-spin shrink-0" />}
                   <span>Unggah Materi</span>
                 </button>

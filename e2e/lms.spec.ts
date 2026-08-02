@@ -20,6 +20,29 @@ async function waitForLeafAnimations(page: import("@playwright/test").Page) {
   );
 }
 
+async function expectCanonicalPublicFooter(page: import("@playwright/test").Page) {
+  const footer = page.locator("footer.pf-footer");
+  await expect(footer).toBeAttached();
+  await footer.scrollIntoViewIfNeeded();
+  await expect(footer).toBeVisible();
+
+  const appearance = await footer.evaluate(element => {
+    const styles = window.getComputedStyle(element);
+    const logo = element.querySelector<HTMLElement>(".logo-image");
+    return {
+      backgroundColor: styles.backgroundColor,
+      backgroundImage: styles.backgroundImage,
+      fontFamily: styles.fontFamily,
+      logoFilter: logo ? window.getComputedStyle(logo).filter : null,
+    };
+  });
+
+  expect(appearance.backgroundColor).toBe("rgb(255, 255, 255)");
+  expect(appearance.backgroundImage).toBe("none");
+  expect(appearance.fontFamily).toContain("SF Pro Text");
+  expect(appearance.logoFilter).toBe("none");
+}
+
 async function loginAs(page: import("@playwright/test").Page, email: string, password = learnerPassword) {
   const response = await page.request.post("/api/auth/login", {
     data: { email, password, remember: false },
@@ -46,6 +69,7 @@ test.describe("public performance and accessibility", () => {
     await waitForLeafAnimations(page);
     await expect(page.getByRole("link", { name: /program/i }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /mulai|jelajahi/i }).first()).toBeVisible();
+    await expectCanonicalPublicFooter(page);
 
     const mentorCarousel = page.getByRole("region", { name: /profil mentor profas/i });
     const autoplayControl = mentorCarousel.getByRole("button", { name: /pergantian mentor otomatis/i });
@@ -67,9 +91,40 @@ test.describe("public performance and accessibility", () => {
     await waitForApp(page);
     await waitForLeafAnimations(page);
     await expect(page.getByRole("heading", { name: /satu paket.*tiga pilar kepemimpinan/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /lihat detail.*mulai belajar/i })).toBeVisible();
+    const packageCta = page.getByRole("link", { name: /lihat detail.*mulai belajar/i });
+    await expect(packageCta).toBeVisible();
+    await expect(packageCta).toHaveCSS("background-color", "rgb(42, 107, 167)");
+    await expect(packageCta).toHaveCSS("color", "rgb(255, 255, 255)");
     await expect(page.getByRole("link", { name: /program/i }).first()).toBeVisible();
+    await expectCanonicalPublicFooter(page);
 
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations).toEqual([]);
+  });
+
+  test("all public information routes use the canonical landing footer", async ({ page }) => {
+    for (const route of ["/verifikasi", "/privasi", "/syarat"]) {
+      await page.goto(route);
+      await waitForApp(page);
+      await expectCanonicalPublicFooter(page);
+    }
+  });
+
+  test("program detail presents clear local mentor portraits", async ({ page }) => {
+    await page.goto("/program/profas-leadership");
+    await waitForApp(page);
+
+    const mentorPanel = page.getByRole("complementary", { name: /tim mentor/i });
+    await expect(mentorPanel).toBeVisible();
+    await expect(mentorPanel).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    const portraits = mentorPanel.locator("img.pf-mentor-portrait");
+    await expect(portraits).toHaveCount(3);
+    for (const portrait of await portraits.all()) {
+      await expect(portrait).toBeVisible();
+      expect(await portrait.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    }
+
+    await expectCanonicalPublicFooter(page);
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   });

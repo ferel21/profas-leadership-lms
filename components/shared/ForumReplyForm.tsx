@@ -46,7 +46,7 @@ export function ForumReplyForm({ threadId }: { threadId: string }) {
         required
         disabled={submitting}
       />
-      {error && <p className="text-sm text-red-600 m-0">{error}</p>}
+      {error && <p className="text-sm text-brand-critical m-0">{error}</p>}
       <button type="submit" className="btn btn-primary self-end" disabled={submitting || content.trim().length < 2}>
         {submitting ? "Mengirim..." : "Kirim Balasan"}
       </button>

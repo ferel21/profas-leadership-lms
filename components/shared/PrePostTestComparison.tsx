@@ -61,29 +61,29 @@ export function PrePostTestComparison({ attempts }: { attempts: Attempt[] }) {
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-center">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Pre-Test</p>
-                    <span className="text-2xl font-extrabold text-blue-600">{data.pre !== null ? data.pre : "-"}</span>
+                    <span className="text-2xl font-extrabold text-brand-blue">{data.pre !== null ? data.pre : "-"}</span>
                   </div>
                   
                   <div className="h-0.5 flex-1 mx-4 bg-slate-100 relative">
                     {hasBoth && (
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2">
-                        <TrendingUp size={16} className={isPositive ? "text-emerald-500" : "text-slate-300"} />
+                        <TrendingUp size={16} className={isPositive ? "text-brand-green" : "text-slate-300"} />
                       </div>
                     )}
                   </div>
 
                   <div className="text-center">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Post-Test</p>
-                    <span className="text-2xl font-extrabold text-emerald-600">{data.post !== null ? data.post : "-"}</span>
+                    <span className="text-2xl font-extrabold text-brand-green">{data.post !== null ? data.post : "-"}</span>
                   </div>
                 </div>
               </div>
               
-              <div className={`mt-2 p-3 rounded-xl flex items-center justify-between ${hasBoth && isPositive ? "bg-emerald-50" : "bg-slate-50"}`}>
-                <span className={`text-sm font-semibold ${hasBoth && isPositive ? "text-emerald-800" : "text-slate-600"}`}>
+              <div className={`mt-2 p-3 rounded-xl flex items-center justify-between ${hasBoth && isPositive ? "bg-brand-green-soft" : "bg-slate-50"}`}>
+                <span className={`text-sm font-semibold ${hasBoth && isPositive ? "text-brand-green-dark" : "text-slate-600"}`}>
                   {hasBoth ? "Peningkatan Skor" : "Status Evaluasi"}
                 </span>
-                <span className={`text-sm font-bold flex items-center gap-1 ${hasBoth && isPositive ? "text-emerald-600" : "text-slate-500"}`}>
+                <span className={`text-sm font-bold flex items-center gap-1 ${hasBoth && isPositive ? "text-brand-green" : "text-slate-500"}`}>
                   {hasBoth ? (
                     <>
                       {isPositive ? "+" : ""}{improvement} Poin

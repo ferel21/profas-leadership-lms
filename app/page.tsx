@@ -19,6 +19,7 @@ import { Header } from "@/components/ui/Header";
 import { Footer } from "@/components/ui/Footer";
 import { CourseCard } from "@/components/ui/CourseCard";
 import { MentorCarousel } from "@/components/ui/MentorCarousel";
+import { MENTOR_PROFILES } from "@/constants/mentor-profiles";
 
 const journey = [
   {
@@ -102,7 +103,7 @@ const profasModules = [
     rating: 4.9,
     studentsCount: 2500,
     image: "/images/profas-leadership-hero.webp",
-    mentor: { name: "Prof. Dr. Muhammad Asdar, S.E., M.Si." },
+    mentor: { name: MENTOR_PROFILES[0].name },
   },
   {
     id: "mod-2",
@@ -116,7 +117,7 @@ const profasModules = [
     rating: 4.9,
     studentsCount: 2500,
     image: "/images/profas-leadership-hero.webp",
-    mentor: { name: "Prof. Dr. Firman Menne, S.E., M.Si., Ak., CA., CTA, ACPA" },
+    mentor: { name: MENTOR_PROFILES[1].name },
   },
   {
     id: "mod-3",
@@ -130,7 +131,7 @@ const profasModules = [
     rating: 4.9,
     studentsCount: 2500,
     image: "/images/profas-leadership-hero.webp",
-    mentor: { name: "Bahrul Ulum Ilham, S.Pd., M.M., Ph.D." },
+    mentor: { name: MENTOR_PROFILES[2].name },
   },
 ];
 
@@ -285,19 +286,19 @@ export default function Home() {
               ))}
             </div>
             
-            <div className="pf-package-footer" style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', backgroundColor: 'var(--pf-surface-alt, #f8fafc)', borderRadius: '1rem', border: '1px solid var(--pf-border, #e2e8f0)' }}>
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.25rem' }}>Mulai perjalanan kepemimpinan Anda</h3>
-                <p style={{ color: 'var(--pf-text-muted, #64748b)', fontSize: '0.95rem' }}>Akses 3 modul lengkap, sesi diskusi, dan sertifikat kelulusan.</p>
+            <div className="pf-package-footer">
+              <div className="pf-package-footer__copy">
+                <h3 className="pf-package-footer__title">Mulai perjalanan kepemimpinan Anda</h3>
+                <p className="pf-package-footer__description">Akses 3 modul lengkap, sesi diskusi, dan sertifikat kelulusan.</p>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                <div className="pf-package-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <small style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--pf-text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Investasi</small>
-                  <strong style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--pf-primary, #0f172a)' }}>Rp499.000</strong>
+              <div className="pf-package-footer__offer">
+                <div className="pf-package-price">
+                  <small className="pf-package-price__label">Investasi</small>
+                  <strong className="pf-package-price__value">Rp499.000</strong>
                 </div>
                 <Link
                   href="/daftar"
-                  className="pf-home-button pf-home-button-primary"
+                  className="pf-home-button pf-home-button-primary pf-package-footer__cta"
                 >
                   Ambil Paket Ini
                   <ArrowRight aria-hidden="true" />

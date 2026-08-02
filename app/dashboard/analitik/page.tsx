@@ -246,8 +246,8 @@ export default async function AnalyticsDashboardPage() {
 
       <div className="analytics-metric-grid">
         <article className="analytics-card-flex hover-lift">
-          <div className="analytics-icon-wrap analytics-icon-teal">
-            <Users size={26} />
+          <div className="analytics-icon-wrap">
+            <Users size={26} className="text-brand-green-dark" />
           </div>
           <div>
             <small className="analytics-metric-label">Total Peserta</small>
@@ -256,8 +256,8 @@ export default async function AnalyticsDashboardPage() {
         </article>
         
         <article className="analytics-card-flex hover-lift">
-          <div className="analytics-icon-wrap analytics-icon-amber">
-            <Activity size={26} />
+          <div className="analytics-icon-wrap">
+            <Activity size={26} className="text-brand-blue-dark" />
           </div>
           <div>
             <small className="analytics-metric-label">Aktif Hari Ini</small>
@@ -266,8 +266,8 @@ export default async function AnalyticsDashboardPage() {
         </article>
 
         <article className="analytics-card-flex hover-lift">
-          <div className="analytics-icon-wrap analytics-icon-blue">
-            <BarChart3 size={26} />
+          <div className="analytics-icon-wrap">
+            <BarChart3 size={26} className="text-brand-green-dark" />
           </div>
           <div>
             <small className="analytics-metric-label">{isMentor ? "Aktivitas Peserta" : "Total Event Log"}</small>
@@ -299,7 +299,9 @@ export default async function AnalyticsDashboardPage() {
                   aria-label={`${item.count} aktivitas pada ${item.day}`}
                   style={{ 
                     height,
-                    background: isPeak ? "linear-gradient(180deg, #2a6ba7, #1e5a8f)" : "linear-gradient(180deg, #60a5fa, #2a6ba7)",
+                    background: isPeak
+                      ? "linear-gradient(180deg, var(--brand-blue-dark), var(--brand-blue-deep))"
+                      : "linear-gradient(180deg, var(--brand-blue), var(--brand-blue-dark))",
                     opacity: isPeak ? 1 : 0.75,
                     boxShadow: isPeak ? "0 6px 16px rgba(42,107,167,0.3)" : "none"
                   }} 
@@ -329,12 +331,12 @@ export default async function AnalyticsDashboardPage() {
                   <div key={i} className="analytics-log-row">
                     <div className="analytics-log-head">
                       <span className="font-semibold text-slate-700 text-sm">{action.action}</span>
-                      <span className="analytics-realtime-badge" style={{ background: "#eff6ff", color: "#1e5a8f", borderColor: "#bfdbfe" }}>
+                      <span className="analytics-realtime-badge" style={{ background: "var(--brand-blue-soft)", color: "var(--brand-blue-dark)", borderColor: "var(--brand-blue)" }}>
                         {countVal}x
                       </span>
                     </div>
                     <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${barWidth}%`, background: "linear-gradient(90deg, #1e5a8f, #2a6ba7)" }} />
+                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${barWidth}%`, background: "linear-gradient(90deg, var(--brand-blue-dark), var(--brand-blue))" }} />
                     </div>
                   </div>
                 );

@@ -81,7 +81,7 @@ export function AssessmentEditorClient({ assessment }: { assessment: any }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Daftar Soal / Instruksi</h2>
-            <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: '#dcfce7', color: '#15803d', fontWeight: 700 }}>
+            <span className="bg-brand-green-soft text-brand-green-dark" style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', fontWeight: 700 }}>
               💾 Auto-Backup Memori Browser Aktif
             </span>
           </div>
@@ -96,13 +96,13 @@ export function AssessmentEditorClient({ assessment }: { assessment: any }) {
                   setQuestions(assessment.questions || []);
                 }
               }}
-              className="btn btn-outline" 
-              style={{ padding: '8px 14px', borderRadius: '10px', fontWeight: 600, fontSize: '13px', borderColor: '#ef4444', color: '#ef4444' }}
+              className="btn border border-brand-critical bg-white text-brand-critical"
+              style={{ padding: '8px 14px', borderRadius: '10px', fontWeight: 600, fontSize: '13px' }}
             >
               🔄 Reset ke Server
             </button>
           )}
-          <button className="btn btn-primary" onClick={saveAll} disabled={saving} style={{ background: 'var(--teal)', fontWeight: 700 }}>
+          <button className="btn btn-primary bg-brand-blue" onClick={saveAll} disabled={saving} style={{ fontWeight: 700 }}>
             {saving ? "Menyimpan..." : <><Save size={16}/> Simpan Perubahan</>}
           </button>
         </div>
@@ -113,13 +113,13 @@ export function AssessmentEditorClient({ assessment }: { assessment: any }) {
           <div key={q.id} style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: '12px', padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {q.type === 'MULTIPLE_CHOICE' && <CheckCircle size={16} color="var(--teal)"/>}
-                {q.type === 'ESSAY' && <FileText size={16} color="var(--teal)"/>}
-                {q.type === 'FILE_UPLOAD' && <UploadCloud size={16} color="var(--teal)"/>}
-                {q.type === 'SHORT_ANSWER' && <Type size={16} color="var(--teal)"/>}
+                {q.type === 'MULTIPLE_CHOICE' && <CheckCircle size={16} className="text-brand-blue"/>}
+                {q.type === 'ESSAY' && <FileText size={16} className="text-brand-blue"/>}
+                {q.type === 'FILE_UPLOAD' && <UploadCloud size={16} className="text-brand-blue"/>}
+                {q.type === 'SHORT_ANSWER' && <Type size={16} className="text-brand-blue"/>}
                 Soal {qIndex + 1} ({q.type})
               </h3>
-              <button className="btn btn-ghost btn-small" onClick={() => setQuestions(questions.filter((_, i) => i !== qIndex))} style={{ color: 'var(--error)' }}>
+              <button className="btn btn-ghost btn-small text-brand-critical" onClick={() => setQuestions(questions.filter((_, i) => i !== qIndex))}>
                 <Trash2 size={16}/>
               </button>
             </div>
@@ -141,7 +141,7 @@ export function AssessmentEditorClient({ assessment }: { assessment: any }) {
             </div>
 
             {q.type === 'MULTIPLE_CHOICE' && (
-              <div style={{ background: '#f8fbfc', padding: '1rem', borderRadius: '8px' }}>
+              <div className="bg-brand-blue-soft" style={{ padding: '1rem', borderRadius: '8px' }}>
                 <label className="form-label">Pilihan Jawaban</label>
                 {JSON.parse(q.options || "[]").map((opt: string, optIndex: number) => (
                   <div key={optIndex} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
@@ -166,14 +166,14 @@ export function AssessmentEditorClient({ assessment }: { assessment: any }) {
             )}
 
             {q.type === 'SHORT_ANSWER' && (
-              <div style={{ background: '#f8fbfc', padding: '1rem', borderRadius: '8px' }}>
+              <div className="bg-brand-blue-soft" style={{ padding: '1rem', borderRadius: '8px' }}>
                 <label className="form-label">Jawaban Benar (Kunci)</label>
                 <input type="text" className="form-input" style={{ width: '100%' }} value={q.correctAnswer || ""} onChange={e => updateQuestion(qIndex, 'correctAnswer', e.target.value)} placeholder="Kata kunci jawaban yang benar" />
               </div>
             )}
 
             {(q.type === 'ESSAY' || q.type === 'FILE_UPLOAD') && (
-              <div style={{ padding: '0.5rem', background: '#fff5e7', color: '#a76825', borderRadius: '8px', fontSize: '0.9rem' }}>
+              <div className="bg-brand-blue-soft text-brand-blue-dark" style={{ padding: '0.5rem', borderRadius: '8px', fontSize: '0.9rem' }}>
                 Soal ini akan masuk ke mode penilaian manual (Menunggu Nilai Mentor).
               </div>
             )}

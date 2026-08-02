@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Award, BookOpen, Clock3, ShieldCheck, Users } from "lucide-react";
 import { Header } from "@/components/ui/Header";
 import { Footer } from "@/components/ui/Footer";
+import { extractMentorName } from "@/constants/mentor-profiles";
 import { cachedQuery, prisma } from "@/services/prisma";
 
 export const revalidate = 3600;
@@ -65,13 +66,6 @@ async function getCourse(): Promise<CatalogCourse | null> {
     console.warn("[PROGRAM_CATALOG_FALLBACK]", error);
     return null;
   }
-}
-
-/* Mentor info embedded in module descriptions */
-function extractMentor(description: string | null): string | null {
-  if (!description) return null;
-  const match = description.match(/oleh (.+?) —/);
-  return match ? match[1] : null;
 }
 
 function extractModuleDesc(description: string | null): string | null {
@@ -165,7 +159,7 @@ export default async function ProgramsPage() {
               {/* Module Cards */}
               <div className="pf-package-modules-grid">
                 {modules.map((mod, index) => {
-                  const mentorName = extractMentor(mod.description);
+                  const mentorName = extractMentorName(mod.description);
                   const moduleDesc = extractModuleDesc(mod.description);
                   return (
                     <article key={mod.id} className="pf-package-module-card">

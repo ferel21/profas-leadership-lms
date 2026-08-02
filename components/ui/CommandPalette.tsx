@@ -266,7 +266,7 @@ export function CommandPalette({ isOpen, onClose, role }: { isOpen: boolean; onC
                         <Icon size={18} />
                       </div>
                       <div>
-                        <div style={{ fontSize: "0.9rem", fontWeight: 700, color: isSelected ? "#f3b444" : "#f8fafc" }}>
+                        <div style={{ fontSize: "0.9rem", fontWeight: 700, color: isSelected ? "#33925d" : "#f8fafc" }}>
                           {item.title}
                         </div>
                         <div style={{ fontSize: "0.72rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "2px" }}>
@@ -274,7 +274,7 @@ export function CommandPalette({ isOpen, onClose, role }: { isOpen: boolean; onC
                         </div>
                       </div>
                     </div>
-                    {isSelected && <ArrowRight size={18} style={{ color: "#f3b444" }} />}
+                    {isSelected && <ArrowRight size={18} style={{ color: "#33925d" }} />}
                   </div>
                 );
               })}
@@ -288,7 +288,7 @@ export function CommandPalette({ isOpen, onClose, role }: { isOpen: boolean; onC
             <span><kbd style={{ background: "rgba(255, 255, 255, 0.1)", padding: "2px 6px", borderRadius: "4px", color: "#fff" }}>↑↓</kbd> Navigasi</span>
             <span><kbd style={{ background: "rgba(255, 255, 255, 0.1)", padding: "2px 6px", borderRadius: "4px", color: "#fff" }}>Enter</kbd> Pilih</span>
           </div>
-          <span style={{ color: "#f3b444", fontWeight: 700 }}>PROFAS Executive Command V1</span>
+          <span style={{ color: "#33925d", fontWeight: 700 }}>PROFAS Executive Command V1</span>
         </div>
           </div>
         </Dialog.Content>

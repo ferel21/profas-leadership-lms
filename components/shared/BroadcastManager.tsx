@@ -45,9 +45,9 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
   }
 
   return (
-    <div className="data-card mt-8 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-[0_10px_30px_-10px_rgba(13,148,136,0.08)]">
+    <div className="data-card mt-8 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-lg shadow-brand-blue/5">
       <div className="flex items-center gap-3.5 mb-6 pb-4 border-b border-slate-100">
-        <div className="bg-teal-500/10 p-2.5 rounded-xl text-teal-600 shrink-0">
+        <div className="bg-brand-blue-soft p-2.5 rounded-xl text-brand-blue shrink-0">
           <Megaphone size={24} />
         </div>
         <div>
@@ -59,10 +59,10 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
       {status && (
         <div className={`p-4 rounded-xl mb-6 text-sm flex items-center gap-3 font-medium border ${
           status.type === "success" 
-            ? "bg-emerald-50 text-emerald-800 border-emerald-200" 
-            : "bg-rose-50 text-rose-800 border-rose-200"
+            ? "bg-brand-green-soft text-brand-green-dark border-brand-green/30"
+            : "bg-brand-critical-soft text-brand-critical border-brand-critical/30"
         }`}>
-          {status.type === "success" ? <CheckCircle2 size={18} className="text-emerald-600 shrink-0" /> : <AlertTriangle size={18} className="text-rose-600 shrink-0" />}
+          {status.type === "success" ? <CheckCircle2 size={18} className="text-brand-green shrink-0" /> : <AlertTriangle size={18} className="text-brand-critical shrink-0" />}
           <span>{status.text}</span>
         </div>
       )}
@@ -74,7 +74,7 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
             <select
               value={targetCourseId}
               onChange={e => setTargetCourseId(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition cursor-pointer"
             >
               <option value="ALL">Seluruh Peserta Platform (Semua Program)</option>
               {safeCourses.map(c => (
@@ -89,7 +89,7 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
               placeholder="Contoh: /belajar/nama-program"
               value={link}
               onChange={e => setLink(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition"
             />
           </div>
         </div>
@@ -102,7 +102,7 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
             placeholder="Contoh: Jadwal Live Mentoring Kohort 1 Malam Ini"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white transition font-medium"
+            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition font-medium"
           />
         </div>
 
@@ -114,7 +114,7 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
             placeholder="Tuliskan pesan lengkap pengumuman untuk peserta..."
             value={message}
             onChange={e => setMessage(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white transition resize-y leading-relaxed"
+            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition resize-y leading-relaxed"
           />
         </div>
 
@@ -122,7 +122,7 @@ export function BroadcastManager({ courses = [] }: { courses?: CourseOption[] })
           <button
             type="submit"
             disabled={loading || !title.trim() || !message.trim()}
-            className="btn btn-primary hover-lift flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-sm shadow-md hover:shadow-lg disabled:opacity-50 transition"
+            className="btn btn-primary hover-lift flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-blue-dark to-brand-blue hover:from-brand-blue hover:to-brand-blue-dark text-white font-bold text-sm shadow-md shadow-brand-blue/15 hover:shadow-lg disabled:opacity-50 transition"
           >
             {loading ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Send size={16} className="shrink-0" />}
             <span>Siarkan Pengumuman Sekarang</span>

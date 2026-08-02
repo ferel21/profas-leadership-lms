@@ -37,7 +37,7 @@ export function Footer() {
           <h2 id="footer-program">Program</h2>
           <Link href="/program">Katalog Program</Link>
           <Link href="/#mentor">Mentor</Link>
-          <Link href="/#tentang">Tentang LMS</Link>
+          <Link href="/#platform">Tentang LMS</Link>
         </div>
 
         <div

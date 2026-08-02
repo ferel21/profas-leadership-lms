@@ -329,7 +329,7 @@ export default async function DashboardPage() {
               <div><dt>Rata-rata progres</dt><dd>{averageStudentProgress}%</dd></div>
               <div>
                 <dt>Agregat Peningkatan</dt>
-                <dd className={improvement > 0 ? "text-emerald-600 font-bold" : ""}>
+                <dd className={improvement > 0 ? "text-brand-green-dark font-bold" : ""}>
                   {improvement > 0 ? `+${improvement} Poin` : `${improvement} Poin`}
                 </dd>
               </div>

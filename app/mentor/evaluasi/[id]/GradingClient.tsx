@@ -85,7 +85,7 @@ export function GradingClient({ attempt }: { attempt: any }) {
                       <Download size={14}/> Unduh Lampiran
                     </a>
                   ) : (
-                    <span className="text-red-500 font-medium">Tidak ada lampiran.</span>
+                    <span className="text-brand-critical font-medium">Tidak ada lampiran.</span>
                   )
                 ) : (
                   <div className="whitespace-pre-wrap text-slate-700">{ans.answerText || <span className="text-slate-400 italic">(Kosong)</span>}</div>
@@ -128,7 +128,7 @@ export function GradingClient({ attempt }: { attempt: any }) {
           </div>
         </div>
 
-        <div className={`rounded-xl border p-4 mt-6 flex gap-3 items-start ${willPass ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}>
+        <div className={`rounded-xl border p-4 mt-6 flex gap-3 items-start ${willPass ? "border-brand-green bg-brand-green-soft text-brand-green-dark" : "border-brand-blue bg-brand-blue-soft text-brand-blue-dark"}`}>
           {willPass ? <CheckCircle size={20} className="shrink-0 mt-0.5" /> : <XCircle size={20} className="shrink-0 mt-0.5" />}
           <div>
             <strong>{willPass ? "Akan dinyatakan lulus" : "Belum memenuhi nilai kelulusan"}</strong>

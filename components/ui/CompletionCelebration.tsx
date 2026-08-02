@@ -52,7 +52,7 @@ export function CompletionCelebration(props: Props) {
     );
   }
 
-  const confettiColors = ["#f59e0b", "#ef4444", "#3b82f6", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
+  const confettiColors = ["#2A6BA7", "#1E5A8F", "#EFF6FF", "#33925D", "#246E48", "#EAF6EF"];
 
   return (
     <div className={`completion-overlay ${visible ? "show" : ""}`}>

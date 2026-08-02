@@ -438,13 +438,13 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <div className="player-pulse-circle">
                 {current.type === "QUIZ" ? <Award size={44} /> : <FileCheck size={44} />}
               </div>
-              <span className="eyebrow-teal" style={{
+              <span className="text-[0.62rem] font-bold tracking-[0.11em] text-brand-blue-dark" style={{
                 color: (() => {
                   const assessment = course.assessments.find(a => a.id === current.assessmentId || a.id === current.id);
                   if (!assessment) return undefined;
-                  if (assessment.type === "PRETEST") return "#2563eb";
-                  if (assessment.type === "POSTTEST") return "#059669";
-                  if (assessment.type === "FINAL") return "#d97706";
+                  if (assessment.type === "PRETEST") return "#2a6ba7";
+                  if (assessment.type === "POSTTEST") return "#33925d";
+                  if (assessment.type === "FINAL") return "#173f73";
                   return undefined;
                 })()
               }}>
@@ -452,9 +452,9 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                   const assessment = course.assessments.find(a => a.id === current.assessmentId || a.id === current.id);
                   if (!assessment) return current.type === "QUIZ" ? "EVALUASI & KUIS PEMAHAMAN" : "TUGAS EKSEKUTIF & STUDI KASUS";
                   switch (assessment.type) {
-                    case "PRETEST": return "🔵 PRE-TEST — TES AWAL";
-                    case "POSTTEST": return "🟢 POST-TEST — TES AKHIR";
-                    case "FINAL": return "🏆 UJIAN FINAL";
+                    case "PRETEST": return "PRE-TEST — TES AWAL";
+                    case "POSTTEST": return "POST-TEST — TES AKHIR";
+                    case "FINAL": return "UJIAN FINAL";
                     default: return "EVALUASI & KUIS PEMAHAMAN";
                   }
                 })()}
@@ -540,7 +540,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
             </article>
           ) : current.type === "IMAGE" ? (
             <article className="player-card-center hover-lift">
-              <span className="eyebrow-teal">INFOGRAFIS & VISUAL PEMBELAJARAN</span>
+              <span className="text-[0.62rem] font-bold tracking-[0.11em] text-brand-blue-dark">INFOGRAFIS & VISUAL PEMBELAJARAN</span>
               <h1 className="player-title-xl">{current.title}</h1>
               {(current.description || current.content) && <p className="player-desc-lead">{current.description || current.content}</p>}
               {current.fileUrl ? (
@@ -553,7 +553,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <div className="player-link-circle">
                 <Link2 size={40} />
               </div>
-              <span className="eyebrow-teal">TAUTAN SUMBER DAYA EKSTERNAL</span>
+              <span className="text-[0.62rem] font-bold tracking-[0.11em] text-brand-blue-dark">TAUTAN SUMBER DAYA EKSTERNAL</span>
               <h1 className="player-title-xl">{current.title}</h1>
               <p className="player-desc-lead">
                 {current.description || current.content || "Modul ini merujuk pada tautan sumber eksternal yang disiapkan oleh mentor Anda."}
@@ -571,7 +571,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
             </article>
           ) : (
             <article className="player-card-read hover-lift">
-              <span className="eyebrow-teal">MATERI BACAAN EKSKLUSIF</span>
+              <span className="text-[0.62rem] font-bold tracking-[0.11em] text-brand-blue-dark">MATERI BACAAN EKSKLUSIF</span>
               <h1 className="player-title-read">{current.title}</h1>
               {current.description || current.content ? <div className="player-desc-read">{current.content || current.description}</div> : <div className="player-empty-glass" role="status"><FileText size={40} aria-hidden="true" /><p className="player-empty-text">Konten bacaan belum tersedia untuk materi ini.</p></div>}
               {current.fileUrl && (

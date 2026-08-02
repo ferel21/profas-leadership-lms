@@ -148,11 +148,11 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
   };
 
   return (
-    <article className="data-card mt-8 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-[0_10px_30px_-10px_rgba(13,148,136,0.08)]">
+    <article className="data-card mt-8 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-[0_10px_30px_-10px_rgba(42,107,167,0.08)]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
         <div>
           <h2 className="flex items-center gap-2.5 text-xl font-bold text-slate-900 tracking-tight">
-            <Shield className="text-teal-600 shrink-0" size={22} />
+            <Shield className="text-[#2A6BA7] shrink-0" size={22} />
             <span>Manajemen Pengguna & Hak Akses (Role Access)</span>
           </h2>
           <p className="text-sm text-slate-500 mt-1">Atur peran pengguna sebagai Peserta (STUDENT), Mentor (MENTOR), atau Super Admin (SUPER_ADMIN)</p>
@@ -167,12 +167,12 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
               aria-label="Cari nama, email, atau role pengguna"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#2A6BA7] focus:bg-white transition"
             />
           </div>
           <button
             onClick={openAddModal}
-            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-sm shadow-md hover:shadow-lg transition shrink-0 hover-lift"
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1E5A8F] to-[#2A6BA7] hover:from-[#2A6BA7] hover:to-[#1E5A8F] text-white font-bold text-sm shadow-md hover:shadow-lg transition shrink-0 hover-lift"
           >
             <UserPlus size={16} className="shrink-0" />
             <span>Tambah Akun Baru</span>
@@ -191,7 +191,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <h3 id="modal-add-user-title" className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <UserPlus size={20} className="text-teal-600" />
+                <UserPlus size={20} className="text-[#2A6BA7]" />
                 <span>Tambah / Sinkron Akun</span>
               </h3>
               <button onClick={closeAddModal} aria-label="Tutup modal" className="text-slate-400 hover:text-slate-600 transition">
@@ -202,7 +202,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
               Buat akun dan tentukan metode masuknya. Pendaftaran ke program dikelola secara terpisah.
             </p>
             {message?.type === "error" && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-semibold mb-4" role="alert">
+              <div className="p-3 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs font-semibold mb-4" role="alert">
                 {message.text}
               </div>
             )}
@@ -213,7 +213,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                   id="admin-new-user-name"
                   type="text" required placeholder="Contoh: Keyra Ferel / Nadia Pratama"
                   value={newName} onChange={e => setNewName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-[#2A6BA7] focus:bg-white transition"
                 />
               </div>
               <div>
@@ -222,7 +222,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                   id="admin-new-user-email"
                   type="email" required placeholder="email.anda@gmail.com"
                   value={newEmail} onChange={e => setNewEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-[#2A6BA7] focus:bg-white transition"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -231,7 +231,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                   <select
                     id="admin-new-user-role"
                     value={newRole} onChange={e => setNewRole(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#2A6BA7] focus:bg-white transition cursor-pointer"
                   >
                     <option value="STUDENT">Peserta (STUDENT)</option>
                     <option value="MENTOR">Mentor (MENTOR)</option>
@@ -247,7 +247,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                       setNewProvider(e.target.value);
                       setNewPassword("");
                     }}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition cursor-pointer"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#2A6BA7] focus:bg-white transition cursor-pointer"
                   >
                     <option value="GOOGLE">Google OAuth</option>
                     <option value="LOCAL">Local / Email</option>
@@ -269,7 +269,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                     placeholder="Minimal 8 karakter"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-[#2A6BA7] focus:bg-white transition"
                   />
                   <p className="mt-1.5 text-xs text-slate-500">Bagikan kata sandi awal ini kepada pengguna melalui kanal yang aman.</p>
                 </div>
@@ -283,7 +283,7 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                 </button>
                 <button
                   type="submit" disabled={creating}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1e5a8f] to-[#2a6ba7] hover:from-[#2a6ba7] hover:to-[#38bdf8] text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1E5A8F] to-[#2A6BA7] hover:from-[#2A6BA7] hover:to-[#1E5A8F] text-white font-bold text-xs shadow-md flex items-center gap-2 transition disabled:opacity-50"
                 >
                   {creating && <Loader2 size={14} className="animate-spin" />}
                   <span>{creating ? "Menyimpan..." : "Simpan Akun"}</span>
@@ -297,10 +297,10 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
       {message && (
         <div className={`p-3.5 rounded-xl mb-5 text-sm flex items-center gap-3 font-medium border ${
           message.type === "success"
-            ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-            : "bg-rose-50 text-rose-800 border-rose-200"
+            ? "bg-[#EAF6EF] text-[#246E48] border-[#33925D]/30"
+            : "bg-red-50 text-red-800 border-red-200"
         }`}>
-          {message.type === "success" ? <CheckCircle2 size={18} className="text-emerald-600 shrink-0" /> : <AlertTriangle size={18} className="text-rose-600 shrink-0" />}
+          {message.type === "success" ? <CheckCircle2 size={18} className="text-[#33925D] shrink-0" /> : <AlertTriangle size={18} className="text-red-600 shrink-0" />}
           <span>{message.text}</span>
         </div>
       )}
@@ -336,17 +336,17 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                   </td>
                   <td className="py-3.5 px-4 text-xs text-slate-600 font-medium">
                     {u.role === "MENTOR" ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 font-semibold">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EFF6FF] text-[#1E5A8F] border border-[#2A6BA7]/20 font-semibold">
                         {(u._count?.mentoredCourses ?? 0)} Program dikelola
                       </span>
                     ) : u.role === "SUPER_ADMIN" ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 font-semibold">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF6EF] text-[#246E48] border border-[#33925D]/20 font-semibold">
                         Akses Penuh Sistem
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-2 text-slate-600 font-semibold">
-                        <span className="px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-100">{(u._count?.enrollments ?? 0)} Kelas</span>
-                        <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">{(u._count?.certificates ?? 0)} Sertifikat</span>
+                        <span className="px-2 py-0.5 rounded bg-[#EFF6FF] text-[#1E5A8F] border border-[#2A6BA7]/20">{(u._count?.enrollments ?? 0)} Kelas</span>
+                        <span className="px-2 py-0.5 rounded bg-[#EAF6EF] text-[#246E48] border border-[#33925D]/20">{(u._count?.certificates ?? 0)} Sertifikat</span>
                       </span>
                     )}
                   </td>
@@ -357,9 +357,9 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                       onChange={e => handleRoleChange(u.id, e.target.value)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer focus:outline-none ${
                         u.role === "SUPER_ADMIN"
-                          ? "bg-amber-100 text-amber-900 border-amber-300"
+                          ? "bg-[#EAF6EF] text-[#246E48] border-[#33925D]/40"
                           : u.role === "MENTOR"
-                          ? "bg-indigo-100 text-indigo-900 border-indigo-300"
+                          ? "bg-[#EFF6FF] text-[#1E5A8F] border-[#2A6BA7]/40"
                           : "bg-slate-100 text-slate-800 border-slate-300"
                       }`}
                     >
@@ -370,12 +370,12 @@ export function AdminUserManagement({ initialUsers }: { initialUsers: AdminUserR
                   </td>
                   <td className="py-3.5 px-4 text-center">
                     {loadingId === u.id ? (
-                      <Loader2 size={16} className="animate-spin mx-auto text-teal-600" />
+                      <Loader2 size={16} className="animate-spin mx-auto text-[#2A6BA7]" />
                     ) : (
                       <button
                         onClick={() => handleDeleteUser(u.id, u.name)}
                         title="Hapus Akun Pengguna"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
                       >
                         <Trash2 size={16} />
                       </button>

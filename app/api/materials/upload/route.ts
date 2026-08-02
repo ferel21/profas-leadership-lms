@@ -9,6 +9,7 @@ import { getWritableUploadRoots, resolveUploadPath } from "@/services/upload-sto
 import { validateFileMagicBytes } from "@/services/file-security";
 import { getObjectStorageMode } from "@/services/object-storage";
 import { rateLimit } from "@/services/rate-limit";
+import { activeEnrollmentWindowWhere } from "@/services/enrollment-access";
 import { sanitizeMaterialDescription, validateUploadMetadata } from "@/services/upload-policy";
 
 const uploadLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
@@ -234,7 +235,10 @@ export async function POST(request: Request) {
     });
 
     // Notify enrolled students jika materi baru diunggah in chunked batches
-    const enrollments = await prisma.enrollment.findMany({ where: { courseId, status: "ACTIVE" }, select: { userId: true } });
+    const enrollments = await prisma.enrollment.findMany({
+      where: { courseId, ...activeEnrollmentWindowWhere() },
+      select: { userId: true },
+    });
     if (enrollments.length > 0) {
       for (let i = 0; i < enrollments.length; i += 500) {
         const batch = enrollments.slice(i, i + 500);

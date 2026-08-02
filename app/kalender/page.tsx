@@ -6,6 +6,7 @@ import { CalendarEventManager } from "@/components/shared/CalendarEventManager";
 import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 const calendarFormatter = (options: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Makassar", ...options });
@@ -59,7 +60,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
 
   if (user.role === Role.STUDENT) {
     const enrollments = await prisma.enrollment.findMany({
-      where: { userId: user.id },
+      where: accessibleEnrollmentWhere(user.id, undefined, now),
       select: { courseId: true },
     });
     courseIds = enrollments.map(enrollment => enrollment.courseId);

@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/services/prisma";
 import { getCurrentUser } from "@/services/auth";
-import { EnrollmentStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+export async function GET() {
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
-import { NodeType } from "@prisma/client";
+import { AssessmentType, NodeType } from "@prisma/client";
 
 const nodesLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
@@ -192,20 +192,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
         .map(node => node.assessmentId)
         .filter((assessmentId): assessmentId is string => Boolean(assessmentId));
 
-      const removedNodes = existingCourseNodes.filter(node => !activeIds.includes(node.id));
-
       // As per absolute authority requirements, mentors can delete any node regardless of student progress.
       // Progress, discussion posts, and assessment attempts will be cascade-deleted by Prisma.
-
-      for (const existingNode of existingCourseNodes) {
-        if (!existingNode.assessmentId || (existingNode.assessment?._count.attempts ?? 0) === 0) continue;
-        const submitted = nodes.find(node => node.id === existingNode.id);
-        const nextAssessmentId = submitted && (submitted.type === NodeType.QUIZ || submitted.type === NodeType.ASSIGNMENT)
-          ? (submitted.assessmentId || existingNode.assessmentId || submitted.id)
-          : null;
-        
-        // Allowed to re-assign or unbind assessments freely now
-      }
 
       // Detach retained children first. Deleting an old folder would otherwise
       // cascade-delete a child that the submitted curriculum is reparenting.
@@ -252,9 +240,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
             throw new CurriculumValidationError("Evaluasi berasal dari program lain dan tidak dapat digunakan.");
           }
 
-          let finalAssType = node.type === NodeType.QUIZ ? "MODULE" : "FINAL";
+          let finalAssType: AssessmentType = node.type === NodeType.QUIZ
+            ? AssessmentType.MODULE
+            : AssessmentType.FINAL;
           if (node.type === NodeType.QUIZ && node.assessmentType && ["PRETEST", "POSTTEST", "MODULE", "FINAL"].includes(node.assessmentType)) {
-            finalAssType = node.assessmentType;
+            finalAssType = node.assessmentType as AssessmentType;
           }
 
           if (existingAssessment) {
@@ -262,7 +252,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
               where: { id: assessmentId, courseId },
               data: {
                 title: node.title,
-                type: finalAssType as any,
+                type: finalAssType,
                 isAssignment: node.type === NodeType.ASSIGNMENT
               }
             });
@@ -272,7 +262,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
                 id: assessmentId,
                 courseId,
                 title: node.title,
-                type: finalAssType as any,
+                type: finalAssType,
                 isAssignment: node.type === NodeType.ASSIGNMENT
               }
             });

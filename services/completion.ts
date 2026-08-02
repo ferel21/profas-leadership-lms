@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { prisma } from "./prisma";
+import { accessibleEnrollmentWhere } from "./enrollment-access";
 
 export function getCourseCompletionState(
   totalLessons: number,
@@ -19,8 +20,8 @@ export function getCourseCompletionState(
 export async function finalizeCourseCompletion(userId: string, courseId: string) {
   return prisma.$transaction(async (tx) => {
     const [enrollment,totalLessons,completedLessons,requiredAssessments,passedAttempts] = await Promise.all([
-      tx.enrollment.findUnique({
-        where: { userId_courseId: { userId, courseId } },
+      tx.enrollment.findFirst({
+        where: accessibleEnrollmentWhere(userId, courseId),
         select: {
           completedAt: true,
           course: { select: { certificateAvailable: true } },

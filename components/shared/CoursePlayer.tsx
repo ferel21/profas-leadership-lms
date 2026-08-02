@@ -346,7 +346,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
     }
 
     return renderTree(course.nodes);
-  }, [course.nodes, done, current?.id]);
+  }, [course.assessments, course.nodes, done, current?.id]);
 
   if (!current) return (
     <main className="player-empty-state" aria-live="polite">

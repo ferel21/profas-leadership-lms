@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 const discussionLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
@@ -30,7 +31,7 @@ async function canAccessLesson(user: { id: string; role: string }, lessonId: str
       course: {
         published: true,
         OR: [
-          { enrollments: { some: { userId: user.id } } },
+          { enrollments: { some: accessibleEnrollmentWhere(user.id) } },
           { mentorId: user.id }
         ]
       }

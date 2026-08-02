@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 const calendarLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
@@ -52,7 +53,10 @@ export async function GET(request: Request) {
     // If mentor, get their managed courses events + global events
     let courseIds: string[] = [];
     if (user.role === "STUDENT") {
-      const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id }, select: { courseId: true } });
+      const enrollments = await prisma.enrollment.findMany({
+        where: accessibleEnrollmentWhere(user.id),
+        select: { courseId: true },
+      });
       courseIds = enrollments.map(e => e.courseId);
     } else if (user.role === "MENTOR") {
       const courses = await prisma.course.findMany({ where: { mentorId: user.id }, select: { id: true } });

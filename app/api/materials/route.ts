@@ -7,6 +7,7 @@ import { existsSync } from "node:fs";
 import { getReadableUploadRoots, resolveUploadPath, uploadSegmentsFromUrl } from "@/services/upload-storage";
 import { deleteStoredObject, getObjectStorageMode } from "@/services/object-storage";
 import { rateLimit } from "@/services/rate-limit";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 const deleteLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
   if (user.role === "STUDENT") {
     where.course = {
       is: {
-        enrollments: { some: { userId: user.id } }
+        enrollments: { some: accessibleEnrollmentWhere(user.id) }
       }
     };
   }

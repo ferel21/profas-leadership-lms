@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/services/prisma";
 import { getCurrentUser } from "@/services/auth";
 import { CoursePlayer, CourseNode } from "@/components/shared/CoursePlayer";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,7 +21,7 @@ export default async function LearnPage({ params }: { params: Promise<{ slug: st
       id: true,
       slug: true,
       title: true,
-      enrollments: { where: { userId: user.id }, select: { id: true } },
+      enrollments: { where: accessibleEnrollmentWhere(user.id), select: { id: true } },
       assessments: { select: { id: true, title: true, type: true } },
       nodes: {
         orderBy: { order: "asc" },

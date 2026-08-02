@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
+import { activeEnrollmentWindowWhere } from "@/services/enrollment-access";
 
 const badgesLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
     }
     if (userId !== user.id && user.role === "MENTOR") {
       const managesParticipant = await prisma.enrollment.findFirst({
-        where: { userId, course: { mentorId: user.id } },
+        where: { userId, course: { mentorId: user.id }, ...activeEnrollmentWindowWhere() },
         select: { id: true },
       });
       if (!managesParticipant) {

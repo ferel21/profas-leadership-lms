@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 const resultLimiter = rateLimit({ limit: 60, windowMs: 60 * 1000 });
 
@@ -38,8 +39,8 @@ export async function GET(
     return NextResponse.json({ result: null });
   }
 
-  const enrollment = await prisma.enrollment.findUnique({
-    where: { userId_courseId: { userId: user.id, courseId } },
+  const enrollment = await prisma.enrollment.findFirst({
+    where: accessibleEnrollmentWhere(user.id, courseId),
     select: { id: true }
   });
   if (!enrollment && user.role !== "SUPER_ADMIN" && user.role !== "MENTOR") {

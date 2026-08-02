@@ -11,6 +11,7 @@ import {
   buildMentorAnalyticsScope,
   mentorXpSourceIds,
 } from "@/services/mentor-analytics-scope";
+import { activeEnrollmentWindowWhere } from "@/services/enrollment-access";
 
 export default async function MentorPesertaPage({
   searchParams
@@ -33,7 +34,7 @@ export default async function MentorPesertaPage({
       assessments: { select: { id: true } },
       calendarEvents: { select: { id: true } },
       enrollments: {
-        where: { user: { role: "STUDENT" } },
+        where: { ...activeEnrollmentWindowWhere(), user: { role: "STUDENT" } },
         select: {
           userId: true,
           progressPercent: true,

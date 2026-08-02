@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/services/prisma";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 function assessmentInclude(userId: string) {
   return {
@@ -9,7 +10,7 @@ function assessmentInclude(userId: string) {
         slug: true,
         title: true,
         published: true,
-        enrollments: { where: { userId }, select: { id: true } },
+        enrollments: { where: accessibleEnrollmentWhere(userId), select: { id: true } },
       },
     },
     questions: {

@@ -7,6 +7,7 @@ import { prisma } from "@/services/prisma";
 import { getReadableUploadRoots, resolveUploadPath } from "@/services/upload-storage";
 import { createSignedObjectDownload, getObjectStorageMode } from "@/services/object-storage";
 import { rateLimit } from "@/services/rate-limit";
+import { accessibleEnrollmentWhere, hasActiveCourseAccess } from "@/services/enrollment-access";
 
 const uploadsLimiter = rateLimit({ limit: 120, windowMs: 60 * 1000 });
 
@@ -49,13 +50,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
           attempt: {
             select: {
               userId: true,
-              assessment: { select: { course: { select: { mentorId: true } } } },
+              assessment: { select: { course: { select: { id: true, mentorId: true } } } },
             },
           },
         },
       });
+      const ownsSubmission = answer?.attempt.userId === user.id;
+      const ownerHasAccess = ownsSubmission && answer
+        ? await hasActiveCourseAccess(user.id, answer.attempt.assessment.course.id)
+        : false;
       const canAccess = answer && (
-        answer.attempt.userId === user.id ||
+        ownerHasAccess ||
         user.role === "SUPER_ADMIN" ||
         (user.role === "MENTOR" && answer.attempt.assessment.course.mentorId === user.id)
       );
@@ -76,10 +81,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
                     {
                       published: true,
                       enrollments: {
-                        some: {
-                          userId: user.id,
-                          status: { in: ["ACTIVE", "COMPLETED"] },
-                        },
+                        some: accessibleEnrollmentWhere(user.id),
                       },
                     },
                   ],

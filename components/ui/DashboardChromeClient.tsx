@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, BookOpen, Check, ClipboardCheck, Gauge, LogOut, Menu, X, History, Users, FileCheck2, Calendar, MessageSquare, Settings, PieChart, Search, Trophy, Megaphone } from "lucide-react";
+import { Bell, BookOpen, Check, ClipboardCheck, Gauge, LogOut, Menu, X, History, Users, FileCheck2, Calendar, MessageSquare, Settings, PieChart, Search, Trophy, Megaphone, Layers3 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
@@ -34,7 +34,7 @@ const studentNavSections = [
 
 const mentorNavSections = [
   { label: "Workspace", items: [["Ringkasan", Gauge, "/dashboard"], ["Program & Materi", BookOpen, "/dashboard#program"]] },
-  { label: "Peserta & evaluasi", items: [["Manajemen Peserta", Users, "/dashboard/peserta"], ["Evaluasi", FileCheck2, "/mentor/evaluasi"]] },
+  { label: "Peserta & evaluasi", items: [["Kohort & Akses", Layers3, "/dashboard/kohort"], ["Manajemen Peserta", Users, "/dashboard/peserta"], ["Evaluasi", FileCheck2, "/mentor/evaluasi"]] },
   { label: "Operasional", items: [["Kalender", Calendar, "/kalender"], ["Absensi", ClipboardCheck, "/absensi"]] },
   { label: "Wawasan & komunitas", items: [["Analitik", PieChart, "/dashboard/analitik"], ["Peringkat", Trophy, "/peringkat"], ["Komunitas", MessageSquare, "/forum"]] },
   { label: "Akun", items: [["Pengaturan", Settings, "/pengaturan"]] },
@@ -42,7 +42,7 @@ const mentorNavSections = [
 
 const adminNavSections = [
   { label: "Workspace", items: [["Ringkasan", Gauge, "/dashboard"]] },
-  { label: "Kelola platform", items: [["Pengguna", Users, "/dashboard#admin-user-mgmt"], ["Program", BookOpen, "/dashboard#program"], ["Siaran", Megaphone, "/dashboard#broadcast-mgmt"]] },
+  { label: "Kelola platform", items: [["Kohort & Akses", Layers3, "/dashboard/kohort"], ["Pengguna", Users, "/dashboard#admin-user-mgmt"], ["Program", BookOpen, "/dashboard#program"], ["Siaran", Megaphone, "/dashboard#broadcast-mgmt"]] },
   { label: "Operasional", items: [["Kalender", Calendar, "/kalender"], ["Absensi", ClipboardCheck, "/absensi"]] },
   { label: "Wawasan & komunitas", items: [["Analitik", PieChart, "/dashboard/analitik"], ["Peringkat", Trophy, "/peringkat"], ["Komunitas", MessageSquare, "/forum"]] },
   { label: "Akun", items: [["Pengaturan", Settings, "/pengaturan"]] },

@@ -6,7 +6,6 @@ import {
   BarChart3,
   BookOpen,
   Check,
-  ChevronRight,
   Compass,
   Gauge,
   Layers3,

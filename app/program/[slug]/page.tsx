@@ -18,6 +18,7 @@ import { Footer } from "@/components/ui/Footer";
 import { Header } from "@/components/ui/Header";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 import { initials } from "@/utils";
 
 function parseOutcomes(value: string): string[] {
@@ -61,6 +62,7 @@ export default async function CourseDetail({
         category: true,
         level: true,
         price: true,
+        enrollmentMode: true,
         durationHours: true,
         rating: true,
         studentsCount: true,
@@ -93,8 +95,8 @@ export default async function CourseDetail({
   const lessonCount = course.nodes.filter((node) => node.type !== "FOLDER").length;
   const folders = course.nodes.filter((node) => node.type === "FOLDER");
   const enrolled = user
-    ? !!(await prisma.enrollment.findUnique({
-        where: { userId_courseId: { userId: user.id, courseId: course.id } },
+    ? !!(await prisma.enrollment.findFirst({
+        where: accessibleEnrollmentWhere(user.id, course.id),
         select: { id: true },
       }))
     : false;
@@ -171,13 +173,17 @@ export default async function CourseDetail({
               </div>
               <div className="enroll-body pf-enroll-body">
                 <small>Akses paket lengkap</small>
-                <h2>Rp499.000</h2>
+                <h2>{course.price === 0 ? "Gratis" : `Rp${course.price.toLocaleString("id-ID")}`}</h2>
                 <EnrollButton
                   courseId={course.id}
                   slug={course.slug}
                   signedIn={!!user}
                   enrolled={enrolled}
+                  enrollmentMode={course.enrollmentMode}
                 />
+                {course.enrollmentMode === "CODE" && !enrolled && (
+                  <p className="pf-enroll-manual-note">Pendaftaran dan konfirmasi dilakukan oleh admin. Gunakan kode yang sudah diberikan setelah administrasi selesai.</p>
+                )}
                 <p className="secure-text">
                   <ShieldCheck aria-hidden="true" />
                   Akses aman dan sertifikat terverifikasi
@@ -202,8 +208,8 @@ export default async function CourseDetail({
                   <li>
                     <Globe2 aria-hidden="true" />
                     <span>
-                      <b>12 bulan</b>
-                      akses fleksibel
+                      <b>{course.enrollmentMode === "CODE" ? "Periode kohort" : "Akses terbuka"}</b>
+                      {course.enrollmentMode === "CODE" ? "sesuai jadwal organisasi" : "untuk akun terdaftar"}
                     </span>
                   </li>
                   <li>

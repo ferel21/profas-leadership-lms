@@ -1,9 +1,10 @@
-import { EnrollmentStatus, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { AttendanceClient } from "@/components/shared/AttendanceClient";
 import { DashboardChrome } from "@/components/ui/DashboardChrome";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
+import { accessibleEnrollmentWhere, activeEnrollmentWindowWhere } from "@/services/enrollment-access";
 
 export default async function AttendancePage() {
   const user = await getCurrentUser();
@@ -16,7 +17,7 @@ export default async function AttendancePage() {
 
   if (user.role === Role.STUDENT) {
     const enrollments = await prisma.enrollment.findMany({
-      where: { userId: user.id, status: EnrollmentStatus.ACTIVE },
+      where: accessibleEnrollmentWhere(user.id, undefined, now),
       select: { courseId: true }
     });
     courseIds = enrollments.map(item => item.courseId);
@@ -41,8 +42,8 @@ export default async function AttendancePage() {
             title: true,
             enrollments: {
               where: {
-                status: EnrollmentStatus.ACTIVE,
-                user: { role: Role.STUDENT }
+                ...activeEnrollmentWindowWhere(now),
+                user: { role: Role.STUDENT },
               },
               select: { user: { select: { id: true, name: true, email: true } } },
               orderBy: { user: { name: "asc" } }

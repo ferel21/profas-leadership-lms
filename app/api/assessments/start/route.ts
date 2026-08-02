@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 const startLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 const inputSchema = z.object({ assessmentId: z.string().trim().min(1).max(191) });
@@ -35,10 +36,7 @@ export async function POST(request: Request) {
           select: {
             published: true,
             enrollments: {
-              where: {
-                userId: user.id,
-                status: { in: ["ACTIVE", "COMPLETED"] },
-              },
+              where: accessibleEnrollmentWhere(user.id),
               select: { id: true },
             },
           },

@@ -12,6 +12,7 @@ import { syncAssessmentAchievement } from "@/services/assessment-achievement";
 import { getObjectStorageMode } from "@/services/object-storage";
 import { validateUploadMetadata } from "@/services/upload-policy";
 import { verifyCommittedAssignmentTicket } from "@/services/upload-tickets";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 const submitLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 const SUBMISSION_GRACE_MS = 10_000;
@@ -135,8 +136,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Asesmen belum memiliki soal yang dapat dikerjakan." }, { status: 409 });
     }
 
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId: user.id, courseId: assessment.course.id } },
+    const enrollment = await prisma.enrollment.findFirst({
+      where: accessibleEnrollmentWhere(user.id, assessment.course.id),
       select: { id: true }
     });
 

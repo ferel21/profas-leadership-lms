@@ -5,7 +5,7 @@ const learnerEmail = process.env.E2E_TEST_EMAIL || "peserta@profas.id";
 const learnerPassword = process.env.E2E_TEST_PASSWORD || "profas123";
 const mentorEmail = process.env.E2E_MENTOR_EMAIL || "mentor@profas.id";
 const adminEmail = process.env.E2E_ADMIN_EMAIL || "admin@profas.id";
-const coursePath = "/belajar/fondasi-kepemimpinan-berdampak";
+const coursePath = process.env.E2E_COURSE_PATH || "/belajar/profas-leadership";
 
 async function waitForApp(page: import("@playwright/test").Page) {
   await page.waitForLoadState("networkidle");
@@ -21,11 +21,11 @@ async function waitForLeafAnimations(page: import("@playwright/test").Page) {
 }
 
 async function loginAs(page: import("@playwright/test").Page, email: string, password = learnerPassword) {
-  await page.goto("/masuk");
-  await page.locator('input[name="email"]').fill(email);
-  await page.locator('input[name="password"]').fill(password);
-  await page.getByRole("button", { name: /masuk ke dashboard/i }).click();
-  await page.waitForURL("**/dashboard", { timeout: 20_000 });
+  const response = await page.request.post("/api/auth/login", {
+    data: { email, password, remember: false },
+  });
+  expect(response.ok(), await response.text()).toBe(true);
+  await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   await expect(page.locator(".dashboard-layout")).toBeVisible({ timeout: 20_000 });
 }
@@ -46,6 +46,16 @@ test.describe("public performance and accessibility", () => {
     await waitForLeafAnimations(page);
     await expect(page.getByRole("link", { name: /program/i }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /mulai|jelajahi/i }).first()).toBeVisible();
+
+    const mentorCarousel = page.getByRole("region", { name: /profil mentor profas/i });
+    const autoplayControl = mentorCarousel.getByRole("button", { name: /pergantian mentor otomatis/i });
+    await expect(mentorCarousel).toBeVisible();
+    await autoplayControl.click();
+    await expect(autoplayControl).toHaveAttribute("aria-pressed", "true");
+    const visibleSlide = await mentorCarousel.getAttribute("data-current-slide");
+    await mentorCarousel.getByRole("button", { name: /mentor berikutnya/i }).click();
+    await expect(mentorCarousel).not.toHaveAttribute("data-current-slide", visibleSlide || "");
+
     expect(errors).toEqual([]);
 
     const results = await new AxeBuilder({ page }).analyze();
@@ -56,7 +66,8 @@ test.describe("public performance and accessibility", () => {
     await page.goto("/program");
     await waitForApp(page);
     await waitForLeafAnimations(page);
-    await expect(page.getByRole("textbox", { name: /cari program/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /satu paket.*tiga pilar kepemimpinan/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /lihat detail.*mulai belajar/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /program/i }).first()).toBeVisible();
 
     const results = await new AxeBuilder({ page }).analyze();
@@ -88,6 +99,13 @@ test.describe("learner journey", () => {
     await expect(sidebar.getByRole("link", { name: "Program Saya" })).toHaveCount(0);
     await expect(sidebar.getByRole("link", { name: "Sertifikat" })).toHaveCount(0);
     await expect(sidebar.locator(".logo")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(page.getByRole("heading", { name: "Punya kode akses?" })).toBeVisible();
+    await expect(page.getByLabel("Kode akses kohort")).toBeVisible();
+
+    const forbiddenCohortList = await page.request.get("/api/cohorts");
+    expect(forbiddenCohortList.status()).toBe(403);
+    const invalidCode = await page.request.post("/api/cohorts/join", { data: { code: "AAAA-BBBB-CCCC" } });
+    expect([404, 409]).toContain(invalidCode.status());
 
     const dashboardResults = await new AxeBuilder({ page }).analyze();
     expect(dashboardResults.violations).toEqual([]);
@@ -132,7 +150,7 @@ test.describe("mentor and admin workspaces", () => {
     await expect(page.getByRole("heading", { name: /evaluasi|semua evaluasi/i }).first()).toBeVisible();
 
     const sidebar = page.getByRole("complementary", { name: /navigasi utama ruang belajar/i });
-    for (const label of ["Manajemen Peserta", "Evaluasi", "Kalender", "Absensi", "Analitik", "Peringkat", "Komunitas"]) {
+    for (const label of ["Kohort & Akses", "Manajemen Peserta", "Evaluasi", "Kalender", "Absensi", "Analitik", "Peringkat", "Komunitas"]) {
       await expect(sidebar.getByRole("link", { name: label })).toHaveCount(1);
     }
 
@@ -145,6 +163,11 @@ test.describe("mentor and admin workspaces", () => {
     await page.goto("/kalender");
     await waitForApp(page);
     await expect(page.getByRole("button", { name: /tambah jadwal/i })).toBeVisible();
+
+    await page.goto("/dashboard/kohort");
+    await waitForApp(page);
+    await expect(page.getByRole("heading", { name: "Kohort & kode akses" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /buat kohort/i })).toBeVisible();
   });
 
   test("admin receives the same minimal shell and all platform controls", async ({ page }) => {
@@ -153,7 +176,7 @@ test.describe("mentor and admin workspaces", () => {
     await expect(page.getByRole("heading", { name: "Operasional LMS dalam satu ruang." })).toBeVisible();
 
     const sidebar = page.getByRole("complementary", { name: /navigasi utama ruang belajar/i });
-    for (const label of ["Pengguna", "Program", "Siaran", "Kalender", "Absensi", "Analitik", "Peringkat", "Komunitas"]) {
+    for (const label of ["Kohort & Akses", "Pengguna", "Program", "Siaran", "Kalender", "Absensi", "Analitik", "Peringkat", "Komunitas"]) {
       await expect(sidebar.getByRole("link", { name: label })).toHaveCount(1);
     }
 

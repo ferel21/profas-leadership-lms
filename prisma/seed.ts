@@ -1,4 +1,4 @@
-import { PrismaClient, AssessmentType, NodeType, CourseLevel, EnrollmentStatus, Persona, Role } from "@prisma/client";
+import { PrismaClient, AssessmentType, NodeType, CourseLevel, EnrollmentMode, EnrollmentStatus, Persona, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const runningOnVercel = ["1", "true", "yes"].includes((process.env.VERCEL ?? "").trim().toLowerCase());
@@ -26,6 +26,7 @@ const courseData = {
   category: "Leadership Program",
   level: CourseLevel.INTERMEDIATE,
   price: 499000,
+  enrollmentMode: EnrollmentMode.CODE,
   durationHours: 24,
   rating: 4.9,
   studentsCount: 2500,

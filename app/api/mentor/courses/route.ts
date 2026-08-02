@@ -151,6 +151,7 @@ export async function POST(request: Request) {
           shortDescription: cleanShortDesc,
           description: cleanDesc || cleanShortDesc,
           price: safePrice,
+          enrollmentMode: safePrice > 0 ? "CODE" : "OPEN",
           durationHours: safeDuration,
           image: normalizeCourseImage(image),
           outcomes: JSON.stringify(DEFAULT_OUTCOMES),
@@ -268,7 +269,12 @@ export async function PATCH(request: Request) {
           ...(cleanDesc ? { description: cleanDesc } : {}),
           ...(cleanCategory ? { category: cleanCategory } : {}),
           ...(validLevel ? { level: validLevel } : {}),
-          ...(typeof price === "number" && Number.isFinite(price) ? { price: Math.round(Math.min(1000000000, Math.max(0, price))) } : {}),
+          ...(typeof price === "number" && Number.isFinite(price)
+            ? {
+                price: Math.round(Math.min(1000000000, Math.max(0, price))),
+                ...(price > 0 ? { enrollmentMode: "CODE" as const } : {}),
+              }
+            : {}),
           ...(typeof durationHours === "number" && Number.isFinite(durationHours) ? { durationHours: Math.round(Math.min(1000, Math.max(1, durationHours))) } : {}),
           ...(cleanImage ? { image: cleanImage } : {}),
           ...(cleanOutcomes ? { outcomes: cleanOutcomes } : {})

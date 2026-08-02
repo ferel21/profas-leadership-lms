@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import type { ReportRow } from "@/components/shared/AdminReportTable";
+import { JoinCohortCard } from "@/components/shared/JoinCohortCard";
+import { activeEnrollmentWindowWhere, resolveEnrollmentAccessState } from "@/services/enrollment-access";
 
 const AdminReportTable = nextDynamic(() => import("@/components/shared/AdminReportTable").then(module => module.AdminReportTable));
 const PrePostTestComparison = nextDynamic(() => import("@/components/shared/PrePostTestComparison").then(module => module.PrePostTestComparison));
@@ -31,9 +33,10 @@ export default async function DashboardPage() {
   // STUDENT DASHBOARD
   // ═══════════════════════════════════════════════════════════
   if (user.role === "STUDENT") {
-    const initialEnrollments = await prisma.enrollment.findMany({
+    const allEnrollments = await prisma.enrollment.findMany({
       where: { userId: user.id },
       include: {
+        cohort: { select: { id: true, name: true } },
         course: {
           select: {
             id: true, slug: true, title: true, shortDescription: true, category: true, level: true, price: true, durationHours: true, rating: true, studentsCount: true, image: true,
@@ -64,7 +67,9 @@ export default async function DashboardPage() {
 
     // Enrollment adalah entitlement peserta. Jangan auto-enroll semua course
     // yang dipublish: dashboard harus mencerminkan paket/program yang dibeli.
-    const enrollments = initialEnrollments;
+    const now = new Date();
+    const enrollments = allEnrollments.filter(enrollment => resolveEnrollmentAccessState(enrollment, now) === "ACTIVE");
+    const scheduledEnrollments = allEnrollments.filter(enrollment => resolveEnrollmentAccessState(enrollment, now) === "NOT_STARTED");
     const completedEnrollments = enrollments.filter(e => e.status === "COMPLETED" || e.progressPercent === 100);
 
     const avgProgress = average(enrollments.map(e => e.progressPercent));
@@ -135,6 +140,27 @@ export default async function DashboardPage() {
                 <span className="pf-student-play"><BookOpen aria-hidden="true" /></span>
                 <span className="pf-student-visual-label">Lihat katalog</span>
               </Link>
+            </section>
+          )}
+
+          <JoinCohortCard />
+
+          {scheduledEnrollments.length > 0 && (
+            <section className="pf-cohort-upcoming" aria-labelledby="upcoming-cohort-title">
+              <header>
+                <CalendarDays aria-hidden="true" />
+                <div><span>Akses terjadwal</span><h2 id="upcoming-cohort-title">Kohort yang akan dimulai</h2></div>
+              </header>
+              <div>
+                {scheduledEnrollments.map(enrollment => (
+                  <article key={enrollment.id}>
+                    <div><strong>{enrollment.course.title}</strong><small>{enrollment.cohort?.name || "Kohort program"}</small></div>
+                    <time dateTime={enrollment.accessStartsAt?.toISOString()}>
+                      Mulai {enrollment.accessStartsAt?.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                    </time>
+                  </article>
+                ))}
+              </div>
             </section>
           )}
 
@@ -228,7 +254,7 @@ export default async function DashboardPage() {
     const courses = await prisma.course.findMany({
       where: { mentorId: user.id },
       include: {
-        enrollments: { select: { userId: true, progressPercent: true } },
+        enrollments: { where: activeEnrollmentWindowWhere(), select: { userId: true, progressPercent: true } },
         nodes: { select: { id: true, type: true, title: true } },
       },
       orderBy: [{ published: "desc" }, { createdAt: "desc" }],
@@ -246,6 +272,7 @@ export default async function DashboardPage() {
     const activeCourses = courses.filter(course => course.published);
     const averageStudentProgress = average(courses.flatMap(course => course.enrollments.map(enrollment => enrollment.progressPercent)));
     const mentorQuickLinks = [
+      { href: "/dashboard/kohort", label: "Kohort", description: "Atur kode dan periode akses", icon: ShieldCheck },
       { href: "/mentor/evaluasi", label: "Evaluasi", description: "Nilai tugas peserta", icon: FileCheck2 },
       { href: "/dashboard/peserta", label: "Peserta", description: "Pantau progres belajar", icon: UsersRound },
       { href: "/kalender", label: "Kalender", description: "Atur agenda program", icon: CalendarDays },

@@ -1,9 +1,10 @@
-import { AttendanceStatus, EnrollmentStatus, Prisma, Role } from "@prisma/client";
+import { AttendanceStatus, Prisma, Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
+import { accessibleEnrollmentWhere, activeEnrollmentWindowWhere } from "@/services/enrollment-access";
 
 const attendanceLimiter = rateLimit({ limit: 30, windowMs: 60 * 1000 });
 
@@ -33,7 +34,7 @@ export async function GET() {
   let eventWhere = {};
   if (user.role === Role.STUDENT) {
     const enrollments = await prisma.enrollment.findMany({
-      where: { userId: user.id, status: EnrollmentStatus.ACTIVE },
+      where: accessibleEnrollmentWhere(user.id, undefined, now),
       select: { courseId: true }
     });
     eventWhere = { OR: [{ courseId: null }, { courseId: { in: enrollments.map(item => item.courseId) } }] };
@@ -51,8 +52,8 @@ export async function GET() {
           title: true,
           enrollments: {
             where: {
-              status: EnrollmentStatus.ACTIVE,
-              user: { role: Role.STUDENT }
+              ...activeEnrollmentWindowWhere(now),
+              user: { role: Role.STUDENT },
             },
             select: { userId: true }
           }
@@ -103,8 +104,8 @@ export async function POST(request: Request) {
           title: true,
           enrollments: {
             where: {
-              status: EnrollmentStatus.ACTIVE,
-              user: { role: Role.STUDENT }
+              ...activeEnrollmentWindowWhere(),
+              user: { role: Role.STUDENT },
             },
             select: { userId: true }
           },

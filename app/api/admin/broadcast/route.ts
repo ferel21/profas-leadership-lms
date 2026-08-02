@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/services/auth";
 import { prisma } from "@/services/prisma";
 import { z } from "zod";
 import { rateLimit } from "@/services/rate-limit";
+import { activeEnrollmentWindowWhere } from "@/services/enrollment-access";
 
 const broadcastLimiter = rateLimit({ limit: 5, windowMs: 60 * 1000 });
 
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
 
       // Broadcast ke peserta program tertentu
       const enrollments = await prisma.enrollment.findMany({
-        where: { courseId: targetCourseId, status: "ACTIVE" },
+        where: { courseId: targetCourseId, ...activeEnrollmentWindowWhere() },
         select: { userId: true }
       });
       targetUserIds = Array.from(new Set(enrollments.map(e => e.userId)));

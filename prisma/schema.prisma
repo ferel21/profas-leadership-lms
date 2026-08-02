@@ -30,6 +30,7 @@ model User {
   attempts        AssessmentAttempt[]
   attendances     AttendanceRecord[]
   certificates    Certificate[]
+  createdCohorts  Cohort[]            @relation("CohortCreator")
   mentoredCourses Course[]            @relation("CourseMentor")
   discussionPosts DiscussionPost[]
   enrollments     Enrollment[]
@@ -60,6 +61,7 @@ model Course {
   studentsCount        Int             @default(0)
   image                String
   certificateAvailable Boolean         @default(true)
+  enrollmentMode       EnrollmentMode  @default(OPEN)
   published            Boolean         @default(false)
   featured             Boolean         @default(false)
   outcomes             String
@@ -68,6 +70,7 @@ model Course {
   assessments          Assessment[]
   calendarEvents       CalendarEvent[]
   certificates         Certificate[]
+  cohorts              Cohort[]
   mentor               User            @relation("CourseMentor", fields: [mentorId], references: [id])
   nodes                CourseNode[]
   enrollments          Enrollment[]
@@ -203,16 +206,47 @@ model Enrollment {
   id              String           @id @default(cuid())
   userId          String
   courseId        String
+  cohortId        String?
   status          EnrollmentStatus @default(ACTIVE)
+  source          EnrollmentSource @default(DIRECT)
   progressPercent Int              @default(0)
   enrolledAt      DateTime         @default(now())
   completedAt     DateTime?
+  accessStartsAt  DateTime?
+  accessExpiresAt DateTime?
+  accessRevokedAt DateTime?
+  cohort          Cohort?          @relation(fields: [cohortId], references: [id], onDelete: SetNull)
   course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+  @@index([cohortId, accessRevokedAt])
   @@index([courseId, status])
   @@index([userId, status])
+  @@index([userId, accessRevokedAt, accessExpiresAt])
+}
+
+model Cohort {
+  id           String       @id @default(cuid())
+  courseId     String
+  name         String
+  organization String?
+  capacity     Int
+  startsAt     DateTime
+  endsAt       DateTime
+  status       CohortStatus @default(DRAFT)
+  joinCodeHash String?      @unique
+  joinCodeHint String?
+  createdById  String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  course       Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("CohortCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  enrollments  Enrollment[]
+
+  @@index([courseId, status])
+  @@index([createdById, createdAt])
+  @@index([status, startsAt, endsAt])
 }
 
 model Certificate {
@@ -430,6 +464,23 @@ enum AssessmentType {
 enum EnrollmentStatus {
   ACTIVE
   COMPLETED
+}
+
+enum EnrollmentMode {
+  OPEN
+  CODE
+}
+
+enum EnrollmentSource {
+  DIRECT
+  COHORT
+  ADMIN
+}
+
+enum CohortStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
 }
 
 enum PaymentStatus {

@@ -11,6 +11,7 @@ import {
   verifyUploadTicket,
   type MaterialUploadTicketPayload,
 } from "@/services/upload-tickets";
+import { accessibleEnrollmentWhere, activeEnrollmentWindowWhere } from "@/services/enrollment-access";
 
 export const runtime = "nodejs";
 
@@ -128,7 +129,7 @@ async function commitMaterial(
     });
 
     const enrollments = await prisma.enrollment.findMany({
-      where: { courseId: ticket.courseId, status: "ACTIVE" },
+      where: { courseId: ticket.courseId, ...activeEnrollmentWindowWhere() },
       select: { userId: true },
     });
     for (let index = 0; index < enrollments.length; index += 500) {
@@ -228,7 +229,7 @@ export async function POST(request: Request) {
               select: {
                 published: true,
                 enrollments: {
-                  where: { userId: user.id, status: { in: ["ACTIVE", "COMPLETED"] } },
+                  where: accessibleEnrollmentWhere(user.id, undefined, now),
                   select: { id: true },
                 },
               },

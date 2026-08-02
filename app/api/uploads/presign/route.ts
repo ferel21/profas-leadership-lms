@@ -7,6 +7,7 @@ import { prisma } from "@/services/prisma";
 import { rateLimit } from "@/services/rate-limit";
 import { sanitizeMaterialDescription, validateUploadMetadata } from "@/services/upload-policy";
 import { createUploadTicket } from "@/services/upload-tickets";
+import { accessibleEnrollmentWhere } from "@/services/enrollment-access";
 
 export const runtime = "nodejs";
 
@@ -142,7 +143,7 @@ export async function POST(request: Request) {
               select: {
                 published: true,
                 enrollments: {
-                  where: { userId: user.id, status: { in: ["ACTIVE", "COMPLETED"] } },
+                  where: accessibleEnrollmentWhere(user.id, undefined, now),
                   select: { id: true },
                 },
               },

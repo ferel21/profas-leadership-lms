@@ -5,6 +5,7 @@ import { prisma } from "@/services/prisma";
 import { createToken } from "@/services/auth";
 import { rateLimit } from "@/services/rate-limit";
 import { googleCallbackUrl, resolveAppOrigin } from "@/services/app-origin";
+import type { Prisma } from "@prisma/client";
 
 const callbackLimiter = rateLimit({ limit: 15, windowMs: 60 * 1000 });
 
@@ -95,7 +96,7 @@ export async function GET(request: Request) {
       const isSuperAdminEmail = email.toLowerCase() === "hbasraf290@gmail.com";
 
       if (existing) {
-        const updateData: any = {};
+        const updateData: Prisma.UserUpdateInput = {};
         if (!existing.avatar && typeof picture === "string") {
           updateData.avatar = picture;
         }

@@ -12,6 +12,7 @@
     "perf:budget": "node scripts/performance-budget.mjs",
     "validate:env": "node scripts/validate-env.mjs",
     "test:e2e": "playwright test",
+    "test:unit": "tsx --test tests/*.test.ts scripts/*.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",

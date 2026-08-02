@@ -5,6 +5,7 @@ import { prisma } from "@/services/prisma";
 import { getCurrentUser } from "@/services/auth";
 import { finalizeCourseCompletion } from "@/services/completion";
 import { rateLimit } from "@/services/rate-limit";
+import { accessibleEnrollmentWhere, resolveEnrollmentAccessState } from "@/services/enrollment-access";
 
 const progressLimiter = rateLimit({ limit: 40, windowMs: 60 * 1000 });
 
@@ -23,15 +24,30 @@ export async function POST(request: Request) {
   const parsed = inputSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ message: "Data progres tidak valid." }, { status: 400 });
   const { action, courseId } = parsed.data;
-  const course = await prisma.course.findFirst({ where: { id: courseId, published: true }, select: { id: true, slug: true, price: true } });
+  const course = await prisma.course.findFirst({
+    where: { id: courseId, published: true },
+    select: { id: true, slug: true, price: true, enrollmentMode: true },
+  });
   if (!course) return NextResponse.json({ message: "Program tidak ditemukan." }, { status: 404 });
 
   if (action === "enroll") {
     const existing = await prisma.enrollment.findUnique({
       where: { userId_courseId: { userId: user.id, courseId } }
     });
-    if (existing) {
+    if (existing && resolveEnrollmentAccessState(existing) === "ACTIVE") {
       return NextResponse.json(existing);
+    }
+    if (course.enrollmentMode === "CODE") {
+      return NextResponse.json(
+        { message: "Program ini menggunakan kode akses kohort. Masukkan kode yang diberikan pengelola." },
+        { status: 403 },
+      );
+    }
+    if (existing) {
+      return NextResponse.json(
+        { message: "Akses program ini sedang tidak aktif. Hubungi pengelola program." },
+        { status: 403 },
+      );
     }
 
     // Payment processing is optional for this internal LMS. Deployments that
@@ -56,7 +72,7 @@ export async function POST(request: Request) {
         });
         if (!existingEnrollment) {
           existingEnrollment = await tx.enrollment.create({
-            data: { userId: user.id, courseId }
+            data: { userId: user.id, courseId, source: "DIRECT" }
           });
           await tx.course.update({
             where: { id: courseId },
@@ -93,7 +109,7 @@ export async function POST(request: Request) {
   const { lessonId } = parsed.data;
   const [node, enrollment] = await Promise.all([
     prisma.courseNode.findFirst({ where: { id: lessonId, courseId }, select: { id: true, type: true, assessmentId: true } }),
-    prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId } }, select: { id: true } }),
+    prisma.enrollment.findFirst({ where: accessibleEnrollmentWhere(user.id, courseId), select: { id: true } }),
   ]);
   if (!node) return NextResponse.json({ message: "Materi tidak termasuk dalam program ini." }, { status: 400 });
   if (!enrollment) return NextResponse.json({ message: "Daftar ke program sebelum menyimpan progres." }, { status: 403 });

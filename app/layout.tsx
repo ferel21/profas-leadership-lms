@@ -6,6 +6,7 @@ import "@/styles/typography.css";
 import "@/styles/design-system.css";
 import "@/styles/master.css";
 import "@/styles/profas-reframe.css";
+import "@/styles/lms-fresh.css";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profas-leadership-lms.vercel.app";
 

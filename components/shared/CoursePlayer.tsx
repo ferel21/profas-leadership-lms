@@ -508,7 +508,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                   <h1 className="player-title-xl" style={{ margin: "6px 0 0" }}>{current.title}</h1>
                 </div>
                 {current.fileUrl && (
-                  <a className="player-btn-download-sm hover-lift" href={current.fileUrl} target="_blank" rel="noreferrer">
+                  <a className="player-btn-download-sm hover-lift" href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}.pdf`}>
                     <Download size={18} style={{ marginRight: "8px" }} /> Unduh Modul PDF ({current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi"})
                   </a>
                 )}
@@ -568,7 +568,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <h1 className="player-title-read">{current.title}</h1>
               {current.description || current.content ? <div className="player-desc-read">{current.content || current.description}</div> : <div className="player-empty-glass" role="status"><FileText size={40} aria-hidden="true" /><p className="player-empty-text">Konten bacaan belum tersedia untuk materi ini.</p></div>}
               {current.fileUrl && (
-                <a className="player-btn-quiz hover-lift player-btn-dl-mat" href={current.fileUrl} target="_blank" rel="noreferrer"><Download size={18} style={{ marginRight: "10px" }} /> Unduh Berkas Materi</a>
+                <a className="player-btn-quiz hover-lift player-btn-dl-mat" href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}`}><Download size={18} style={{ marginRight: "10px" }} /> Unduh Berkas Materi</a>
               )}
             </article>
           )}
@@ -591,7 +591,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <p className="player-tab-desc">Unduh berkas materi, lembar kerja eksekutif, dan panduan belajar untuk modul ini.</p>
               {current.fileUrl ? (
                 <div className="player-materials-grid">
-                  <a href={current.fileUrl} target="_blank" rel="noreferrer" className="player-mat-card hover-lift">
+                  <a href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}`} className="player-mat-card hover-lift">
                     <div className="player-mat-icon">
                       <Download size={24} />
                     </div>

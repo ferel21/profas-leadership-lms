@@ -279,7 +279,7 @@ export async function verifyStoredObject(input: {
   return { size: actualSize, mimeType: actualMimeType };
 }
 
-export async function createSignedObjectDownload(objectPath: string, expiresInSeconds = 60) {
+export async function createSignedObjectDownload(objectPath: string, expiresInSeconds = 60, forceDownload = false) {
   const config = requireSupabaseConfig();
   const encodedPath = encodeObjectPath(objectPath);
   const response = await fetch(
@@ -287,7 +287,10 @@ export async function createSignedObjectDownload(objectPath: string, expiresInSe
     {
       method: "POST",
       headers: serviceHeaders(config, true),
-      body: JSON.stringify({ expiresIn: Math.max(10, Math.min(expiresInSeconds, 300)) }),
+      body: JSON.stringify({ 
+        expiresIn: Math.max(10, Math.min(expiresInSeconds, 300)),
+        ...(forceDownload ? { download: true } : {})
+      }),
     },
   );
   if (!response.ok) throw new Error(await parseStorageError(response));

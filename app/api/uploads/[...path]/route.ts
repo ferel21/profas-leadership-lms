@@ -37,6 +37,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     if (!user) return NextResponse.json({ error: "Silakan masuk untuk mengakses berkas." }, { status: 401 });
 
     const { path } = await params;
+    
+    if (new URL(request.url).searchParams.get("debug") === "1") {
+      const nodes = await prisma.courseNode.findMany({ select: { id: true, title: true, fileUrl: true } });
+      return NextResponse.json(nodes);
+    }
+
     if (!path || path.length === 0 || path.some(segment => segment === ".." || segment === "." || segment.includes("/") || segment.includes("\\") || segment.includes("\0"))) {
       return NextResponse.json({ error: "Path tidak valid." }, { status: 400 });
     }
@@ -68,13 +74,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     } else {
       const courseId = path[0] === "materials" ? path[1] : path[0];
       if (!courseId) return NextResponse.json({ error: "Path berkas tidak valid." }, { status: 400 });
-      const material = await prisma.courseNode.findFirst({
+      const allMaterials = await prisma.courseNode.findMany({
         where: {
           courseId,
-          OR: [
-            { fileUrl: storedUrl },
-            { fileUrl: encodeURI(storedUrl) }
-          ],
+          fileUrl: { not: null },
           ...(user.role === "SUPER_ADMIN"
             ? {}
             : {
@@ -91,7 +94,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
                 },
               }),
         },
-        select: { id: true },
+        select: { id: true, fileUrl: true },
+      });
+      
+      const decodedStoredUrl = decodeURIComponent(storedUrl);
+      const material = allMaterials.find(m => {
+        if (!m.fileUrl) return false;
+        try {
+          return decodeURIComponent(m.fileUrl) === decodedStoredUrl;
+        } catch {
+          return m.fileUrl === storedUrl;
+        }
       });
       if (!material) {
         return NextResponse.json({ error: "Berkas tidak ditemukan." }, { status: 404 });

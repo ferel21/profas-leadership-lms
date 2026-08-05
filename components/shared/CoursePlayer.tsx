@@ -5,7 +5,6 @@ import Link from "next/link";
 import { AlertCircle, Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, Clock3, Download, FileText, Film, Image as ImageIcon, Link2, LoaderCircle, Menu, MessageSquare, Play, Send, X, Folder, FileCheck, FileCode, RefreshCw } from "lucide-react";
 import { initials } from "@/utils";
 import { CompletionCelebration } from "@/components/ui/CompletionCelebration";
-import { AILeadershipTutor } from "./AILeadershipTutor";
 import type { NodeType } from "@/types/course";
 
 export type DiscussionPost = { id: string; content: string; createdAt: Date | string; user: { id: string; name: string } };
@@ -382,19 +381,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           <div><span>Materi {index + 1} dari {flatLessons.length}</span><b>{current.title}</b></div>
           <Link href="/dashboard">Keluar Kelas</Link>
         </header>
-        <section className="player-resume-summary" aria-labelledby="resume-summary-title">
-          <div className="player-resume-icon" aria-hidden="true"><BookOpen size={20} /></div>
-          <div className="player-resume-copy">
-            <span className="player-resume-kicker">{resumeLessonId === current.id ? "LANJUTKAN BELAJAR" : "RINGKASAN BELAJAR"}</span>
-            <h1 id="resume-summary-title">{current.title}</h1>
-            <p>{remainingCount > 0 ? `Masih ada ${remainingCount} materi yang belum selesai.` : "Semua materi program sudah selesai."} {current.durationMin ? `Durasi sesi ini sekitar ${current.durationMin} menit.` : ""}</p>
-          </div>
-          <div className="player-resume-stats" aria-label="Ringkasan progres">
-            <strong>{percent}%</strong>
-            <span>{done.size}/{flatLessons.length} materi</span>
-          </div>
-          {nextIncomplete && nextIncomplete.id !== current.id && <button type="button" className="player-resume-next" onClick={() => selectLesson(nextIncomplete.id)}>Materi belum selesai <ChevronRight size={16} /></button>}
-        </section>
+
         <section className="lesson-stage">
           {current.type === "VIDEO" || (current.fileUrl && (current.fileUrl.endsWith(".mp4") || current.fileUrl.endsWith(".webm") || current.fileUrl.includes("/video/"))) ? (
             <div className="player-video-shell hover-lift glass">
@@ -659,8 +646,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
           )}
           {message && <p className="player-message" role="alert">{message}</p>}
 
-          {/* AI Leadership Tutor Widget */}
-          <AILeadershipTutor lessonTitle={current.title} />
+
         </section>
         <footer className="player-footer" aria-label="Navigasi materi">
           <button type="button" disabled={index === 0 || busy} aria-disabled={index === 0 || busy} onClick={goPrevious} aria-label="Materi sebelumnya"><ChevronLeft aria-hidden="true" /> <span>Sebelumnya</span></button>

@@ -596,7 +596,7 @@ html body .player-main > header {
 html body .player-main > header span { color: var(--ws-muted) !important; }
 html body .player-main > header b { color: var(--ws-ink) !important; }
 html body .player-main > header > a { min-height: 38px; display: inline-flex; align-items: center; padding: 0 13px; border: 1px solid var(--ws-line); border-radius: 11px; color: var(--ws-body) !important; background: #fff; }
-html body .lesson-stage { width: min(980px, calc(100% - 48px)) !important; padding-top: 28px !important; }
+html body .lesson-stage { width: min(980px, calc(100% - 48px)) !important; padding-top: 28px !important; background: transparent !important; }
 html body .player-card-center,
 html body .player-card-read,
 html body .player-card-compact,
@@ -699,74 +699,7 @@ html body .demo-box { border-color: var(--ws-line) !important; border-radius: 14
   html body .player-layout *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
 
-/* Course Player: resume, module progress, feedback, and resilient states. */
-html body .player-resume-summary {
-  width: min(980px, calc(100% - 48px));
-  margin: 24px auto 0;
-  padding: 18px 20px;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 14px;
-  border: 1px solid var(--ws-line);
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(237,250,247,.9));
-  box-shadow: 0 12px 32px rgba(21, 67, 74, .06);
-}
 
-html body .player-resume-icon {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  color: #fff;
-  background: linear-gradient(135deg, #2a6ba7, #1e5a8f);
-}
-
-html body .player-resume-copy { min-width: 0; }
-html body .player-resume-kicker {
-  display: block;
-  color: var(--ws-accent-dark);
-  font-size: .67rem;
-  font-weight: 800;
-  letter-spacing: .12em;
-}
-html body .player-resume-copy h1 {
-  margin: 3px 0;
-  color: var(--ws-ink);
-  font-size: 1rem;
-  line-height: 1.35;
-}
-html body .player-resume-copy p {
-  margin: 0;
-  color: var(--ws-muted);
-  font-size: .78rem;
-  line-height: 1.5;
-}
-html body .player-resume-stats {
-  min-width: 80px;
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-html body .player-resume-stats strong { color: var(--ws-accent-dark); font-size: 1.35rem; line-height: 1; }
-html body .player-resume-stats span { color: var(--ws-muted); font-size: .7rem; margin-top: 4px; }
-html body .player-resume-next {
-  min-height: 38px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 0 11px;
-  color: var(--ws-accent-dark);
-  background: #fff;
-  border: 1px solid var(--ws-line);
-  border-radius: 10px;
-  font-size: .72rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-html body .player-resume-next:hover { background: var(--ws-mint); }
 
 html body .overall-progress > i[role="progressbar"] { overflow: hidden; }
 html body .overall-progress > small { display: block; margin-top: 7px; color: var(--ws-muted); font-size: .68rem; }

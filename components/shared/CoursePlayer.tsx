@@ -188,10 +188,16 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
     if (downloadingUrl === url) return;
     setDownloadingUrl(url);
     try {
-      const res = await fetch(`${url}?get_url=1&download=1`);
+      const res = await fetch(`${url}?get_url=1&download=1`, { credentials: "include" });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status} ${text}`);
+        // Tembakan fetch gagal, coba langsung menggunakan link biasa agar browser bisa memproses atau menampilkan error asli server.
+        const a = document.createElement("a");
+        a.href = `${url}?download=1`;
+        a.target = "_blank";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
       }
       const contentType = res.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {

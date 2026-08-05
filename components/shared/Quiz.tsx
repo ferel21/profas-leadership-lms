@@ -59,7 +59,7 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
       setCurrent(0);
       setAttemptId("");
       setExpiresAtMs(null);
-      setSeconds(0);
+      setSeconds(15);
       setAttemptClosed(false);
     }
 
@@ -87,7 +87,7 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
 
       setAttemptId(data.attemptId);
       setExpiresAtMs(serverExpiresAt);
-      setSeconds(Math.max(0, Math.ceil((serverExpiresAt - Date.now()) / 1000)));
+      setSeconds(15);
     } catch (startError) {
       if (startError instanceof DOMException && startError.name === "AbortError") return;
       setError("Koneksi bermasalah. Sesi evaluasi belum dapat dimulai.");
@@ -193,14 +193,17 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
   }, [startAttempt]);
 
   useEffect(() => {
-    if (expiresAtMs === null || result || attemptClosed) return;
-    const updateRemainingTime = () => {
-      setSeconds(Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 1000)));
-    };
-    updateRemainingTime();
-    const timer = window.setInterval(updateRemainingTime, 250);
+    if (expiresAtMs === null || result || attemptClosed || starting || loading || submitting.current) return;
+    
+    // Timer 15 detik per soal
+    const timer = window.setInterval(() => {
+      setSeconds(prev => {
+        if (prev <= 1) return 0;
+        return prev - 1;
+      });
+    }, 1000);
     return () => window.clearInterval(timer);
-  }, [attemptClosed, expiresAtMs, result]);
+  }, [attemptClosed, expiresAtMs, result, starting, loading]);
 
   useEffect(() => {
     if (
@@ -211,12 +214,21 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
       && !starting
       && !loading
       && !attemptClosed
-      && !timeoutSubmitted.current
+      && !submitting.current
     ) {
-      timeoutSubmitted.current = true;
-      void submit();
+      if (current < assessment.questions.length - 1) {
+        // Lanjut ke soal berikutnya secara otomatis
+        setCurrent(c => c + 1);
+        setSeconds(15);
+      } else {
+        // Submit otomatis jika soal terakhir
+        if (!timeoutSubmitted.current) {
+          timeoutSubmitted.current = true;
+          void submit();
+        }
+      }
     }
-  }, [attemptClosed, attemptId, expiresAtMs, seconds, result, starting, loading, submit]);
+  }, [attemptClosed, attemptId, expiresAtMs, seconds, result, starting, loading, submit, current, assessment.questions.length]);
 
   function retry() {
     void startAttempt(true);
@@ -381,9 +393,9 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
           </span>
         )}
       </div>
-      <span className={`pf-quiz-timer ${seconds <= 60 ? "time-warning" : ""}`} role="timer" aria-label={`Sisa waktu ${Math.floor(seconds / 60)} menit ${seconds % 60} detik`}>
+      <span className={`pf-quiz-timer ${seconds <= 5 ? "time-warning" : ""}`} role="timer" aria-label={`Sisa waktu ${seconds} detik`}>
         <Clock3 aria-hidden="true" />
-        <b>{String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}</b>
+        <b>00:{String(seconds).padStart(2, "0")}</b>
       </span>
     </header>
     <main className="pf-quiz-main">
@@ -474,13 +486,10 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
           {attemptClosed ? "Mulai percobaan baru" : "Kirim ulang"}
         </button>
       </div>}
-      <footer className="glass pf-quiz-footer">
-        <button type="button" className="btn btn-outline" disabled={current === 0 || loading || attemptClosed} onClick={() => setCurrent(current - 1)}>
-          <ArrowLeft aria-hidden="true" /> Sebelumnya
-        </button>
-        <small aria-live="polite">{Object.keys(answers).length} dari {assessment.questions.length} terjawab</small>
+      <footer className="glass pf-quiz-footer" style={{ justifyContent: "flex-end" }}>
+        <small aria-live="polite" style={{ marginRight: "auto" }}>{Object.keys(answers).length} dari {assessment.questions.length} terjawab</small>
         {current < assessment.questions.length - 1
-          ? <button type="button" className="btn btn-primary" disabled={loading || attemptClosed} onClick={() => setCurrent(current + 1)}>
+          ? <button type="button" className="btn btn-primary" disabled={loading || attemptClosed} onClick={() => { setCurrent(current + 1); setSeconds(15); }}>
               Berikutnya <ArrowRight aria-hidden="true" />
             </button>
           : <button type="button" className="btn btn-primary" disabled={Object.keys(answers).length < assessment.questions.length || loading || attemptClosed} onClick={() => void submit()}>

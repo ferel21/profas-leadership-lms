@@ -93,15 +93,22 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
   const [mediaError, setMediaError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [maxWatched, setMaxWatched] = useState(0);
+  const [videoCompleted, setVideoCompleted] = useState(false);
 
   useEffect(() => {
     setMaxWatched(0);
+    setVideoCompleted(false);
   }, [currentId]);
 
   const handleTimeUpdate = () => {
     if (videoRef.current && !videoRef.current.seeking) {
-      if (videoRef.current.currentTime > maxWatched) {
-        setMaxWatched(videoRef.current.currentTime);
+      const cur = videoRef.current.currentTime;
+      const dur = videoRef.current.duration;
+      if (cur > maxWatched) {
+        setMaxWatched(cur);
+      }
+      if (dur > 0 && cur >= dur - 1) {
+        setVideoCompleted(true);
       }
     }
   };
@@ -119,6 +126,24 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
       setNoteText(saved || "");
     }
   }, [currentId, currentUser.id]);
+
+  useEffect(() => {
+    const current = flatLessons.find(l => l.id === currentId);
+    if (!current) return;
+    
+    if (current.type === "VIDEO") {
+      const isNativeVideo = (current.fileUrl && (current.fileUrl.endsWith(".mp4") || current.fileUrl.endsWith(".webm") || current.fileUrl.startsWith("/api/uploads/"))) || (current.content && (current.content.endsWith(".mp4") || current.content.endsWith(".webm")));
+      if (!isNativeVideo) {
+        // Fallback timer for iframes based on durationMin (min 30s)
+        const timeout = setTimeout(() => {
+          setVideoCompleted(true);
+        }, Math.max((current.durationMin || 1) * 60 * 1000, 30000));
+        return () => clearTimeout(timeout);
+      }
+    } else {
+      setVideoCompleted(true);
+    }
+  }, [currentId, flatLessons]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -403,6 +428,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                     onError={() => setMediaError(true)}
                     onTimeUpdate={handleTimeUpdate}
                     onSeeking={handleSeeking}
+                    onEnded={() => setVideoCompleted(true)}
                   />
                 ) : !current.fileUrl && !current.content ? (
                   <div className="player-media-error" role="alert">
@@ -651,8 +677,10 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
         <footer className="player-footer" aria-label="Navigasi materi">
           <button type="button" disabled={index === 0 || busy} aria-disabled={index === 0 || busy} onClick={goPrevious} aria-label="Materi sebelumnya"><ChevronLeft aria-hidden="true" /> <span>Sebelumnya</span></button>
           <span aria-label={`Durasi ${current.durationMin} menit`}><Clock3 aria-hidden="true" /> {current.durationMin} menit</span>
-          <button type="button" className="player-next-btn" disabled={index === flatLessons.length - 1 || busy} aria-disabled={index === flatLessons.length - 1 || busy} onClick={goNext} aria-label="Materi berikutnya">Berikutnya <ChevronRight aria-hidden="true" /></button>
-          <button type="button" className="complete-btn" onClick={complete} disabled={busy} aria-busy={busy} aria-pressed={done.has(current.id)}>{busy ? <><LoaderCircle className="spin" aria-hidden="true" /> <span>Menyimpan...</span></> : done.has(current.id) ? <><Check aria-hidden="true" /> {index < flatLessons.length - 1 ? "Lanjut Materi Berikutnya" : "Sudah selesai"}</> : <>Tandai Selesai <ChevronRight aria-hidden="true" /></>}</button>
+          <button type="button" className="player-next-btn" disabled={index === flatLessons.length - 1 || busy || (!videoCompleted && !done.has(current.id) && current.type === "VIDEO")} onClick={goNext} aria-label="Materi berikutnya">Berikutnya <ChevronRight aria-hidden="true" /></button>
+          <button type="button" className="complete-btn" onClick={complete} disabled={busy || (!videoCompleted && !done.has(current.id) && current.type === "VIDEO")} aria-busy={busy} aria-pressed={done.has(current.id)}>
+            {busy ? <><LoaderCircle className="spin" aria-hidden="true" /> <span>Menyimpan...</span></> : done.has(current.id) ? <><Check aria-hidden="true" /> {index < flatLessons.length - 1 ? "Lanjut Materi Berikutnya" : "Sudah selesai"}</> : (!videoCompleted && current.type === "VIDEO") ? <>Selesaikan Video <ChevronRight aria-hidden="true" /></> : <>Tandai Selesai <ChevronRight aria-hidden="true" /></>}
+          </button>
         </footer>
       </main>
     </div>

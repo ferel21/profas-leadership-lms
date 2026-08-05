@@ -142,7 +142,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     }
     const filePath = candidates.find((candidate): candidate is string => Boolean(candidate && existsSync(candidate)));
     if (!filePath) {
-      return NextResponse.json({ error: "Berkas tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "File PDF tidak ditemukan di penyimpanan server (kemungkinan terhapus atau belum diunggah secara fisik). Harap unggah ulang materi ini." }, { status: 404 });
     }
 
     const buffer = await readFile(filePath);

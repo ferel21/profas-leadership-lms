@@ -71,7 +71,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
       const material = await prisma.courseNode.findFirst({
         where: {
           courseId,
-          fileUrl: storedUrl,
+          OR: [
+            { fileUrl: storedUrl },
+            { fileUrl: encodeURI(storedUrl) }
+          ],
           ...(user.role === "SUPER_ADMIN"
             ? {}
             : {

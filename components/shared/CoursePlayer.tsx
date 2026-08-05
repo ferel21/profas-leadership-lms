@@ -52,6 +52,100 @@ function typeIcon(type: NodeType) {
   }
 }
 
+function getYouTubeId(url: string | null) {
+  if (!url) return null;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+  return match ? match[1] : null;
+}
+
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
+function YouTubeEmbed({ videoId, onEnded, done }: { videoId: string; onEnded: () => void; done: boolean }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
+  const maxWatchedRef = useRef(0);
+
+  useEffect(() => {
+    maxWatchedRef.current = 0;
+
+    const initPlayer = () => {
+      if (!containerRef.current || !window.YT) return;
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
+      playerRef.current = new window.YT.Player(containerRef.current, {
+        videoId,
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          disablekb: 1,
+          rel: 0,
+          modestbranding: 1,
+        },
+        events: {
+          onStateChange: (event: any) => {
+            if (event.data === window.YT.PlayerState.ENDED) {
+              onEnded();
+            }
+          }
+        }
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      if (firstScriptTag && firstScriptTag.parentNode) {
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      } else {
+        document.head.appendChild(tag);
+      }
+      
+      const previousReady = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (previousReady) previousReady();
+        initPlayer();
+      };
+    }
+
+    return () => {
+      if (playerRef.current) playerRef.current.destroy();
+    };
+  }, [videoId]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playerRef.current && typeof playerRef.current.getCurrentTime === "function") {
+        const cur = playerRef.current.getCurrentTime();
+        const dur = playerRef.current.getDuration();
+        
+        if (cur > maxWatchedRef.current) {
+          if (cur - maxWatchedRef.current > 3 && !done) {
+            playerRef.current.seekTo(maxWatchedRef.current, true);
+          } else {
+            maxWatchedRef.current = cur;
+          }
+        }
+        
+        if (dur > 0 && cur >= dur - 1) {
+          onEnded();
+        }
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [done, onEnded]);
+
+  return <div ref={containerRef} className="player-video-inner" style={{ width: '100%', height: '100%', border: 'none' }} />;
+}
+
 export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerProps) {
   // Flatten tree to get ordered lessons for previous/next navigation
   const flatLessons = useMemo(() => {
@@ -133,8 +227,10 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
     
     if (current.type === "VIDEO") {
       const isNativeVideo = (current.fileUrl && (current.fileUrl.endsWith(".mp4") || current.fileUrl.endsWith(".webm") || current.fileUrl.startsWith("/api/uploads/"))) || (current.content && (current.content.endsWith(".mp4") || current.content.endsWith(".webm")));
-      if (!isNativeVideo) {
-        // Fallback timer for iframes based on durationMin (min 30s)
+      const ytId = getYouTubeId(current.fileUrl);
+
+      if (!isNativeVideo && !ytId) {
+        // Fallback timer for non-YouTube iframes based on durationMin (min 30s)
         const timeout = setTimeout(() => {
           setVideoCompleted(true);
         }, Math.max((current.durationMin || 1) * 60 * 1000, 30000));
@@ -436,6 +532,12 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                     <strong>Video belum tersedia</strong>
                     <span>Materi ini belum ditautkan ke sumber video.</span>
                   </div>
+                ) : getYouTubeId(current.fileUrl) ? (
+                  <YouTubeEmbed 
+                    videoId={getYouTubeId(current.fileUrl)!} 
+                    onEnded={() => setVideoCompleted(true)} 
+                    done={done.has(current.id)} 
+                  />
                 ) : (
                   <>
                     <iframe

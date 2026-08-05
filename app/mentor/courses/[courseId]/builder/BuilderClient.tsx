@@ -60,7 +60,7 @@ function typeBadge(type: NodeType) {
   return <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "12px", background: c.bg, color: c.text, letterSpacing: "0.5px" }}>{type}</span>;
 }
 
-export function BuilderClient({ course }: { course: { id: string; nodes: CourseNode[] } }) {
+export function BuilderClient({ course }: { course: { id: string; published: boolean; nodes: CourseNode[] } }) {
   // MASTER SKILL: Auto-Backup & Auto-Restore ke localStorage (Menanggulangi reset database ephemeral Vercel)
   const {
     items: nodes,
@@ -72,6 +72,8 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [isPublished, setIsPublished] = useState(course.published);
+  const [togglingPublish, setTogglingPublish] = useState(false);
 
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -499,6 +501,47 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
             style={{ padding: '10px 16px', borderRadius: '12px', fontWeight: 600, fontSize: '13px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', border: '1px solid rgba(239, 68, 68, 0.2)' }}
           >
             Hapus Program
+          </button>
+          
+          <button
+            onClick={async () => {
+              if (!isPublished && nodes.filter(n => n.type !== "FOLDER").length === 0) {
+                alert("Tambahkan minimal satu materi (bukan folder) sebelum menerbitkan program.");
+                return;
+              }
+              if (confirm(isPublished ? "Sembunyikan program ini dari publik?" : "Terbitkan program ini agar dapat diakses peserta?")) {
+                setTogglingPublish(true);
+                try {
+                  const res = await fetch(`/api/mentor/courses`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id: course.id, published: !isPublished })
+                  });
+                  if (res.ok) {
+                    setIsPublished(!isPublished);
+                    alert(isPublished ? "Program disembunyikan." : "Program berhasil diterbitkan.");
+                  } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(`Gagal mempublikasi: ${err.message || res.statusText}`);
+                  }
+                } catch (e: any) {
+                  alert(`Terjadi kesalahan: ${e.message}`);
+                } finally {
+                  setTogglingPublish(false);
+                }
+              }
+            }}
+            disabled={togglingPublish || saving}
+            className={`btn hover-lift ${isPublished ? 'btn-outline' : 'btn-primary'}`}
+            style={{ 
+              padding: '10px 16px', borderRadius: '12px', fontWeight: 600, fontSize: '13px',
+              ...(isPublished 
+                ? { borderColor: 'var(--border)', color: 'var(--muted)' }
+                : { background: BRAND_COLORS.green, color: 'white', border: 'none' })
+            }}
+          >
+            {togglingPublish ? <Loader2 size={16} className="animate-spin" /> : null}
+            {isPublished ? "Berstatus: Terbit (Klik untuk Draf)" : "🚀 Terbitkan Program"}
           </button>
           {backupRestored && (
             <button 

@@ -417,6 +417,12 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                     onTimeUpdate={handleTimeUpdate}
                     onSeeking={handleSeeking}
                   />
+                ) : !current.fileUrl && !current.content ? (
+                  <div className="player-media-error" role="alert">
+                    <AlertCircle size={34} aria-hidden="true" />
+                    <strong>Video belum tersedia</strong>
+                    <span>Materi ini belum ditautkan ke sumber video.</span>
+                  </div>
                 ) : (
                   <>
                     <iframe

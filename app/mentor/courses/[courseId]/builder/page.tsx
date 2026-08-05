@@ -31,7 +31,7 @@ export default async function CourseBuilderPage({ params }: { params: Promise<{ 
   });
   
   const treeNodes = nodes.filter(n => !n.parentId).map(buildTree);
-  const shapedCourse = { id: course.id, nodes: treeNodes };
+  const shapedCourse = { id: course.id, published: course.published, nodes: treeNodes };
 
   return (
     <DashboardChrome user={user}>

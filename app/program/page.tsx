@@ -26,7 +26,8 @@ type CatalogCourse = {
 
 const getCachedCourse = cachedQuery(
   () => prisma.course.findFirst({
-    where: { published: true, slug: "profas-leadership" },
+    where: { published: true },
+    orderBy: { createdAt: "desc" },
     select: {
       id: true,
       slug: true,
@@ -48,8 +49,8 @@ const getCachedCourse = cachedQuery(
       },
     },
   }),
-  ["program-catalog-single"],
-  3600,
+  ["program-catalog-latest"],
+  60,
 );
 
 async function getCourse(): Promise<CatalogCourse | null> {
@@ -59,7 +60,7 @@ async function getCourse(): Promise<CatalogCourse | null> {
     return {
       ...course,
       description: course.description ?? "",
-      mentor: { name: course.mentor?.name ?? "Mentor PROFAS" },
+      mentor: { name: course.mentor?.name ?? "Mentor Utama" },
       nodes: course.nodes.map(n => ({ ...n, parentId: n.parentId ?? null, description: n.description ?? null })),
     };
   } catch (error) {
@@ -87,7 +88,7 @@ export default async function ProgramsPage() {
             <div className="pf-hero-copy pf-catalog-hero-copy">
               <span className="pf-kicker">
                 <span aria-hidden="true" />
-                PROGRAM PROFAS LEADERSHIP
+                {course?.title?.toUpperCase() || "PROGRAM KEPEMIMPINAN"}
               </span>
               <h1 id="catalog-title">
                 Satu paket,<br />
@@ -101,8 +102,8 @@ export default async function ProgramsPage() {
             <aside className="pf-catalog-hero-aside" aria-label="Peta jalur program">
               <div className="pf-catalog-route-card">
                 <div className="pf-catalog-route-heading">
-                  <span>PROFAS LEADERSHIP</span>
-                  <b>3 modul</b>
+                  <span>{course?.title || "Program Belajar"}</span>
+                  <b>{modules.length} modul</b>
                 </div>
                 <h2>Mulai dari pilar yang paling dekat.</h2>
                 <div className="pf-catalog-route-list">
@@ -136,8 +137,8 @@ export default async function ProgramsPage() {
             <div className="pf-package-detail">
               {/* Package Info */}
               <div className="pf-package-detail-info">
-                <div className="pf-package-detail-badge">1 PAKET · 3 MODUL · Rp499.000</div>
-                <h2>PROFAS LEADERSHIP</h2>
+                <div className="pf-package-detail-badge">1 PAKET · {modules.length} MODUL · {course?.price === 0 ? "Gratis" : `Rp${(course?.price || 0).toLocaleString("id-ID")}`}</div>
+                <h2>{course?.title || "PROGRAM KEPEMIMPINAN"}</h2>
                 <p>{course?.description ?? "Program intensif yang memadukan tiga pilar utama — kepemimpinan, pertumbuhan diri, dan kewirausahaan."}</p>
 
                 <div className="pf-package-detail-stats">
@@ -182,11 +183,11 @@ export default async function ProgramsPage() {
               {/* CTA */}
               <div className="pf-package-detail-cta">
                 <div className="pf-package-detail-price">
-                  <small>Investasi untuk 3 modul lengkap</small>
-                  <strong>Rp499.000</strong>
+                  <small>Investasi untuk {modules.length} modul lengkap</small>
+                  <strong>{course?.price === 0 ? "Gratis" : `Rp${(course?.price || 0).toLocaleString("id-ID")}`}</strong>
                 </div>
                 <Link
-                  href={`/program/${course?.slug ?? "profas-leadership"}`}
+                  href={`/program/${course?.slug ?? ""}`}
                   className="pf-home-button pf-home-button-primary"
                 >
                   <BookOpen aria-hidden="true" />

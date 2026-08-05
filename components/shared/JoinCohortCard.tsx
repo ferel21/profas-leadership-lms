@@ -39,6 +39,7 @@ export function JoinCohortCard() {
       if (!response.ok) throw new Error(data?.message || "Kode akses belum dapat diproses.");
       setResult(data as JoinResult);
       setCode("");
+      router.push(`/belajar/${data.course.slug}`);
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kode akses belum dapat diproses.");

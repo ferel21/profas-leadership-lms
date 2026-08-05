@@ -107,7 +107,16 @@ export default async function LearnPage({ params }: { params: Promise<{ slug: st
   };
 
   const firstIncomplete = getFirstIncomplete(treeNodes) ?? getFirstLesson(treeNodes);
-  if (!firstIncomplete) notFound();
+  if (!firstIncomplete) {
+    return (
+      <div className="pf-public-page">
+        <main className="container" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
+          <h2>Materi belum tersedia</h2>
+          <p>Mentor belum menambahkan materi ke dalam program ini. Silakan periksa kembali nanti.</p>
+        </main>
+      </div>
+    );
+  }
 
   return <CoursePlayer course={shapedCourse} initialLessonId={firstIncomplete.id} currentUser={{ id: user.id, name: user.name }} />;
 }

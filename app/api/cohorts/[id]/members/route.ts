@@ -5,6 +5,7 @@ import {
   addCohortMember,
   CohortMembershipError,
   revokeCohortMember,
+  restoreCohortMember,
 } from "@/services/cohort-membership";
 import { rateLimit } from "@/services/rate-limit";
 
@@ -68,6 +69,42 @@ export async function DELETE(request: Request, context: RouteContext) {
 
   try {
     const result = await revokeCohortMember(user, id, parsed.data.userId);
+    return NextResponse.json(result);
+  } catch (error) {
+    return membershipErrorResponse(error);
+  }
+}
+
+const updateMemberSchema = z.object({
+  userId: z.string().min(1).max(100),
+  action: z.enum(["restore"]),
+});
+
+export async function PATCH(request: Request, context: RouteContext) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ message: "Silakan masuk." }, { status: 401 });
+
+  const limit = memberLimiter.check(request, user.id);
+  if (!limit.success) {
+    return NextResponse.json({ message: "Terlalu banyak perubahan anggota. Silakan tunggu sebentar." }, { status: 429 });
+  }
+
+  const [{ id }, parsed] = await Promise.all([
+    context.params,
+    request.json().catch(() => null).then((body) => updateMemberSchema.safeParse(body)),
+  ]);
+
+  if (!parsed.success) {
+    return NextResponse.json({ message: "Payload tidak valid." }, { status: 400 });
+  }
+
+  try {
+    let result;
+    if (parsed.data.action === "restore") {
+      result = await restoreCohortMember(user, id, parsed.data.userId);
+    } else {
+      return NextResponse.json({ message: "Aksi tidak didukung." }, { status: 400 });
+    }
     return NextResponse.json(result);
   } catch (error) {
     return membershipErrorResponse(error);

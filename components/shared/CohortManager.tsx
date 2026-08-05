@@ -11,6 +11,7 @@ import {
   Plus,
   RefreshCw,
   ShieldCheck,
+  UserCheck,
   UserMinus,
   UsersRound,
   X,
@@ -225,6 +226,25 @@ export function CohortManager({ courses, initialCohorts }: { courses: CourseOpti
     }
   }
 
+  async function restoreMember(userId: string, name: string) {
+    if (!selectedId || !window.confirm(`Pulihkan akses ${name}?`)) return;
+    setBusy(`restore-${userId}`);
+    setNotice(null);
+    try {
+      await requestJson(`/api/cohorts/${selectedId}/members`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action: "restore" }),
+      });
+      setNotice({ type: "success", text: `Akses ${name} berhasil dipulihkan.` });
+      await refreshCohorts(selectedId);
+    } catch (error) {
+      setNotice({ type: "error", text: error instanceof Error ? error.message : "Akses belum dapat dipulihkan." });
+    } finally {
+      setBusy("");
+    }
+  }
+
   async function copyCode() {
     if (!revealedCode) return;
     await navigator.clipboard.writeText(revealedCode.code);
@@ -342,6 +362,7 @@ export function CohortManager({ courses, initialCohorts }: { courses: CourseOpti
                         <span className="pf-cohort-member-progress"><i><em style={{ width: `${member.progressPercent}%` }} /></i><b>{member.progressPercent}%</b></span>
                         <span className="pf-cohort-member-source">{member.accessRevokedAt ? "Dicabut" : member.source === "ADMIN" ? "Ditambahkan admin" : "Kode akses"}</span>
                         {!member.accessRevokedAt && <button type="button" onClick={() => void revokeMember(member.user.id, member.user.name)} disabled={busy === `revoke-${member.user.id}`} aria-label={`Nonaktifkan akses ${member.user.name}`}><UserMinus aria-hidden="true" />Cabut</button>}
+                        {member.accessRevokedAt && <button type="button" onClick={() => void restoreMember(member.user.id, member.user.name)} disabled={busy === `restore-${member.user.id}`} aria-label={`Pulihkan akses ${member.user.name}`}><UserCheck aria-hidden="true" />Pulihkan</button>}
                       </article>
                     ))}
                   </div>

@@ -328,3 +328,58 @@ export async function revokeCohortMember(actor: CohortActor, cohortId: string, t
     return { enrollmentId: enrollment.id, changed: true };
   });
 }
+
+export async function restoreCohortMember(actor: CohortActor, cohortId: string, targetUserId: string) {
+  assertManager(actor);
+
+  return withSerializableRetry(async (tx) => {
+    const cohort = await tx.cohort.findFirst({
+      where: {
+        id: cohortId,
+        ...(actor.role === "MENTOR" ? { course: { mentorId: actor.id } } : {}),
+      },
+      select: { id: true, name: true, course: { select: { id: true, title: true } } },
+    });
+    if (!cohort) {
+      throw new CohortMembershipError(404, "Kohort tidak ditemukan.", "COHORT_NOT_FOUND");
+    }
+
+    const enrollment = await tx.enrollment.findFirst({
+      where: { cohortId, userId: targetUserId },
+      select: { id: true, accessRevokedAt: true },
+    });
+    if (!enrollment) {
+      throw new CohortMembershipError(404, "Anggota kohort tidak ditemukan.", "MEMBER_NOT_FOUND");
+    }
+    if (!enrollment.accessRevokedAt) {
+      return { enrollmentId: enrollment.id, changed: false };
+    }
+
+    await tx.enrollment.update({
+      where: { id: enrollment.id },
+      data: { accessRevokedAt: null },
+    });
+    await tx.notification.create({
+      data: {
+        userId: targetUserId,
+        title: "Akses program dipulihkan",
+        message: `Akses Anda ke ${cohort.course.title} melalui ${cohort.name} telah dipulihkan.`,
+        type: "COHORT_ACCESS_RESTORED",
+        link: "/dashboard",
+      },
+    });
+    await tx.activityLog.create({
+      data: {
+        userId: actor.id,
+        action: "COHORT_MEMBER_RESTORE",
+        metadata: JSON.stringify({
+          cohortId: cohort.id,
+          courseId: cohort.course.id,
+          targetUserId,
+        }),
+      },
+    });
+
+    return { enrollmentId: enrollment.id, changed: true };
+  });
+}

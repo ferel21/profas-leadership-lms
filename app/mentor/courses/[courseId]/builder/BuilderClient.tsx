@@ -354,6 +354,7 @@ export function BuilderClient({ course }: { course: { id: string; published: boo
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             {(node.type === "QUIZ" || node.type === "ASSIGNMENT") ? (
+              <>
               <button 
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={async (e) => {
@@ -435,6 +436,7 @@ export function BuilderClient({ course }: { course: { id: string; published: boo
               >
                 <Copy size={14}/> Duplikat
               </button>
+              </>
             ) : node.type !== "FOLDER" ? (
               <button 
                 onMouseDown={(e) => e.stopPropagation()}

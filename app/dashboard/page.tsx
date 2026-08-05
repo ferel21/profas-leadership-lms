@@ -169,14 +169,14 @@ export default async function DashboardPage() {
               <header className="pf-student-section-heading">
                 <div>
                   <span>Ruang belajar</span>
-                  <h2 id="other-programs-title">Program lainnya</h2>
+                  <h2 id="other-programs-title">Semua program</h2>
                 </div>
                 <Link href="/program">Lihat katalog <ArrowRight aria-hidden="true" /></Link>
               </header>
 
-              {otherEnrollments.length > 0 ? (
+              {sortedEnrollments.length > 0 ? (
                 <div className="pf-student-program-list">
-                  {otherEnrollments.map(item => {
+                  {sortedEnrollments.map(item => {
                     const isCompleted = item.status === "COMPLETED" || item.progressPercent === 100;
                     return (
                       <Link href={`/belajar/${item.course.slug}`} key={item.id} className="pf-student-program-row">

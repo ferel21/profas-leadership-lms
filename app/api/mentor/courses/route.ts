@@ -229,34 +229,9 @@ export async function PATCH(request: Request) {
     const validLevel = typeof level === "string" ? (level as CourseLevel) : undefined;
 
     if (published === true && !course.published) {
-      const nodes = await prisma.courseNode.findMany({
-        where: { courseId: id },
-        select: {
-          id: true,
-          title: true,
-          type: true,
-          fileUrl: true,
-          content: true,
-          assessmentId: true,
-          assessment: { select: { _count: { select: { questions: true } } } },
-        },
-      });
-      const lessons = nodes.filter(node => node.type !== "FOLDER");
-      if (lessons.length === 0) {
-        return NextResponse.json({ message: "Tambahkan minimal satu materi sebelum menerbitkan program." }, { status: 409 });
-      }
-      const incomplete = lessons.find(node => {
-        if (node.type === "QUIZ" || node.type === "ASSIGNMENT") {
-          return !node.assessmentId || !node.assessment || node.assessment._count.questions === 0;
-        }
-        if (node.type === "TEXT") return !node.content?.trim();
-        return !node.fileUrl?.trim() && !node.content?.trim();
-      });
-      if (incomplete) {
-        return NextResponse.json({
-          message: `Materi "${incomplete.title}" belum memiliki konten atau evaluasi yang siap.`,
-        }, { status: 409 });
-      }
+      // Validasi ketat dinonaktifkan sementara agar mentor bisa menerbitkan
+      // program kosong untuk keperluan pengujian alur pendaftaran peserta.
+      // Peserta akan melihat halaman "Materi belum tersedia" jika kosong.
     }
 
     const updated = await prisma.$transaction(async (tx) => {

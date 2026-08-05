@@ -66,8 +66,7 @@ export function EnrollButton({
       });
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.message || "Kode akses belum dapat diproses.");
-      const startsAt = new Date(data.startsAt);
-      router.push(startsAt <= new Date() ? `/belajar/${data.course.slug}` : "/dashboard");
+      router.push(`/belajar/${data.course.slug}`);
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Koneksi sedang bermasalah. Coba lagi.");

@@ -47,8 +47,6 @@ export function JoinCohortCard() {
     }
   }
 
-  const accessStarted = result ? new Date(result.startsAt) <= new Date() : false;
-
   return (
     <section className="pf-cohort-join-card" aria-labelledby="cohort-code-title">
       <div className="pf-cohort-join-icon"><KeyRound aria-hidden="true" /></div>
@@ -81,11 +79,9 @@ export function JoinCohortCard() {
           <span>
             <strong>{result.course.title}</strong> melalui {result.cohort.name} berhasil ditambahkan.
           </span>
-          {accessStarted && (
-            <button type="button" onClick={() => router.push(`/belajar/${result.course.slug}`)}>
-              Buka program <ArrowRight aria-hidden="true" />
-            </button>
-          )}
+          <button type="button" onClick={() => router.push(`/belajar/${result.course.slug}`)}>
+            Buka program <ArrowRight aria-hidden="true" />
+          </button>
         </div>
       )}
     </section>

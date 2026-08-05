@@ -51,7 +51,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
           title,
           category,
           level,
-          shortDescription,
+          shortDescription: shortDescription || "Deskripsi singkat program",
           price: Number(price) || 0,
           durationHours: Number(duration) || 10
         })

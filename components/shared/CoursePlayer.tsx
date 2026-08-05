@@ -189,7 +189,10 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
     setDownloadingUrl(url);
     try {
       const res = await fetch(`${url}?get_url=1&download=1`);
-      if (!res.ok) throw new Error("Gagal mengambil akses berkas");
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status} ${text}`);
+      }
       const contentType = res.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         const data = await res.json();
@@ -215,7 +218,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      alert("Terjadi kesalahan saat mengunduh berkas. Coba muat ulang halaman.");
+      alert(`Gagal: ${err instanceof Error ? err.message : "Kesalahan tidak diketahui"}`);
     } finally {
       setDownloadingUrl(null);
     }

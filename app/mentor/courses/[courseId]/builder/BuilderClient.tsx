@@ -478,6 +478,28 @@ export function BuilderClient({ course }: { course: { id: string; nodes: CourseN
           <p style={{ color: 'var(--muted)', margin: 0 }}>Tarik dan lepas (drag & drop) untuk menyusun urutan materi dengan bebas.</p>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={async () => {
+              if (confirm("Apakah Anda yakin ingin menghapus seluruh program ini? Program yang sudah dipublish atau memiliki peserta tidak dapat dihapus.")) {
+                try {
+                  const res = await fetch(`/api/mentor/courses?id=${course.id}`, { method: "DELETE" });
+                  if (res.ok) {
+                    alert("Program berhasil dihapus.");
+                    window.location.href = "/mentor/courses";
+                  } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(`Gagal menghapus: ${err.message || res.statusText}`);
+                  }
+                } catch (e: any) {
+                  alert(`Terjadi kesalahan: ${e.message}`);
+                }
+              }
+            }}
+            className="btn hover-lift"
+            style={{ padding: '10px 16px', borderRadius: '12px', fontWeight: 600, fontSize: '13px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+          >
+            Hapus Program
+          </button>
           {backupRestored && (
             <button 
               onClick={() => {

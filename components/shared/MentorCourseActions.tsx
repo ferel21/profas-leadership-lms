@@ -172,58 +172,7 @@ export function MentorCourseActions({ courses = [] }: { courses?: CourseOption[]
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
-                  <select
-                    value={category} onChange={e => setCategory(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition cursor-pointer"
-                  >
-                    <option value="Kepemimpinan">Kepemimpinan</option>
-                    <option value="Manajemen Strategis">Manajemen Strategis</option>
-                    <option value="Inovasi & Teknologi">Inovasi & Teknologi</option>
-                    <option value="Pengembangan Diri">Pengembangan Diri</option>
-                    <option value="Komunikasi Eksekutif">Komunikasi Eksekutif</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tingkat (Level)</label>
-                  <select
-                    value={level} onChange={e => setLevel(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition cursor-pointer"
-                  >
-                    <option value="BASIC">Dasar (BASIC)</option>
-                    <option value="INTERMEDIATE">Menengah (INTERMEDIATE)</option>
-                    <option value="ADVANCED">Lanjutan (ADVANCED)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi Singkat</label>
-                <textarea
-                  rows={2} required placeholder="Jelaskan ringkasan kurikulum dan dampak ke peserta..."
-                  value={shortDescription} onChange={e => setShortDescription(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition resize-y"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Harga (Rp)</label>
-                  <input
-                    type="number" min="0" value={price} onChange={e => setPrice(e.target.value)} placeholder="0 untuk Gratis"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Durasi (Jam)</label>
-                  <input
-                    type="number" min="1" value={duration} onChange={e => setDuration(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:bg-white transition"
-                  />
-                </div>
-              </div>
+              {/* Input disederhanakan: hanya judul program. Sisanya menggunakan nilai default */}
 
               <div className="flex justify-end gap-2.5 mt-3 pt-3 border-t border-slate-100">
                 <button

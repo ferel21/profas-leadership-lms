@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit2, Trash2, GripVertical, FileText, PlayCircle, Folder, ChevronRight, ChevronDown, Save, Link2, HelpCircle, Loader2, Sparkles, FileUp, X } from "lucide-react";
+import { Plus, Edit2, Trash2, GripVertical, FileText, PlayCircle, Folder, ChevronRight, ChevronDown, Save, Link2, HelpCircle, Loader2, Sparkles, FileUp, X, Copy } from "lucide-react";
 import { useLocalBackup } from "@/hooks/useLocalBackup";
 import type { NodeType } from "@/types/course";
 import { uploadFileDirectly } from "@/utils/direct-upload";
@@ -389,6 +389,51 @@ export function BuilderClient({ course }: { course: { id: string; published: boo
                 style={{ color: BRAND_COLORS.blueDark, background: BRAND_COLORS.blueSoft, borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 <Edit2 size={14}/> Edit Soal / Tugas
+              </button>
+              <button 
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!confirm("Apakah Anda yakin ingin menduplikasi kuis/tugas ini beserta soal-soalnya?")) return;
+                  setSaving(true);
+                  try {
+                     const res = await fetch(`/api/courses/${course.id}/assessments/${node.assessmentId || node.id}/duplicate`, { method: "POST" });
+                     if (!res.ok) throw new Error("Gagal menduplikasi");
+                     const { newAssessmentId } = await res.json();
+                     
+                     const newNode: CourseNode = {
+                       ...node,
+                       id: generateId(),
+                       title: `${node.title} (Copy)`,
+                       assessmentId: newAssessmentId,
+                       isNew: true,
+                       children: []
+                     };
+                     
+                     const insertAfter = (list: CourseNode[]): CourseNode[] => {
+                       const index = list.findIndex(n => n.id === node.id);
+                       if (index !== -1) {
+                          const newList = [...list];
+                          newList.splice(index + 1, 0, newNode);
+                          newList.forEach((n, i) => n.order = i);
+                          return newList;
+                       }
+                       return list.map(n => ({ ...n, children: insertAfter(n.children) }));
+                     };
+                     
+                     setNodes(insertAfter([...nodes]));
+                     alert("Kuis berhasil diduplikasi. Jangan lupa klik Simpan Kurikulum.");
+                  } catch(error) {
+                     alert("Gagal menduplikasi kuis.");
+                  } finally {
+                     setSaving(false);
+                  }
+                }} 
+                className="btn btn-ghost btn-small hover-lift" 
+                style={{ color: BRAND_COLORS.greenDark, background: BRAND_COLORS.greenSoft, borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Copy size={14}/> Duplikat
               </button>
             ) : node.type !== "FOLDER" ? (
               <button 

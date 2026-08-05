@@ -1,0 +1,1 @@
+import { PrismaClient } from "@prisma/client"; const prisma = new PrismaClient(); async function main() { await prisma.course.deleteMany({ where: { id: "course-profas-leadership" } }); console.log("Dummy course deleted"); } main().catch(console.error).finally(() => prisma.$disconnect());

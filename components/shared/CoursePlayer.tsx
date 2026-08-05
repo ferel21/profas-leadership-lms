@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
-import { AlertCircle, Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, Clock3, Download, FileText, Film, Image as ImageIcon, Link2, LoaderCircle, Menu, MessageSquare, Play, Send, X, Folder, FileCheck, FileCode, RefreshCw } from "lucide-react";
+import { AlertCircle, Award, BookOpen, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, Clock3, Download, FileText, Film, Image as ImageIcon, Link2, LoaderCircle, Menu, MessageSquare, Play, Send, X, Folder, FileCheck, FileCode, RefreshCw, Lock } from "lucide-react";
 import { initials } from "@/utils";
 import { CompletionCelebration } from "@/components/ui/CompletionCelebration";
 import type { NodeType } from "@/types/course";
@@ -171,6 +171,21 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
   });
   const [sidebar, setSidebar] = useState(false);
   const [tab, setTab] = useState("materi");
+  
+  const lockedLessons = useMemo(() => {
+    const locked = new Set<string>();
+    let isLocked = false;
+    for (const lesson of flatLessons) {
+      if (isLocked) {
+        locked.add(lesson.id);
+      } else {
+        if ((lesson.type === "QUIZ" || lesson.type === "ASSIGNMENT") && !done.has(lesson.id)) {
+          isLocked = true;
+        }
+      }
+    }
+    return locked;
+  }, [flatLessons, done]);
   const [busy, setBusy] = useState(false);
   const [discussion, setDiscussion] = useState("");
   const [message, setMessage] = useState("");
@@ -415,7 +430,12 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
   }
 
   function goNext() {
-    if (index < flatLessons.length - 1) selectLesson(flatLessons[index + 1].id);
+    if (index < flatLessons.length - 1) {
+      const nextId = flatLessons[index + 1].id;
+      if (!lockedLessons.has(nextId)) {
+        selectLesson(nextId);
+      }
+    }
   }
 
   async function complete() {
@@ -505,9 +525,19 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
         const badgeText = node.type === "QUIZ" || node.type === "ASSIGNMENT"
           ? (node.type === "QUIZ" ? getAssessmentBadgeLabel(node) : "Tugas • ")
           : "";
+        const isLocked = lockedLessons.has(node.id);
         return (
-          <button type="button" key={node.id} onClick={() => selectLesson(node.id)} className={node.id === current?.id ? "active" : ""} aria-current={node.id === current?.id ? "page" : undefined} aria-label={`${node.title}${done.has(node.id) ? ", selesai" : ", belum selesai"}`}>
-            {done.has(node.id) ? <CheckCircle2 aria-hidden="true" /> : typeIcon(node.type)}
+          <button 
+            type="button" 
+            key={node.id} 
+            onClick={() => !isLocked && selectLesson(node.id)} 
+            className={`${node.id === current?.id ? "active" : ""} ${isLocked ? "opacity-50 cursor-not-allowed" : ""}`} 
+            style={isLocked ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+            disabled={isLocked}
+            aria-current={node.id === current?.id ? "page" : undefined} 
+            aria-label={`${node.title}${done.has(node.id) ? ", selesai" : isLocked ? ", terkunci" : ", belum selesai"}`}
+          >
+            {isLocked ? <Lock aria-hidden="true" size={16} /> : done.has(node.id) ? <CheckCircle2 aria-hidden="true" /> : typeIcon(node.type)}
             <span>{node.title} <small>{badgeText}{node.durationMin} menit</small></span>
           </button>
         );
@@ -828,7 +858,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
         <footer className="player-footer" aria-label="Navigasi materi">
           <button type="button" disabled={index === 0 || busy} aria-disabled={index === 0 || busy} onClick={goPrevious} aria-label="Materi sebelumnya"><ChevronLeft aria-hidden="true" /> <span>Sebelumnya</span></button>
           <span aria-label={`Durasi ${current.durationMin} menit`}><Clock3 aria-hidden="true" /> {current.durationMin} menit</span>
-          <button type="button" className="player-next-btn" disabled={index === flatLessons.length - 1 || busy || (!videoCompleted && !done.has(current.id) && current.type === "VIDEO")} onClick={goNext} aria-label="Materi berikutnya">Berikutnya <ChevronRight aria-hidden="true" /></button>
+          <button type="button" className="player-next-btn" disabled={index === flatLessons.length - 1 || busy || lockedLessons.has(flatLessons[index + 1]?.id) || (!videoCompleted && !done.has(current.id) && current.type === "VIDEO")} onClick={goNext} aria-label="Materi berikutnya">Berikutnya <ChevronRight aria-hidden="true" /></button>
           <button type="button" className="complete-btn" onClick={complete} disabled={busy || (!videoCompleted && !done.has(current.id) && current.type === "VIDEO")} aria-busy={busy} aria-pressed={done.has(current.id)}>
             {busy ? <><LoaderCircle className="spin" aria-hidden="true" /> <span>Menyimpan...</span></> : done.has(current.id) ? <><Check aria-hidden="true" /> {index < flatLessons.length - 1 ? "Lanjut Materi Berikutnya" : "Sudah selesai"}</> : (!videoCompleted && current.type === "VIDEO") ? <>Selesaikan Video <ChevronRight aria-hidden="true" /></> : <>Tandai Selesai <ChevronRight aria-hidden="true" /></>}
           </button>

@@ -181,6 +181,46 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
   const [resumeReady, setResumeReady] = useState(false);
   const [resumeLessonId, setResumeLessonId] = useState<string | null>(null);
   const [assessmentFeedback, setAssessmentFeedback] = useState<AssessmentFeedback | null>(null);
+  const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
+
+  const handleDownload = async (e: React.MouseEvent<HTMLAnchorElement>, url: string, filename: string) => {
+    e.preventDefault();
+    if (downloadingUrl === url) return;
+    setDownloadingUrl(url);
+    try {
+      const res = await fetch(`${url}?get_url=1&download=1`);
+      if (!res.ok) throw new Error("Gagal mengambil akses berkas");
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await res.json();
+        if (data.url) {
+          const link = document.createElement("a");
+          link.href = data.url;
+          link.download = filename;
+          link.target = "_blank";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          return;
+        }
+      }
+      
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      alert("Terjadi kesalahan saat mengunduh berkas. Coba muat ulang halaman.");
+    } finally {
+      setDownloadingUrl(null);
+    }
+  };
+
   const [assessmentLoading, setAssessmentLoading] = useState(false);
   const [assessmentLoadError, setAssessmentLoadError] = useState("");
   const [assessmentRefreshToken, setAssessmentRefreshToken] = useState(0);
@@ -636,8 +676,8 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                   <h1 className="player-title-xl" style={{ margin: "6px 0 0" }}>{current.title}</h1>
                 </div>
                 {current.fileUrl && (
-                  <a className="player-btn-download-sm hover-lift" href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}.pdf`}>
-                    <Download size={18} style={{ marginRight: "8px" }} /> Unduh Modul PDF ({current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi"})
+                  <a className="player-btn-download-sm hover-lift" href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}.pdf`} onClick={(e) => handleDownload(e, current.fileUrl!, current.fileName || `${current.title}.pdf`)}>
+                    <Download size={18} style={{ marginRight: "8px" }} /> {downloadingUrl === current.fileUrl ? "Mengunduh..." : `Unduh Modul PDF (${current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi"})`}
                   </a>
                 )}
               </div>
@@ -696,7 +736,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <h1 className="player-title-read">{current.title}</h1>
               {current.description || current.content ? <div className="player-desc-read">{current.content || current.description}</div> : <div className="player-empty-glass" role="status"><FileText size={40} aria-hidden="true" /><p className="player-empty-text">Konten bacaan belum tersedia untuk materi ini.</p></div>}
               {current.fileUrl && (
-                <a className="player-btn-quiz hover-lift player-btn-dl-mat" href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}`}><Download size={18} style={{ marginRight: "10px" }} /> Unduh Berkas Materi</a>
+                <a className="player-btn-quiz hover-lift player-btn-dl-mat" href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}`} onClick={(e) => handleDownload(e, current.fileUrl!, current.fileName || current.title)}><Download size={18} style={{ marginRight: "10px" }} /> {downloadingUrl === current.fileUrl ? "Mengunduh..." : "Unduh Berkas Materi"}</a>
               )}
             </article>
           )}
@@ -719,7 +759,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
               <p className="player-tab-desc">Unduh berkas materi, lembar kerja eksekutif, dan panduan belajar untuk modul ini.</p>
               {current.fileUrl ? (
                 <div className="player-materials-grid">
-                  <a href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}`} className="player-mat-card hover-lift">
+                  <a href={`${current.fileUrl}?download=1`} target="_blank" rel="noreferrer" download={current.fileName || `${current.title}`} className="player-mat-card hover-lift" onClick={(e) => handleDownload(e, current.fileUrl!, current.fileName || current.title)}>
                     <div className="player-mat-icon">
                       <Download size={24} />
                     </div>
@@ -727,7 +767,7 @@ export function CoursePlayer({ course, initialLessonId, currentUser }: PlayerPro
                       <h3>{current.fileName || "Berkas Materi Pembelajaran"}</h3>
                       <small>{current.fileSize ? `${Math.round(current.fileSize / 1024)} KB` : "Dokumen Resmi PROFAS"}</small>
                     </div>
-                    <span className="player-mat-badge">Unduh</span>
+                    <span className="player-mat-badge">{downloadingUrl === current.fileUrl ? "Mengunduh..." : "Unduh"}</span>
                   </a>
                 </div>
               ) : (

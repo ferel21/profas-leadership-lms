@@ -103,8 +103,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
       const storage = getObjectStorageMode();
       if (storage.mode === "supabase") {
         const urlObj = new URL(request.url);
+        const getUrl = urlObj.searchParams.get("get_url") === "1";
         const forceDownload = urlObj.searchParams.get("download") === "1";
         const signedUrl = await createSignedObjectDownload(relativePath, 60, forceDownload);
+        
+        if (getUrl) {
+          return NextResponse.json({ url: signedUrl });
+        }
+        
         const response = NextResponse.redirect(signedUrl, 307);
         response.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
         response.headers.set("Referrer-Policy", "no-referrer");

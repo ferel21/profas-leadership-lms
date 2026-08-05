@@ -159,6 +159,7 @@ export async function addCohortMember(
 ) {
   assertManager(actor);
   const normalizedEmail = email.trim().toLowerCase();
+  const now = new Date();
 
   return withSerializableRetry(async (tx) => {
     const cohort = await tx.cohort.findFirst({

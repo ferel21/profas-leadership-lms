@@ -305,6 +305,18 @@ export function BuilderClient({ course }: { course: { id: string; published: boo
     setExpanded(prev => ({ ...prev, [newNode.parentId as string]: true }));
   };
 
+  const updateNodeTitle = (id: string, newTitle: string) => {
+    const updateTree = (list: CourseNode[]): CourseNode[] => {
+      return list.map(n => {
+        if (n.id === id) {
+          return { ...n, title: newTitle };
+        }
+        return { ...n, children: updateTree(n.children) };
+      });
+    };
+    setNodes(updateTree([...nodes]));
+  };
+
   const renderNode = (node: CourseNode, level = 0) => {
     const isFolder = node.type === "FOLDER";
     const isExpanded = expanded[node.id];
@@ -328,7 +340,7 @@ export function BuilderClient({ course }: { course: { id: string; published: boo
             boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
             <div 
               style={{ display: 'flex', alignItems: 'center', cursor: 'grab', padding: '4px' }}
               onMouseEnter={(e) => {
@@ -348,7 +360,39 @@ export function BuilderClient({ course }: { course: { id: string; published: boo
               </button>
             ) : <div style={{width: 24}}></div>}
             {typeIcon(node.type)}
-            <span style={{ fontSize: '15px', fontWeight: isFolder ? 700 : 500, color: 'var(--ink)' }}>{node.title}</span>
+            <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '6px' }}>
+              <input
+                value={node.title}
+                onChange={(e) => updateNodeTitle(node.id, e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                placeholder="Judul Materi / Modul"
+                style={{
+                  fontSize: '15px',
+                  fontWeight: isFolder ? 700 : 500,
+                  color: 'var(--ink)',
+                  border: 'none',
+                  background: 'transparent',
+                  outline: 'none',
+                  flex: 1,
+                  padding: '4px 6px',
+                  borderRadius: '6px',
+                  borderBottom: '1px dashed transparent',
+                  transition: 'all 0.2s',
+                  width: '100%'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderBottom = `1px dashed ${BRAND_COLORS.blue}`;
+                  e.target.style.background = 'rgba(255,255,255,0.6)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderBottom = '1px dashed transparent';
+                  e.target.style.background = 'transparent';
+                }}
+                title="Klik untuk mengubah nama (otomatis tersimpan ke draf)"
+              />
+              <Edit2 size={12} style={{ color: 'var(--muted)', opacity: 0.5, flexShrink: 0 }} />
+            </div>
             {!isFolder && typeBadge(node.type)}
             {node.isNew && <span style={{fontSize:'10px', background: BRAND_COLORS.green, color:'white', padding:'2px 8px', borderRadius:'10px', fontWeight:700}}>BARU</span>}
           </div>

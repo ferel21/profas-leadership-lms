@@ -47,6 +47,14 @@ export async function GET() {
             });
           }
         }
+      } else if (a.title.toLowerCase().includes('posttest') || a.title.toLowerCase().includes('post-test')) {
+        if (a.type !== AssessmentType.POSTTEST) {
+          await prisma.assessment.update({
+            where: { id: a.id },
+            data: { type: AssessmentType.POSTTEST }
+          });
+          updated++;
+        }
       }
     }
     

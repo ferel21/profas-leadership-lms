@@ -246,6 +246,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
           if (node.type === NodeType.QUIZ && node.assessmentType && ["PRETEST", "POSTTEST", "MODULE", "FINAL"].includes(node.assessmentType)) {
             finalAssType = node.assessmentType as AssessmentType;
           }
+          
+          let passingScore = 80;
+          if (node.title.toLowerCase().includes('pretest') || node.title.toLowerCase().includes('pre-test')) {
+            finalAssType = AssessmentType.PRETEST;
+            passingScore = 0;
+          } else if (node.title.toLowerCase().includes('posttest') || node.title.toLowerCase().includes('post-test')) {
+            finalAssType = AssessmentType.POSTTEST;
+            passingScore = 80;
+          }
 
           if (existingAssessment) {
             await tx.assessment.updateMany({
@@ -253,6 +262,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
               data: {
                 title: node.title,
                 type: finalAssType,
+                passingScore,
                 isAssignment: node.type === NodeType.ASSIGNMENT
               }
             });
@@ -263,6 +273,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ cour
                 courseId,
                 title: node.title,
                 type: finalAssType,
+                passingScore,
                 isAssignment: node.type === NodeType.ASSIGNMENT
               }
             });

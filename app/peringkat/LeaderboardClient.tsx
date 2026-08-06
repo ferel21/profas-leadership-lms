@@ -8,12 +8,12 @@ import { Persona } from "@prisma/client";
 type LeaderboardUser = {
   id: string;
   name: string;
-  persona: Persona;
+  persona: Persona | null;
   xp: number;
   badges: { id: string; name: string }[];
 };
 
-export function LeaderboardClient({ user }: { user: { id: string; name: string; email: string; role: string; persona: Persona } }) {
+export function LeaderboardClient({ user }: { user: { id: string; name: string; email: string; role: string; persona: Persona | null } }) {
   const [ranking, setRanking] = useState<LeaderboardUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<"all" | "monthly" | "weekly">("all");

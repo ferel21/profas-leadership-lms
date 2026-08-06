@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/services/prisma';
 import { AssessmentType } from '@prisma/client';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: Request) {
   try {
     const assessments = await prisma.assessment.findMany();
     let updated = 0;

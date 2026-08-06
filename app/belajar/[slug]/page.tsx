@@ -50,7 +50,24 @@ export default async function LearnPage({ params }: { params: Promise<{ slug: st
   });
 
   if (!course) notFound();
-  if (course.enrollments.length === 0) redirect(`/program/${course.slug}`);
+  
+  if (course.enrollments.length === 0) {
+    // ═══════════════════════════════════════════════════════════
+    // AUTO-ENROLL LOGIC: Berikan akses otomatis
+    // ═══════════════════════════════════════════════════════════
+    await prisma.enrollment.create({
+      data: {
+        userId: user.id,
+        courseId: course.id,
+        status: "ACTIVE",
+        progressPercent: 0,
+      }
+    });
+    await prisma.course.update({
+      where: { id: course.id },
+      data: { studentsCount: { increment: 1 } }
+    });
+  }
 
   // Build tree
   const buildTree = (parentId: string | null): CourseNode[] => {

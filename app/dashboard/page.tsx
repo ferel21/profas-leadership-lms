@@ -33,6 +33,36 @@ export default async function DashboardPage() {
   // STUDENT DASHBOARD
   // ═══════════════════════════════════════════════════════════
   if (user.role === "STUDENT") {
+    // ═══════════════════════════════════════════════════════════
+    // AUTO-ENROLL LOGIC: Berikan akses otomatis ke semua materi
+    // ═══════════════════════════════════════════════════════════
+    const publishedCourses = await prisma.course.findMany({
+      where: { published: true },
+      select: { id: true }
+    });
+    const currentEnrollments = await prisma.enrollment.findMany({
+      where: { userId: user.id },
+      select: { courseId: true }
+    });
+    const enrolledIds = new Set(currentEnrollments.map(e => e.courseId));
+    const missingCourseIds = publishedCourses.map(c => c.id).filter(id => !enrolledIds.has(id));
+    
+    if (missingCourseIds.length > 0) {
+      await prisma.enrollment.createMany({
+        data: missingCourseIds.map(courseId => ({
+          userId: user.id,
+          courseId,
+          status: "ACTIVE",
+          progressPercent: 0,
+        })),
+        skipDuplicates: true
+      });
+      await prisma.course.updateMany({
+        where: { id: { in: missingCourseIds } },
+        data: { studentsCount: { increment: 1 } }
+      });
+    }
+
     const allEnrollments = await prisma.enrollment.findMany({
       where: { userId: user.id },
       include: {

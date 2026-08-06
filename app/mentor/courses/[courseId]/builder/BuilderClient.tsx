@@ -171,14 +171,15 @@ export function BuilderClient({ course }: { course: { id: string; published: boo
     }
   };
 
-  const flattenNodes = (list: CourseNode[], parentId: string | null = null): Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null, durationMin: number, content: string | null, description: string | null, fileUrl: string | null, fileName: string | null, fileSize: number | null }> => {
-    let result: Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null, durationMin: number, content: string | null, description: string | null, fileUrl: string | null, fileName: string | null, fileSize: number | null }> = [];
+  const flattenNodes = (list: CourseNode[], parentId: string | null = null): Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null, assessmentType?: string | null, durationMin: number, content: string | null, description: string | null, fileUrl: string | null, fileName: string | null, fileSize: number | null }> => {
+    let result: Array<{ id: string, parentId: string | null, title: string, type: NodeType, order: number, isNew?: boolean, assessmentId?: string | null, assessmentType?: string | null, durationMin: number, content: string | null, description: string | null, fileUrl: string | null, fileName: string | null, fileSize: number | null }> = [];
     list.forEach((n, idx) => {
       // Enforce strict sequential order (0, 1, 2...) to prevent unique-constraint collisions.
       n.order = idx;
       n.parentId = parentId;
       result.push({
         id: n.id, parentId: parentId, title: n.title, type: n.type, order: idx, isNew: n.isNew, assessmentId: n.assessmentId || ((n.type === "QUIZ" || n.type === "ASSIGNMENT") ? n.id : null),
+        assessmentType: n.assessmentType || null,
         durationMin: n.durationMin || 0,
         content: n.content || n.description || null,
         description: n.description || n.content || null,

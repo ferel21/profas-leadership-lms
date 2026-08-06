@@ -3,13 +3,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, LoaderCircle, RotateCcw, Trophy, XCircle, UploadCloud } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, LoaderCircle, RotateCcw, Trophy, XCircle, UploadCloud, Award } from "lucide-react";
 import { uploadFileDirectly } from "@/utils/direct-upload";
 
 type Question = { id: string; prompt: string; options: string | null; type: string; order: number };
 type QuizResult = { 
   score: number; passed: boolean; correct: number; total: number; feedback: string; 
-  needsManualGrading?: boolean; status?: string;
+  needsManualGrading?: boolean; status?: string; certificateNumber?: string | null;
   questions?: { id: string; prompt: string; options: string | null; correctAnswer: string | null; explanation?: string | null; type: string }[]
 };
 type StartAttemptResult = {
@@ -309,8 +309,13 @@ export function Quiz({ assessment }: { assessment: { id: string; title: string; 
       )}
       <p className="pf-quiz-feedback">{result.feedback}</p>
       <div className="result-actions pf-quiz-result-actions">
+        {result.certificateNumber && (
+          <Link href={`/sertifikat/${result.certificateNumber}`} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
+             Lihat Sertifikat <Award aria-hidden="true" style={{ marginLeft: "8px" }} />
+          </Link>
+        )}
         {result.questions && !result.needsManualGrading && (
-          <button type="button" onClick={() => setShowReview(true)} className="btn btn-primary">
+          <button type="button" onClick={() => setShowReview(true)} className={result.certificateNumber ? "btn btn-outline" : "btn btn-primary"}>
             Lihat pembahasan
           </button>
         )}

@@ -48,12 +48,41 @@ export async function GET() {
           }
         }
       } else if (a.title.toLowerCase().includes('posttest') || a.title.toLowerCase().includes('post-test')) {
-        if (a.type !== AssessmentType.POSTTEST) {
+        if (a.type !== AssessmentType.POSTTEST || a.passingScore === 0) {
           await prisma.assessment.update({
             where: { id: a.id },
-            data: { type: AssessmentType.POSTTEST }
+            data: { type: AssessmentType.POSTTEST, passingScore: 80 }
           });
           updated++;
+        }
+        
+        // Revoke any invalid passed attempts that scored below 80
+        const wrongAttempts = await prisma.assessmentAttempt.findMany({
+          where: { assessmentId: a.id, passed: true, score: { lt: 80 }, status: 'GRADED' }
+        });
+
+        for (const attempt of wrongAttempts) {
+          await prisma.assessmentAttempt.update({
+            where: { id: attempt.id },
+            data: { 
+              passed: false,
+              feedback: "Tinjau kembali materi inti, lalu coba sekali lagi."
+            }
+          });
+          
+          // Delete node progress so it gets locked again
+          const nodes = await prisma.courseNode.findMany({
+            where: { assessmentId: a.id }
+          });
+          
+          if (nodes.length > 0) {
+            await prisma.nodeProgress.deleteMany({
+              where: {
+                userId: attempt.userId,
+                nodeId: { in: nodes.map(n => n.id) }
+              }
+            });
+          }
         }
       }
     }

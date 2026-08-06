@@ -15,11 +15,7 @@ export async function GET() {
             data: { type: AssessmentType.PRETEST, passingScore: 0 }
           });
           
-          await prisma.courseNode.updateMany({
-            where: { assessmentId: a.id },
-            data: { assessmentType: AssessmentType.PRETEST }
-          });
-          
+
           updated++;
         }
       }
